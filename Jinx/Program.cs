@@ -159,7 +159,7 @@ namespace Jinx
                         W.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0 && t.Path.Count() > 0 )
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && Farm && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm )&& ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                         {
@@ -213,6 +213,8 @@ namespace Jinx
                         }
                         if (cast && target.IsValidTarget())
                             R.Cast(target, true);
+                        if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4 && R.GetDamage(target) * 1.4 > target.Health && CountEnemies(ObjectManager.Player, GetRealPowPowRange(target)) > 1)
+                            R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                     }
                     
                     /*
@@ -221,8 +223,7 @@ namespace Jinx
                     var powPowRange = GetRealPowPowRange(t);
                     if (rDamage > t.Health && CountAlliesNearTarget(t, 600) == 0 && CountEnemies(ObjectManager.Player, 200f) == 0 && distance > bonusRange() + 70 && t.Path.Count() > 1)
                             R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4 && rDamage * 1.4 > t.Health && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) > 0 && distance > 300)
-                        R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                    else 
                     else if (rDamage * 1.4 > t.Health && CountEnemies(t, 200) > 2)
                         R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                      * */
@@ -400,8 +401,9 @@ namespace Jinx
                 if (t.IsValidTarget())
                 {
                     var rDamage = R.GetDamage(t);
+                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Yellow, "Semi-manual R target: " + t.ChampionName);
                     if (rDamage > predictedHealth)
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.8f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName);
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName);
                 }
             }
         }
