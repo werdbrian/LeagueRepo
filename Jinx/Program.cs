@@ -73,13 +73,15 @@ namespace Jinx
             //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
+            Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
+            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.AddItem(new MenuItem("useR", "Semi-manual cast R Key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -106,11 +108,11 @@ namespace Jinx
                     {
                         E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if (autoEi &&
+                    if (autoEi &&
                         (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                          enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.IsStunned || enemy.HasBuff("Recall")))
-                        E.CastIfHitchanceEquals(enemy, HitChance.High, true);
+                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.IsStunned || enemy.HasBuff("Recall") || enemy.HasBuff("zhonyasringshield")))
+                        E.Cast(t, true);
                 }
             }
             
@@ -215,7 +217,7 @@ namespace Jinx
                             }
                             if (cast && target.IsValidTarget())
                                 R.Cast(target, true);
-                            var target3 = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Physical);
+                            var target3 = TargetSelector.GetTarget(500, TargetSelector.DamageType.Physical);
                             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4 && R.GetDamage(target3) * 1.4 > target3.Health && CountEnemies(ObjectManager.Player, GetRealPowPowRange(target3)) > 1)
                                 R.CastIfHitchanceEquals(target3, HitChance.VeryHigh, true);
                         }
@@ -271,7 +273,7 @@ namespace Jinx
         {
             double ShouldUse = ShouldUseE(args.SData.Name);
             if (unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f)
-                E.Cast(unit, true);
+                E.CastIfHitchanceEquals(unit, HitChance.High, true);
             if (unit.IsMe && args.SData.Name == "JinxW")
             {
                 WCastTime = Game.Time;
@@ -387,14 +389,14 @@ namespace Jinx
 
         public static void PotionMenager()
         {
-            if (Potion.IsReady() && !InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
+            if (Config.Item("pots").GetValue<bool>() && Potion.IsReady() && !InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
             {
-                if (CountEnemies(ObjectManager.Player, 700) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
+                if (CountEnemies(ObjectManager.Player, 600) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
                     Potion.Cast();
-                else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
+                else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
                     Potion.Cast();
             }
-            if (ManaPotion.IsReady() && !InFountain())
+            if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !InFountain())
             {
                 if (CountEnemies(ObjectManager.Player, 1000) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA)
                     ManaPotion.Cast();
@@ -402,17 +404,27 @@ namespace Jinx
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (R.IsReady())
+            if (Config.Item("noti").GetValue<bool>())
             {
                 var maxR = 2500f;
                 var t = TargetSelector.GetTarget(maxR, TargetSelector.DamageType.Physical);
                 float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t) / R.Speed) * 1000));
-                if (t.IsValidTarget())
+                if (t.IsValidTarget() && R.IsReady())
                 {
                     var rDamage = R.GetDamage(t);
-                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Yellow, "Semi-manual R target: " + t.ChampionName);
+                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Yellow, "Semi-manual R target: " + t.ChampionName + " have: " + t.Health + "hp");
                     if (rDamage > predictedHealth)
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName);
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                }
+                var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (tw.IsValidTarget())
+                {
+                    var wDmg = W.GetDamage(tw);
+                    if (wDmg  > tw.Health)
+                    {
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Red);
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                    }
                 }
             }
         }
