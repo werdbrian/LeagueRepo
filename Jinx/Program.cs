@@ -178,7 +178,7 @@ namespace Jinx
                         W.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0  && haras())
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm )&& ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm ) && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                         {
@@ -202,7 +202,7 @@ namespace Jinx
 
                     if (target.IsValidTarget() && Config.Item("autoR").GetValue<bool>() &&  (Game.Time - WCastTime > 1 ))
                     {
-                        if (R.GetDamage(target) > predictedHealth && CountAlliesNearTarget(target, 500) == 0 && GetRealDistance(target) > bonusRange() + 150)
+                        if (R.GetDamage(target) > predictedHealth && CountAlliesNearTarget(target, 500) == 0 && (GetRealDistance(target) > bonusRange() + 150 || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5 ))
                         {
 
                             PredictionOutput output = R.GetPrediction(target);
