@@ -95,11 +95,9 @@ namespace Jinx
             {
                 var distance = GetRealDistance(t);
                 var powPowRange = GetRealPowPowRange(t);
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && FishBoneActive && (distance < powPowRange))
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && FishBoneActive && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA || ObjectManager.Player.GetAutoAttackDamage(t) < t.Health))
                     Q.Cast();
                 else if (Farm && FishBoneActive && (distance > bonusRange() || distance < powPowRange))
-                    Q.Cast();
-                else if (ObjectManager.Player.Mana < RMANA + WMANA)
                     Q.Cast();
             }
         }
@@ -111,7 +109,7 @@ namespace Jinx
             {
                 var distance = GetRealDistance(t);
                 var powPowRange = GetRealPowPowRange(t);
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && FishBoneActive && (distance < powPowRange) )
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && FishBoneActive && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA || ObjectManager.Player.GetAutoAttackDamage(t) < t.Health))
                     Q.Cast();
                 else if (Farm && FishBoneActive && (distance > bonusRange() || distance < powPowRange))
                     Q.Cast();
