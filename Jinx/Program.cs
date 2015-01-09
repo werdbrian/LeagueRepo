@@ -84,7 +84,7 @@ namespace Jinx
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
@@ -137,10 +137,10 @@ namespace Jinx
                 var autoEd = true;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (enemy.Distance(Player) < 900f && enemy.HasBuff("zhonyasringshield"))
+                    if (enemy.Distance(Player.ServerPosition) < 900f && enemy.HasBuff("zhonyasringshield"))
                         E.Cast(enemy, true);
                 }
-                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player) < 900f && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
+                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < 900f && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
                     E.Cast(Object.Position, true);
                  }
@@ -219,7 +219,7 @@ namespace Jinx
                     if (target.IsValidTarget() && Config.Item("autoR").GetValue<bool>() && (Game.Time - WCastTime > 1) && 
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
-                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target) / R.Speed) * 1000));
+                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
                         if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
                             Rdmg = R.GetDamage(target) * 1.4f;
@@ -250,7 +250,7 @@ namespace Jinx
                                 Vector3 pb = Player.ServerPosition + ((float)b * v);
                                 float length = Vector3.Distance(predictedPosition, pb);
 
-                                if (length < (R.Width + 50 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target))
+                                if (length < (R.Width + 50 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget())
@@ -455,6 +455,7 @@ namespace Jinx
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
+
                     var wDmg = W.GetDamage(tw);
                     if (wDmg  > tw.Health)
                     {
