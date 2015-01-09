@@ -1,2 +1,0 @@
-C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\obj\Debug\Jinx.csprojResolveAssemblyReference.cache
-C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\Jinx.exe.config
