@@ -255,7 +255,7 @@ namespace Jinx
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget())
-                                R.Cast(target, true);
+                                R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         }
 
                         /*
