@@ -213,7 +213,6 @@ namespace Jinx
             if (R.IsReady())
             {
                 bool cast = false;
-                var maxR = 2500f;
                 
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
                 {
@@ -255,7 +254,7 @@ namespace Jinx
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget())
-                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                R.Cast(target, true);
                         }
 
                         /*
@@ -290,7 +289,6 @@ namespace Jinx
                 }
             }
         }
-        
     
         public static bool haras()
         {
@@ -460,6 +458,7 @@ namespace Jinx
                     var wDmg = W.GetDamage(tw);
                     if (wDmg  > tw.Health)
                     {
+                        
                         Utility.DrawCircle(ObjectManager.Player.ServerPosition, W.Range, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     }
