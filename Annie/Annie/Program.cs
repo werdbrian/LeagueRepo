@@ -81,6 +81,35 @@ namespace Annie
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Orbwalking.BeforeAttack += args =>
+            {
+                try
+                {
+                    if (args.Target.IsValid<Obj_AI_Minion>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+                    {
+                        switch (ConfigValue<StringList>("AttackMinions").SelectedIndex)
+                        {
+                            case 0: // Smart
+                                args.Process = AttackMinion;
+                                break;
+
+                            case 1: // Never
+                                args.Process = false;
+                                break;
+                        }
+                    }
+
+                    if (args.Target.IsValid<Obj_AI_Hero>() && !ConfigValue<bool>("AttackChampions") &&
+                        Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+                    {
+                        args.Process = false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            };
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {

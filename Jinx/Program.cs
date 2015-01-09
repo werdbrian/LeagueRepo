@@ -101,7 +101,7 @@ namespace Jinx
                     Q.Cast();
             }
         }
-
+        
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             var t = TargetSelector.GetTarget(bonusRange() + 50, TargetSelector.DamageType.Physical);
@@ -113,8 +113,7 @@ namespace Jinx
                     Q.Cast();
                 else if (Farm && FishBoneActive && (distance > bonusRange() || distance < powPowRange))
                     Q.Cast();
-                else if (ObjectManager.Player.Mana < RMANA + WMANA)
-                    Q.Cast();
+
             }
         }
 
@@ -181,7 +180,7 @@ namespace Jinx
                 }
                 else if (FishBoneActive && Farm)
                     Q.Cast();
-                else if (!FishBoneActive && (Orbwalker.ActiveMode.ToString() == "Combo"))
+                else if (!FishBoneActive && (Orbwalker.ActiveMode.ToString() == "Combo") && ObjectManager.Player.Mana > RMANA + WMANA)
                     Q.Cast();
             }
 
@@ -213,7 +212,7 @@ namespace Jinx
 
             if (R.IsReady())
             {
-                bool cast = true;
+                bool cast = false;
                 var maxR = 2500f;
                 
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
@@ -222,7 +221,10 @@ namespace Jinx
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target) / R.Speed) * 1000));
-                        if (R.GetDamage(target) > predictedHealth && CountAlliesNearTarget(target, 600) == 0 && target.Path.Count() > 0 && (GetRealDistance(target) > bonusRange() + 150 || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
+                        var Rdmg = R.GetDamage(target);
+                        if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
+                            Rdmg = R.GetDamage(target) * 1.4f;
+                        if (Rdmg > predictedHealth && CountAlliesNearTarget(target, 450) == 0 && (GetRealDistance(target) > bonusRange() + 100 || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                         {
 
                             PredictionOutput output = R.GetPrediction(target);
@@ -253,7 +255,7 @@ namespace Jinx
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget())
-                                R.Cast(target, true);
+                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                         }
 
                         /*
