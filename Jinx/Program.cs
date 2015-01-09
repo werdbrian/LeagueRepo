@@ -226,6 +226,7 @@ namespace Jinx
                         if (Rdmg > predictedHealth && CountAlliesNearTarget(target, 450) == 0 && (GetRealDistance(target) > bonusRange() + 100 || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                         {
 
+                            cast = true;
                             PredictionOutput output = R.GetPrediction(target);
 
                             Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
@@ -445,7 +446,7 @@ namespace Jinx
             {
                 var maxR = 2500f;
                 var t = TargetSelector.GetTarget(maxR, TargetSelector.DamageType.Physical);
-                float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t) / R.Speed) * 1000));
+                float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                 if (t.IsValidTarget() && R.IsReady())
                 {
                     var rDamage = R.GetDamage(t);
