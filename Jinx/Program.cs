@@ -91,12 +91,13 @@ namespace Jinx
         {
             ManaMenager();
             PotionMenager();
+            
             //Game.PrintChat(Game.Time.ToString());
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
             else
                 Farm = false;
-
+            
             if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady())
             {
                 var t = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
@@ -186,9 +187,8 @@ namespace Jinx
                         var Rdmg = R.GetDamage(target);
                         if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                             Rdmg = R.GetDamage(target) * 1.4f;
-                        if (Rdmg > predictedHealth
-                            && (GetRealDistance(target) > bonusRange() + 100 || (CountAlliesNearTarget(target, 700) > 0 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
-                            && (CountAlliesNearTarget(target, 450) == 0 || (CountAlliesNearTarget(target, 700) > 0 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)))
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 100
+                            && (CountAlliesNearTarget(target, 500) == 0 || (CountAlliesNearTarget(target, 700) > 0 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)))
                         {
                             cast = true;
                             PredictionOutput output = R.GetPrediction(target);
@@ -212,7 +212,7 @@ namespace Jinx
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget())
-                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                R.CastIfHitchanceEquals(target, HitChance.High, true);
                         }
                         /*
                         var distance = GetRealDistance(t);
@@ -228,7 +228,32 @@ namespace Jinx
                 }
             }
         }
-
+        /*
+        public static void Botrk()
+        {
+            if (CountEnemies(ObjectManager.Player, 450) == 0)
+                return;
+            Obj_AI_Hero lowHP = TargetSelector.GetTarget(450, TargetSelector.DamageType.Physical);
+            Obj_AI_Hero nearest = TargetSelector.GetTarget(450, TargetSelector.DamageType.Physical);
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(450)))
+            {
+                if (lowHP.MaxHealth < target.MaxHealth)
+                    lowHP = target;
+                if(Player.Distance(target.ServerPosition) < Player.Distance(nearest.ServerPosition))
+                    nearest = target;
+            }
+            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
+            {
+                UseItem(3153, lowHP);
+            }
+            else if (ObjectManager.Player.MaxHealth - ObjectManager.Player.Health > nearest.MaxHealth * 0.1 && 200 > Player.Distance(nearest.ServerPosition))
+            {
+                UseItem(3153, nearest);
+            }
+            return;
+            
+        }
+        */
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe) return;
@@ -258,12 +283,20 @@ namespace Jinx
             }
         }
 
+        public static void UseItem(int id, Obj_AI_Hero target = null)
+        {
+            if (Items.HasItem(id) && Items.CanUseItem(id))
+            {
+                Items.UseItem(id, target);
+            }
+        }
+
         public static void farmQ()
         {
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
             foreach (var minion in allMinionsQ)
             {
-                if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) * 1.1 && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion))
+                if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion)  && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion))
                 {
                     Q.Cast();
                     return;
