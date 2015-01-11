@@ -21,6 +21,7 @@ namespace Jinx
         public static Spell W;
         public static Spell E;
         public static Spell R;
+        public static Spell R1;
         //ManaMenager
         public static int QMANA;
         public static int WMANA;
@@ -52,16 +53,18 @@ namespace Jinx
             W = new Spell(SpellSlot.W, 1500f);
             E = new Spell(SpellSlot.E, 900f);
             R = new Spell(SpellSlot.R, 2500f);
+            R1 = new Spell(SpellSlot.R, 2500f);
 
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.1f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
+            R1.SetSkillshot(0.7f, 200f, 1500f, false, SkillshotType.SkillshotCircle);
 
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
             SpellList.Add(R);
-
+            SpellList.Add(R1);
             //Create the menu
             Config = new Menu(ChampionName, ChampionName, true);
 
@@ -86,17 +89,14 @@ namespace Jinx
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.7 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
             ManaMenager();
             PotionMenager();
-            if (Config.Item("Botrk").GetValue<bool>())
-            {
-                Botrk();
-            }
+           
             //Game.PrintChat(Game.Time.ToString());
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
@@ -141,7 +141,7 @@ namespace Jinx
                     var powPowRange = GetRealPowPowRange(t);
                     if (Youmuu.IsReady() && (ObjectManager.Player.GetAutoAttackDamage(t) * 6 > t.Health || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
                         Youmuu.Cast();
-                    if (!FishBoneActive && (distance > powPowRange) && (ObjectManager.Player.Mana > RMANA + WMANA || ObjectManager.Player.GetAutoAttackDamage(t) > t.Health))
+                    if (!FishBoneActive && (distance > powPowRange) && (ObjectManager.Player.Mana > RMANA + WMANA || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo")
                             Q.Cast();
@@ -165,8 +165,8 @@ namespace Jinx
                         W.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                         W.CastIfHitchanceEquals(t, HitChance.High, true);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0  && haras() )
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0 && haras() && t.Path.Count() > 1)
+                        W.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm ) && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
@@ -232,6 +232,10 @@ namespace Jinx
                     }
                 }
             }
+            if (Config.Item("Botrk").GetValue<bool>())
+            {
+                Botrk();
+            }
         }
 
         public static void Botrk()
@@ -256,11 +260,10 @@ namespace Jinx
             else if (ObjectManager.Player.MaxHealth - ObjectManager.Player.Health > nearest.MaxHealth * 0.1 && 200 > Player.Distance(nearest.ServerPosition))
             {
                 UseItem(3153, nearest);
-                UseItem(3144, lowHP);
+                UseItem(3144, nearest);
                 return;
             }
             return;
-            
         }
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
@@ -480,7 +483,7 @@ namespace Jinx
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     if (Config.Item("useR").GetValue<KeyBind>().Active)
                     {
-                        R.CastIfHitchanceEquals(t, HitChance.High, true);
+                        R1.Cast(t,true,true);
                     }
                 }
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
