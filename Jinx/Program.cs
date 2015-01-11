@@ -165,9 +165,14 @@ namespace Jinx
                         W.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                         W.CastIfHitchanceEquals(t, HitChance.High, true);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0 && haras() && t.Path.Count() > 1)
-                        W.CastIfHitchanceEquals(t, HitChance.High, true);
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm ) && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, bonusRange()) == 0 && haras())
+                    {
+                        if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 )
+                            W.CastIfHitchanceEquals(t, HitChance.High, true);
+                        else if (t.Path.Count() > 1)
+                            W.CastIfHitchanceEquals(t, HitChance.High, true);
+                    }
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                         {
@@ -192,7 +197,7 @@ namespace Jinx
                         var Rdmg = R.GetDamage(target);
                         if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                             Rdmg = R.GetDamage(target) * 1.4f;
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 100
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 150
                             && (CountAlliesNearTarget(target, 500) == 0 || (CountAlliesNearTarget(target, 700) > 0 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)))
                         {
                             cast = true;
