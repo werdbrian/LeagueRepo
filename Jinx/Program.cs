@@ -77,6 +77,7 @@ namespace Jinx
             Config.AddToMainMenu();
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.AddItem(new MenuItem("Botrk", "Use Botrk").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
@@ -92,7 +93,10 @@ namespace Jinx
         {
             ManaMenager();
             PotionMenager();
-            Botrk();
+            if (Config.Item("Botrk").GetValue<bool>())
+            {
+                Botrk();
+            }
             //Game.PrintChat(Game.Time.ToString());
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
