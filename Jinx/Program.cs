@@ -32,6 +32,7 @@ namespace Jinx
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
         public static Items.Item Youmuu = new Items.Item(3142, 0);
+        
         //Menu
         public static Menu Config;
 
@@ -77,7 +78,7 @@ namespace Jinx
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            //Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -91,7 +92,7 @@ namespace Jinx
         {
             ManaMenager();
             PotionMenager();
-            
+            Botrk();
             //Game.PrintChat(Game.Time.ToString());
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
@@ -158,7 +159,7 @@ namespace Jinx
                     var wDmg = W.GetDamage(t);
                     if (GetRealDistance(t) > bonusRange() && wDmg + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
                         W.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, bonusRange()) == 0)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                         W.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0  && haras() )
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
@@ -228,7 +229,7 @@ namespace Jinx
                 }
             }
         }
-        /*
+
         public static void Botrk()
         {
             if (CountEnemies(ObjectManager.Player, 450) == 0)
@@ -244,16 +245,20 @@ namespace Jinx
             }
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
             {
+                UseItem(3144, lowHP);
                 UseItem(3153, lowHP);
+                return;
             }
             else if (ObjectManager.Player.MaxHealth - ObjectManager.Player.Health > nearest.MaxHealth * 0.1 && 200 > Player.Distance(nearest.ServerPosition))
             {
                 UseItem(3153, nearest);
+                UseItem(3144, lowHP);
+                return;
             }
             return;
             
         }
-        */
+
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe) return;
@@ -469,6 +474,10 @@ namespace Jinx
                     var rDamage = R.GetDamage(t);
                     if (rDamage > predictedHealth)
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                    if (Config.Item("useR").GetValue<KeyBind>().Active)
+                    {
+                        R.CastIfHitchanceEquals(t, HitChance.High, true);
+                    }
                 }
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
