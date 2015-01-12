@@ -51,7 +51,7 @@ namespace Jinx
             //Create the spells
             Q = new Spell(SpellSlot.Q, float.MaxValue);
             W = new Spell(SpellSlot.W, 1500f);
-            E = new Spell(SpellSlot.E, 900f);
+            E = new Spell(SpellSlot.E, 1100f);
             R = new Spell(SpellSlot.R, 2500f);
             R1 = new Spell(SpellSlot.R, 2500f);
 
@@ -82,6 +82,7 @@ namespace Jinx
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("Botrk", "Use Botrk").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -106,6 +107,7 @@ namespace Jinx
             if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady())
             {
                 var t = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
+
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
                 {
                     if (enemy.Distance(Player.ServerPosition) < 900f && enemy.HasBuff("zhonyasringshield"))
@@ -117,15 +119,19 @@ namespace Jinx
                  }
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                 {
-                    if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
-                    {
-                        E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    }
+
                     if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                          enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                          enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
                          enemy.IsStunned || enemy.HasBuff("Recall") )
                         E.Cast(enemy, true);
+                }
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
+                {
+                    if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
+                    {
+                        E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                    }
                 }
             }
 
@@ -222,7 +228,13 @@ namespace Jinx
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget())
-                                R.CastIfHitchanceEquals(target, HitChance.High, true);
+                            {
+                                if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() > 1)
+                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                else
+                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
+                            }
+
                         }
                         /*
                         var distance = GetRealDistance(t);
