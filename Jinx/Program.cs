@@ -203,7 +203,7 @@ namespace Jinx
                         var Rdmg = R.GetDamage(target);
                         if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                             Rdmg = R.GetDamage(target) * 1.4f;
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 100 + target.BoundingRadius
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius
                             && (CountAlliesNearTarget(target, 500) == 0 || (CountAlliesNearTarget(target, 700) > 0 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4 && CountEnemies(target, 300) > 0)))
                         {
                             cast = true;
@@ -227,7 +227,7 @@ namespace Jinx
                                 if (length < (R.Width + 50 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget())
+                            if (cast && target.IsValidTarget() && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius)
                             {
                                 if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() > 1)
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
