@@ -226,7 +226,7 @@ namespace Jinx
                                 if (length < (R.Width + 50 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget() && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius)
+                            if (cast && target.IsValidTarget())
                             {
                                 if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() > 1)
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
@@ -477,7 +477,7 @@ namespace Jinx
             {
                 if (CountEnemies(ObjectManager.Player, 600) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
                     Potion.Cast();
-                else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
+                else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
                     Potion.Cast();
             }
             if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !InFountain())
