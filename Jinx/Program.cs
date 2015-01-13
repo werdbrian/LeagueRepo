@@ -203,7 +203,7 @@ namespace Jinx
                         var Rdmg = R.GetDamage(target);
                         if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                             Rdmg = R.GetDamage(target) * 1.4f;
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius)
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius && CountAlliesNearTarget(target, 500) == 0 )
                         {
                             cast = true;
                             PredictionOutput output = R.GetPrediction(target);
