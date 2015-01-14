@@ -113,11 +113,11 @@ namespace Sivir
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         Q.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA))
-                        Qc.CastIfHitchanceEquals(t, HitChance.High, true);
+                        Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                 }
                 if (ObjectManager.Player.Mana > RMANA + QMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range-50)))
                     {
                         if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
@@ -161,7 +161,7 @@ namespace Sivir
             QMANA = 60 + 10 * Q.Level;
             WMANA = 60;
             if (!R.IsReady())
-                RMANA = QMANA - 10;
+                RMANA = QMANA - 20;
             else
                 RMANA = 100;
 
