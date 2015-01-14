@@ -35,6 +35,7 @@ namespace Sivir
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Hero_OnProcessSpellCast;
         }
         private static void Game_OnGameLoad(EventArgs args)
         {
@@ -45,6 +46,7 @@ namespace Sivir
             Q = new Spell(SpellSlot.Q, 1250f);
             Qc = new Spell(SpellSlot.Q, 1250f);
             W = new Spell(SpellSlot.W, float.MaxValue);
+            E = new Spell(SpellSlot.E, float.MaxValue);
 
             R = new Spell(SpellSlot.R, 25000f);
 
@@ -59,7 +61,7 @@ namespace Sivir
             Config = new Menu(ChampionName, ChampionName, true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(targetSelectorMenu);
+            TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
 
             //Orbwalker submenu
@@ -72,12 +74,21 @@ namespace Sivir
 
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Orbwalking.AfterAttack += Orbwalking_AfterAttack;
+            Orbwalking.AfterAttack += AfterAttackEvenH;
+
         }
 
-        private static void Orbwalking_AfterAttack(Obj_AI_Base unit, Obj_AI_Base target)
+        private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if ( unit.IsMe )
+            if (sender.IsValid<Obj_AI_Hero>() && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack())
+            {
+                E.Cast();
+            }
+        }
+
+        private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
+        {
+            if (unit.IsMe)
             {
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast();
@@ -93,7 +104,7 @@ namespace Sivir
             ManaMenager();
             if (Q.IsReady())
             {
-                var t = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
                     var qDmg = W.GetDamage(t);
@@ -116,7 +127,7 @@ namespace Sivir
                 }
             }
         }
-       
+
         private static int CountEnemies(Obj_AI_Base target, float range)
         {
             return

@@ -354,7 +354,9 @@ namespace Jinx
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
             double ShouldUse = ShouldUseE(args.SData.Name);
+
             if (unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f && unit.IsValidTarget(E.Range))
+                dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.);
                 E.Cast(unit.ServerPosition, true);
             if (unit.IsMe && args.SData.Name == "JinxW")
             {
