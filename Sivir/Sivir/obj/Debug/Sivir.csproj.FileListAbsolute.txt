@@ -2,7 +2,6 @@ C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\Sivir.exe.config
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\Sivir.exe
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\Sivir.pdb
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\clipper_library.dll
-C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\LeagueSharp.AppDomainManager.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\LeagueSharp.Common.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\LeagueSharp.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\SharpDX.dll

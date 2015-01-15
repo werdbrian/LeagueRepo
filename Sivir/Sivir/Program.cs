@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using System.IO;
 using SharpDX;
 using Collision = LeagueSharp.Common.Collision;
 namespace Sivir
@@ -27,6 +28,11 @@ namespace Sivir
         public static int QMANA;
         public static int WMANA;
         public static int RMANA;
+        //AutoPotion
+        public static Items.Item Potion = new Items.Item(2003, 0);
+        public static Items.Item ManaPotion = new Items.Item(2004, 0);
+        public static Items.Item Youmuu = new Items.Item(3142, 0);
+
         //Menu
         public static Menu Config;
 
@@ -51,7 +57,7 @@ namespace Sivir
             R = new Spell(SpellSlot.R, 25000f);
 
             Q.SetSkillshot(0.25f, 90f, 1350f, false, SkillshotType.SkillshotLine);
-            Qc.SetSkillshot(0.25f, 90f, 1350f, true, SkillshotType.SkillshotLine);
+            Qc.SetSkillshot(0.25f, 90f, 1300f, true, SkillshotType.SkillshotLine);
             SpellList.Add(Q);
             SpellList.Add(W);
 
@@ -69,18 +75,22 @@ namespace Sivir
 
             //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+            Config.AddToMainMenu();
+            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.AddToMainMenu();
 
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttackEvenH;
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 0.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsValid<Obj_AI_Hero>() && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack())
+            if (sender.IsValid<Obj_AI_Hero>() && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
             {
                 E.Cast();
             }
@@ -88,13 +98,16 @@ namespace Sivir
 
         private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
         {
-            if (unit.IsMe)
+            var t = TargetSelector.GetTarget(600, TargetSelector.DamageType.Physical);
+            if (W.IsReady() && unit.IsMe)
             {
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast();
-                if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
+                else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
+                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
+                    W.Cast();
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > target.Health && !Q.IsReady() && !R.IsReady())
                     W.Cast();
             }
         }
@@ -102,6 +115,7 @@ namespace Sivir
         private static void Game_OnGameUpdate(EventArgs args)
         {
             ManaMenager();
+            PotionMenager();
             if (Q.IsReady())
             {
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
@@ -165,6 +179,30 @@ namespace Sivir
             else
                 RMANA = 100;
 
+        }
+        public static void PotionMenager()
+        {
+            if (Config.Item("pots").GetValue<bool>() && Potion.IsReady() && !InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
+            {
+                if (CountEnemies(ObjectManager.Player, 600) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
+                    Potion.Cast();
+                else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
+                    Potion.Cast();
+            }
+            if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !InFountain())
+            {
+                if (CountEnemies(ObjectManager.Player, 1000) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + QMANA)
+                    ManaPotion.Cast();
+            }
+        }
+        public static bool InFountain()
+        {
+            float fountainRange = 750;
+            if (Utility.Map.GetMap()._MapType == Utility.Map.MapType.SummonersRift)
+                fountainRange = 1050;
+            return ObjectManager.Get<Obj_SpawnPoint>()
+                    .Where(spawnPoint => spawnPoint.IsAlly)
+                    .Any(spawnPoint => Vector2.Distance(ObjectManager.Player.ServerPosition.To2D(), spawnPoint.Position.To2D()) < fountainRange);
         }
     }
 
