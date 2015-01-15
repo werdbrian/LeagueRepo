@@ -84,7 +84,7 @@ namespace Sivir
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttackEvenH;
-            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 0.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat(" BETA <font color=\"#9c3232\">S</font>ivir full automatic AI ver 0.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
