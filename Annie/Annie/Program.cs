@@ -27,7 +27,7 @@ namespace Annie
         public static int EMANA;
         public static int RMANA;
         public static bool Farm = false;
-        public static double WCastTime = 0;
+        public static bool HaveStun = false;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -52,9 +52,9 @@ namespace Annie
             W = new Spell(SpellSlot.W, 625f);
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R, 600f);
-            W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(1.1f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
-            R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
+            Q.SetTargetted(0.25f, 1400f);
+            W.SetSkillshot(0.60f, 50f * (float)Math.PI / 180, float.MaxValue, false, SkillshotType.SkillshotCone);
+            R.SetSkillshot(0.20f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -80,42 +80,50 @@ namespace Annie
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
+            Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
-            Orbwalking.BeforeAttack += args =>
-            {
-                try
-                {
-                    if (args.Target.IsValid<Obj_AI_Minion>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
-                    {
-                        switch (ConfigValue<StringList>("AttackMinions").SelectedIndex)
-                        {
-                            case 0: // Smart
-                                args.Process = AttackMinion;
-                                break;
-
-                            case 1: // Never
-                                args.Process = false;
-                                break;
-                        }
-                    }
-
-                    if (args.Target.IsValid<Obj_AI_Hero>() && !ConfigValue<bool>("AttackChampions") &&
-                        Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
-                    {
-                        args.Process = false;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            };
         }
+
+        static void Orbwalking_BeforeAttack(LeagueSharp.Common.Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
 
-            if (Orbwalker.ActiveMode.ToString() == "Combo")
-                Orbwalking.Attack = false;
+            if (ObjectManager.Player.HasBuff("Recall"))
+                return;
+            HaveStun = GetPassiveStacks();
+
+            if ((Q.IsReady() || W.IsReady()) && Orbwalker.ActiveMode.ToString() == "Combo")
+            {
+                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget() && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health)
+                    Orbwalking.Attack = true;
+                else
+                    Orbwalking.Attack = false;
+            }
+            else
+                Orbwalking.Attack = true;
+
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var targetR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+
+            if (HaveStun && R.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && targetR.IsValidTarget())
+                R.Cast(targetR, true, true);
+            else if (HaveStun && W.IsReady() && target.IsValidTarget() && CountEnemies(target, 250) > 1)
+                W.Cast(target, true, true);
+            else if ( Q.IsReady() && target.IsValidTarget())
+                Q.Cast(target, true);
+
+            if (W.IsReady() && !Q.IsReady() && target.IsValidTarget())
+                W.Cast(target, true, true);
+            if (!W.IsReady() && !Q.IsReady() && targetR.IsValidTarget())
+                R.Cast(targetR, true, true);
+
+            if (E.IsReady() && !HaveStun)
+                E.Cast();
 
         }
 
@@ -146,18 +154,39 @@ namespace Annie
                             hero.Team == ObjectManager.Player.Team &&
                             hero.ServerPosition.Distance(target.ServerPosition) <= range);
         }
-        public static int GetPassiveStacks()
+        public static bool GetPassiveStacks()
         {
             var buffs = Player.Buffs.Where(buff => (buff.Name.ToLower() == "pyromania" || buff.Name.ToLower() == "pyromania_particle"));
             if (buffs.Any())
             {
                 var buff = buffs.First();
                 if (buff.Name.ToLower() == "pyromania_particle")
-                    return 4;
+                    return true;
                 else
-                    return buff.Count;
+                    return false;
             }
-            return 0;
+            return false;
+        }
+        public static void ManaMenager()
+        {
+            QMANA = 10;
+            WMANA = 40 + 10 * W.Level;
+            EMANA = 50;
+            if (!R.IsReady())
+                RMANA = WMANA - ObjectManager.Player.Level * 2;
+            else
+                RMANA = 100;
+
+            if (Farm)
+                RMANA = RMANA + (CountEnemies(ObjectManager.Player, 2500) * 20);
+
+            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                EMANA = 0;
+                RMANA = 0;
+            }
         }
     }
 }

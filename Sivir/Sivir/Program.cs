@@ -214,28 +214,20 @@ namespace Sivir
         }
         public static void PotionMenager()
         {
-            if (Config.Item("pots").GetValue<bool>() && Potion.IsReady() && !InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
+            if (Config.Item("pots").GetValue<bool>() && Potion.IsReady() && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
             {
                 if (CountEnemies(ObjectManager.Player, 600) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
                     Potion.Cast();
                 else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
                     Potion.Cast();
             }
-            if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !InFountain())
+            if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !ObjectManager.Player.InFountain())
             {
                 if (CountEnemies(ObjectManager.Player, 1000) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + QMANA)
                     ManaPotion.Cast();
             }
         }
-        public static bool InFountain()
-        {
-            float fountainRange = 750;
-            if (Utility.Map.GetMap()._MapType == Utility.Map.MapType.SummonersRift)
-                fountainRange = 1050;
-            return ObjectManager.Get<Obj_SpawnPoint>()
-                    .Where(spawnPoint => spawnPoint.IsAlly)
-                    .Any(spawnPoint => Vector2.Distance(ObjectManager.Player.ServerPosition.To2D(), spawnPoint.Position.To2D()) < fountainRange);
-        }
+
     }
 
 }
