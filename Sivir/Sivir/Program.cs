@@ -107,7 +107,7 @@ namespace Sivir
                     W.Cast();
                 else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && farmW())
+                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + WMANA && farmW())
                     W.Cast();
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > target.Health && !Q.IsReady() && !R.IsReady())
                     W.Cast();
