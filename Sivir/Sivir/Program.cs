@@ -127,7 +127,7 @@ namespace Sivir
                     if (qDmg * 2 > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
-                        Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                        Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") ))
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
@@ -143,6 +143,11 @@ namespace Sivir
                     }
                 }
                 
+            }
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            {
+                if (CountEnemies(ObjectManager.Player, 700f) > 2)
+                    R.Cast();
             }
         }
         public static bool farmW()
@@ -191,7 +196,7 @@ namespace Sivir
             QMANA = 60 + 10 * Q.Level;
             WMANA = 60;
             if (!R.IsReady())
-                RMANA = QMANA + 20;
+                RMANA = QMANA - ObjectManager.Player.Level * 3;
             else
                 RMANA = 100;
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
