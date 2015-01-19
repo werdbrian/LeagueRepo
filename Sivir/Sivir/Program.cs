@@ -78,8 +78,9 @@ namespace Sivir
             Config.AddToMainMenu();
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
 
-            Config.AddToMainMenu();
+            
 
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -90,10 +91,11 @@ namespace Sivir
 
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsValid<Obj_AI_Hero>() && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
+            if (sender.IsValid<Obj_AI_Hero>() && sender.MaxMana > 10 && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
             {
                 E.Cast();
             }
+            
         }
 
         private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
@@ -105,7 +107,7 @@ namespace Sivir
                     W.Cast();
                 else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
+                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && farmW())
                     W.Cast();
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > target.Health && !Q.IsReady() && !R.IsReady())
                     W.Cast();
@@ -126,22 +128,36 @@ namespace Sivir
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         Q.CastIfHitchanceEquals(t, HitChance.High, true);
-                    else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA))
-                        Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                }
-                if (ObjectManager.Player.Mana > RMANA + QMANA)
-                {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range-50)))
+                    else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") ))
+                        if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
+                            Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                        else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 )
+                             Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                    else if (ObjectManager.Player.Mana > RMANA + QMANA)
                     {
-                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                            enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                            enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow))
-                            Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                            if (t.HasBuffOfType(BuffType.Stun) || t.HasBuffOfType(BuffType.Snare) ||
+                                t.HasBuffOfType(BuffType.Charm) || t.HasBuffOfType(BuffType.Fear) ||
+                                t.HasBuffOfType(BuffType.Taunt) || t.HasBuffOfType(BuffType.Slow)
+                                || t.HasBuffOfType(BuffType.Suppression) || t.IsStunned || t.HasBuff("Recall"))
+                                Q.CastIfHitchanceEquals(t, HitChance.High, true);
                     }
                 }
+                
             }
         }
-
+        public static bool farmW()
+        {
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 900, MinionTypes.All);
+            int num=0;
+            foreach (var minion in allMinionsQ)
+            {
+                num++;
+            }
+            if (num > 4)
+                return true;
+            else
+                return false;
+        }
         private static int CountEnemies(Obj_AI_Base target, float range)
         {
             return
@@ -175,9 +191,15 @@ namespace Sivir
             QMANA = 60 + 10 * Q.Level;
             WMANA = 60;
             if (!R.IsReady())
-                RMANA = QMANA - 20;
+                RMANA = QMANA + 20;
             else
                 RMANA = 100;
+            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                RMANA = 0;
+            }
 
         }
         public static void PotionMenager()
