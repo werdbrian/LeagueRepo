@@ -91,10 +91,15 @@ namespace Sivir
 
         private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
+            double HpLeft = ObjectManager.Player.Health - dmg;
+            double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
+
             if (sender.IsValid<Obj_AI_Hero>() && sender.MaxMana > 10 && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
             {
                 E.Cast();
             }
+            
             
         }
 

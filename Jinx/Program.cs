@@ -105,12 +105,12 @@ namespace Jinx
             
             if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady())
             {
-                var t = TargetSelector.GetTarget(E.Range + 200, TargetSelector.DamageType.Physical);
-                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < 900f && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
+                var t = TargetSelector.GetTarget(E.Range + 300, TargetSelector.DamageType.Physical);
+                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
                     E.Cast(Object.Position, true);
                 }
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range + 200)))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                 {
                     if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                          enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
@@ -121,15 +121,14 @@ namespace Jinx
                     {
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
                     }
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && t.Path.Count() > 1 && CountEnemies(t, 300) > 1)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && t.Path.Count() > 1 && CountEnemies(t, 200) > 1)
                     {
                         E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && CountEnemies(t, 300) > 2)
                     {
                         E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    }
-                    
+                    }  
                 }
             }
 
@@ -150,7 +149,6 @@ namespace Jinx
                             Q.Cast();
                         else if (Farm && haras() && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA && distance < bonusRange() + t.BoundingRadius)
                                 Q.Cast();
-                        
                     }
                 }
                 else if (FishBoneActive && Farm)
@@ -159,7 +157,6 @@ namespace Jinx
                     Q.Cast();
                 else if (FishBoneActive && (Orbwalker.ActiveMode.ToString() == "Combo") && ObjectManager.Player.Mana < RMANA + WMANA + 20)
                     Q.Cast();
-                
             }
 
             if (W.IsReady())
