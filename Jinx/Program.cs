@@ -105,7 +105,7 @@ namespace Jinx
             
             if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady())
             {
-                var t = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(E.Range + 200, TargetSelector.DamageType.Physical);
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < 900f && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
                     E.Cast(Object.Position, true);
@@ -125,10 +125,11 @@ namespace Jinx
                     {
                         E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && t.Path.Count() > 1 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && CountEnemies(t, 300) > 2)
                     {
                         E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
+                    
                 }
             }
 
@@ -142,8 +143,7 @@ namespace Jinx
                 {
                     var distance = GetRealDistance(t);
                     var powPowRange = GetRealPowPowRange(t);
-                    if (Youmuu.IsReady() && (ObjectManager.Player.GetAutoAttackDamage(t) * 6 > t.Health || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
-                        Youmuu.Cast();
+                    
                     if (!FishBoneActive && (distance > powPowRange) )
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
@@ -296,6 +296,12 @@ namespace Jinx
                     Q.Cast();
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
+                if (Youmuu.IsReady() && (ObjectManager.Player.GetAutoAttackDamage(t) * 6 > t.Health || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
+                    Youmuu.Cast();
+                if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && t.Path.Count() > 1 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
+                {
+                    E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                }
             }
         }
 
