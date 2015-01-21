@@ -79,13 +79,14 @@ namespace Sivir
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
 
             
 
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttackEvenH;
-            Game.PrintChat(" BETA <font color=\"#9c3232\">S</font>ivir full automatic AI ver 0.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
@@ -95,17 +96,17 @@ namespace Sivir
             double HpLeft = ObjectManager.Player.Health - dmg;
             double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
 
-            if (sender.IsValid<Obj_AI_Hero>() && sender.MaxMana > 10 && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
+            if (sender.IsValid<Obj_AI_Hero>() && HpPercentage >= Config.Item("Edmg").GetValue<Slider>().Value && sender.MaxMana > 10  && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
             {
                 E.Cast();
+                //Game.PrintChat("" + HpPercentage);
             }
-            
-            
+
         }
 
         private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
         {
-            var t = TargetSelector.GetTarget(600, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
             if (W.IsReady() && unit.IsMe)
             {
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
@@ -113,6 +114,8 @@ namespace Sivir
                 else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
                 else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + WMANA && farmW())
+                    W.Cast();
+                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + WMANA && t.IsValidTarget())
                     W.Cast();
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > target.Health && !Q.IsReady() && !R.IsReady())
                     W.Cast();
@@ -136,7 +139,7 @@ namespace Sivir
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") ))
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 )
+                        else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9 )
                              Q.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if (ObjectManager.Player.Mana > RMANA + QMANA)
                     {
@@ -157,7 +160,7 @@ namespace Sivir
         }
         public static bool farmW()
         {
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 900, MinionTypes.All);
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 1300, MinionTypes.All);
             int num=0;
             foreach (var minion in allMinionsQ)
             {
