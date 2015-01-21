@@ -50,8 +50,8 @@ namespace Caitlyn
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1240);
-            Qc = new Spell(SpellSlot.Q, 1240);
+            Q = new Spell(SpellSlot.Q, 1260);
+            Qc = new Spell(SpellSlot.Q, 1260);
             W = new Spell(SpellSlot.W, 820);
             E = new Spell(SpellSlot.E, 950);
             R = new Spell(SpellSlot.R, 3000);
@@ -121,12 +121,9 @@ namespace Caitlyn
                          enemy.IsStunned || enemy.HasBuff("Recall"))
                         W.Cast(enemy, true);
                     else if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
-                    {
                         W.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
-                    }
                 }
             }
-
 
             if (E.IsReady())
             {
@@ -144,22 +141,19 @@ namespace Caitlyn
                         && ObjectManager.Player.Mana > RMANA + EMANA
                         && t2.IsValidTarget()
                         && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
-                        && GetRealDistance(t2) > bonusRange() + 100
+                        && GetRealDistance(t2) > GetRealRange(t2) + 50
                         && CountEnemies(t2, 600f) < 3
                         && (Game.Time - WCastTime > 1))
                     {
                         var position = ObjectManager.Player.ServerPosition - (t2.ServerPosition - ObjectManager.Player.ServerPosition);
                         E.Cast(position, true);
-                    }
-                    
-                   
+                    }                         
                 }
                 if (Config.Item("useE").GetValue<KeyBind>().Active)
                 {
                     var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
                     E.Cast(position,true);
                 }
-                
             }
 
             if (Q.IsReady())
@@ -202,7 +196,7 @@ namespace Caitlyn
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius && CountAlliesNearTarget(target, 500) == 0 && CountEnemies(ObjectManager.Player, GetRealRange(target)) == 0)
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && CountAlliesNearTarget(target, 500) == 0 && CountEnemies(ObjectManager.Player, GetRealRange(target)) == 0)
                         {
                             cast = true;
                             PredictionOutput output = R.GetPrediction(target);
@@ -226,9 +220,8 @@ namespace Caitlyn
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget() && CountEnemies(target, 300f) == 1)
-                            {
                                     R.Cast(target, true);
-                            }
+
 
                         }
                         /*
@@ -338,19 +331,6 @@ namespace Caitlyn
             return -1;
         }
 
-       
-
-
-        private static int PowPowStacks
-        {
-            get
-            {
-                return
-                    ObjectManager.Player.Buffs.Where(buff => buff.DisplayName.ToLower() == "Caitlynqramp")
-                        .Select(buff => buff.Count)
-                        .FirstOrDefault();
-            }
-        }
         private static int CountEnemies(Obj_AI_Base target, float range)
         {
             return
@@ -384,16 +364,6 @@ namespace Caitlyn
             return ObjectManager.Player.ServerPosition.Distance(target.Position) + ObjectManager.Player.BoundingRadius +
                    target.BoundingRadius;
         }
-
-        private static float GetSlowEndTime(Obj_AI_Base target)
-        {
-            return
-                target.Buffs.OrderByDescending(buff => buff.EndTime - Game.Time)
-                    .Where(buff => buff.Type == BuffType.Slow)
-                    .Select(buff => buff.EndTime)
-                    .FirstOrDefault();
-        }
-
 
         public static void ManaMenager()
         {
