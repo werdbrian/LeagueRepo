@@ -142,7 +142,7 @@ namespace Caitlyn
                         && ObjectManager.Player.Mana > RMANA + EMANA
                         && t2.IsValidTarget()
                         && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
-                        && GetRealDistance(t2) > bonusRange() + 150
+                        && GetRealDistance(t2) > bonusRange() + 100
                         && CountEnemies(t2, 600f) < 3
                         && (Game.Time - WCastTime > 1))
                     {
@@ -179,7 +179,7 @@ namespace Caitlyn
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && CountEnemies(ObjectManager.Player, GetRealRange(t)) == 0)
                     {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
@@ -370,12 +370,12 @@ namespace Caitlyn
 
         private static float GetRealRange(GameObject target)
         {
-            return 690f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
+            return 680f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
         }
 
         public static float bonusRange()
         {
-            return 690f + ObjectManager.Player.BoundingRadius;
+            return 680f + ObjectManager.Player.BoundingRadius;
         }
         private static float GetRealDistance(GameObject target)
         {
