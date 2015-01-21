@@ -404,16 +404,6 @@ namespace Jinx
             get { return Math.Abs(ObjectManager.Player.AttackRange - 525f) > float.Epsilon; }
         }
 
-        private static int PowPowStacks
-        {
-            get
-            {
-                return
-                    ObjectManager.Player.Buffs.Where(buff => buff.DisplayName.ToLower() == "jinxqramp")
-                        .Select(buff => buff.Count)
-                        .FirstOrDefault();
-            }
-        }
         private static int CountEnemies(Obj_AI_Base target, float range)
         {
             return
@@ -443,16 +433,6 @@ namespace Jinx
             return ObjectManager.Player.ServerPosition.Distance(target.Position) + ObjectManager.Player.BoundingRadius +
                    target.BoundingRadius;
         }
-
-        private static float GetSlowEndTime(Obj_AI_Base target)
-        {
-            return
-                target.Buffs.OrderByDescending(buff => buff.EndTime - Game.Time)
-                    .Where(buff => buff.Type == BuffType.Slow)
-                    .Select(buff => buff.EndTime)
-                    .FirstOrDefault();
-        }
-
 
         public static void ManaMenager()
         {
