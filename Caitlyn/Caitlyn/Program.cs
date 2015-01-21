@@ -18,6 +18,7 @@ namespace Caitlyn
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
+        public static Spell Qc;
         public static Spell W;
         public static Spell E;
         public static Spell R;
@@ -50,12 +51,14 @@ namespace Caitlyn
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 1240);
+            Qc = new Spell(SpellSlot.Q, 1240);
             W = new Spell(SpellSlot.W, 820);
             E = new Spell(SpellSlot.E, 950);
             R = new Spell(SpellSlot.R, 3000);
             R1 = new Spell(SpellSlot.R, 3000f);
 
             Q.SetSkillshot(0.625f, 90f, 2200f, false, SkillshotType.SkillshotLine);
+            Qc.SetSkillshot(0.625f, 90f, 2200f, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(1.5f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 80f, 1600f, true, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.7f, 200f, 1500f, false, SkillshotType.SkillshotCircle);
@@ -110,7 +113,7 @@ namespace Caitlyn
                 {
                     W.Cast(Object.Position, true);
                 }
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && W.IsReady()))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && W.IsReady()))
                 {
                     if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                          enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
@@ -121,7 +124,6 @@ namespace Caitlyn
                     {
                         W.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
                     }
- 
                 }
             }
 
@@ -175,7 +177,7 @@ namespace Caitlyn
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                             Q.CastIfHitchanceEquals(t, HitChance.High, true);
                         else if (t.Path.Count() > 1)
-                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                            Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && CountEnemies(ObjectManager.Player, GetRealRange(t)) == 0)
                     {
