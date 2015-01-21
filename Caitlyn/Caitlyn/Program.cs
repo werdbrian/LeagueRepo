@@ -105,7 +105,7 @@ namespace Caitlyn
 
             if (ObjectManager.Player.Mana > RMANA + WMANA  && W.IsReady())
             {
-                var t = TargetSelector.GetTarget(E.Range + 300, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(W.Range + 300, TargetSelector.DamageType.Physical);
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < W.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
                     W.Cast(Object.Position, true);
