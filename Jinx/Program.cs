@@ -80,7 +80,6 @@ namespace Jinx
             Config.AddToMainMenu();
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("Botrk", "Use Botrk").SetValue(true));
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
             Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
@@ -91,7 +90,7 @@ namespace Jinx
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.8 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -105,7 +104,7 @@ namespace Jinx
             
             if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady())
             {
-                var t = TargetSelector.GetTarget(E.Range + 300, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(E.Range , TargetSelector.DamageType.Physical);
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
                     E.Cast(Object.Position, true);
@@ -118,17 +117,7 @@ namespace Jinx
                          enemy.IsStunned || enemy.HasBuff("Recall"))
                         E.Cast(enemy, true);
                     else if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
-                    {
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
-                    }
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && t.Path.Count() > 1 && CountEnemies(t, 200) > 1)
-                    {
-                        E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    }
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && CountEnemies(t, 300) > 2)
-                    {
-                        E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    }  
                 }
             }
 
@@ -168,7 +157,7 @@ namespace Jinx
                     if (GetRealDistance(t) > bonusRange() && wDmg + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
                         W.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
-                        W.CastIfHitchanceEquals(t, HitChance.High, true);
+                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, bonusRange()) == 0 && haras())
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 )
@@ -227,7 +216,7 @@ namespace Jinx
                                 if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() > 1)
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                 else
-                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
+                                    R.Cast(target, true);
                             }
 
                         }
@@ -244,41 +233,11 @@ namespace Jinx
                     }
                 }
             }
-            if (Config.Item("Botrk").GetValue<bool>())
-            {
-                Botrk();
-            }
             ManaMenager();
             PotionMenager();
         }
 
-        public static void Botrk()
-        {
-            if (CountEnemies(ObjectManager.Player, 450) == 0)
-                return;
-            Obj_AI_Hero lowHP = TargetSelector.GetTarget(450, TargetSelector.DamageType.Physical);
-            Obj_AI_Hero nearest = TargetSelector.GetTarget(450, TargetSelector.DamageType.Physical);
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(450)))
-            {
-                if (lowHP.MaxHealth < target.MaxHealth)
-                    lowHP = target;
-                if(Player.Distance(target.ServerPosition) < Player.Distance(nearest.ServerPosition))
-                    nearest = target;
-            }
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
-            {
-                UseItem(3144, lowHP);
-                UseItem(3153, lowHP);
-                return;
-            }
-            else if (ObjectManager.Player.MaxHealth - ObjectManager.Player.Health > nearest.MaxHealth * 0.1 && 200 > Player.Distance(nearest.ServerPosition))
-            {
-                UseItem(3153, nearest);
-                UseItem(3144, nearest);
-                return;
-            }
-            return;
-        }
+      
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -293,11 +252,7 @@ namespace Jinx
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
                 if (Youmuu.IsReady() && (ObjectManager.Player.GetAutoAttackDamage(t) * 6 > t.Health || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
-                    Youmuu.Cast();
-                if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && t.Path.Count() > 1 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
-                {
-                    E.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                }
+                    Youmuu.Cast();   
             }
         }
 
@@ -312,14 +267,6 @@ namespace Jinx
                     Q.Cast();
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
-            }
-        }
-
-        public static void UseItem(int id, Obj_AI_Hero target = null)
-        {
-            if (Items.HasItem(id) && Items.CanUseItem(id))
-            {
-                Items.UseItem(id, target);
             }
         }
 
