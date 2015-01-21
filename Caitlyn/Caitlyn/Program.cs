@@ -137,7 +137,7 @@ namespace Caitlyn
                     if (GetRealDistance(t) > bonusRange() && qDmg + eDmg > t.Health && qDmg * 0.8 < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady())
                         E.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
-                        E.CastIfHitchanceEquals(t, HitChance.High, true);
+                        E.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo"
                         && ObjectManager.Player.Mana > RMANA + EMANA
                         && t2.IsValidTarget()
@@ -175,7 +175,7 @@ namespace Caitlyn
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                             Q.CastIfHitchanceEquals(t, HitChance.High, true);
                         else if (t.Path.Count() > 1)
-                            Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && CountEnemies(ObjectManager.Player, GetRealRange(t)) == 0)
                     {
@@ -220,7 +220,7 @@ namespace Caitlyn
                                 double b = c1 / c2;
                                 Vector3 pb = Player.ServerPosition + ((float)b * v);
                                 float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (R.Width + 200 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                if (length < (R.Width + 300 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget() && CountEnemies(target, 300f) == 1)

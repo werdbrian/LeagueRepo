@@ -174,7 +174,7 @@ namespace Jinx
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 )
                             W.CastIfHitchanceEquals(t, HitChance.High, true);
                         else if (t.Path.Count() > 1)
-                            W.CastIfHitchanceEquals(t, HitChance.High, true);
+                            W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
                     {
