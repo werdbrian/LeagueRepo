@@ -99,8 +99,6 @@ namespace Caitlyn
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
-            //Game.PrintChat(Game.Time.ToString());
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
             else
@@ -135,7 +133,7 @@ namespace Caitlyn
                     var qDmg = Q.GetDamage(t);
                     if (GetRealDistance(t) > bonusRange() && qDmg + eDmg > t.Health && qDmg * 0.8 < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady())
                         E.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
                         E.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo"
                         && ObjectManager.Player.Mana > RMANA + EMANA
@@ -216,31 +214,18 @@ namespace Caitlyn
                                 double b = c1 / c2;
                                 Vector3 pb = Player.ServerPosition + ((float)b * v);
                                 float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (R.Width + 300 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                if (length < ( 400 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget() && CountEnemies(target, 300f) == 1)
+                            if (cast && target.IsValidTarget() && CountEnemies(target, 400f) == 1)
                                     R.Cast(target, true);
-
-
                         }
-                        /*
-                        var distance = GetRealDistance(t);
-                        var rDamage = R.GetDamage(t);
-                        var powPowRange = GetRealPowPowRange(t);
-                        if (rDamage > t.Health && CountAlliesNearTarget(t, 600) == 0 && CountEnemies(ObjectManager.Player, 200f) == 0 && distance > bonusRange() + 70 && t.Path.Count() > 1)
-                                R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        else 
-                        else if (rDamage * 1.4 > t.Health && CountEnemies(t, 200) > 2)
-                            R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                         * */
                     }
                 }
             }
             if (Config.Item("Botrk").GetValue<bool>())
-            {
                 Botrk();
-            }
+
             ManaMenager();
             PotionMenager();
         }
@@ -290,7 +275,6 @@ namespace Caitlyn
                 Items.UseItem(id, target);
             }
         }
-
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
