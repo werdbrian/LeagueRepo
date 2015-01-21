@@ -112,7 +112,7 @@ namespace Annie
 
             if (HaveStun && R.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && targetR.IsValidTarget())
                 R.Cast(targetR, true, true);
-            else if (HaveStun && W.IsReady() && target.IsValidTarget() && CountEnemies(target, 250) > 1)
+            else if (HaveStun && W.IsReady() && target.IsValidTarget() && CountEnemies(target, R.Width) > 1)
                 W.Cast(target, true, true);
             else if ( Q.IsReady() && target.IsValidTarget())
                 Q.Cast(target, true);
@@ -127,15 +127,7 @@ namespace Annie
 
         }
 
-        public static bool InFountain()
-        {
-            float fountainRange = 750;
-            if (Utility.Map.GetMap()._MapType == Utility.Map.MapType.SummonersRift)
-                fountainRange = 1050;
-            return ObjectManager.Get<Obj_SpawnPoint>()
-                    .Where(spawnPoint => spawnPoint.IsAlly)
-                    .Any(spawnPoint => Vector2.Distance(ObjectManager.Player.ServerPosition.To2D(), spawnPoint.Position.To2D()) < fountainRange);
-        }
+        
         private static int CountEnemies(Obj_AI_Base target, float range)
         {
             return
