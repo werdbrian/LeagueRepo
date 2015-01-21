@@ -50,10 +50,10 @@ namespace Caitlyn
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1260);
-            Qc = new Spell(SpellSlot.Q, 1260);
-            W = new Spell(SpellSlot.W, 820);
-            E = new Spell(SpellSlot.E, 950);
+            Q = new Spell(SpellSlot.Q, 1230);
+            Qc = new Spell(SpellSlot.Q, 1200);
+            W = new Spell(SpellSlot.W, 800);
+            E = new Spell(SpellSlot.E, 980);
             R = new Spell(SpellSlot.R, 3000);
             R1 = new Spell(SpellSlot.R, 3000f);
 
@@ -84,8 +84,8 @@ namespace Caitlyn
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("Botrk", "Use Botrk").SetValue(true));
-            Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
-            Config.AddItem(new MenuItem("useE", "dash E").SetValue(new KeyBind('t', KeyBindType.Press)));
+            Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastW").SetValue(true));
+            Config.AddItem(new MenuItem("useE", "Dash E key").SetValue(new KeyBind('t', KeyBindType.Press)));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
@@ -94,7 +94,7 @@ namespace Caitlyn
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">C</font>aitlyn full automatic SI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#7e62cc\">C</font>aitlyn full automatic SI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -133,7 +133,9 @@ namespace Caitlyn
                     var qDmg = Q.GetDamage(t);
                     if (GetRealDistance(t) > bonusRange() && qDmg + eDmg > t.Health && qDmg * 0.8 < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady())
                         E.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.8)
+                        E.Cast(t, true);
+                    else if ( ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 500 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
                         E.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo"
                         && ObjectManager.Player.Mana > RMANA + EMANA
@@ -214,7 +216,7 @@ namespace Caitlyn
                                 double b = c1 / c2;
                                 Vector3 pb = Player.ServerPosition + ((float)b * v);
                                 float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < ( 400 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                if (length < ( 400 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget() && CountEnemies(target, 400f) == 1)
