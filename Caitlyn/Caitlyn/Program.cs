@@ -136,6 +136,8 @@ namespace Caitlyn
                     var qDmg = Q.GetDamage(t);
                     if (GetRealDistance(t) > bonusRange() && qDmg + eDmg > t.Health && qDmg * 0.8 < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady())
                         E.Cast(t, true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
+                        E.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo"
                         && ObjectManager.Player.Mana > RMANA + EMANA
                         && t2.IsValidTarget()
@@ -147,8 +149,7 @@ namespace Caitlyn
                         var position = ObjectManager.Player.ServerPosition - (t2.ServerPosition - ObjectManager.Player.ServerPosition);
                         E.Cast(position, true);
                     }
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5)
-                        E.CastIfHitchanceEquals(t, HitChance.High, true);
+                    
                    
                 }
                 if (Config.Item("useE").GetValue<KeyBind>().Active)
