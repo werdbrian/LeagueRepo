@@ -221,7 +221,7 @@ namespace Caitlyn
                                 if (length < ( 400 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget() && CountEnemies(target, 400f) == 1)
+                            if (cast && target.IsValidTarget() && CountEnemies(target, 500f) == 1)
                                     R.Cast(target, true);
                         }
                     }
