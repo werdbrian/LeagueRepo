@@ -85,6 +85,7 @@ namespace Caitlyn
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("Botrk", "Use Botrk").SetValue(true));
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastW").SetValue(true));
+            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("useE", "Dash E key").SetValue(new KeyBind('t', KeyBindType.Press)));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -93,8 +94,9 @@ namespace Caitlyn
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#7e62cc\">C</font>aitlyn full automatic SI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#7e62cc\">C</font>aitlyn full automatic SI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -168,7 +170,7 @@ namespace Caitlyn
                         Q.CastIfHitchanceEquals(t, HitChance.High, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && CountEnemies(ObjectManager.Player, bonusRange()) == 0 )
                     {
-                        if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
+                        if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                             Q.CastIfHitchanceEquals(t, HitChance.High, true);
                         else if (t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
@@ -231,7 +233,18 @@ namespace Caitlyn
             ManaMenager();
             PotionMenager();
         }
+        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            var Target = (Obj_AI_Hero)gapcloser.Sender;
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Target.IsValidTarget(E.Range)) 
+            {
+                E.Cast(Target, true);
+                return;
+            }
+            else
+                return;
 
+        }
         public static void Botrk()
         {
             if (CountEnemies(ObjectManager.Player, 450) == 0)
