@@ -91,7 +91,14 @@ namespace Darius
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Orbwalking.AfterAttack += Orbwalking_AfterAttack;
+            Orbwalking.AfterAttack += afterAttack;
+        }
+
+        private static void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (_config.Item("ComboActive").GetValue<KeyBind>().Active && _config.Item("UseWCombo").GetValue<bool>() &&
+                unit.IsMe && (target is Obj_AI_Hero))
+                W.Cast();  
         }
 
         private static void Drawing_OnDraw(EventArgs args)
@@ -114,18 +121,18 @@ namespace Darius
             {
                 CastR();
             }
-            var targetRanduin = SimpleTs.GetTarget(Randuin.Range, SimpleTs.DamageType.Physical);
-            if (targetRanduin.IsValidTarget() && targetRanduin.Path[0].Distance(ObjectManager.Player.ServerPosition) > ObjectManager.Player.Distance(targetRanduin) && ObjectManager.Player.Distance(targetRanduin) > 220)
+            var targetRanduin = TargetSelector.GetTarget(Randuin.Range, TargetSelector.DamageType.Physical); 
+            if (targetRanduin.IsValidTarget() && targetRanduin.Path[0].Distance(ObjectManager.Player.ServerPosition) > ObjectManager.Player.Distance(targetRanduin.ServerPosition) && ObjectManager.Player.Distance(targetRanduin.ServerPosition) > 220)
             {
                 Items.UseItem(3143);
             }
 
             if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Orbwalker.ActiveMode.ToString() == "Combo")
             {
-                var target = SimpleTs.GetTarget(E.Range, SimpleTs.DamageType.Physical);
+                var target =  TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical); 
                 if (target.IsValidTarget())
                 {
-                    if ( target.Path.Count() > 0 && target.Path[0].Distance(ObjectManager.Player.ServerPosition) > ObjectManager.Player.Distance(target) && ObjectManager.Player.Distance(target) > 220)
+                    if ( target.Path.Count() > 0 && target.Path[0].Distance(ObjectManager.Player.ServerPosition) > ObjectManager.Player.Distance(target.ServerPosition) && ObjectManager.Player.Distance(target) > 220)
                         E.Cast(target, true, true);
                 }
             }
@@ -136,20 +143,7 @@ namespace Darius
             if (Q.IsReady() && CountEnemies(ObjectManager.Player, Q.Range) > 0 && ObjectManager.Player.Mana > RMANA + QMANA && Orbwalker.ActiveMode.ToString() == "Combo")
                 Q.Cast();
 
-            if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-            {
-                var target = SimpleTs.GetTarget(600f, SimpleTs.DamageType.True);
-                if (target.IsValidTarget())
-                {
-                    if (ObjectManager.Player.Distance(target) < 600 && (ObjectManager.Player.Distance(target) > R.Range || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
-                    {
-                        if (ObjectManager.Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) > target.Health)
-                        {
-                            ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
-                        }
-                    }
-                }
-            }
+
             if ((_config.Item("HarassActive").GetValue<KeyBind>().Active) ||
                 (_config.Item("HarassActiveT").GetValue<KeyBind>().Active))
                 ExecuteHarass();
@@ -158,16 +152,9 @@ namespace Darius
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range,
                    MinionTypes.All);
                 foreach (var minion in allMinionsQ)
-                    if (ObjectManager.Player.Distance(minion) > 300 && minion.Health <  ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.6)
+                    if (ObjectManager.Player.Distance(minion.ServerPosition) > 300 && minion.Health <  ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.6)
                         Q.Cast();
             }
-        }
-
-        private static void Orbwalking_AfterAttack(Obj_AI_Base unit, Obj_AI_Base target)
-        {
-            if (_config.Item("ComboActive").GetValue<KeyBind>().Active && _config.Item("UseWCombo").GetValue<bool>() &&
-                unit.IsMe && (target is Obj_AI_Hero))
-                W.Cast();   
         }
 
         private static void CastR()
@@ -192,14 +179,7 @@ namespace Darius
                             {
                                 R.CastOnUnit(target, true);
                             }
-                            else if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready && ObjectManager.Player.Distance(target) < 600 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
-                            {
-                                if (ObjectManager.Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) + ObjectManager.Player.GetSpellDamage(target, SpellSlot.R, 1) * (1 + buff.Count / 5) - 1 > target.Health)
-                                {
-                                    ObjectManager.Player.SummonerSpellbook.CastSpell(IgniteSlot, target);
-                                    R.CastOnUnit(target, true);
-                                }
-                            }
+                            
                         }
                     }
                 }
