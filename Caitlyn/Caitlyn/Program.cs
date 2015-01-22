@@ -24,10 +24,10 @@ namespace Caitlyn
         public static Spell R;
         public static Spell R1;
         //ManaMenager
-        public static int QMANA;
-        public static int WMANA;
-        public static int EMANA;
-        public static int RMANA;
+        public static float QMANA;
+        public static float WMANA;
+        public static float EMANA;
+        public static float RMANA;
         public static bool Farm = false;
         public static double WCastTime = 0;
         //AutoPotion
@@ -83,7 +83,6 @@ namespace Caitlyn
             Config.AddToMainMenu();
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("Botrk", "Use Botrk").SetValue(true));
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastW").SetValue(true));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("useE", "Dash E key").SetValue(new KeyBind('t', KeyBindType.Press)));
@@ -101,6 +100,7 @@ namespace Caitlyn
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            ManaMenager();
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
             else
@@ -108,6 +108,7 @@ namespace Caitlyn
 
             if (ObjectManager.Player.Mana > RMANA + WMANA  && W.IsReady())
             {
+                
                 var t = TargetSelector.GetTarget(W.Range + 300, TargetSelector.DamageType.Physical);
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < W.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
@@ -143,8 +144,9 @@ namespace Caitlyn
                         && ObjectManager.Player.Mana > RMANA + EMANA
                         && t2.IsValidTarget()
                         && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
-                        && GetRealDistance(t2) > GetRealRange(t2) + 50
-                        && CountEnemies(t2, 600f) < 3
+                        && GetRealDistance(t2) > GetRealRange(t2) + 100
+                        && !ObjectManager.Player.UnderTurret(true)
+                        && t2.CountEnemiesInRange(600) < 3
                         && (Game.Time - WCastTime > 1))
                     {
                         var position = ObjectManager.Player.ServerPosition - (t2.ServerPosition - ObjectManager.Player.ServerPosition);
@@ -166,16 +168,16 @@ namespace Caitlyn
                     var qDmg = Q.GetDamage(t);
                     if (GetRealDistance(t) > bonusRange() && qDmg  > t.Health)
                         Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && CountEnemies(ObjectManager.Player, GetRealRange(t)) == 0)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t)) == 0)
                         Q.CastIfHitchanceEquals(t, HitChance.High, true);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && CountEnemies(ObjectManager.Player, bonusRange()) == 0 )
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 )
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                             Q.CastIfHitchanceEquals(t, HitChance.High, true);
                         else if (t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && CountEnemies(ObjectManager.Player, GetRealRange(t)) == 0)
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t)) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
@@ -198,7 +200,7 @@ namespace Caitlyn
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && CountAlliesNearTarget(target, 500) == 0 && CountEnemies(ObjectManager.Player, GetRealRange(target)) == 0)
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(500) == 0 && ObjectManager.Player.CountEnemiesInRange(GetRealRange(target)) == 0)
                         {
                             cast = true;
                             PredictionOutput output = R.GetPrediction(target);
@@ -221,53 +223,22 @@ namespace Caitlyn
                                 if (length < ( 400 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget() && CountEnemies(target, 500f) == 1)
+                            if (cast && target.IsValidTarget() && target.CountEnemiesInRange(500) == 1)
                                     R.Cast(target, true);
                         }
                     }
                 }
             }
-            if (Config.Item("Botrk").GetValue<bool>())
-                Botrk();
-
-            ManaMenager();
+            
             PotionMenager();
         }
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
-        {
-            var Target = (Obj_AI_Hero)gapcloser.Sender;
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Target.IsValidTarget(E.Range)) 
+        { 
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA ) 
             {
-                E.Cast(Target, true);
-                return;
-            }
-            else
-                return;
-
-        }
-        public static void Botrk()
-        {
-            if (CountEnemies(ObjectManager.Player, 450) == 0)
-                return;
-            Obj_AI_Hero lowHP = TargetSelector.GetTarget(450, TargetSelector.DamageType.Physical);
-            Obj_AI_Hero nearest = TargetSelector.GetTarget(450, TargetSelector.DamageType.Physical);
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(450)))
-            {
-                if (lowHP.MaxHealth < target.MaxHealth)
-                    lowHP = target;
-                if (Player.Distance(target.ServerPosition) < Player.Distance(nearest.ServerPosition))
-                    nearest = target;
-            }
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
-            {
-                UseItem(3144, lowHP);
-                UseItem(3153, lowHP);
-                return;
-            }
-            else if (ObjectManager.Player.MaxHealth - ObjectManager.Player.Health > nearest.MaxHealth * 0.1 && 200 > Player.Distance(nearest.ServerPosition))
-            {
-                UseItem(3153, nearest);
-                UseItem(3144, nearest);
+                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                if (Target.IsValidTarget(E.Range))
+                    E.Cast(Target, true);
                 return;
             }
             return;
@@ -275,6 +246,7 @@ namespace Caitlyn
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
+  
             
         }
 
@@ -330,25 +302,6 @@ namespace Caitlyn
             return -1;
         }
 
-        private static int CountEnemies(Obj_AI_Base target, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.IsValidTarget() && hero.Team != ObjectManager.Player.Team &&
-                            hero.ServerPosition.Distance(target.ServerPosition) <= range);
-        }
-        private static int CountAlliesNearTarget(Obj_AI_Base target, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.Team == ObjectManager.Player.Team &&
-                            hero.ServerPosition.Distance(target.ServerPosition) <= range);
-        }
-
         private static float GetRealRange(GameObject target)
         {
             return 680f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
@@ -366,16 +319,15 @@ namespace Caitlyn
 
         public static void ManaMenager()
         {
-            QMANA = 40 + 10 * Q.Level;
-            WMANA = 50;
-            EMANA = 75;
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
-                RMANA = 100;
+                RMANA = R.Instance.ManaCost;
 
-            if (Farm)
-                RMANA = RMANA + (CountEnemies(ObjectManager.Player, 2500) * 20);
+            RMANA = RMANA + (ObjectManager.Player.CountEnemiesInRange(2500) * 20);
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
@@ -390,14 +342,14 @@ namespace Caitlyn
         {
             if (Config.Item("pots").GetValue<bool>() && Potion.IsReady() && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
             {
-                if (CountEnemies(ObjectManager.Player, 600) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
+                if (ObjectManager.Player.CountEnemiesInRange(700) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
                     Potion.Cast();
                 else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
                     Potion.Cast();
             }
             if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !ObjectManager.Player.InFountain())
             {
-                if (CountEnemies(ObjectManager.Player, 1000) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA)
+                if (ObjectManager.Player.CountEnemiesInRange(1000) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA)
                     ManaPotion.Cast();
             }
         }

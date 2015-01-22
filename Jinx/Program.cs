@@ -95,7 +95,7 @@ namespace Jinx
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
+            ManaMenager();
             //Game.PrintChat(Game.Time.ToString());
             if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
                 Farm = true;
@@ -233,7 +233,7 @@ namespace Jinx
                     }
                 }
             }
-            ManaMenager();
+            
             PotionMenager();
         }
 
