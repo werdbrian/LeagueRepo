@@ -108,7 +108,6 @@ namespace Caitlyn
 
             if (ObjectManager.Player.Mana > RMANA + WMANA  && W.IsReady())
             {
-                
                 var t = TargetSelector.GetTarget(W.Range + 300, TargetSelector.DamageType.Physical);
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < W.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
@@ -128,6 +127,7 @@ namespace Caitlyn
 
             if (E.IsReady())
             {
+                ManaMenager();
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 var t2 = TargetSelector.GetTarget(E.Range + 350, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
@@ -161,9 +161,9 @@ namespace Caitlyn
                 }
             }
             
-
             if (Q.IsReady())
             {
+                ManaMenager();
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
@@ -175,7 +175,7 @@ namespace Caitlyn
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 )
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
-                            Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
@@ -231,7 +231,6 @@ namespace Caitlyn
                     }
                 }
             }
-            
             PotionMenager();
         }
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
