@@ -119,10 +119,12 @@ namespace Jinx
                     else if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
                 }
+                
             }
 
             if (Q.IsReady())
             {
+                ManaMenager();
                 if (Farm)
                     if (ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
                         farmQ();
@@ -150,6 +152,7 @@ namespace Jinx
 
             if (W.IsReady())
             {
+                ManaMenager();
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
