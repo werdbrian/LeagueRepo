@@ -157,8 +157,10 @@ namespace Caitlyn
                 {
                     var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
                     E.Cast(position,true);
+                    position.IsWall();
                 }
             }
+            
 
             if (Q.IsReady())
             {
