@@ -57,7 +57,7 @@ namespace Sivir
             R = new Spell(SpellSlot.R, 25000f);
 
             Q.SetSkillshot(0.25f, 90f, 1350f, false, SkillshotType.SkillshotLine);
-            Qc.SetSkillshot(0.25f, 90f, 1300f, true, SkillshotType.SkillshotLine);
+            Qc.SetSkillshot(0.25f, 90f, 1350f, true, SkillshotType.SkillshotLine);
             SpellList.Add(Q);
             SpellList.Add(W);
 
@@ -156,7 +156,7 @@ namespace Sivir
                 var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
                 if (ObjectManager.Player.CountEnemiesInRange(800f) > 2)
                     R.Cast();
-                else if (t.IsValidTarget() && Orbwalker.GetTarget() == null && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health && !Q.IsReady())
+                else if (t.IsValidTarget() && Orbwalker.GetTarget() == null && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health && !Q.IsReady() && t.CountEnemiesInRange(800) < 3)
                     R.Cast();
             }
         }

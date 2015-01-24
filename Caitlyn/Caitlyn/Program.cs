@@ -148,7 +148,7 @@ namespace Caitlyn
                         && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t.Health
                         && GetRealDistance(t2) > GetRealRange(t2) + 100
                         && !ObjectManager.Player.UnderTurret(true)
-                        && t2.CountEnemiesInRange(700) < 2
+                        && t2.CountEnemiesInRange(800) < 2
                         && (Game.Time - WCastTime > 1))
                     {
                         var position = ObjectManager.Player.ServerPosition - (t2.ServerPosition - ObjectManager.Player.ServerPosition);
