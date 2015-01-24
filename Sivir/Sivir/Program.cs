@@ -81,8 +81,6 @@ namespace Sivir
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
 
-            
-
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttackEvenH;
@@ -101,7 +99,6 @@ namespace Sivir
                 E.Cast();
                 //Game.PrintChat("" + HpPercentage);
             }
-
         }
 
         private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
