@@ -51,7 +51,7 @@ namespace Caitlyn
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 1230);
-            Qc = new Spell(SpellSlot.Q, 1200);
+            Qc = new Spell(SpellSlot.Q, 1150);
             W = new Spell(SpellSlot.W, 800);
             E = new Spell(SpellSlot.E, 980);
             R = new Spell(SpellSlot.R, 3000);
@@ -95,7 +95,7 @@ namespace Caitlyn
             Orbwalking.AfterAttack += afterAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#7e62cc\">C</font>aitlyn full automatic SI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#7e62cc\">C</font>aitlyn full automatic SI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -141,12 +141,14 @@ namespace Caitlyn
                     else if ( ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 500 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
                         E.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo"
+                        && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
+                        && !Q.IsReady()
                         && ObjectManager.Player.Mana > RMANA + EMANA
                         && t2.IsValidTarget()
-                        && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
+                        && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t.Health
                         && GetRealDistance(t2) > GetRealRange(t2) + 100
                         && !ObjectManager.Player.UnderTurret(true)
-                        && t2.CountEnemiesInRange(600) < 3
+                        && t2.CountEnemiesInRange(700) < 3
                         && (Game.Time - WCastTime > 1))
                     {
                         var position = ObjectManager.Player.ServerPosition - (t2.ServerPosition - ObjectManager.Player.ServerPosition);
@@ -168,18 +170,18 @@ namespace Caitlyn
                 if (t.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(t);
-                    if (GetRealDistance(t) > bonusRange() && qDmg  > t.Health)
+                    if (GetRealDistance(t) > bonusRange() + 60 && qDmg  > t.Health)
                         Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t)) == 0)
-                        Q.CastIfHitchanceEquals(t, HitChance.High, true);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 )
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && Orbwalker.GetTarget() == null )
+                        Qc.CastIfHitchanceEquals(t, HitChance.High, true);
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
-                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                            Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t)) == 0)
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t)-100) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
@@ -202,7 +204,7 @@ namespace Caitlyn
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(500) == 0 && ObjectManager.Player.CountEnemiesInRange(GetRealRange(target)) == 0)
+                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 400 + target.BoundingRadius && target.CountAlliesInRange(500) == 0 && Orbwalker.GetTarget() == null)
                         {
                             cast = true;
                             PredictionOutput output = R.GetPrediction(target);
