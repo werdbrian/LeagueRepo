@@ -336,7 +336,7 @@ namespace Jinx
 
         private static bool FishBoneActive
         {
-            get { return Math.Abs(ObjectManager.Player.FlatMagicDamageMod- 525f) > float.Epsilon; }
+            get { return Math.Abs(ObjectManager.Player.AttackRange - 525f) > float.Epsilon; }
         }
 
         private static int CountEnemies(Obj_AI_Base target, float range)
