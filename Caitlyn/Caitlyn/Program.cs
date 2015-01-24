@@ -194,7 +194,7 @@ namespace Caitlyn
                 }
             }
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && !ObjectManager.Player.UnderTurret(true))
             {
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(500 * R.Level + 1500)))
