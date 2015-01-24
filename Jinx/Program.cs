@@ -119,7 +119,6 @@ namespace Jinx
                     else if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
                 }
-                
             }
 
             if (Q.IsReady())
@@ -139,7 +138,7 @@ namespace Jinx
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
                             Q.Cast();
                         else if (Farm && haras() && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA && distance < bonusRange() + t.BoundingRadius)
-                                Q.Cast();
+                             Q.Cast();
                     }
                 }
                 else if (FishBoneActive && Farm)
@@ -221,26 +220,12 @@ namespace Jinx
                                 else
                                     R.Cast(target, true);
                             }
-
                         }
-                        /*
-                        var distance = GetRealDistance(t);
-                        var rDamage = R.GetDamage(t);
-                        var powPowRange = GetRealPowPowRange(t);
-                        if (rDamage > t.Health && CountAlliesNearTarget(t, 600) == 0 && CountEnemies(ObjectManager.Player, 200f) == 0 && distance > bonusRange() + 70 && t.Path.Count() > 1)
-                                R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        else 
-                        else if (rDamage * 1.4 > t.Health && CountEnemies(t, 200) > 2)
-                            R.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                         * */
                     }
                 }
             }
-            
             PotionMenager();
         }
-
-      
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -351,7 +336,7 @@ namespace Jinx
 
         private static bool FishBoneActive
         {
-            get { return Math.Abs(ObjectManager.Player.AttackRange - 525f) > float.Epsilon; }
+            get { return Math.Abs(ObjectManager.Player.FlatMagicDamageMod- 525f) > float.Epsilon; }
         }
 
         private static int CountEnemies(Obj_AI_Base target, float range)
