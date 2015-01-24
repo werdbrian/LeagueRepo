@@ -1,0 +1,12 @@
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\Jinx.exe.config
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\Jinx.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\Jinx.pdb
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\SharpDX.Toolkit.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\SharpDX.Toolkit.Graphics.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\LeagueSharp.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\SharpDX.Toolkit.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\bin\Release\SharpDX.Toolkit.Graphics.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\obj\Debug\Jinx.csprojResolveAssemblyReference.cache
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\obj\Debug\Jinx.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Jinx\obj\Debug\Jinx.pdb

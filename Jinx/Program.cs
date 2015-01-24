@@ -408,18 +408,21 @@ namespace Jinx
 
         public static void PotionMenager()
         {
-            if (Config.Item("pots").GetValue<bool>() && Potion.IsReady() && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
+            if (Config.Item("pots").GetValue<bool>() && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
             {
-                if (CountEnemies(ObjectManager.Player, 600) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
-                    Potion.Cast();
-                else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
-                    Potion.Cast();
+                if (Potion.IsReady() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
+                {
+                    if (ObjectManager.Player.CountEnemiesInRange(700) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
+                        Potion.Cast();
+                    else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
+                        Potion.Cast();
+                }
+                if (ManaPotion.IsReady() && !ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true))
+                {
+                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA + 20)
+                        ManaPotion.Cast();
+                }
             }
-            if (Config.Item("pots").GetValue<bool>() && ManaPotion.IsReady() && !ObjectManager.Player.InFountain())
-            {
-                if (CountEnemies(ObjectManager.Player, 1000) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA)
-                    ManaPotion.Cast();
-            } 
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
