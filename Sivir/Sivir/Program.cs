@@ -131,12 +131,12 @@ namespace Sivir
                     if (qDmg * 2 > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
-                        Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                        Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") ))
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9 )
-                            Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     else if (ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
