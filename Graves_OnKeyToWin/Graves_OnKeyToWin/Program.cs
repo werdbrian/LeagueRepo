@@ -60,7 +60,6 @@ namespace Graves_OnKeyToWin
             Q.SetSkillshot(0.26f, 10f * 2 * (float)Math.PI / 180, 1950f, false, SkillshotType.SkillshotCone);
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
-
             R.SetSkillshot(0.25f, 140f, 2100f, false, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.25f, 200f, 2100f, false, SkillshotType.SkillshotLine);
 
@@ -336,14 +335,14 @@ namespace Graves_OnKeyToWin
                         R.Cast(t, true);
                     }
                 }
-                var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                var tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-                    var qDmg = W.GetDamage(tw);
+                    var qDmg = Q.GetDamage(tw);
                     if (qDmg > tw.Health)
                     {
                         Utility.DrawCircle(ObjectManager.Player.ServerPosition, Q.Range, System.Drawing.Color.Red);
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     }
                 }
             }
