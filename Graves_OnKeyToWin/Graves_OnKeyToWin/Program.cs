@@ -263,40 +263,13 @@ namespace Graves_OnKeyToWin
         {
             double ShouldUse = ShouldUseE(args.SData.Name);
 
-            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f && unit.IsValidTarget(E.Range))
-                E.Cast(unit.ServerPosition, true);
             if (unit.IsMe && (args.SData.Name == "CaitlynPiltoverPeacemaker" || args.SData.Name == "CaitlynEntrapment"))
             {
                 WCastTime = Game.Time;
             }
         }
 
-        public static double ShouldUseE(string SpellName)
-        {
-            if (SpellName == "ThreshQ")
-                return 0;
-            if (SpellName == "KatarinaR")
-                return 0;
-            if (SpellName == "AlZaharNetherGrasp")
-                return 0;
-            if (SpellName == "GalioIdolOfDurand")
-                return 0;
-            if (SpellName == "LuxMaliceCannon")
-                return 0;
-            if (SpellName == "MissFortuneBulletTime")
-                return 0;
-            if (SpellName == "RocketGrabMissile")
-                return 0;
-            if (SpellName == "CaitlynPiltoverPeacemaker")
-                return 0;
-            if (SpellName == "EzrealTrueshotBarrage")
-                return 0;
-            if (SpellName == "InfiniteDuress")
-                return 0;
-            if (SpellName == "VelkozR")
-                return 0;
-            return -1;
-        }
+       
 
         private static float GetRealRange(GameObject target)
         {
