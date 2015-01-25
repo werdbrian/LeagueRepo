@@ -189,39 +189,40 @@ namespace Graves_OnKeyToWin
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
+                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R1.Range)))
                 {
                     if (target.IsValidTarget() && (Game.Time - WCastTime > 1) &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
-                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
-                        var Rdmg = R.GetDamage(target);
-                        if (Rdmg > predictedHealth && Orbwalker.GetTarget() == null)
+                    float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
+                    var Rdmg = R.GetDamage(target);
+
+                        cast = true;
+                        PredictionOutput output = R.GetPrediction(target);
+                        Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
+                        direction.Normalize();
+                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
+                        foreach (var enemy in enemies)
                         {
-                            cast = true;
-                            PredictionOutput output = R.GetPrediction(target);
-                            Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-                            direction.Normalize();
-                            List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-                            foreach (var enemy in enemies)
-                            {
-                                if (enemy.SkinName == target.SkinName || !cast)
-                                    continue;
-                                PredictionOutput prediction = R.GetPrediction(enemy);
-                                Vector3 predictedPosition = prediction.CastPosition;
-                                Vector3 v = output.CastPosition - Player.ServerPosition;
-                                Vector3 w = predictedPosition - Player.ServerPosition;
-                                double c1 = Vector3.Dot(w, v);
-                                double c2 = Vector3.Dot(v, v);
-                                double b = c1 / c2;
-                                Vector3 pb = Player.ServerPosition + ((float)b * v);
-                                float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (100 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                                    cast = false;
-                            }
-                            if (cast && target.IsValidTarget() )
-                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                            if (enemy.SkinName == target.SkinName || !cast)
+                                continue;
+                            PredictionOutput prediction = R.GetPrediction(enemy);
+                            Vector3 predictedPosition = prediction.CastPosition;
+                            Vector3 v = output.CastPosition - Player.ServerPosition;
+                            Vector3 w = predictedPosition - Player.ServerPosition;
+                            double c1 = Vector3.Dot(w, v);
+                            double c2 = Vector3.Dot(v, v);
+                            double b = c1 / c2;
+                            Vector3 pb = Player.ServerPosition + ((float)b * v);
+                            float length = Vector3.Distance(predictedPosition, pb);
+                            if (length < (100 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                cast = false;
                         }
+                        if (cast && target.IsValidTarget() && Rdmg > predictedHealth && target.IsValidTarget(R.Range))
+                            R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                        else if (!cast && target.IsValidTarget() && Rdmg * 0.7 > predictedHealth && target.IsValidTarget(R1.Range))
+                            R1.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                        
                     }
                 }
             }
