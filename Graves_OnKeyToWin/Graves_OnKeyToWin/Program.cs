@@ -162,17 +162,16 @@ namespace Graves_OnKeyToWin
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-                    var qDmg = Q.GetDamage(t);
-                    if (GetRealDistance(t) > bonusRange() + 60 && qDmg > t.Health)
-                        Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && Orbwalker.GetTarget() == null)
-                        Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                    if ( Q.GetDamage(t) > t.Health)
+                        Q1.Cast(t, true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
+                        Q.Cast(t,true,true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                             Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (t.Path.Count() > 1)
-                            Q1.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t) - 100) == 0)
                     {
@@ -221,7 +220,7 @@ namespace Graves_OnKeyToWin
                                     cast = false;
                             }
                             if (cast && target.IsValidTarget() )
-                                R.Cast(target, true);
+                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                         }
                     }
                 }
@@ -267,8 +266,6 @@ namespace Graves_OnKeyToWin
                 WCastTime = Game.Time;
             }
         }
-
-       
 
         private static float GetRealRange(GameObject target)
         {
