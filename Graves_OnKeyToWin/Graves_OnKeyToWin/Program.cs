@@ -261,7 +261,6 @@ namespace Graves_OnKeyToWin
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            double ShouldUse = ShouldUseE(args.SData.Name);
 
             if (unit.IsMe && (args.SData.Name == "CaitlynPiltoverPeacemaker" || args.SData.Name == "CaitlynEntrapment"))
             {
