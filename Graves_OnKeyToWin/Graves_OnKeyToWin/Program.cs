@@ -11,7 +11,7 @@ namespace Graves_OnKeyToWin
 {
     class Program
     {
-        public const string ChampionName = "Jinx";
+        public const string ChampionName = "Graves";
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
@@ -52,7 +52,7 @@ namespace Graves_OnKeyToWin
             //Create the spells
             Q = new Spell(SpellSlot.Q, 900f);
             Q1 = new Spell(SpellSlot.Q, 950f);
-            W = new Spell(SpellSlot.W, 1500f);
+            W = new Spell(SpellSlot.W, 1400f);
             E = new Spell(SpellSlot.E, 450f);
             R = new Spell(SpellSlot.R, 1000f);
             R1 = new Spell(SpellSlot.R, 1800f);
@@ -61,8 +61,8 @@ namespace Graves_OnKeyToWin
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
 
-            R.SetSkillshot(0.25f, 100f, 2100f, true, SkillshotType.SkillshotLine);
-            R1.SetSkillshot(0.25f, 10f * (float)Math.PI / 180, 1950f, false, SkillshotType.SkillshotCone);
+            R.SetSkillshot(0.25f, 200f, 2100f, false, SkillshotType.SkillshotLine);
+            R1.SetSkillshot(0.30f, 200f, 2100f, false, SkillshotType.SkillshotLine);
 
             SpellList.Add(Q);
             SpellList.Add(Q1);
@@ -115,56 +115,58 @@ namespace Graves_OnKeyToWin
                         W.Cast(t, true, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                         W.Cast(t, true, true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA
+                        && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
+                        && GetRealDistance(t) > GetRealRange(t)
+                        && !R.IsReady())
+                        W.Cast(t, true, true);
                 }
             }
-
             if (E.IsReady())
             {
                 ManaMenager();
                 var t = TargetSelector.GetTarget(E.Range + Q.Range, TargetSelector.DamageType.Physical);
-                var t2 = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Physical);
+                var t2 = TargetSelector.GetTarget(1000f, TargetSelector.DamageType.Physical);
 
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 400 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.8)
-                    E.Cast(Game.CursorPos, true);
+                if (Orbwalker.ActiveMode.ToString() == "Combo"  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7 && ObjectManager.Player.CountEnemiesInRange(300) > 0)
+                    E.Cast(Game.CursorPos);
                 else if (Orbwalker.ActiveMode.ToString() == "Combo"
-                && t.IsValidTarget()
-                && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
-                && Q.IsReady()
-                && ObjectManager.Player.Mana > QMANA + EMANA
-                && Q.GetDamage(t) > t.Health
-                && GetRealDistance(t) > GetRealRange(t)
-                && !ObjectManager.Player.UnderTurret(true)
-                && t.CountEnemiesInRange(800) < 3)
-                {
-                    E.Cast(t.ServerPosition, true);
-                }
+                 && t.IsValidTarget()
+                 && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
+                 && Q.IsReady()
+                 && ObjectManager.Player.Mana > QMANA + EMANA
+                 && Q.GetDamage(t) > t.Health
+                 && GetRealDistance(t) > GetRealRange(t)
+                 && !ObjectManager.Player.UnderTurret(true)
+                 && t.CountEnemiesInRange(800) < 3)
+                 {
+                     E.Cast(Game.CursorPos, true);
+                 }
                 else if (Orbwalker.ActiveMode.ToString() == "Combo"
-                && !Q.IsReady()
-                && t2.IsValidTarget()
-                && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
-                && ObjectManager.Player.Mana > RMANA + EMANA
-                && (ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t.Health)
-                && GetRealDistance(t2) > GetRealRange(t2) + 100
-                && !ObjectManager.Player.UnderTurret(true)
-                && t2.CountEnemiesInRange(800) < 3)
+                 && t2.IsValidTarget()
+                 && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
+                 && ObjectManager.Player.Mana > QMANA + RMANA
+                 && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t2.Health
+                 && GetRealDistance(t2) > GetRealRange(t2)
+                 && !ObjectManager.Player.UnderTurret(true)
+                 && t2.CountEnemiesInRange(800) < 3)
                 {
-                    E.Cast(t2.ServerPosition, true);
-                }
-                
-                if (Config.Item("useE").GetValue<KeyBind>().Active)
                     E.Cast(Game.CursorPos, true);
-
+                }
             }
+        
 
             if (Q.IsReady())
             {
                 ManaMenager();
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Q1.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
                     if ( Q.GetDamage(t) > t.Health)
                         Q1.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
+                    if (R.GetDamage(t) + Q.GetDamage(t) > t.Health && R.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA)
+                        Q1.Cast(t, true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA  )
                         Q.Cast(t,true,true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
@@ -180,7 +182,7 @@ namespace Graves_OnKeyToWin
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                              enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
-                                Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                                Q1.CastIfHitchanceEquals(t, HitChance.High, true);
                         }
                     }
                 }
@@ -215,13 +217,13 @@ namespace Graves_OnKeyToWin
                             double b = c1 / c2;
                             Vector3 pb = Player.ServerPosition + ((float)b * v);
                             float length = Vector3.Distance(predictedPosition, pb);
-                            if (length < (100 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                            if (length < (150 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                 cast = false;
                         }
-                        if (cast && target.IsValidTarget() && Rdmg > predictedHealth && target.IsValidTarget(R.Range))
-                            R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                        else if (!cast && target.IsValidTarget() && Rdmg * 0.7 > predictedHealth && target.IsValidTarget(R1.Range))
-                            R1.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                        if (cast && target.IsValidTarget() && Rdmg > predictedHealth && target.IsValidTarget(R.Range) && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
+                            R.CastIfHitchanceEquals(target, HitChance.High, true);
+                        else if (target.IsValidTarget() && Rdmg * 0.7 > predictedHealth && target.IsValidTarget(R1.Range) && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
+                            R1.CastIfHitchanceEquals(target, HitChance.High, true);
                         
                     }
                 }
