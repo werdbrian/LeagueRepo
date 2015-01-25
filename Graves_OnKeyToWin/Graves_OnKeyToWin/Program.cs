@@ -61,8 +61,8 @@ namespace Graves_OnKeyToWin
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
 
-            R.SetSkillshot(0.25f, 200f, 2100f, false, SkillshotType.SkillshotLine);
-            R1.SetSkillshot(0.30f, 200f, 2100f, false, SkillshotType.SkillshotLine);
+            R.SetSkillshot(0.25f, 140f, 2100f, false, SkillshotType.SkillshotLine);
+            R1.SetSkillshot(0.25f, 200f, 2100f, false, SkillshotType.SkillshotLine);
 
             SpellList.Add(Q);
             SpellList.Add(Q1);
@@ -85,8 +85,6 @@ namespace Graves_OnKeyToWin
             Config.AddToMainMenu();
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
-            Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
@@ -95,7 +93,7 @@ namespace Graves_OnKeyToWin
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic SI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -119,6 +117,9 @@ namespace Graves_OnKeyToWin
                         && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
                         && GetRealDistance(t) > GetRealRange(t)
                         && !R.IsReady())
+                        W.Cast(t, true, true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA
+                       && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                         W.Cast(t, true, true);
                 }
             }
@@ -171,7 +172,7 @@ namespace Graves_OnKeyToWin
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
-                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                            Q.CastIfHitchanceEquals(t, HitChance.High, true);
                         else if (t.Path.Count() > 1)
                             Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
@@ -193,11 +194,11 @@ namespace Graves_OnKeyToWin
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R1.Range)))
                 {
-                    if (target.IsValidTarget() && (Game.Time - WCastTime > 1) &&
+                    if (target.IsValidTarget() &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
-                    float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
-                    var Rdmg = R.GetDamage(target);
+                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
+                        var Rdmg = R.GetDamage(target);
 
                         cast = true;
                         PredictionOutput output = R.GetPrediction(target);
@@ -217,14 +218,13 @@ namespace Graves_OnKeyToWin
                             double b = c1 / c2;
                             Vector3 pb = Player.ServerPosition + ((float)b * v);
                             float length = Vector3.Distance(predictedPosition, pb);
-                            if (length < (150 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                            if (length < (200 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                 cast = false;
                         }
                         if (cast && target.IsValidTarget() && Rdmg > predictedHealth && target.IsValidTarget(R.Range) && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                             R.CastIfHitchanceEquals(target, HitChance.High, true);
-                        else if (target.IsValidTarget() && Rdmg * 0.7 > predictedHealth && target.IsValidTarget(R1.Range) && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
+                        else if (Rdmg * 0.7 > predictedHealth && target.IsValidTarget(R1.Range) && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                             R1.CastIfHitchanceEquals(target, HitChance.High, true);
-                        
                     }
                 }
             }
@@ -264,10 +264,6 @@ namespace Graves_OnKeyToWin
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
 
-            if (unit.IsMe && (args.SData.Name == "CaitlynPiltoverPeacemaker" || args.SData.Name == "CaitlynEntrapment"))
-            {
-                WCastTime = Game.Time;
-            }
         }
 
         private static float GetRealRange(GameObject target)
@@ -328,7 +324,7 @@ namespace Graves_OnKeyToWin
         {
             if (Config.Item("noti").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(500 * R.Level + 1500, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(1800, TargetSelector.DamageType.Physical);
                 float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                 if (t.IsValidTarget() && R.IsReady())
                 {
