@@ -270,8 +270,8 @@ namespace Caitlyn
         {
             double ShouldUse = ShouldUseE(args.SData.Name);
 
-            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f && unit.IsValidTarget(E.Range))
-                E.Cast(unit.ServerPosition, true);
+            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f && unit.IsValidTarget(W.Range))
+                W.Cast(unit.ServerPosition, true);
             if (unit.IsMe && (args.SData.Name == "CaitlynPiltoverPeacemaker" || args.SData.Name == "CaitlynEntrapment"))
             {
                 WCastTime = Game.Time;
