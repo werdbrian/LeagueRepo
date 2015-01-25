@@ -55,7 +55,7 @@ namespace Graves_OnKeyToWin
             W = new Spell(SpellSlot.W, 1400f);
             E = new Spell(SpellSlot.E, 450f);
             R = new Spell(SpellSlot.R, 1000f);
-            R1 = new Spell(SpellSlot.R, 1800f);
+            R1 = new Spell(SpellSlot.R, 1600f);
 
             Q.SetSkillshot(0.26f, 10f * 2 * (float)Math.PI / 180, 1950f, false, SkillshotType.SkillshotCone);
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
@@ -85,6 +85,7 @@ namespace Graves_OnKeyToWin
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -92,7 +93,7 @@ namespace Graves_OnKeyToWin
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic SI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
