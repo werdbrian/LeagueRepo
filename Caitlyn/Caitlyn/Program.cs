@@ -187,7 +187,7 @@ namespace Caitlyn
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                              enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
-                                Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                                Q.CastIfHitchanceEquals(enemy, HitChance.High, true);
                         }
                     }
                 }
