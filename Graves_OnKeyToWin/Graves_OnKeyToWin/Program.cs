@@ -247,11 +247,11 @@ namespace Graves_OnKeyToWin
                             && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                             R.CastIfHitchanceEquals(target, HitChance.High, true);
                         else if (cast 
-                            && Rdmg * 0.7 > predictedHealth 
+                            && Rdmg * 0.6 > predictedHealth 
                             && target.IsValidTarget(R1.Range) 
                             && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                             R1.CastIfHitchanceEquals(target, HitChance.High, true);
-                        else if (!cast && Rdmg * 0.7 > predictedHealth && target.IsValidTarget(GetRealDistance(collisionTarget) + 700)
+                        else if (!cast && Rdmg * 0.6 > predictedHealth && target.IsValidTarget(GetRealDistance(collisionTarget) + 700)
                             && (GetRealDistance(target) > GetRealRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
                             R1.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
