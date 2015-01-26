@@ -29,7 +29,7 @@ namespace Graves_OnKeyToWin
         public static float EMANA;
         public static float RMANA;
         public static bool Farm = false;
-        public static double WCastTime = 0;
+        public static double QCastTime = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -239,7 +239,8 @@ namespace Graves_OnKeyToWin
                                 collisionTarget = enemy;
                             }
                         }
-                        if (cast 
+                        if (cast
+                            && (Game.Time - QCastTime > 0.5)
                             && target.IsValidTarget() 
                             && Rdmg > predictedHealth 
                             && target.IsValidTarget(R.Range) 
@@ -291,7 +292,10 @@ namespace Graves_OnKeyToWin
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-
+            if (unit.IsMe && args.SData.Name == "GravesClusterShot")
+            {
+                QCastTime = Game.Time;
+            }
         }
 
         private static float GetRealRange(GameObject target)
