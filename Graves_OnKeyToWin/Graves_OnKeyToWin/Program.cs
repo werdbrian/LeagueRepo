@@ -50,7 +50,7 @@ namespace Graves_OnKeyToWin
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 900f);
+            Q = new Spell(SpellSlot.Q, 880f);
             Q1 = new Spell(SpellSlot.Q, 950f);
             W = new Spell(SpellSlot.W, 1400f);
             E = new Spell(SpellSlot.E, 450f);
@@ -60,8 +60,8 @@ namespace Graves_OnKeyToWin
             Q.SetSkillshot(0.26f, 10f * 2 * (float)Math.PI / 180, 1950f, false, SkillshotType.SkillshotCone);
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
-            R.SetSkillshot(0.25f, 140f, 2100f, false, SkillshotType.SkillshotLine);
-            R1.SetSkillshot(0.25f, 200f, 2100f, false, SkillshotType.SkillshotLine);
+            R.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
+            R1.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
 
             SpellList.Add(Q);
             SpellList.Add(Q1);
@@ -114,9 +114,8 @@ namespace Graves_OnKeyToWin
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                         W.Cast(t, true, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA
-                        && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health
-                        && GetRealDistance(t) > GetRealRange(t)
-                        && !R.IsReady())
+                        && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health
+                        && GetRealDistance(t) > GetRealRange(t))
                         W.Cast(t, true, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA
                        && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
@@ -133,7 +132,7 @@ namespace Graves_OnKeyToWin
                     E.Cast(Game.CursorPos);
                 else if (Orbwalker.ActiveMode.ToString() == "Combo"
                  && t.IsValidTarget()
-                 && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
+                 && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4
                  && Q.IsReady()
                  && ObjectManager.Player.Mana > QMANA + EMANA
                  && Q.GetDamage(t) > t.Health
@@ -145,7 +144,7 @@ namespace Graves_OnKeyToWin
                  }
                 else if (Orbwalker.ActiveMode.ToString() == "Combo"
                  && t2.IsValidTarget()
-                 && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
+                 && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4
                  && ObjectManager.Player.Mana > QMANA + RMANA
                  && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t2.Health
                  && GetRealDistance(t2) > GetRealRange(t2)
@@ -273,7 +272,7 @@ namespace Graves_OnKeyToWin
 
         public static float bonusRange()
         {
-            return 600f + ObjectManager.Player.BoundingRadius;
+            return 600 + ObjectManager.Player.BoundingRadius;
         }
         private static float GetRealDistance(GameObject target)
         {
