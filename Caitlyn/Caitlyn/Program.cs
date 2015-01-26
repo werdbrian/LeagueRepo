@@ -85,7 +85,8 @@ namespace Caitlyn
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastW").SetValue(true));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.AddItem(new MenuItem("useE", "Dash E key").SetValue(new KeyBind('t', KeyBindType.Press)));
+            Config.AddItem(new MenuItem("useE", "Dash E HotKeySmartcast").SetValue(new KeyBind('t', KeyBindType.Press)));
+            Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
@@ -130,7 +131,7 @@ namespace Caitlyn
                 ManaMenager();
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 var t2 = TargetSelector.GetTarget(E.Range + 350, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
+                if (t.IsValidTarget() && Config.Item("autoE").GetValue<bool>())
                 {
                     var eDmg = E.GetDamage(t);
                     var qDmg = Q.GetDamage(t);
