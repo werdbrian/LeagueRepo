@@ -29,7 +29,7 @@ namespace Graves_OnKeyToWin
         public static float EMANA;
         public static float RMANA;
         public static bool Farm = false;
-        public static double QCastTime = 0;
+        public static double OverKill = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -92,7 +92,6 @@ namespace Graves_OnKeyToWin
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += afterAttack;
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
@@ -112,6 +111,7 @@ namespace Graves_OnKeyToWin
                     if (W.GetDamage(t) > t.Health)
                     {
                         W.Cast(t, true, true);
+                        OverKill = Game.Time;
                         return;
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
@@ -187,6 +187,7 @@ namespace Graves_OnKeyToWin
                     if ( Q.GetDamage(t) > t.Health)   
                     {
                         Q1.Cast(t, true);
+                        OverKill = Game.Time;
                         return;
                     }
                     if (R.GetDamage(t) + Q.GetDamage(t) > t.Health && R.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA)
@@ -213,7 +214,7 @@ namespace Graves_OnKeyToWin
                 }
             }
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && (Game.Time - OverKill > 0.5))
             {
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R1.Range)))
@@ -252,7 +253,6 @@ namespace Graves_OnKeyToWin
                             }
                         }
                         if (cast
-                            && (Game.Time - QCastTime > 0.5)
                             && target.IsValidTarget() 
                             && Rdmg > predictedHealth 
                             && target.IsValidTarget(R.Range)
@@ -298,14 +298,6 @@ namespace Graves_OnKeyToWin
             if (Items.HasItem(id) && Items.CanUseItem(id))
             {
                 Items.UseItem(id, target);
-            }
-        }
-
-        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (unit.IsMe && args.SData.Name == "GravesClusterShot")
-            {
-                QCastTime = Game.Time;
             }
         }
 
