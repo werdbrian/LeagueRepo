@@ -61,7 +61,7 @@ namespace Graves_OnKeyToWin
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
-            R1.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
+            R1.SetSkillshot(0.26f, 30f * (float)Math.PI / 180, 2100f, false, SkillshotType.SkillshotCone);
 
             SpellList.Add(Q);
             SpellList.Add(Q1);
@@ -92,7 +92,7 @@ namespace Graves_OnKeyToWin
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += afterAttack;
-            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -105,7 +105,7 @@ namespace Graves_OnKeyToWin
 
             if (W.IsReady())
             {
-                var t = TargetSelector.GetTarget(W.Range , TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
                     if (W.GetDamage(t) > t.Health)
@@ -165,7 +165,7 @@ namespace Graves_OnKeyToWin
                         return;
                     }
                     else if (t.IsValidTarget()
-                     && Q.IsReady() && R.IsReady() 
+                     && Q.IsReady() && R.IsReady()
                      && ObjectManager.Player.Mana > RMANA + EMANA + RMANA
                      && Q.GetDamage(t) + R.GetDamage(t) > t.Health
                      && R.GetDamage(t) < t.Health
@@ -177,14 +177,14 @@ namespace Graves_OnKeyToWin
                     }
                 }
             }
-        
+
             if (Q.IsReady())
             {
                 ManaMenager();
                 var t = TargetSelector.GetTarget(Q1.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-                    if ( Q.GetDamage(t) > t.Health)   
+                    if (Q.GetDamage(t) > t.Health)
                     {
                         Q1.Cast(t, true);
                         OverKill = Game.Time;
@@ -192,8 +192,8 @@ namespace Graves_OnKeyToWin
                     }
                     if (R.GetDamage(t) + Q.GetDamage(t) > t.Health && R.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA)
                         Q1.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA  )
-                        Q.Cast(t,true,true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                        Q.Cast(t, true, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
@@ -201,7 +201,7 @@ namespace Graves_OnKeyToWin
                         else if (t.Path.Count() > 1)
                             Q.Cast(t, true, true);
                     }
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA )
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
@@ -214,15 +214,15 @@ namespace Graves_OnKeyToWin
                 }
             }
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && (Game.Time - OverKill > 0.5))
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && (Game.Time - OverKill > 0.7))
             {
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R1.Range)))
                 {
                     if (target.IsValidTarget()
                     && R.GetDamage(target) > target.Health
-                    && !target.HasBuffOfType(BuffType.PhysicalImmunity) 
-                    && !target.HasBuffOfType(BuffType.SpellImmunity) 
+                    && !target.HasBuffOfType(BuffType.PhysicalImmunity)
+                    && !target.HasBuffOfType(BuffType.SpellImmunity)
                     && !target.HasBuffOfType(BuffType.SpellShield))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
@@ -246,29 +246,27 @@ namespace Graves_OnKeyToWin
                             double b = c1 / c2;
                             Vector3 pb = Player.ServerPosition + ((float)b * v);
                             float length = Vector3.Distance(predictedPosition, pb);
-                            if (length < (200 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                            if (length < (120 + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                             {
                                 cast = false;
                                 collisionTarget = enemy;
                             }
                         }
                         if (cast
-                            && target.IsValidTarget() 
-                            && Rdmg > predictedHealth 
+                            && target.IsValidTarget()
+                            && Rdmg > predictedHealth
                             && target.IsValidTarget(R.Range)
-                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0 )|| ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
+                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7))
                             R.Cast(target, true);
-                        else if (cast 
-                            && Rdmg * 0.6 > predictedHealth 
-                            && target.CountAlliesInRange(300) == 0
+                        else if (cast
+                            && Rdmg * 0.7 > predictedHealth
                             && target.IsValidTarget(R1.Range)
-                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
-                            R1.CastIfHitchanceEquals(target, HitChance.High, true);
-                        else if (!cast && Rdmg * 0.6 > predictedHealth
-                            && target.CountAlliesInRange(300) == 0
-                            && target.IsValidTarget(GetRealDistance(collisionTarget) + 700)
-                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.5))
-                            R1.CastIfHitchanceEquals(target, HitChance.High, true);
+                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7))
+                            R1.Cast(target, true, true);
+
+                        else if (!cast && Rdmg * 0.7 > predictedHealth
+                            && target.IsValidTarget(GetRealDistance(collisionTarget) + 700))
+                            R1.Cast(target, true, true);
                     }
                 }
             }
@@ -288,8 +286,8 @@ namespace Graves_OnKeyToWin
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (E.IsReady() && Config.Item("autoE").GetValue<bool>() && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA  && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7 && ObjectManager.Player.CountEnemiesInRange(400) > 0)
-                    E.Cast(Game.CursorPos);
+            if (E.IsReady() && Config.Item("autoE").GetValue<bool>() && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7 && ObjectManager.Player.CountEnemiesInRange(400) > 0)
+                E.Cast(Game.CursorPos);
         }
 
 
@@ -368,7 +366,7 @@ namespace Graves_OnKeyToWin
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     if (Config.Item("useR").GetValue<KeyBind>().Active)
                     {
-                        R.Cast(t, true);
+                        R1.Cast(t, true, true);
                     }
                 }
                 var tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
