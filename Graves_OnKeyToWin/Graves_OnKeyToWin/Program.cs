@@ -116,14 +116,14 @@ namespace Graves_OnKeyToWin
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                         W.Cast(t, true, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + 5
                         && GetRealDistance(t) > GetRealRange(t))
-                        W.Cast(t, true, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA
-                       && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                         W.Cast(t, true, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + WMANA
                        && ObjectManager.Player.CountEnemiesInRange(300) > 0)
+                        W.Cast(t, true, true);
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA
+                        && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                         W.Cast(t, true, true);
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                     {
