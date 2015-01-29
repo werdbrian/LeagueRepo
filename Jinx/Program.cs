@@ -143,7 +143,7 @@ namespace Jinx
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
                             Q.Cast();
-                        else if (Farm && haras() && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA && distance < bonusRange() + t.BoundingRadius)
+                        else if (Farm && haras() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA && distance < bonusRange() + t.BoundingRadius)
                              Q.Cast();
                     }
                 }
