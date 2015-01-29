@@ -173,7 +173,7 @@ namespace Caitlyn
                     if (GetRealDistance(t) > bonusRange() + 60 && qDmg  > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && Orbwalker.GetTarget() == null )
-                        Q.CastIfHitchanceEquals(t, HitChance.High, true);
+                        Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)

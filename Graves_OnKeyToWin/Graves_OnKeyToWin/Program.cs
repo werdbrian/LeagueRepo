@@ -51,17 +51,17 @@ namespace Graves_OnKeyToWin
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 840f);
-            Q1 = new Spell(SpellSlot.Q, 940f);
+            Q1 = new Spell(SpellSlot.Q, 930f);
             W = new Spell(SpellSlot.W, 950f);
             E = new Spell(SpellSlot.E, 450f);
             R = new Spell(SpellSlot.R, 1000f);
             R1 = new Spell(SpellSlot.R, 1600f);
 
-            Q.SetSkillshot(0.26f, 10f * 2 * (float)Math.PI / 180, 1800f, false, SkillshotType.SkillshotCone);
+            Q.SetSkillshot(0.26f, 20f * (float)Math.PI / 180, 1800f, false, SkillshotType.SkillshotCone);
             Q1.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
-            R1.SetSkillshot(0.26f, 30f * (float)Math.PI / 180, 2100f, false, SkillshotType.SkillshotCone);
+            R1.SetSkillshot(0.26f, 20f * (float)Math.PI / 180, 2100f, false, SkillshotType.SkillshotCone);
 
             SpellList.Add(Q);
             SpellList.Add(Q1);
@@ -184,13 +184,13 @@ namespace Graves_OnKeyToWin
                 var t = TargetSelector.GetTarget(Q1.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-                    if (Q.GetDamage(t) > t.Health)
+                    if (Q.GetDamage(t) > t.Health && Q1.IsReady())
                     {
                         Q1.Cast(t, true);
                         OverKill = Game.Time;
                         return;
                     }
-                    if (R.GetDamage(t) + Q.GetDamage(t) > t.Health && R.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA)
+                    if (R.GetDamage(t) + Q.GetDamage(t) > t.Health && R.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA && Q1.IsReady())
                         Q1.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                         Q.Cast(t, true, true);
@@ -201,7 +201,7 @@ namespace Graves_OnKeyToWin
                         else if (t.Path.Count() > 1)
                             Q.Cast(t, true, true);
                     }
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA)
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && Q1.IsReady())
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
@@ -372,8 +372,8 @@ namespace Graves_OnKeyToWin
                 var tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-                    var qDmg = Q.GetDamage(tw);
-                    if (qDmg > tw.Health)
+                    
+                    if (Q.GetDamage(tw) > tw.Health)
                     {
                         Utility.DrawCircle(ObjectManager.Player.ServerPosition, Q.Range, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q can kill: " + t.ChampionName + " have: " + t.Health + "hp");

@@ -23,10 +23,10 @@ namespace Jinx
         public static Spell R;
         public static Spell R1;
         //ManaMenager
-        public static int QMANA;
-        public static int WMANA;
-        public static int EMANA;
-        public static int RMANA;
+        public static float QMANA;
+        public static float WMANA;
+        public static float EMANA;
+        public static float RMANA;
         public static bool Farm = false;
         public static double WCastTime = 0;
         //AutoPotion
@@ -51,9 +51,10 @@ namespace Jinx
             //Create the spells
             Q = new Spell(SpellSlot.Q, float.MaxValue);
             W = new Spell(SpellSlot.W, 1500f);
-            E = new Spell(SpellSlot.E, 900f);
+            E = new Spell(SpellSlot.E, 900f); 
             R = new Spell(SpellSlot.R, 2500f);
             R1 = new Spell(SpellSlot.R, 2500f);
+            
 
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.1f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
@@ -81,6 +82,7 @@ namespace Jinx
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
+            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -90,7 +92,8 @@ namespace Jinx
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 2.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -101,14 +104,9 @@ namespace Jinx
                 Farm = true;
             else
                 Farm = false;
-            
-            if (ObjectManager.Player.Mana > RMANA + EMANA && E.IsReady())
+
+            if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
             {
-                var t = TargetSelector.GetTarget(E.Range , TargetSelector.DamageType.Physical);
-                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
-                {
-                    E.Cast(Object.Position, true);
-                }
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && E.IsReady()))
                 {
                     if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
@@ -116,8 +114,16 @@ namespace Jinx
                          enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
                          enemy.IsStunned || enemy.HasBuff("Recall"))
                         E.Cast(enemy, true);
-                    else if (enemy.HasBuffOfType(BuffType.Slow) && t.Path.Count() > 1)
+                    else if (enemy.HasBuffOfType(BuffType.Slow) && enemy.Path.Count() > 1)
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
+                    else if (enemy.Path.Count() > 1 && enemy.CountEnemiesInRange(300) > 2)
+                        E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
+                    else 
+                        E.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
+                }
+                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
+                {
+                    E.Cast(Object.Position, true);
                 }
             }
 
@@ -132,8 +138,8 @@ namespace Jinx
                 {
                     var distance = GetRealDistance(t);
                     var powPowRange = GetRealPowPowRange(t);
-                    
-                    if (!FishBoneActive && (distance > powPowRange) )
+
+                    if (!FishBoneActive && !Orbwalking.InAutoAttackRange(t))
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
                             Q.Cast();
@@ -141,11 +147,11 @@ namespace Jinx
                              Q.Cast();
                     }
                 }
-                else if (FishBoneActive && Farm)
-                    Q.Cast();
                 else if (!FishBoneActive && (Orbwalker.ActiveMode.ToString() == "Combo") && ObjectManager.Player.Mana > RMANA + WMANA + 20)
                     Q.Cast();
-                else if (FishBoneActive && (Orbwalker.ActiveMode.ToString() == "Combo") && ObjectManager.Player.Mana < RMANA + WMANA + 20)
+                else if (FishBoneActive && (Orbwalker.ActiveMode.ToString() == "Combo") && ObjectManager.Player.Mana < RMANA + WMANA + 20 )
+                    Q.Cast();
+                else if (FishBoneActive && Farm)
                     Q.Cast();
             }
 
@@ -156,18 +162,18 @@ namespace Jinx
                 if (t.IsValidTarget())
                 {
                     var wDmg = W.GetDamage(t);
-                    if (GetRealDistance(t) > bonusRange() && wDmg + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
+                    if (!Orbwalking.InAutoAttackRange(t) && wDmg + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
                         W.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && CountEnemies(ObjectManager.Player, bonusRange()) == 0 && haras())
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 )
                             W.CastIfHitchanceEquals(t, HitChance.High, true);
-                        else if (t.Path.Count() > 1)
+                        else if (t.Path.Count() == 1)
                             W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && CountEnemies(ObjectManager.Player, GetRealPowPowRange(t)) == 0)
+                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                         {
@@ -190,7 +196,7 @@ namespace Jinx
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
-                        if (Rdmg > predictedHealth && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius && CountAlliesNearTarget(target, 500) == 0 && CountEnemies(ObjectManager.Player, GetRealPowPowRange(target)) == 0)
+                        if (Rdmg > predictedHealth )
                         {
                             cast = true;
                             PredictionOutput output = R.GetPrediction(target);
@@ -210,15 +216,19 @@ namespace Jinx
                                 double b = c1 / c2;
                                 Vector3 pb = Player.ServerPosition + ((float)b * v);
                                 float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (R.Width + 50 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget())
+                            if (cast && target.IsValidTarget() && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius && target.CountAlliesInRange(500) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
-                                if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() > 1)
+                                if (Config.Item("hitchanceR").GetValue<bool>())
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                 else
                                     R.Cast(target, true);
+                            }
+                            else if (target.IsValidTarget() && target.CountEnemiesInRange(200) > 2 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                            {
+                                R1.Cast(target,true, true);
                             }
                         }
                     }
@@ -234,14 +244,16 @@ namespace Jinx
             if (t.IsValidTarget())
             {
                 var distance = GetRealDistance(t);
-                var powPowRange = GetRealPowPowRange(t);
+                var powPowRange = GetRealPowPowRange(t) + 50;
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
+                
                 if (Youmuu.IsReady() && (ObjectManager.Player.GetAutoAttackDamage(t) * 6 > t.Health || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4))
                     Youmuu.Cast();   
             }
+            
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -250,12 +262,41 @@ namespace Jinx
             if (t.IsValidTarget() && Q.IsReady() && FishBoneActive)
             {
                 var distance = GetRealDistance(t);
-                var powPowRange = GetRealPowPowRange(t);
+                var powPowRange = GetRealPowPowRange(t) + 50;
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
             }
+            else if (Q.IsReady() && Orbwalker.ActiveMode.ToString() == "LaneClear" && !FishBoneActive && ObjectManager.Player.Mana < RMANA + EMANA + WMANA + 30)
+            {
+                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
+                foreach (var minion in allMinionsQ)
+                {
+                    if (Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion))
+                    {
+                        foreach (var minion2 in allMinionsQ)
+                        {
+                            if (minion2.Health < ObjectManager.Player.GetAutoAttackDamage(minion2) && minion.ServerPosition.Distance(minion2.Position) < 150 && minion2.Position != minion.Position)
+                            {
+                                Q.Cast();
+                            }
+                        }
+                    }
+                }
+            
+            }
+        }
+        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
+            {
+                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                if (Target.IsValidTarget(E.Range))
+                    E.Cast(ObjectManager.Player.ServerPosition, true);
+                return;
+            }
+            return;
         }
 
         public static void farmQ()
@@ -264,11 +305,6 @@ namespace Jinx
             foreach (var minion in allMinionsQ)
             {
                 if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion)  && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion))
-                {
-                    Q.Cast();
-                    return;
-                }
-                else if (Orbwalking.InAutoAttackRange(minion) && CountEnemies(minion, 150) > 0)
                 {
                     Q.Cast();
                     return;
@@ -339,25 +375,6 @@ namespace Jinx
             get { return Math.Abs(ObjectManager.Player.AttackRange - 525f) > float.Epsilon; }
         }
 
-        private static int CountEnemies(Obj_AI_Base target, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.IsValidTarget() && hero.Team != ObjectManager.Player.Team &&
-                            hero.ServerPosition.Distance(target.ServerPosition) <= range);
-        }
-        private static int CountAlliesNearTarget(Obj_AI_Base target, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.Team == ObjectManager.Player.Team &&
-                            hero.ServerPosition.Distance(target.ServerPosition) <= range);
-        }
-
         private static float GetRealPowPowRange(GameObject target)
         {
             return 610f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
@@ -372,15 +389,15 @@ namespace Jinx
         public static void ManaMenager()
         {
             QMANA = 10;
-            WMANA = 40 + 10 * W.Level;
-            EMANA = 50;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
                 RMANA = WMANA - ObjectManager.Player.Level * 2;
             else
-                RMANA = 100;
+                RMANA = R.Instance.ManaCost; ;
 
             if (Farm)
-                RMANA = RMANA + (CountEnemies(ObjectManager.Player, 2500) * 20);
+                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
             
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
