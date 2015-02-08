@@ -211,22 +211,16 @@ namespace Jinx
                     if (t.Path.Count() == 1 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        if (Config.Item("debug").GetValue<bool>())
-                            Game.PrintChat("W normal combo");
                     }
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 20) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                         {
                             W.CastIfHitchanceEquals(t, HitChance.High, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("W normal haras 1");
                         }
                         else if (t.Path.Count() == 1)
                         {
                             W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("W normal haras 2");
                         }
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
@@ -238,8 +232,6 @@ namespace Jinx
                              enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
                             {
                                 W.CastIfHitchanceEquals(t, HitChance.High, true);
-                                if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("W cc");
                             }
                         }
                     }
