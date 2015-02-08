@@ -288,7 +288,7 @@ namespace Jinx
             if (t.IsValidTarget())
             {
                 var distance = GetRealDistance(t);
-                var powPowRange = GetRealPowPowRange(t) + 50;
+                var powPowRange = GetRealPowPowRange(t) + 70;
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
@@ -315,7 +315,7 @@ namespace Jinx
             if (t.IsValidTarget() && Q.IsReady() && FishBoneActive)
             {
                 var distance = GetRealDistance(t);
-                var powPowRange = GetRealPowPowRange(t) + 50;
+                var powPowRange = GetRealPowPowRange(t) + 70;
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
                 else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
