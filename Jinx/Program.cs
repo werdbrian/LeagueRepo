@@ -56,7 +56,6 @@ namespace Jinx
             R = new Spell(SpellSlot.R, 2500f);
             R1 = new Spell(SpellSlot.R, 2500f);
 
-
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.1f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
@@ -436,7 +435,7 @@ namespace Jinx
                              if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                  cast = false;
                          }
-                         if ( rDmg > HpLeft && HpLeft > 0 && cast)
+                         if (rDmg > HpLeft && HpLeft > 0 && cast && target.CountAlliesInRange(500) == 0)
                              R.Cast(target, true);
                      }
                      
