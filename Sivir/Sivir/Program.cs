@@ -138,7 +138,7 @@ namespace Sivir
                 if (t.IsValidTarget())
                 {
                     var qDmg = W.GetDamage(t);
-                    if (qDmg * 2 > t.Health)
+                    if (qDmg * 2.3 > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
