@@ -195,11 +195,11 @@ namespace Ezreal
                                 if (length < (Q.Width + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if ( cast && target.IsValidTarget(Q.Range))
+                            if ( cast && target.IsValidTarget(Q.Range + 100))
                             {
                                 Q.Cast(target, true);
                                 if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("W ks");
+                                    Game.PrintChat("Q ks");
                             }
                         }
                     }
@@ -326,17 +326,14 @@ namespace Ezreal
                              target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
                              target.HasBuffOfType(BuffType.Taunt))
                         {
-                            if (Rdmg * 3 > predictedHealth)
+                            if (target.IsValidTarget(R.Range) && Rdmg * 2 > predictedHealth)
                             {
-                                R.CastIfHitchanceEquals(target, HitChance.High, true);
-                                if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("R CC");
+                                R.Cast(target, true);
                             }
                         }
-                        else
+                        else if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(800) > 0)
                         {
-                            R.CastIfWillHit(target, 4, true);
-                            
+                            R.CastIfWillHit(target, 3, true);
                         }
                       
                     }
