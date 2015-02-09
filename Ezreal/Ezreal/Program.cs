@@ -277,7 +277,7 @@ namespace Ezreal
             }
             
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(500) == 0)
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
