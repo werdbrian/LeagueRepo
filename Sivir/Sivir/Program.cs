@@ -79,15 +79,18 @@ namespace Sivir
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
+            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
 
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += AfterAttackEvenH;
-            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
-        private static void Obj_AI_Hero_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
@@ -99,7 +102,15 @@ namespace Sivir
                 //Game.PrintChat("" + HpPercentage);
             }
         }
-
+        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            var Target = (Obj_AI_Hero)gapcloser.Sender;
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && Target.IsValidTarget(1000))
+            {
+                    E.Cast();
+            }
+            return;
+        }
         private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
         {
             ManaMenager();
