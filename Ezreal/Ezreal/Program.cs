@@ -197,7 +197,7 @@ namespace Ezreal
                     {
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA + 20) && !ObjectManager.Player.UnderTurret(true))
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                         {
@@ -236,7 +236,7 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     if (wDmg > t.Health)
                         W.Cast(t, true);
-                    else if (wDmg + qDmg > t.Health && ObjectManager.Player.Mana > WMANA + QMANA )
+                    else if (wDmg + qDmg> t.Health && ObjectManager.Player.Mana > WMANA + QMANA )
                         W.Cast(t, true);
                     else if (t.Path.Count() == 1 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                     {
@@ -308,6 +308,13 @@ namespace Ezreal
                             if (Config.Item("debug").GetValue<bool>())
                                 Game.PrintChat("R aoe 2");
                         }
+                        else if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                             target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
+                             target.HasBuffOfType(BuffType.Taunt) )
+                            {
+                                if ( Rdmg * 2 > predictedHealth)
+                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
+                            }
                     }
                 }
             }
@@ -347,17 +354,13 @@ namespace Ezreal
 
                     var dmg = unit.GetSpellDamage(target, args.SData.Name);
                     double HpLeft = target.Health - dmg;
-                    if (HpLeft < 0 && target.IsValidTarget())
+
+                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(W.Range) && Q.IsReady())
                     {
-                        QCastTime = Game.Time;
-                    }
-                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        var wDmg = W.GetDamage(target);
-                        if (wDmg > HpLeft && HpLeft > 0)
+                        var qDmg = Q.GetDamage(target);
+                        if (qDmg > HpLeft && HpLeft > 0)
                         {
-                            W.Cast(target, true);
-                            WCastTime = Game.Time;
+                            Q.Cast(target, true);
                             if (Config.Item("debug").GetValue<bool>())
                                 Game.PrintChat("W ks OPS");
                         }
