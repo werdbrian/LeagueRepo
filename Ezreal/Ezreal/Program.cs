@@ -326,11 +326,18 @@ namespace Ezreal
                              target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
                              target.HasBuffOfType(BuffType.Taunt))
                         {
-                            if (Rdmg * 2 > predictedHealth)
+                            if (Rdmg * 3 > predictedHealth)
+                            {
                                 R.CastIfHitchanceEquals(target, HitChance.High, true);
+                                if (Config.Item("debug").GetValue<bool>())
+                                    Game.PrintChat("R CC");
+                            }
                         }
                         else
+                        {
                             R.CastIfWillHit(target, 4, true);
+                            
+                        }
                       
                     }
                 }
@@ -492,6 +499,7 @@ namespace Ezreal
                 if (tw.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(tw);
+                    Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Gold);
                     if (qDmg > tw.Health)
                     {
                         Render.Circle.DrawCircle(ObjectManager.Player.ServerPosition, W.Range, System.Drawing.Color.Red);
