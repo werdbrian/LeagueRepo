@@ -140,7 +140,9 @@ namespace Ezreal
                      && ObjectManager.Player.Mana > QMANA + RMANA
                      && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 + E.GetDamage(t2) > t2.Health
                      && !Orbwalking.InAutoAttackRange(t2)
+                     && Game.CursorPos.CountEnemiesInRange(400) < 3
                      && t2.CountEnemiesInRange(800) < 3)
+
                     {
                         E.Cast(Game.CursorPos, true);
                     } 
@@ -151,6 +153,7 @@ namespace Ezreal
                     && ObjectManager.Player.Mana > QMANA + RMANA
                     && ObjectManager.Player.GetAutoAttackDamage(t2) > t2.Health
                     && !Orbwalking.InAutoAttackRange(t2)
+                    && Game.CursorPos.CountEnemiesInRange(400) < 3
                     && t2.CountEnemiesInRange(800) < 3)
                     {
                         E.Cast(Game.CursorPos, true);
@@ -326,7 +329,7 @@ namespace Ezreal
                              target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
                              target.HasBuffOfType(BuffType.Taunt))
                         {
-                            if (target.IsValidTarget(R.Range) && Rdmg * 2 > predictedHealth)
+                            if (target.IsValidTarget(R.Range) && Rdmg * target.CountAlliesInRange(1100) > predictedHealth )
                             {
                                 R.Cast(target, true);
                             }
