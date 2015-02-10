@@ -101,7 +101,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -114,7 +114,7 @@ namespace Ezreal
                 {
                     Q.Cast(minion);
                 }
-                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && minion.Health < Q.GetDamage(minion) && Orbwalker.GetTarget() != minion && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)))
+                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) && minion.Health < Q.GetDamage(minion) && Orbwalker.GetTarget() != minion && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)))
                 {
                     Q.Cast(minion);
                 }
@@ -128,40 +128,43 @@ namespace Ezreal
                 Farm = true;
             else
                 Farm = false;
-            if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 ManaMenager();
-                var t2 = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
-                if (E.IsReady() && Config.Item("autoE").GetValue<bool>() && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(250) > 0)
-                    E.Cast(Game.CursorPos);
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(400) < 3)
+                var t2 = TargetSelector.GetTarget(1000f, TargetSelector.DamageType.Physical);
+
+                if (E.IsReady()  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(250) > 0 && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
+                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);   
+                else if ( ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(500) < 3)
                 {
                      if (t2.IsValidTarget()
                      && ObjectManager.Player.Mana > QMANA + RMANA
-                     && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 + E.GetDamage(t2) > t2.Health
+                     && ObjectManager.Player.GetAutoAttackDamage(t2)  + E.GetDamage(t2) > t2.Health
                      && !Orbwalking.InAutoAttackRange(t2)
-                     && Game.CursorPos.CountEnemiesInRange(400) < 3
+                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3
                      && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
                      && t2.CountEnemiesInRange(800) < 3)
 
                     {
-                        E.Cast(Game.CursorPos, true);
+                        E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);   
                     } 
                 }
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(400) < 3)
+                else if ( ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(500) < 3)
                 {
                     if (t2.IsValidTarget()
                     && ObjectManager.Player.Mana > QMANA + RMANA
                     && ObjectManager.Player.GetAutoAttackDamage(t2) > t2.Health
                     && !Orbwalking.InAutoAttackRange(t2)
-                    && Game.CursorPos.CountEnemiesInRange(400) < 3
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
                     && t2.CountEnemiesInRange(800) < 3)
                     {
 
-                        E.Cast(Game.CursorPos, true);  
+                        E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true); 
                     }
+
                 }
+                
             }
             
             if (Q.IsReady() )
@@ -203,7 +206,7 @@ namespace Ezreal
                             if ( cast && target.IsValidTarget(Q.Range + 100))
                             {
                                 Q.Cast(target, true);
-                                if (Config.Item("debug").GetValue<bool>())
+                                if (Config.Item("debug").GetValue<bool>() && !Q.IsReady())
                                     Game.PrintChat("Q ks");
                             }
                         }
@@ -349,11 +352,11 @@ namespace Ezreal
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
-                    E.Cast(Game.CursorPos, true);
+                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range),true); 
                 return;
             }
             return;
