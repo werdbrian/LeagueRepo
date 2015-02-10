@@ -101,7 +101,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#ff00d8\">E</font>zreal full automatic AI ver 0.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -141,6 +141,7 @@ namespace Ezreal
                      && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 + E.GetDamage(t2) > t2.Health
                      && !Orbwalking.InAutoAttackRange(t2)
                      && Game.CursorPos.CountEnemiesInRange(400) < 3
+                     && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
                      && t2.CountEnemiesInRange(800) < 3)
 
                     {
@@ -154,8 +155,10 @@ namespace Ezreal
                     && ObjectManager.Player.GetAutoAttackDamage(t2) > t2.Health
                     && !Orbwalking.InAutoAttackRange(t2)
                     && Game.CursorPos.CountEnemiesInRange(400) < 3
+                    && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
                     && t2.CountEnemiesInRange(800) < 3)
                     {
+
                         E.Cast(Game.CursorPos, true);  
                     }
                 }
@@ -260,7 +263,7 @@ namespace Ezreal
                     }
                     else if (Farm && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                     {
-                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                            W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA)
                     {
@@ -292,18 +295,8 @@ namespace Ezreal
                         {
                             if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(500) == 0)
                             {
-                                if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() == 1)
-                                {
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    if (Config.Item("debug").GetValue<bool>())
-                                        Game.PrintChat("R normal");
-                                }
-                                else
-                                {
-                                    R.Cast(target, true);
-                                    if (Config.Item("debug").GetValue<bool>())
-                                        Game.PrintChat("R normal");
-                                }
+
                             }
                             else if (target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2)
                             {
@@ -330,7 +323,7 @@ namespace Ezreal
                         {
                             if (target.IsValidTarget(R.Range) && Rdmg * target.CountAlliesInRange(1100) > predictedHealth )
                             {
-                                R.Cast(target, true);
+                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                             }
                         }
                         else if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(800) > 0)
@@ -388,32 +381,11 @@ namespace Ezreal
                                 Game.PrintChat("W ks OPS");
                         }
                     }
-                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                     {
                         var rDmg = R.GetDamage(target);
-                        var cast = true;
-
-                        PredictionOutput output = R.GetPrediction(target);
-                        Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-                        direction.Normalize();
-                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-                        foreach (var enemy in enemies)
-                        {
-                            if (enemy.SkinName == target.SkinName || !cast)
-                                continue;
-                            PredictionOutput prediction = R.GetPrediction(enemy);
-                            Vector3 predictedPosition = prediction.CastPosition;
-                            Vector3 v = output.CastPosition - Player.ServerPosition;
-                            Vector3 w = predictedPosition - Player.ServerPosition;
-                            double c1 = Vector3.Dot(w, v);
-                            double c2 = Vector3.Dot(v, v);
-                            double b = c1 / c2;
-                            Vector3 pb = Player.ServerPosition + ((float)b * v);
-                            float length = Vector3.Distance(predictedPosition, pb);
-                            if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                                cast = false;
-                        }
-                        if (rDmg > HpLeft && HpLeft > 0 && cast && target.CountAlliesInRange(500) == 0)
+                        
+                        if (rDmg > HpLeft && HpLeft > 0  && target.CountAlliesInRange(500) == 0)
                         {
                             R.Cast(target, true);
                             if (Config.Item("debug").GetValue<bool>())
