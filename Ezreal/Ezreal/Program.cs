@@ -280,9 +280,9 @@ namespace Ezreal
 
                 }
             }
-            
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(700) == 0 && (Game.Time - QCastTime > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
@@ -295,8 +295,7 @@ namespace Ezreal
                         {
                             if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(500) == 0)
                             {
-                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-
+                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                             }
                             else if (target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2)
                             {
@@ -370,7 +369,10 @@ namespace Ezreal
 
                     var dmg = unit.GetSpellDamage(target, args.SData.Name);
                     double HpLeft = target.Health - dmg;
-
+                    if (HpLeft < 0 && target.IsValidTarget())
+                    {
+                        QCastTime = Game.Time;
+                    }
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(W.Range) && Q.IsReady())
                     {
                         var qDmg = Q.GetDamage(target);
