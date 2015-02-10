@@ -156,8 +156,7 @@ namespace Ezreal
                     && Game.CursorPos.CountEnemiesInRange(400) < 3
                     && t2.CountEnemiesInRange(800) < 3)
                     {
-                        E.Cast(Game.CursorPos, true);
-                        
+                        E.Cast(Game.CursorPos, true);  
                     }
                 }
             }
