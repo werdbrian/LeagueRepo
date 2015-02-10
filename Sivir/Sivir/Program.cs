@@ -86,7 +86,7 @@ namespace Sivir
             Orbwalking.AfterAttack += AfterAttackEvenH;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
@@ -95,8 +95,7 @@ namespace Sivir
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
             double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
-
-            if (sender.IsValid<Obj_AI_Hero>() && HpPercentage >= Config.Item("Edmg").GetValue<Slider>().Value && !(sender is Obj_AI_Turret) && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
+            if (sender.IsValid<Obj_AI_Hero>() && HpPercentage >= Config.Item("Edmg").GetValue<Slider>().Value && !sender.IsValid<Obj_AI_Turret>() && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
             {
                 E.Cast();
                 //Game.PrintChat("" + HpPercentage);
@@ -121,7 +120,7 @@ namespace Sivir
                     W.Cast();
                 else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > target.Health && !Q.IsReady() && !R.IsReady())
+                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.GetAutoAttackDamage(t) * 3 + Q.GetDamage(t) * 1.9 > target.Health )
                     W.Cast();
                 else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA  && (farmW() || t.IsValidTarget()))
                     W.Cast();
@@ -137,8 +136,10 @@ namespace Sivir
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-                    var qDmg = W.GetDamage(t);
-                    if (qDmg * 2.3 > t.Health)
+                    var qDmg = Q.GetDamage(t) * 1.9;
+                    if (Orbwalking.InAutoAttackRange(t))
+                        qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
+                    if (qDmg  > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
@@ -147,6 +148,8 @@ namespace Sivir
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9 )
                             Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                        else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA)
+                            Q.CastIfWillHit(t, 2, true);
                     else if (ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
