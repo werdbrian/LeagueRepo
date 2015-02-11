@@ -7,6 +7,7 @@ using LeagueSharp.Common;
 using System.IO;
 using SharpDX;
 using Collision = LeagueSharp.Common.Collision;
+using System.Threading;
 namespace Ezreal
 {
     class Program
@@ -89,11 +90,14 @@ namespace Ezreal
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
-            Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            #region Combo
+                Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+                Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
+                Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
+                Config.SubMenu("R option").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
+                Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            #endregion
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
-
-            Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -108,9 +112,10 @@ namespace Ezreal
         {
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
             var t = TargetSelector.GetTarget(Q.Range + 300, TargetSelector.DamageType.Physical);
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             foreach (var minion in allMinionsQ)
             {
-                if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion) )
+                if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion) && !t.IsValidTarget() && Q.WillHit(ObjectManager.Player.Position,minion.Position))
                 {
                     Q.Cast(minion);
                 }
@@ -119,7 +124,15 @@ namespace Ezreal
                     Q.Cast(minion);
                 }
             }
+
+            if (mobs.Count > 0 && Q.IsReady() && Orbwalker.ActiveMode.ToString() == "LaneClear")
+            {
+                var mob = mobs[0];
+                    Q.Cast(mob, true);
+
+            }
         }
+
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
@@ -128,43 +141,38 @@ namespace Ezreal
                 Farm = true;
             else
                 Farm = false;
-            if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>() && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3)
             {
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(1000f, TargetSelector.DamageType.Physical);
-
-                if (E.IsReady()  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(250) > 0 && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
+                var t = TargetSelector.GetTarget(E.Range + Q.Range, TargetSelector.DamageType.Physical);
+                if (E.IsReady()  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(300) > 0)
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);   
-                else if ( ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(500) < 3)
+                else if ( !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(500) < 3)
                 {
                      if (t2.IsValidTarget()
-                     && ObjectManager.Player.Mana > QMANA + RMANA
+                     && ObjectManager.Player.Mana > EMANA + RMANA
                      && ObjectManager.Player.GetAutoAttackDamage(t2)  + E.GetDamage(t2) > t2.Health
                      && !Orbwalking.InAutoAttackRange(t2)
-                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3
-                     && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
-                     && t2.CountEnemiesInRange(800) < 3)
+                     && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position))
 
                     {
                         E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);   
                     } 
                 }
-                else if ( ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(500) < 3)
+                else if ( ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true) )
                 {
-                    if (t2.IsValidTarget()
-                    && ObjectManager.Player.Mana > QMANA + RMANA
-                    && ObjectManager.Player.GetAutoAttackDamage(t2) > t2.Health
-                    && !Orbwalking.InAutoAttackRange(t2)
-                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
-                    && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
-                    && t2.CountEnemiesInRange(800) < 3)
+                    if (t.IsValidTarget()
+                    && ObjectManager.Player.Mana > QMANA + EMANA
+                    && Q.IsReady()
+                    && Q.GetDamage(t) > t.Health
+                    && !Orbwalking.InAutoAttackRange(t)
+                    && t.Position.Distance(Game.CursorPos) < t.Position.Distance(ObjectManager.Player.Position)
+                    && Q.WillHit(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition))
                     {
-
                         E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true); 
                     }
-
-                }
-                
+                }           
             }
             
             if (Q.IsReady() )
@@ -174,7 +182,7 @@ namespace Ezreal
                 bool wait = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(Q.Range) &&
+                    if (target.IsValidTarget(Q.Range + 100) &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(Q.Delay + (Player.Distance(target.ServerPosition) / Q.Speed) * 1000));
@@ -212,24 +220,18 @@ namespace Ezreal
                         }
                     }
                 }
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Q.Range - 100, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
+                    
                     if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && t.Path.Count() == 1)
                     {
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && t.Path.Count() == 1)
                     {
-                        if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
-                        {
                             Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        }
-                        else if (t.Path.Count() == 1)
-                        {
-                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        }
-                        
+
                     }
 
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA)
@@ -293,9 +295,13 @@ namespace Ezreal
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
-                        var Rdmg = R.GetDamage(target);
+                        double Rdmg = R.GetDamage(target);
+                        if (R.GetDamage(target) > predictedHealth)
+                            Rdmg = getRdmg(target);
+
                         if (Rdmg > predictedHealth && target.Path.Count() == 1)
                         {
+                            Rdmg = getRdmg(target);
                             if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(500) == 0)
                             {
                                 R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
@@ -338,6 +344,53 @@ namespace Ezreal
             }
             PotionMenager();
         }
+
+
+        private static double getRdmg(Obj_AI_Hero target)
+        {
+                var rDmg = R.GetDamage(target);
+                var dmg = 0;
+                PredictionOutput output = R.GetPrediction(target);
+                Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
+                direction.Normalize();
+                List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
+                foreach (var enemy in enemies)
+                {
+                    PredictionOutput prediction = R.GetPrediction(enemy);
+                    Vector3 predictedPosition = prediction.CastPosition;
+                    Vector3 v = output.CastPosition - Player.ServerPosition;
+                    Vector3 w = predictedPosition - Player.ServerPosition;
+                    double c1 = Vector3.Dot(w, v);
+                    double c2 = Vector3.Dot(v, v);
+                    double b = c1 / c2;
+                    Vector3 pb = Player.ServerPosition + ((float)b * v);
+                    float length = Vector3.Distance(predictedPosition, pb);
+                    if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                        dmg ++;
+                }
+                var allMinionsR = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, R.Range, MinionTypes.All);
+                foreach (var minion in allMinionsR)
+                {
+                    PredictionOutput prediction = R.GetPrediction(minion);
+                    Vector3 predictedPosition = prediction.CastPosition;
+                    Vector3 v = output.CastPosition - Player.ServerPosition;
+                    Vector3 w = predictedPosition - Player.ServerPosition;
+                    double c1 = Vector3.Dot(w, v);
+                    double c2 = Vector3.Dot(v, v);
+                    double b = c1 / c2;
+                    Vector3 pb = Player.ServerPosition + ((float)b * v);
+                    float length = Vector3.Distance(predictedPosition, pb);
+                    if (length < (R.Width + 100 + minion.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                        dmg++;
+                }
+                if (dmg > 7)
+                    return rDmg * 0.7;
+                else
+                {
+                    return rDmg - (rDmg * 0.1 * dmg);
+                }
+        }
+
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -414,7 +467,7 @@ namespace Ezreal
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = WMANA - ObjectManager.Player.Level * 2;
+                RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
                 RMANA = R.Instance.ManaCost; ;
 
@@ -443,7 +496,7 @@ namespace Ezreal
                 }
                 if (ManaPotion.IsReady() && !ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true))
                 {
-                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA + 20)
+                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA )
                         ManaPotion.Cast();
                 }
             }
@@ -471,7 +524,7 @@ namespace Ezreal
                         R1.Cast(t, true, true);
                     }
                 }
-                var tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                var tw = TargetSelector.GetTarget(Q.Range-100, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(tw);
