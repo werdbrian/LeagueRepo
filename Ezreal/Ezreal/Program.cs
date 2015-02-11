@@ -146,7 +146,7 @@ namespace Ezreal
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(1000f, TargetSelector.DamageType.Physical);
                 var t = TargetSelector.GetTarget(E.Range + Q.Range, TargetSelector.DamageType.Physical);
-                if (E.IsReady()  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(300) > 0)
+                if (E.IsReady()  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(250) > 0)
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);   
                 else if ( !ObjectManager.Player.UnderTurret(true) )
                 {
@@ -224,7 +224,7 @@ namespace Ezreal
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
                     
-                    if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && t.Path.Count() == 1)
+                    if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA )
                     {
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
@@ -301,7 +301,7 @@ namespace Ezreal
 
                         if (Rdmg > predictedHealth )
                         {
-                            Rdmg = getRdmg(target);
+                            
                             if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(500) == 0)
                             {
                                 R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
