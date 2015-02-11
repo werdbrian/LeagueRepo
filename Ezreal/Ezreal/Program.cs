@@ -299,7 +299,7 @@ namespace Ezreal
                         if (R.GetDamage(target) > predictedHealth)
                             Rdmg = getRdmg(target);
 
-                        if (Rdmg > predictedHealth && target.Path.Count() == 1)
+                        if (Rdmg > predictedHealth )
                         {
                             Rdmg = getRdmg(target);
                             if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(500) == 0)
