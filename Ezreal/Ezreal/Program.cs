@@ -105,7 +105,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -148,7 +148,7 @@ namespace Ezreal
                 var t = TargetSelector.GetTarget(E.Range + Q.Range, TargetSelector.DamageType.Physical);
                 if (E.IsReady()  && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(300) > 0)
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);   
-                else if ( !ObjectManager.Player.UnderTurret(true) && Game.CursorPos.CountEnemiesInRange(500) < 3)
+                else if ( !ObjectManager.Player.UnderTurret(true) )
                 {
                      if (t2.IsValidTarget()
                      && ObjectManager.Player.Mana > EMANA + RMANA
@@ -383,6 +383,8 @@ namespace Ezreal
                     if (length < (R.Width + 100 + minion.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                         dmg++;
                 }
+                if (Config.Item("debug").GetValue<bool>())
+                    Game.PrintChat("R collision" + dmg);
                 if (dmg > 7)
                     return rDmg * 0.7;
                 else
