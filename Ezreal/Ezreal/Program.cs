@@ -215,11 +215,11 @@ namespace Ezreal
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
-                    if ( Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
+                    if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && t.Path.Count() == 1)
                     {
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && t.Path.Count() == 1)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                         {
@@ -264,7 +264,7 @@ namespace Ezreal
                     {
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
-                    else if (Farm && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
+                    else if (t.Path.Count() == 1 &&Farm && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                     {
                             W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                     }
@@ -294,7 +294,7 @@ namespace Ezreal
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
-                        if (Rdmg > predictedHealth)
+                        if (Rdmg > predictedHealth && target.Path.Count() == 1)
                         {
                             if (target.IsValidTarget(R.Range) && target.CountAlliesInRange(500) == 0)
                             {
