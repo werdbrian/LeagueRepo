@@ -141,9 +141,9 @@ namespace Sivir
                         qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
                     if (qDmg  > t.Health)
                         Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && t.Path.Count() == 1)
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") ))
+                    else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") && t.Path.Count() == 1))
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9 )

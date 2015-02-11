@@ -50,8 +50,8 @@ namespace Caitlyn
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1230);
-            Qc = new Spell(SpellSlot.Q, 1150);
+            Q = new Spell(SpellSlot.Q, 1180);
+            Qc = new Spell(SpellSlot.Q, 1100);
             W = new Spell(SpellSlot.W, 800);
             E = new Spell(SpellSlot.E, 980);
             R = new Spell(SpellSlot.R, 3000);
@@ -172,14 +172,16 @@ namespace Caitlyn
                     var qDmg = Q.GetDamage(t);
                     if (GetRealDistance(t) > bonusRange() + 60 && qDmg  > t.Health)
                         Q.Cast(t, true);
-                    else if (t.Path.Count() == 1 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && Orbwalker.GetTarget() == null)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 60) == 0 && t.Path.Count() == 1)
                         Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                    else if ((t.Path.Count() == 1 && Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 60) == 0 && t.Path.Count() == 1)
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                             Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                        else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA)
+                            Q.CastIfWillHit(t, 2, true);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(GetRealRange(t)-100) == 0)
                     {
