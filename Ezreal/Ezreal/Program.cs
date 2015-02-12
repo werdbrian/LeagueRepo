@@ -56,8 +56,8 @@ namespace Ezreal
             Q2 = new Spell(SpellSlot.Q, 1600);
             W = new Spell(SpellSlot.W, 1000);
             E = new Spell(SpellSlot.E, 475);
-            R = new Spell(SpellSlot.R, 2500f);
-            R1 = new Spell(SpellSlot.R, 2500f);
+            R = new Spell(SpellSlot.R, 3000f);
+            R1 = new Spell(SpellSlot.R, 3000f);
 
             Q.SetSkillshot(0.25f, 50f, 2000f, true, SkillshotType.SkillshotLine);
             Q2.SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);
@@ -234,11 +234,9 @@ namespace Ezreal
 
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
-                    var wDmg = W.GetDamage(t);
+
                     var qDmg = Q.GetDamage(t);
-                    if (wDmg + qDmg > t.Health && ObjectManager.Player.Mana > WMANA + QMANA && W.IsReady())
-                        W.Cast(t, true);
-                    else if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(900)> 1)
+                    if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800)> 1)
                     {
                         //im noob
                         Game.PrintChat("noob KS mode");
