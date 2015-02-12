@@ -88,6 +88,7 @@ namespace Ezreal
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             #region Combo
                 Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
@@ -104,7 +105,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -237,11 +238,15 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     if (wDmg + qDmg > t.Health && ObjectManager.Player.Mana > WMANA + QMANA)
                         W.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA )
+                    else if (qDmg + qDmg > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(500)> 1)
+                    {
+                        //im noob
+                    }
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                     {
                         Q.Cast(t, true);
                     }
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) )
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.7)
                             Q.Cast(t, true);
