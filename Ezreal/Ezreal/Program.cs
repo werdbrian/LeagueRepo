@@ -238,10 +238,10 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     if (wDmg + qDmg > t.Health && ObjectManager.Player.Mana > WMANA + QMANA && W.IsReady())
                         W.Cast(t, true);
-                    else if (qDmg + qDmg > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(500)> 1)
+                    else if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(900)> 1)
                     {
                         //im noob
-                        Game.PrintChat("noob");
+                        Game.PrintChat("noob KS mode");
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                     {
