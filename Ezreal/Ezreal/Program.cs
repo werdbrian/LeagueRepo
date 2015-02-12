@@ -136,13 +136,14 @@ namespace Ezreal
             if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 ManaMenager();
-                var t2 = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Physical);
+                var t2 = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
-                var t = TargetSelector.GetTarget( Q.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget( 1300, TargetSelector.DamageType.Physical);
 
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA 
-                    && ObjectManager.Player.CountEnemiesInRange(250) > 0 
-                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3)
+                    && ObjectManager.Player.CountEnemiesInRange(270) > 0 
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
+                    && t.Position.Distance(Game.CursorPos)  > t.Position.Distance(ObjectManager.Player.Position))
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                 else if (ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 
                     && !ObjectManager.Player.UnderTurret(true) 
@@ -217,6 +218,7 @@ namespace Ezreal
                             if ( cast && target.IsValidTarget(Q.Range + 100))
                             {
                                 Q.Cast(target, true);
+                                QCastTime = Game.Time;
                                 if (Config.Item("debug").GetValue<bool>() && !Q.IsReady())
                                     Game.PrintChat("Q ks");
                             }
@@ -468,7 +470,7 @@ namespace Ezreal
                                 Game.PrintChat("W ks OPS");
                         }
                     }
-                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(800) == 0)
                     {
                         var rDmg = R.GetDamage(target);
                         
