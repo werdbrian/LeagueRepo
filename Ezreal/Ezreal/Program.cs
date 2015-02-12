@@ -137,7 +137,9 @@ namespace Ezreal
             {
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Physical);
+
                 var t = TargetSelector.GetTarget( Q.Range, TargetSelector.DamageType.Physical);
+
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA 
                     && ObjectManager.Player.CountEnemiesInRange(250) > 0 
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3)
@@ -150,7 +152,7 @@ namespace Ezreal
                 {
                     if (t.IsValidTarget()
                      && ObjectManager.Player.Mana > QMANA + EMANA + WMANA
-                     && t.Position.Distance(Game.CursorPos) - 300 < t.Position.Distance(ObjectManager.Player.Position)
+                     && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
                      && Q.IsReady() && W.IsReady()
                      && Q.GetDamage(t) + W.GetDamage(t) + E.GetDamage(t) > t.Health
                      && !Orbwalking.InAutoAttackRange(t)
@@ -162,7 +164,7 @@ namespace Ezreal
                              Game.PrintChat("E kill Q");
                      }
                     else if (t2.IsValidTarget()
-                     && t2.Position.Distance(Game.CursorPos) -300 < t2.Position.Distance(ObjectManager.Player.Position)
+                     && t2.Position.Distance(Game.CursorPos) +300 < t2.Position.Distance(ObjectManager.Player.Position)
                      && ObjectManager.Player.Mana > EMANA + RMANA
                      && ObjectManager.Player.GetAutoAttackDamage(t2)  + E.GetDamage(t2) > t2.Health
                      && !Orbwalking.InAutoAttackRange(t2))
@@ -222,10 +224,10 @@ namespace Ezreal
                     }
                 }
                 var t = TargetSelector.GetTarget(Q.Range - 50, TargetSelector.DamageType.Physical);
-                if (ObjectManager.Player.CountEnemiesInRange(800) == 0)
+                if (ObjectManager.Player.CountEnemiesInRange(900) == 0)
                     t = TargetSelector.GetTarget(Q.Range , TargetSelector.DamageType.Physical);
                 else
-                    t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
+                    t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
@@ -553,7 +555,11 @@ namespace Ezreal
                         R1.Cast(t, true, true);
                     }
                 }
-                var tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                var tw = TargetSelector.GetTarget(Q.Range - 50, TargetSelector.DamageType.Physical);
+                if (ObjectManager.Player.CountEnemiesInRange(900) == 0)
+                    tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                else
+                    tw = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
 
