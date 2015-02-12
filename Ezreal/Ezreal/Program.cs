@@ -145,11 +145,12 @@ namespace Ezreal
                 else if (ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 
                     && !ObjectManager.Player.UnderTurret(true) 
                     && (Game.Time - QCastTime > 0.6)
-                    && t2.Position.Distance(Game.CursorPos) < t2.Position.Distance(ObjectManager.Player.Position)
+                    
                      && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
                 {
                     if (t.IsValidTarget()
                      && ObjectManager.Player.Mana > QMANA + EMANA + WMANA
+                     && t.Position.Distance(Game.CursorPos) - 300 < t.Position.Distance(ObjectManager.Player.Position)
                      && Q.IsReady() && W.IsReady()
                      && Q.GetDamage(t) + W.GetDamage(t) + E.GetDamage(t) > t.Health
                      && !Orbwalking.InAutoAttackRange(t)
@@ -161,6 +162,7 @@ namespace Ezreal
                              Game.PrintChat("E kill Q");
                      }
                     else if (t2.IsValidTarget()
+                     && t2.Position.Distance(Game.CursorPos) -300 < t2.Position.Distance(ObjectManager.Player.Position)
                      && ObjectManager.Player.Mana > EMANA + RMANA
                      && ObjectManager.Player.GetAutoAttackDamage(t2)  + E.GetDamage(t2) > t2.Health
                      && !Orbwalking.InAutoAttackRange(t2))
@@ -220,6 +222,11 @@ namespace Ezreal
                     }
                 }
                 var t = TargetSelector.GetTarget(Q.Range - 50, TargetSelector.DamageType.Physical);
+                if (ObjectManager.Player.CountEnemiesInRange(800) == 0)
+                    t = TargetSelector.GetTarget(Q.Range , TargetSelector.DamageType.Physical);
+                else
+                    t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
+
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
                     var wDmg = W.GetDamage(t);
