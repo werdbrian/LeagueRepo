@@ -281,8 +281,6 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     if (wDmg > t.Health)
                         W.Cast(t, true);
-                    else if (wDmg + qDmg> t.Health && ObjectManager.Player.Mana > WMANA + QMANA )
-                        W.Cast(t, true);
                     else if (t.Path.Count() == 1 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                     {
                         W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
