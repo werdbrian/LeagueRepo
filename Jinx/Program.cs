@@ -293,6 +293,8 @@ namespace Jinx
                                 && target.IsValidTarget(W.Range) && Rdmg * target.CountAlliesInRange(W.Range) > predictedHealth && Config.Item("Rcc").GetValue<bool>() && cast)
                             {
                                 R.Cast(target, true);
+                                if (Config.Item("debug").GetValue<bool>())
+                                    Game.PrintChat("R cc");
                             }
                             else if (target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
