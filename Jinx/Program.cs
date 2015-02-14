@@ -84,7 +84,7 @@ namespace Jinx
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E in Combo BETA").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(0, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));

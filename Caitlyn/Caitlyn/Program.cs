@@ -84,7 +84,7 @@ namespace Caitlyn
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(0, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             #region E
                 Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));

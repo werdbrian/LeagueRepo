@@ -91,7 +91,7 @@ namespace Ezreal
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(0, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             #region Combo
                 Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));

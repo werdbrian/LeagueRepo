@@ -77,7 +77,7 @@ namespace Sivir
             Config.AddToMainMenu();
             
             Config.AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(0, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             #region Shield
                 Config.SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
