@@ -137,6 +137,10 @@ namespace Ezreal
                 Farm = true;
             else
                 Farm = false;
+
+            if (Orbwalker.GetTarget() == null)
+                attackNow = true;
+
             if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 ManaMenager();

@@ -272,7 +272,7 @@ namespace Jinx
                                     cast = false;
                             }
                             
-                            if (cast && target.IsValidTarget(R.Range) && GetRealDistance(target) > bonusRange() + 150 + target.BoundingRadius && target.CountAlliesInRange(500) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                            if (cast && target.IsValidTarget(R.Range) && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
                                 if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() == 1)
                                 {
@@ -290,7 +290,7 @@ namespace Jinx
                             else if ((target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
                                      target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
                                      target.HasBuffOfType(BuffType.Taunt))
-                                && target.IsValidTarget(W.Range) && Rdmg * target.CountAlliesInRange(W.Range) > predictedHealth && Config.Item("Rcc").GetValue<bool>() && cast)
+                                && target.IsValidTarget(W.Range) && Rdmg * 2 > predictedHealth && Config.Item("Rcc").GetValue<bool>() && cast)
                             {
                                 R.Cast(target, true);
                                 if (Config.Item("debug").GetValue<bool>())
@@ -339,14 +339,14 @@ namespace Jinx
                     Youmuu.Cast();
             }
             var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (E.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && ta.IsValidTarget(E.Range) && ta.Path.Count() == 1 && Config.Item("autoE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA)
+            if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && ta.IsValidTarget(E.Range) && Config.Item("autoE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA)
             {
                 if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
-                    if (ta.Position.Distance(Game.CursorPos) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range - 300))
+                    if (ta.Position.Distance(Game.CursorPos) < target.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
                         E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
-                else
-                    if (ta.Position.Distance(Game.CursorPos) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range - 100))
-                        E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
+                    else
+                        if (ta.Position.Distance(Game.CursorPos) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range ))
+                            E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
             }
         }
 
@@ -471,7 +471,7 @@ namespace Jinx
                                  Game.PrintChat("W ks OPS");
                          }
                      }
-                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                     if (GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius &&  target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                      {
                          var rDmg = R.GetDamage(target);
                          var cast = true;
