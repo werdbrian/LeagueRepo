@@ -84,6 +84,7 @@ namespace Jinx
             Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E in Combo BETA").SetValue(true));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(0, 2, 0)));
             Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
@@ -96,7 +97,7 @@ namespace Jinx
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 2.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 2.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -106,8 +107,6 @@ namespace Jinx
                 Farm = true;
             else
                 Farm = false;
-
-
             if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && E.IsReady()))
@@ -141,7 +140,6 @@ namespace Jinx
                 {
                     var distance = GetRealDistance(t);
                     var powPowRange = GetRealPowPowRange(t);
-
                     if (!FishBoneActive && !Orbwalking.InAutoAttackRange(t))
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
@@ -208,15 +206,15 @@ namespace Jinx
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && W.IsReady() && !wait)
                 {
-                    if (t.Path.Count() == 1 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                    if ( Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                        castW(t);
                     }
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 20) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
                     {
                         if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
                         {
-                            W.CastIfHitchanceEquals(t, HitChance.High, true);
+                            W.Cast(t, true);
                         }
                         else if (t.Path.Count() == 1)
                         {
@@ -369,7 +367,6 @@ namespace Jinx
                         }
                     }
                 }
-
             }
         }
 
@@ -416,6 +413,15 @@ namespace Jinx
                 return true;
             else
                 return false;
+        }
+        private static void castW(Obj_AI_Hero target)
+        {
+            if (Config.Item("Hit").GetValue<Slider>().Value == 0)
+                W.Cast(target, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
+                W.CastIfHitchanceEquals(target, HitChance.High, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
+                W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {

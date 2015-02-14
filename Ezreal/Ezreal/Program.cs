@@ -108,7 +108,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.7 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.8 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -122,7 +122,6 @@ namespace Ezreal
                 if (!Orbwalking.InAutoAttackRange(minion) && predictedHealth < Q.GetDamage(minion))
                     Q.Cast(minion);
             }
-
             if (mobs.Count > 0 && Q.IsReady() && Orbwalker.ActiveMode.ToString() == "LaneClear")
             {
                 var mob = mobs[0];
@@ -192,7 +191,7 @@ namespace Ezreal
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
                     if (target.IsValidTarget(Q.Range + 100) &&
-                        !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
+                        !target.HasBuffOfType(BuffType.PhysicalImmunity) )
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(Q.Delay + (Player.Distance(target.ServerPosition) / Q.Speed) * 1000));
                         var Qdmg = Q.GetDamage(target);
