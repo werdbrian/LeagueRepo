@@ -87,6 +87,7 @@ namespace Jinx
             Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -286,6 +287,13 @@ namespace Jinx
                                         Game.PrintChat("R normal");
                                 }
                             }
+                            else if ((target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                                     target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
+                                     target.HasBuffOfType(BuffType.Taunt))
+                                && target.IsValidTarget(W.Range) && Rdmg * target.CountAlliesInRange(W.Range) > predictedHealth && Config.Item("Rcc").GetValue<bool>() && cast)
+                            {
+                                R.Cast(target, true);
+                            }
                             else if (target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
                                 R1.Cast(target, true, true);
@@ -298,6 +306,7 @@ namespace Jinx
                                 if (Config.Item("debug").GetValue<bool>())
                                     Game.PrintChat("R recall");
                             }
+
                         }
                         else if (target.IsValidTarget(W.Range) && target.CountEnemiesInRange(250) > 2 && Rdmg * 2 > predictedHealth)
                         {
