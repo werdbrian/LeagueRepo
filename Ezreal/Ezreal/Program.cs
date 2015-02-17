@@ -33,7 +33,7 @@ namespace Ezreal
         public static float RMANA;
         public static bool Farm = false;
         public static double WCastTime = 0;
-        public static double QCastTime = 0;
+        public static double OverKill = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -155,7 +155,7 @@ namespace Ezreal
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                 else if (ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 
                     && !ObjectManager.Player.UnderTurret(true) 
-                    && (Game.Time - QCastTime > 0.6)
+                    && (Game.Time - OverKill > 0.6)
                     
                      && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
                 {
@@ -182,7 +182,7 @@ namespace Ezreal
                         E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                         if (Config.Item("debug").GetValue<bool>())
                             Game.PrintChat("E kill aa");
-                        QCastTime = Game.Time;
+                        OverKill = Game.Time;
                     }
                 }
             }
@@ -226,7 +226,7 @@ namespace Ezreal
                             if ( cast && target.IsValidTarget(Q.Range + 100))
                             {
                                 castQ(target);
-                                QCastTime = Game.Time;
+                                OverKill = Game.Time;
                                 if (Config.Item("debug").GetValue<bool>() && !Q.IsReady())
                                     Game.PrintChat("Q ks");
                             }
@@ -242,9 +242,14 @@ namespace Ezreal
                 if (t.IsValidTarget() && Q.IsReady() && !wait && attackNow)
                 {
                     var qDmg = Q.GetDamage(t);
+                    var wDmg = W.GetDamage(t);
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800)> 1)
                     {
                         
+                    }
+                    else if (t.IsValidTarget(W.Range) &&  qDmg + wDmg > t.Health )
+                    {
+                        castQ(t);
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                     {
@@ -271,7 +276,7 @@ namespace Ezreal
                         }
                     }
                 }
-                if ((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear") && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA  + WMANA + QMANA * 3)
+                if (Farm && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA  + WMANA + QMANA * 3)
                     farmQ();
             }
             if (W.IsReady() && attackNow)
@@ -292,7 +297,7 @@ namespace Ezreal
                     }
                     else if ( Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         castW(t);
-                    else if (Farm && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
+                    else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
                         castW(t);
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
@@ -311,7 +316,7 @@ namespace Ezreal
             }
             PotionMenager();
            
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - QCastTime > 0.6))
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
@@ -481,7 +486,7 @@ namespace Ezreal
                     double HpLeft = target.Health - dmg;
                     if (HpLeft < 0 && target.IsValidTarget() && target.IsValidTarget(R.Range))
                     {
-                        QCastTime = Game.Time;
+                        OverKill = Game.Time;
                     }
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(Q.Range) && Q.IsReady())
                     {
