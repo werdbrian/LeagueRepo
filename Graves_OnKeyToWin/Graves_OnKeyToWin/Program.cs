@@ -199,7 +199,7 @@ namespace Graves_OnKeyToWin
                     }
                     if (R.GetDamage(t) + Q.GetDamage(t) > t.Health && R.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA && Q1.IsReady())
                         Q1.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         Q.Cast(t, true, true);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && Orbwalker.GetTarget() == null)
                     {
