@@ -91,6 +91,7 @@ namespace Graves_OnKeyToWin
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Orbwalking.AfterAttack += afterAttack;
             Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
@@ -142,15 +143,19 @@ namespace Graves_OnKeyToWin
                 ManaMenager();
                 var t = TargetSelector.GetTarget(E.Range + Q.Range - 100f, TargetSelector.DamageType.Physical);
                 var t2 = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
-
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true))
+                if ( ObjectManager.Player.Mana > RMANA + EMANA
+                    && ObjectManager.Player.CountEnemiesInRange(270) > 0
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
+                    && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
+                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                if (E.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true))
                 {
                     if (t.IsValidTarget()
                     && Q.IsReady()
                     && ObjectManager.Player.Mana > RMANA + EMANA
                     && Q.GetDamage(t) > t.Health
                     && GetRealDistance(t) > GetRealRange(t)
-                    && t.CountEnemiesInRange(800) < 3)
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
                     {
                         E.Cast(Game.CursorPos, true);
                         return;
@@ -158,19 +163,21 @@ namespace Graves_OnKeyToWin
                     else if (t2.IsValidTarget()
                      && ObjectManager.Player.Mana > QMANA + RMANA
                      && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t2.Health
-                     && GetRealDistance(t2) > GetRealRange(t2)
-                     && t2.CountEnemiesInRange(800) < 3)
+                     && !Orbwalking.InAutoAttackRange(t2)
+                     && t2.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
+                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
                     {
                         E.Cast(Game.CursorPos, true);
                         return;
                     }
                     else if (t.IsValidTarget()
                      && Q.IsReady() && R.IsReady()
+                     && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
                      && ObjectManager.Player.Mana > RMANA + EMANA + RMANA
                      && Q.GetDamage(t) + R.GetDamage(t) > t.Health
                      && R.GetDamage(t) < t.Health
-                     && GetRealDistance(t) > GetRealRange(t)
-                     && t.CountEnemiesInRange(800) < 3)
+                     && !Orbwalking.InAutoAttackRange(t2)
+                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
                     {
                         E.Cast(Game.CursorPos, true);
                         return;
@@ -256,14 +263,13 @@ namespace Graves_OnKeyToWin
                             && target.IsValidTarget()
                             && Rdmg > predictedHealth
                             && target.IsValidTarget(R.Range)
-                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7))
+                            && (!Orbwalking.InAutoAttackRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7))
                             R.Cast(target, true);
                         else if (cast
                             && Rdmg * 0.7 > predictedHealth
                             && target.IsValidTarget(R1.Range)
-                            && ((GetRealDistance(target) > GetRealRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7))
+                            && ((!Orbwalking.InAutoAttackRange(target) && target.CountAlliesInRange(300) == 0) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.7))
                             R1.Cast(target, true, true);
-
                         else if (!cast && Rdmg * 0.7 > predictedHealth
                             && target.IsValidTarget(GetRealDistance(collisionTarget) + 700))
                             R1.Cast(target, true, true);
@@ -272,6 +278,67 @@ namespace Graves_OnKeyToWin
             }
             PotionMenager();
         }
+
+
+
+        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
+        {
+
+            if (unit.IsMe && args.SData.Name == "JinxW")
+            {
+                OverKill = Game.Time;
+            }
+
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
+                {
+
+                    var dmg = unit.GetSpellDamage(target, args.SData.Name);
+                    double HpLeft = target.Health - dmg;
+                    if (HpLeft < 0 && target.IsValidTarget())
+                    {
+                        OverKill = Game.Time;
+                    }
+                    if (GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.IsValidTarget(R1.Range) && R1.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                    {
+                        var rDmg = R.GetDamage(target);
+                        var cast = true;
+
+                        PredictionOutput output = R.GetPrediction(target);
+                        Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
+                        direction.Normalize();
+                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
+                        foreach (var enemy in enemies)
+                        {
+                            if (enemy.SkinName == target.SkinName || !cast)
+                                continue;
+                            PredictionOutput prediction = R.GetPrediction(enemy);
+                            Vector3 predictedPosition = prediction.CastPosition;
+                            Vector3 v = output.CastPosition - Player.ServerPosition;
+                            Vector3 w = predictedPosition - Player.ServerPosition;
+                            double c1 = Vector3.Dot(w, v);
+                            double c2 = Vector3.Dot(v, v);
+                            double b = c1 / c2;
+                            Vector3 pb = Player.ServerPosition + ((float)b * v);
+                            float length = Vector3.Distance(predictedPosition, pb);
+                            if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                cast = false;
+                        }
+                        if (rDmg > HpLeft && HpLeft > 0 && cast && target.CountAlliesInRange(300) == 0 && target.IsValidTarget(R.Range))
+                        {
+                            R.Cast(target, true);
+                        }
+                        else if (rDmg * 0.7 > HpLeft && HpLeft > 0  && target.CountAlliesInRange(300) == 0)
+                        {
+                            R1.Cast(target, true);
+                        }
+                    }
+
+                }
+            }
+        }
+
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)

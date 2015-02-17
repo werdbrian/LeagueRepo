@@ -287,16 +287,8 @@ namespace Jinx
                                         Game.PrintChat("R normal");
                                 }
                             }
-                            else if ((target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                                     target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
-                                     target.HasBuffOfType(BuffType.Taunt))
-                                && target.IsValidTarget(W.Range) && Rdmg * 2 > predictedHealth && Config.Item("Rcc").GetValue<bool>() && cast)
-                            {
-                                R.Cast(target, true);
-                                if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("R cc");
-                            }
-                            else if (target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+
+                            else if (cast && target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2 && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius )
                             {
                                 R1.Cast(target, true, true);
                                 if (Config.Item("debug").GetValue<bool>())
@@ -309,12 +301,6 @@ namespace Jinx
                                     Game.PrintChat("R recall");
                             }
 
-                        }
-                        else if (target.IsValidTarget(W.Range) && target.CountEnemiesInRange(250) > 2 && Rdmg * 2 > predictedHealth)
-                        {
-                            R1.Cast(target, true, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("R aoe 2");
                         }
                     }
                 }
