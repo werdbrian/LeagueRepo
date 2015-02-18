@@ -99,7 +99,7 @@ namespace Jinx
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 2.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 2.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -135,11 +135,21 @@ namespace Jinx
                     if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
                     {
                         if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
+                        {
                             E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
+                            if (Config.Item("debug").GetValue<bool>())
+                                Game.PrintChat("run ");
+                        }
                     }
                     else
+                    {
                         if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
+                        {
                             E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
+                            if (Config.Item("debug").GetValue<bool>())
+                                Game.PrintChat("run2 ");
+                        }
+                    }
                 }
             }
 
@@ -234,14 +244,7 @@ namespace Jinx
                     }
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 20) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
                     {
-                        if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
-                        {
-                            W.Cast(t, true);
-                        }
-                        else if (t.Path.Count() == 1)
-                        {
-                            W.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
-                        }
+                        castW(t);
                     }
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
@@ -251,7 +254,7 @@ namespace Jinx
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                              enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
                             {
-                                W.CastIfHitchanceEquals(t, HitChance.High, true);
+                                W.Cast(enemy, true);
                             }
                         }
                     }
@@ -299,7 +302,7 @@ namespace Jinx
                                 {
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                     if (Config.Item("debug").GetValue<bool>())
-                                        Game.PrintChat("R normal");
+                                        Game.PrintChat("R normal ");
                                 }
                                 else
                                 {
