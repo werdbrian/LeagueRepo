@@ -88,10 +88,10 @@ namespace Sivir
 
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Orbwalking.AfterAttack += AfterAttackEvenH;
+            Orbwalking.AfterAttack += Orbwalker_AfterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.5.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
@@ -120,7 +120,8 @@ namespace Sivir
                         {
                             Q.Cast(target, true);
                         }
-                    } 
+                    }
+                    
                 }
             }
         }
@@ -131,11 +132,14 @@ namespace Sivir
                 E.Cast();
             return;
         }
-        private static void AfterAttackEvenH(AttackableUnit unit, AttackableUnit target)
+        public static void Orbwalker_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
+            if (!unit.IsMe)
+                return;
             ManaMenager();
+            Game.PrintChat("" + unit.Name);
             var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-            if (W.IsReady() && unit.IsMe)
+            if (W.IsReady() )
             {
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast();
@@ -160,7 +164,7 @@ namespace Sivir
                         qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
                     if (qDmg  > t.Health)
                         castQ(t);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && t.IsValidTarget(Q.Range - 150))
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         castQ(t);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear")))
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)

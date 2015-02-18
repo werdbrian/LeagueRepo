@@ -162,7 +162,6 @@ namespace Ezreal
             {
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-
                 var t = TargetSelector.GetTarget( 1300, TargetSelector.DamageType.Physical);
 
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA 
@@ -186,8 +185,7 @@ namespace Ezreal
                          )
                      {
                          E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-                         if (Config.Item("debug").GetValue<bool>())
-                             Game.PrintChat("E kill Q");
+                         debug("E kill Q");
                      }
                     else if (t2.IsValidTarget()
                      && t2.Position.Distance(Game.CursorPos) +300 < t2.Position.Distance(ObjectManager.Player.Position)
@@ -196,9 +194,7 @@ namespace Ezreal
                      && !Orbwalking.InAutoAttackRange(t2))
                     {
                         E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-
-                        if (Config.Item("debug").GetValue<bool>())
-                            Game.PrintChat("E kill aa");
+                        debug("E kill aa");
                         OverKill = Game.Time;
                     }
                 }
@@ -244,8 +240,7 @@ namespace Ezreal
                             {
                                 castQ(target);
                                 OverKill = Game.Time;
-                                if (Config.Item("debug").GetValue<bool>() && !Q.IsReady())
-                                    Game.PrintChat("Q ks");
+                                debug("Q ks");
                             }
                         }
                     }
@@ -262,7 +257,7 @@ namespace Ezreal
                     var wDmg = W.GetDamage(t);
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800)> 1)
                     {
-                        
+                        debug("Q noob mode");
                     }
                     else if (t.IsValidTarget(W.Range) &&  qDmg + wDmg > t.Health )
                         castQ(t);
@@ -270,10 +265,7 @@ namespace Ezreal
                         castQ(t);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                     {
-                        if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8)
-                            Q.Cast(t, true);
-                        else if (t.Path.Count() < 2)
-                            Q.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
+                        castQ(t);
                     }
 
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
@@ -284,7 +276,7 @@ namespace Ezreal
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                              enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
                             {
-                                Q.Cast(t, true);
+                                Q.Cast(enemy, true);
                             }
                         }
                     }
@@ -306,7 +298,7 @@ namespace Ezreal
                         castW(t);
                     else if (qDmg * 2 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
                     {
-
+                        debug("W noob mode");
                     }
                     else if ( Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         castW(t);
@@ -354,8 +346,7 @@ namespace Ezreal
                         else if (Rdmg > predictedHealth && target.HasBuff("Recall"))
                         {
                             R.Cast(target, true, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("R recall");
+                            debug("R recall");
                         }
                         else if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
                          target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
@@ -396,7 +387,11 @@ namespace Ezreal
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
-
+        public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Game.PrintChat(msg);
+        }
         private static double getRdmg(Obj_AI_Hero target)
         {
                 var rDmg = R.GetDamage(target);
@@ -445,7 +440,9 @@ namespace Ezreal
 
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
-        {          
+        {
+            if (!unit.IsMe)
+                return;
             attackNow = true;
             OverFarm = Game.Time;
         }
@@ -462,8 +459,10 @@ namespace Ezreal
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
-                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range),true); 
-                return;
+                {
+                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                    debug("E AGC");
+                }
             }
             return;
         }
@@ -481,6 +480,7 @@ namespace Ezreal
                     if (HpLeft < 0 && target.IsValidTarget() && target.IsValidTarget(R.Range))
                     {
                         OverKill = Game.Time;
+                        debug("OverKill detection " + target.ChampionName);
                     }
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(Q.Range) && Q.IsReady())
                     {
@@ -488,8 +488,7 @@ namespace Ezreal
                         if (qDmg > HpLeft && HpLeft > 0)
                         {
                             Q.Cast(target, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("Q ks OPS");
+                            debug("Q ks OPS");
                         }
                     }
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(W.Range) && W.IsReady())
@@ -498,8 +497,7 @@ namespace Ezreal
                         if (wDmg > HpLeft && HpLeft > 0)
                         {
                             W.Cast(target, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("W ks OPS");
+                            debug("W ks OPS");
                         }
                     }
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(800) == 0)
@@ -508,8 +506,7 @@ namespace Ezreal
                         if (rDmg > HpLeft && HpLeft > 0  && target.CountAlliesInRange(500) == 0)
                         {
                             R.Cast(target, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("R OPS");
+                            debug("R OPS");
                         }
                     }
                 }

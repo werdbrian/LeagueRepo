@@ -321,6 +321,8 @@ namespace Jinx
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
+            if (!unit.IsMe)
+                return;
             attackNow = true;
         }
 
