@@ -54,7 +54,7 @@ namespace Vayne_OneKeyToWin
             Q = new Spell(SpellSlot.Q, 300);
             E = new Spell(SpellSlot.E, 560);
             R = new Spell(SpellSlot.R, 3000);
-
+            E.SetTargetted(0.25f, 2000f);
 
             SpellList.Add(Q);
 
@@ -82,6 +82,7 @@ namespace Vayne_OneKeyToWin
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -101,13 +102,16 @@ namespace Vayne_OneKeyToWin
                 Farm = false;
 
             
-
+            
             if (E.IsReady())
             {
                 CondemnCheck(ObjectManager.Player.ServerPosition);
                 var t = TargetSelector.GetTarget(200, TargetSelector.DamageType.Physical);
-                if (E.IsReady() && !Q.IsReady() && t.IsValidTarget() && t.IsMelee())
-                    Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
+                if (E.IsReady() && !Q.IsReady() && t.IsValidTarget() && t.IsMelee() && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
+                {
+                    E.Cast(t, true);
+                    debug("E push");
+                }
             }
 
 
@@ -117,27 +121,79 @@ namespace Vayne_OneKeyToWin
 
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 var t2 = TargetSelector.GetTarget(200, TargetSelector.DamageType.Physical);
+
+
                 if (Q.IsReady()
                     && t2.IsValidTarget() && t2.IsMelee()
-                    && ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range).CountEnemiesInRange(500) < 3)
-                    Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
-                if (t.IsValidTarget() && Q.IsReady()
-                      && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
-                      && !Orbwalking.InAutoAttackRange(t))
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range).CountEnemiesInRange(500) < 3
+                    && ObjectManager.Player.Position.Distance(t2.ServerPosition) < ObjectManager.Player.Position.Distance(t2.Position)
+                    && t2.Position.Distance(ObjectManager.Player.ServerPosition) > t2.Position.Distance(ObjectManager.Player.Position))
                 {
                     Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
+                    debug("Q escape");
+                }
+                else if (t.IsValidTarget()
+                      && ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range).CountEnemiesInRange(700) < 3
+                      && !Orbwalking.InAutoAttackRange(t)
+                      && ObjectManager.Player.Position.Distance(t.ServerPosition) > ObjectManager.Player.Position.Distance(t.Position)
+                      && t.Position.Distance(ObjectManager.Player.ServerPosition) < t.Position.Distance(ObjectManager.Player.Position))
+                {
+                    Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
+                    debug("Q run");
+                }
+                if (E.IsReady() 
+                    && Q.IsReady() 
+                    && CondemnCheckE(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range))
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range).CountEnemiesInRange(700) < 3)
+                {
+                    Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
+                    debug("Q + E codom");
                 }
                 
             }
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && !ObjectManager.Player.UnderTurret(true))
-            {
-               
-            }
+           if (R.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && Config.Item("autoR").GetValue<bool>())
+           {
+               if (ObjectManager.Player.CountEnemiesInRange(800f) > 2)
+                   R.Cast();
+           }
             PotionMenager();
         }
-
+        public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Game.PrintChat(msg);
+        }
         public static void CondemnCheck(Vector3 fromPosition)
+        {
+            //VHReborn Condemn Code
+            foreach (var target in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range)))
+            {
+                var pushDistance = 380;
+                var targetPosition = E.GetPrediction(target).UnitPosition;
+                var finalPosition = targetPosition.Extend(fromPosition, -pushDistance);
+                var numberOfChecks = Math.Ceiling(pushDistance / target.BoundingRadius);
+                for (var i = 0; i < numberOfChecks; i++)
+                {
+                    var extendedPosition = targetPosition.Extend(fromPosition, -(float)(numberOfChecks * target.BoundingRadius));
+                    var extendedPosition2 = targetPosition.Extend(fromPosition, -(float)(numberOfChecks * target.BoundingRadius + target.BoundingRadius / 4));
+                    var extendedPosition3 = targetPosition.Extend(fromPosition, -(float)(numberOfChecks * target.BoundingRadius - target.BoundingRadius / 4));
+                    if (extendedPosition.IsWall() || extendedPosition2.IsWall() || extendedPosition3.IsWall() ||  finalPosition.IsWall())
+                    {
+                        if (target.Path.Count() < 2)
+                        {
+                            E.Cast(target);
+                            debug("E Condemn");
+                        }
+                    }
+                }
+            }
+        }
+        public static bool hasStacks(Obj_AI_Hero target)
+        {
+            return target.Buffs.Any(bu => bu.Name == "vaynesilvereddebuff" && bu.Count > 0);
+        }
+        public static bool CondemnCheckE(Vector3 fromPosition)
         {
             //VHReborn Condemn Code
             foreach (var target in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range)))
@@ -151,13 +207,14 @@ namespace Vayne_OneKeyToWin
                     var extendedPosition = targetPosition.Extend(fromPosition, -(float)(numberOfChecks * target.BoundingRadius));
                     var extendedPosition2 = targetPosition.Extend(fromPosition, -(float)(numberOfChecks * target.BoundingRadius + target.BoundingRadius / 4));
                     var extendedPosition3 = targetPosition.Extend(fromPosition, -(float)(numberOfChecks * target.BoundingRadius - target.BoundingRadius / 4));
-                    if (extendedPosition.IsWall() || extendedPosition2.IsWall() || extendedPosition3.IsWall() ||  finalPosition.IsWall())
+                    if (extendedPosition.IsWall() || extendedPosition2.IsWall() || extendedPosition3.IsWall() || finalPosition.IsWall())
                     {
-                        E.Cast(target);
+                        return true;
                     }
                 }
 
             }
+            return false;
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -166,21 +223,31 @@ namespace Vayne_OneKeyToWin
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
+                {
                     E.Cast(Target, true);
-                return;
+                    debug("E AGC");
+                    return;
+                }
             }
             return;
         }
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-
-
+            var t = TargetSelector.GetTarget(500, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget() && Q.IsReady() && Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health && Orbwalking.InAutoAttackRange(t))
+                {
+                    Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
+                }
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-
+            foreach (var taa in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (taa.IsValidTarget() && hasStacks(taa) && Orbwalking.InAutoAttackRange(taa))
+                    Orbwalker.ForceTarget(taa);
+            }
         }
 
 
@@ -246,6 +313,7 @@ namespace Vayne_OneKeyToWin
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
+            
         }
     }
 }
