@@ -137,7 +137,6 @@ namespace Sivir
             if (!unit.IsMe)
                 return;
             ManaMenager();
-            Game.PrintChat("" + unit.Name);
             var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
             if (W.IsReady() )
             {

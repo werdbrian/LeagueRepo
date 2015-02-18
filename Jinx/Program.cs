@@ -148,7 +148,7 @@ namespace Jinx
                 }
             }
 
-            if (Q.IsReady() && attackNow)
+            if (Q.IsReady())
             {
                 ManaMenager();
                 if (Farm)
@@ -168,7 +168,7 @@ namespace Jinx
                         else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && haras() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
                             Q.Cast();
                     }
-                    else if (FishBoneActive)
+                    else if (FishBoneActive && attackNow)
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                             Q.Cast();
@@ -321,8 +321,6 @@ namespace Jinx
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (!unit.IsMe)
-                return;
             attackNow = true;
         }
 
