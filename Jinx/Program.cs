@@ -50,7 +50,6 @@ namespace Jinx
             Player = ObjectManager.Player;
             if (Player.BaseSkinName != ChampionName) return;
 
-            //Create the spells
             Q = new Spell(SpellSlot.Q, float.MaxValue);
             W = new Spell(SpellSlot.W, 1500f);
             E = new Spell(SpellSlot.E, 900f);
@@ -67,39 +66,36 @@ namespace Jinx
             SpellList.Add(E);
             SpellList.Add(R);
             SpellList.Add(R1);
-            //Create the menu
-            Config = new Menu(ChampionName, ChampionName, true);
 
+            Config = new Menu(ChampionName, ChampionName, true);
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
-
-            //Orbwalker submenu
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-
-            //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
+            #region E
+                Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E in Combo BETA").SetValue(true));
+                Config.SubMenu("E Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
+                Config.SubMenu("E Config").AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
+            #endregion
+            #region R
+                Config.SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+                Config.SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
+                Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            #endregion
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
-            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.AddItem(new MenuItem("autoE", "Auto E in Combo BETA").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 2, 0)));
-            Config.AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
-            Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
-            Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 2.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic AI ver 2.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -109,6 +105,7 @@ namespace Jinx
                 Farm = true;
             else
                 Farm = false;
+
             if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && E.IsReady()))
@@ -137,8 +134,7 @@ namespace Jinx
                         if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
                         {
                             E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("run ");
+                            debug("E run");
                         }
                     }
                     else
@@ -146,13 +142,11 @@ namespace Jinx
                         if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
                         {
                             E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
-                            if (Config.Item("debug").GetValue<bool>())
-                                Game.PrintChat("run2 ");
+                            debug("E escape");
                         }
                     }
                 }
             }
-
 
             if (Q.IsReady() && attackNow)
             {
@@ -229,12 +223,12 @@ namespace Jinx
                             if (!Orbwalking.InAutoAttackRange(target) && cast && target.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
                                 W.Cast(target, true);
-                                if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("W ks");
+                                debug("W ks");
                             }
                         }
                     }
                 }
+
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && W.IsReady() && !wait)
                 {
@@ -261,7 +255,6 @@ namespace Jinx
                 }
             }
             
-
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
@@ -298,33 +291,27 @@ namespace Jinx
                             
                             if (cast && target.IsValidTarget(R.Range) && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
-                                if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() <2)
+                                if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() < 2)
                                 {
                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    if (Config.Item("debug").GetValue<bool>())
-                                        Game.PrintChat("R normal ");
+                                    debug("R normal");
                                 }
                                 else
                                 {
                                     R.Cast(target, true);
-                                    if (Config.Item("debug").GetValue<bool>())
-                                        Game.PrintChat("R normal");
+                                    debug("R normal");
                                 }
                             }
-
                             else if (cast && target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2 && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius )
                             {
                                 R1.Cast(target, true, true);
-                                if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("R aoe 1");
+                                debug("R aoe 1");
                             }
                             else if (cast && target.HasBuff("Recall"))
                             {
                                 R.Cast(target, true, true);
-                                if (Config.Item("debug").GetValue<bool>())
-                                    Game.PrintChat("R recall");
+                                debug("R recall");
                             }
-
                         }
                     }
                 }
@@ -335,8 +322,6 @@ namespace Jinx
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             attackNow = true;
-            
-            
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -370,10 +355,8 @@ namespace Jinx
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
                 {
-
                     E.Cast(ObjectManager.Player.ServerPosition, true);
-                    if (Config.Item("debug").GetValue<bool>())
-                        Game.PrintChat("E AGC");
+                    debug("E agc");
                 }
                 return;
             }
@@ -407,6 +390,7 @@ namespace Jinx
             else
                 return false;
         }
+
         private static void castW(Obj_AI_Hero target)
         {
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
@@ -416,6 +400,7 @@ namespace Jinx
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
+
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
             double ShouldUse = ShouldUseE(args.SData.Name);
@@ -423,8 +408,7 @@ namespace Jinx
             if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f && unit.IsValidTarget(E.Range))
             {
                 E.Cast(unit.ServerPosition, true);
-                if (Config.Item("debug").GetValue<bool>())
-                    Game.PrintChat("E OPS");
+                debug("E ope");
             }
             if (unit.IsMe && args.SData.Name == "JinxW")
             {
@@ -449,8 +433,7 @@ namespace Jinx
                          {
                              W.Cast(target, true);
                              WCastTime = Game.Time;
-                             if (Config.Item("debug").GetValue<bool>())
-                                 Game.PrintChat("W ks OPS");
+                             debug("W ks OPS");
                          }
                      }
                      if (GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius &&  target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
@@ -481,8 +464,7 @@ namespace Jinx
                          if (rDmg > HpLeft && HpLeft > 0 && cast && target.CountAlliesInRange(500) == 0)
                          {
                              R.Cast(target, true);
-                             if (Config.Item("debug").GetValue<bool>())
-                                 Game.PrintChat("R OPS");
+                             debug("R OPS");
                          }
                      }
                      
@@ -578,6 +560,13 @@ namespace Jinx
                 }
             }
         }
+
+        public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Game.PrintChat(msg);
+        }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             

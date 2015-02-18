@@ -91,7 +91,7 @@ namespace Sivir
             Orbwalking.AfterAttack += AfterAttackEvenH;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.5.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
@@ -120,8 +120,7 @@ namespace Sivir
                         {
                             Q.Cast(target, true);
                         }
-                    }
-                    
+                    } 
                 }
             }
         }
@@ -161,7 +160,7 @@ namespace Sivir
                         qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
                     if (qDmg  > t.Health)
                         castQ(t);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && t.IsValidTarget(Q.Range - 150))
                         castQ(t);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear")))
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)

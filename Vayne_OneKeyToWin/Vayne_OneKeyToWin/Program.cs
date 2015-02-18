@@ -57,7 +57,6 @@ namespace Vayne_OneKeyToWin
             E.SetTargetted(0.25f, 2000f);
 
             SpellList.Add(Q);
-
             SpellList.Add(E);
             SpellList.Add(R);
 
