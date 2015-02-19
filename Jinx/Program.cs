@@ -397,7 +397,7 @@ namespace Jinx
                 W.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() == 1)
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
 
