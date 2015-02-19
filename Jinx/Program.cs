@@ -95,7 +95,7 @@ namespace Jinx
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic AI ver 2.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic AI ver 2.5.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -285,7 +285,7 @@ namespace Jinx
                                 double b = c1 / c2;
                                 Vector3 pb = Player.ServerPosition + ((float)b * v);
                                 float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
+                                if (length < (R.Width + 150 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
                             
@@ -397,7 +397,7 @@ namespace Jinx
                 W.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() == 1)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
 
@@ -600,7 +600,12 @@ namespace Jinx
                         Render.Circle.DrawCircle(tw.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     }
+                    
                 }
+            }
+            if (Config.Item("debug").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Q can change: " + attackNow); 
             }
         }
     }
