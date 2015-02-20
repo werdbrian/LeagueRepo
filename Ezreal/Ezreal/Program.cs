@@ -32,6 +32,7 @@ namespace Ezreal
         public static float EMANA;
         public static float RMANA;
         public static bool Farm = false;
+        public static bool Esmart = false;
         public static double WCastTime = 0;
         public static double OverKill = 0;
         public static double OverFarm = 0;
@@ -94,6 +95,7 @@ namespace Ezreal
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
+            Config.AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             #region Combo
                 Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
                 Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
@@ -121,22 +123,26 @@ namespace Ezreal
             foreach (var minion in allMinionsQ)
             {
                 float predictedHealth = HealthPrediction.GetHealthPrediction(minion, (int)(Q.Delay + (Player.Distance(minion.ServerPosition) / Q.Speed) * 1000));
-                if (!Orbwalking.InAutoAttackRange(minion) && predictedHealth < Q.GetDamage(minion))
+                if (predictedHealth < 5)
+                    return;
+                if (!Orbwalking.InAutoAttackRange(minion) && predictedHealth < Q.GetDamage(minion) )
                     Q.Cast(minion);
+                    
                 else if (Game.Time - OverFarm > 0.4
                     && Orbwalker.ActiveMode.ToString() == "LaneClear"
                         && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3
-                        && minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion)
-                        && minion.Health < Q.GetDamage(minion)
-                        && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)))
+                        && predictedHealth > ObjectManager.Player.GetAutoAttackDamage(minion)
+                        && predictedHealth < Q.GetDamage(minion)
+                        && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false))
+                    && Orbwalker.GetTarget() != minion)
                     Q.Cast(minion);
                 else if (
-                    Game.Time - OverFarm > 0.4
-                    && Orbwalker.ActiveMode.ToString() == "LaneClear"
+                    Orbwalker.ActiveMode.ToString() == "LaneClear"
                     && ObjectManager.Player.UnderTurret(false)
-                    && minion.Health < Q.GetDamage(minion)
+                    && predictedHealth < Q.GetDamage(minion)
                     && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA
-                    && minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion))
+                    && predictedHealth > ObjectManager.Player.GetAutoAttackDamage(minion)
+                    && Orbwalker.GetTarget() != minion)
                     Q.Cast(minion);
             }
             if (mobs.Count > 0 && Q.IsReady() && Orbwalker.ActiveMode.ToString() == "LaneClear")
@@ -157,12 +163,26 @@ namespace Ezreal
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
-
+            if (E.IsReady())
+            {
+                if (Config.Item("smartE").GetValue<KeyBind>().Active)
+                {
+                    Esmart = true;
+                }
+                if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3)
+                {
+                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                }
+            }
+            else
+            {
+                Esmart = false;
+            }
             if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-                var t = TargetSelector.GetTarget( 1300, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget( 1400, TargetSelector.DamageType.Physical);
 
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA 
                     && ObjectManager.Player.CountEnemiesInRange(270) > 0 
@@ -281,7 +301,7 @@ namespace Ezreal
                         }
                     }
                 }
-                if (Farm && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA  + WMANA + QMANA * 3)
+                if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                     farmQ();
             }
             if (W.IsReady() && attackNow)
@@ -444,7 +464,6 @@ namespace Ezreal
             if (!unit.IsMe)
                 return;
             attackNow = true;
-            OverFarm = Game.Time;
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)

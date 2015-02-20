@@ -15,6 +15,7 @@ namespace Jinx
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
+        
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
@@ -66,7 +67,6 @@ namespace Jinx
             SpellList.Add(E);
             SpellList.Add(R);
             SpellList.Add(R1);
-
             Config = new Menu(ChampionName, ChampionName, true);
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
