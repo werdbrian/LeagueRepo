@@ -169,7 +169,7 @@ namespace Ezreal
                 {
                     Esmart = true;
                 }
-                if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3)
+                if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 4)
                 {
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                 }
