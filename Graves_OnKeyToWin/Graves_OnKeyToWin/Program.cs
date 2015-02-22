@@ -30,6 +30,8 @@ namespace Graves_OnKeyToWin
         public static float EMANA;
         public static float RMANA;
         public static bool Farm = false;
+        public static bool Esmart = false;
+        public static double secoundDmgR = 0.65;
         public static double OverKill = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
@@ -85,10 +87,12 @@ namespace Graves_OnKeyToWin
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("HitR", "Hit Chance R").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -96,6 +100,12 @@ namespace Graves_OnKeyToWin
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Orbwalking.AfterAttack += afterAttack;
             Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+        }
+
+        public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Game.PrintChat(msg);
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -106,6 +116,24 @@ namespace Graves_OnKeyToWin
             else
                 Farm = false;
 
+            if (Orbwalker.GetTarget() == null)
+                attackNow = true;
+
+            if (E.IsReady())
+            {
+                if (Config.Item("smartE").GetValue<KeyBind>().Active)
+                {
+                    Esmart = true;
+                }
+                if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 4)
+                {
+                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                }
+
+            }
+            else
+                Esmart = false;
+            
             if (W.IsReady())
             {
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
@@ -114,14 +142,12 @@ namespace Graves_OnKeyToWin
                     if (W.GetDamage(t) > t.Health)
                     {
                         W.Cast(t, true, true);
+                        debug("W ks");
                         OverKill = Game.Time;
                         return;
                     }
                     else if (W.GetDamage(t) + Q.GetDamage(t) > t.Health && ObjectManager.Player.Mana >  QMANA + EMANA + RMANA )
-                    {
                         W.Cast(t, true, true);
-                        OverKill = Game.Time;
-                    }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                         W.Cast(t, true, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + 5
@@ -166,6 +192,7 @@ namespace Graves_OnKeyToWin
                     )
                     {
                         E.Cast(Game.CursorPos, true);
+                        debug("E + aa + Q");
                     }
                     else if (t2.IsValidTarget()
                      && ObjectManager.Player.Mana > QMANA + RMANA
@@ -175,6 +202,7 @@ namespace Graves_OnKeyToWin
                      )
                     {
                         E.Cast(Game.CursorPos, true);
+                        debug("E + aa");
                     }
                     else if (t.IsValidTarget()
                      && Q.IsReady() && R.IsReady()
@@ -184,6 +212,7 @@ namespace Graves_OnKeyToWin
                      && !Orbwalking.InAutoAttackRange(t2))
                     {
                         E.Cast(Game.CursorPos, true);
+                        debug("E + Q + R");
                     }
                 }
             }
@@ -198,15 +227,16 @@ namespace Graves_OnKeyToWin
                     {
                         Q.Cast(t, true);
                         OverKill = Game.Time;
-                        return;
+                        debug("Q ks");
                     }
                     else if (Q.GetDamage(t) + R.GetDamage(t) > t.Health && R.IsReady())
                     {
                         Q.Cast(t, true);
+                        debug("Q + R ks");
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA && attackNow)
                         castQ(t);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 60) && attackNow)
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && attackNow)
                         castQ(t);
                     else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && attackNow)
                     {
@@ -264,15 +294,25 @@ namespace Graves_OnKeyToWin
                             && Rdmg > predictedHealth
                             && target.IsValidTarget(R.Range)
                             && (!Orbwalking.InAutoAttackRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6))
+                        {
+
                             castR(target);
+                            debug("Rdmg");
+                        }
                         else if (cast
-                            && Rdmg * 0.7 > predictedHealth
+                            && Rdmg * secoundDmgR > predictedHealth
                             && target.IsValidTarget(R1.Range)
                             && target.CountAlliesInRange(300) == 0 && (!Orbwalking.InAutoAttackRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6))
+                        {
                             R1.Cast(target, true, true);
-                        else if (!cast && Rdmg * 0.7 > predictedHealth
+                            debug("Rdmg 0.7");
+                        }
+                        else if (!cast && Rdmg * secoundDmgR > predictedHealth
                             && target.IsValidTarget(GetRealDistance(collisionTarget) + 700))
+                        {
                             R1.Cast(target, true, true);
+                            debug("Rdmg 0.7 collision");
+                        }
                     }
                 }
             }
@@ -312,14 +352,16 @@ namespace Graves_OnKeyToWin
                     if (HpLeft < 0 && target.IsValidTarget())
                     {
                         OverKill = Game.Time;
+                        debug("OverKill detection " + target.ChampionName);
                     }
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(Q.Range) && Q.IsReady() && qDmg > HpLeft && HpLeft > 0)
                     {
                             Q.Cast(target, true);
+                            debug("Q ops");
                     }
                     else if (
                         HpLeft > 0 
-                        && rDmg * 0.7 > HpLeft 
+                        && rDmg * secoundDmgR > HpLeft 
                         && target.IsValidTarget(R1.Range) 
                         && R1.IsReady()
                         && (!Orbwalking.InAutoAttackRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
@@ -347,17 +389,20 @@ namespace Graves_OnKeyToWin
                             if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                 cast = false;
                         }
-                        if (rDmg > HpLeft &&  cast && target.IsValidTarget(R.Range))
+                        if (rDmg > HpLeft && cast && target.IsValidTarget(R.Range))
                         {
                             castR(target);
+                            debug("R ops");
                         }
-                        else if (rDmg * 0.7 > HpLeft)
+                        else if (rDmg * secoundDmgR > HpLeft)
                         {
                             R1.Cast(target, true);
+                            debug("R2 ops");
                         }
                         else if (rDmg + qDmg > HpLeft && cast && target.IsValidTarget(Q.Range))
                         {
                             castR(target);
+                            debug("R + Q ops");
                         }
                     }
                 }
@@ -370,7 +415,10 @@ namespace Graves_OnKeyToWin
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
+                {
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                    debug("E agc");
+                }
                 return;
             }
             return;
@@ -384,10 +432,8 @@ namespace Graves_OnKeyToWin
         }
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-
             attackNow = false;
         }
-
 
         public static void UseItem(int id, Obj_AI_Hero target = null)
         {
@@ -450,7 +496,7 @@ namespace Graves_OnKeyToWin
                 float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                 if (t.IsValidTarget() && R.IsReady())
                 {
-                    var rDamage = R.GetDamage(t) * 0.7;
+                    var rDamage = R.GetDamage(t) * secoundDmgR;
                     if (rDamage > predictedHealth)
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     if (Config.Item("useR").GetValue<KeyBind>().Active)
@@ -461,7 +507,6 @@ namespace Graves_OnKeyToWin
                 var tw = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-                    
                     if (Q.GetDamage(tw) > tw.Health)
                     {
                         Utility.DrawCircle(ObjectManager.Player.ServerPosition, Q.Range, System.Drawing.Color.Red);
