@@ -78,6 +78,7 @@ namespace Jinx
                 Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E in Combo BETA").SetValue(true));
                 Config.SubMenu("E Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
                 Config.SubMenu("E Config").AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
+                Config.SubMenu("E Config").AddItem(new MenuItem("telE", "Auto E teleport").SetValue(true));
             #endregion
             #region R
                 Config.SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
@@ -110,6 +111,13 @@ namespace Jinx
 
             if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
             {
+                if (Config.Item("telE").GetValue<bool>())
+                {
+                    foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && E.IsReady() && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
+                    {
+                        E.Cast(Object.Position, true);
+                    }
+                }
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && E.IsReady()))
                 {
                     if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
@@ -124,10 +132,7 @@ namespace Jinx
                     else
                         E.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
                 }
-                foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && E.IsReady() && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
-                {
-                    E.Cast(Object.Position, true);
-                }
+                
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && ta.IsValidTarget(E.Range) && Config.Item("autoE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
                 {
