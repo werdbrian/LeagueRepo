@@ -173,6 +173,7 @@ namespace Ezreal
                 {
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                 }
+                
             }
             else
             {
@@ -216,6 +217,18 @@ namespace Ezreal
                         E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                         debug("E kill aa");
                         OverKill = Game.Time;
+                    }
+                    else if (t.IsValidTarget()
+                     && ObjectManager.Player.Mana > QMANA + EMANA + WMANA
+                     && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
+                     && W.IsReady()
+                     && W.GetDamage(t) + E.GetDamage(t) > t.Health
+                     && !Orbwalking.InAutoAttackRange(t)
+                     && Q.WillHit(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition)
+                         )
+                    {
+                        E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                        debug("E kill W");
                     }
                 }
             }
@@ -341,7 +354,7 @@ namespace Ezreal
             }
             PotionMenager();
            
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(700) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
@@ -519,7 +532,7 @@ namespace Ezreal
                             debug("W ks OPS");
                         }
                     }
-                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(800) == 0)
+                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                     {
                         double rDmg = getRdmg(target);
                         if (rDmg > HpLeft && HpLeft > 0  && target.CountAlliesInRange(500) == 0)

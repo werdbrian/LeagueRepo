@@ -83,7 +83,9 @@ namespace Jinx
                 Config.SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
                 Config.SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
                 Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+
             #endregion
+            Config.AddItem(new MenuItem("Qtype", "new Q method").SetValue(true));
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 2, 0)));
@@ -115,9 +117,9 @@ namespace Jinx
                          enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
                          enemy.IsStunned || enemy.HasBuff("Recall"))
                         E.Cast(enemy, true);
-                    else if (enemy.HasBuffOfType(BuffType.Slow) && enemy.Path.Count() > 1)
+                    else if (enemy.HasBuffOfType(BuffType.Slow) && enemy.Path.Count() < 2)
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
-                    else if (enemy.Path.Count() > 1 && enemy.CountEnemiesInRange(300) > 2)
+                    else if (enemy.Path.Count() < 2 && enemy.CountEnemiesInRange(300) > 2)
                         E.CastIfHitchanceEquals(enemy, HitChance.VeryHigh, true);
                     else
                         E.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
@@ -168,7 +170,7 @@ namespace Jinx
                         else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && haras() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
                             Q.Cast();
                     }
-                    else if (FishBoneActive && attackNow)
+                    else if (FishBoneActive && Config.Item("Qtype").GetValue<bool>() && attackNow)
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                             Q.Cast();
@@ -222,7 +224,7 @@ namespace Jinx
                             }
                             if (!Orbwalking.InAutoAttackRange(target) && cast && target.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
-                                W.Cast(target, true);
+                                castW(target);
                                 debug("W ks");
                             }
                         }
@@ -321,14 +323,33 @@ namespace Jinx
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            attackNow = true;
+            if (!unit.IsMe ) return;
+            attackNow = false;
+            var t = TargetSelector.GetTarget(bonusRange() + 50, TargetSelector.DamageType.Physical);
+            if (Q.IsReady() && !Config.Item("Qtype").GetValue<bool>() && FishBoneActive && t.IsValidTarget())
+            {
+                var distance = GetRealDistance(t);
+                var powPowRange = GetRealPowPowRange(t);
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
+                    Q.Cast();
+                else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
+                    Q.Cast();
+            }
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            attackNow = false;
+            attackNow = true;
             var t = TargetSelector.GetTarget(bonusRange() + 50, TargetSelector.DamageType.Physical);
-
+            if (Q.IsReady() && !Config.Item("Qtype").GetValue<bool>() && FishBoneActive && t.IsValidTarget())
+            {
+                var distance = GetRealDistance(t);
+                var powPowRange = GetRealPowPowRange(t);
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
+                    Q.Cast();
+                else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
+                    Q.Cast();
+            }
             if (Q.IsReady() && Orbwalker.ActiveMode.ToString() == "LaneClear" && !FishBoneActive && ObjectManager.Player.Mana < RMANA + EMANA + WMANA + 30)
             {
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
