@@ -53,7 +53,7 @@ namespace Graves_OnKeyToWin
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 950f);
+            Q = new Spell(SpellSlot.Q, 930f);
             W = new Spell(SpellSlot.W, 950f);
             E = new Spell(SpellSlot.E, 450f);
             R = new Spell(SpellSlot.R, 1000f);
@@ -281,7 +281,6 @@ namespace Graves_OnKeyToWin
                             && target.IsValidTarget(R.Range)
                             && (!Orbwalking.InAutoAttackRange(target) || ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6))
                         {
-
                             castR(target);
                             debug("Rdmg");
                         }

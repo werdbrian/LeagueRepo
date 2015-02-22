@@ -89,7 +89,7 @@ namespace Vayne_OneKeyToWin
             Orbwalking.AfterAttack += afterAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            Game.PrintChat("<font color=\"#7e62cc\">C</font>aitlyn full automatic SI ver 1.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#7e62cc\">V</font>aine full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -100,8 +100,6 @@ namespace Vayne_OneKeyToWin
             else
                 Farm = false;
 
-            
-            
             if (E.IsReady())
             {
                 CondemnCheck(ObjectManager.Player.ServerPosition);
@@ -113,7 +111,6 @@ namespace Vayne_OneKeyToWin
                 }
             }
 
-
            if (Orbwalker.ActiveMode.ToString() == "Combo" && Q.IsReady() )
             {
                 ManaMenager();
@@ -123,16 +120,16 @@ namespace Vayne_OneKeyToWin
 
 
                 if (Q.IsReady()
-                    && t2.IsValidTarget() && t2.IsMelee()
+                    && ObjectManager.Player.CountEnemiesInRange(280) > 0 
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range).CountEnemiesInRange(500) < 3
-                    && ObjectManager.Player.Position.Distance(t2.ServerPosition) < ObjectManager.Player.Position.Distance(t2.Position)
-                    && t2.Position.Distance(ObjectManager.Player.ServerPosition) > t2.Position.Distance(ObjectManager.Player.Position))
+                    && t.Position.Distance(Game.CursorPos)  > t.Position.Distance(ObjectManager.Player.Position))
                 {
                     Q.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range), true);
                     debug("Q escape");
                 }
                 else if (t.IsValidTarget()
                       && ObjectManager.Player.Position.Extend(Game.CursorPos, Q.Range).CountEnemiesInRange(700) < 3
+                      && (t.CountEnemiesInRange(800) < 2 || ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
                       && !Orbwalking.InAutoAttackRange(t)
                       && ObjectManager.Player.Position.Distance(t.ServerPosition) > ObjectManager.Player.Position.Distance(t.Position)
                       && t.Position.Distance(ObjectManager.Player.ServerPosition) < t.Position.Distance(ObjectManager.Player.Position))
