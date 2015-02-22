@@ -75,7 +75,8 @@ namespace Jinx
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
             #region E
-                Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E in Combo BETA").SetValue(true));
+                Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+                Config.SubMenu("E Config").AddItem(new MenuItem("comboE", "Auto E in Combo BETA").SetValue(true));
                 Config.SubMenu("E Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
                 Config.SubMenu("E Config").AddItem(new MenuItem("opsE", "OnProcessSpellCastE").SetValue(true));
                 Config.SubMenu("E Config").AddItem(new MenuItem("telE", "Auto E teleport").SetValue(true));
@@ -109,7 +110,7 @@ namespace Jinx
             else
                 Farm = false;
 
-            if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
+            if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
             {
                 if (Config.Item("telE").GetValue<bool>())
                 {
@@ -134,7 +135,7 @@ namespace Jinx
                 }
                 
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && ta.IsValidTarget(E.Range) && Config.Item("autoE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && ta.IsValidTarget(E.Range) && Config.Item("comboE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
                 {
                     if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
                     {

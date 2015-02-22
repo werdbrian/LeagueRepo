@@ -186,7 +186,7 @@ namespace Ezreal
                 var t = TargetSelector.GetTarget( 1400, TargetSelector.DamageType.Physical);
 
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA 
-                    && ObjectManager.Player.CountEnemiesInRange(270) > 0 
+                    && ObjectManager.Player.CountEnemiesInRange(280) > 0 
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t.Position.Distance(Game.CursorPos)  > t.Position.Distance(ObjectManager.Player.Position))
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
