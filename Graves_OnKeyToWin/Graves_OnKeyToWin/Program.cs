@@ -134,7 +134,7 @@ namespace Graves_OnKeyToWin
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
-                    if (W.GetDamage(t) > t.Health)
+                    if (W.GetDamage(t) > t.Health && !Orbwalking.InAutoAttackRange(t))
                     {
                         W.Cast(t, true, true);
                         debug("W ks");
@@ -176,7 +176,7 @@ namespace Graves_OnKeyToWin
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-                else if (E.IsReady() && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true))
+                else if (E.IsReady() && (Game.Time - OverKill > 0.4) && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true))
                 {
                     if (t.IsValidTarget()
                     && Q.IsReady()

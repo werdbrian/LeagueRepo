@@ -40,7 +40,7 @@ namespace Ezreal
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
         public static Items.Item Youmuu = new Items.Item(3142, 0);
-
+        public static int Muramana = 3042;
         //Menu
         public static Menu Config;
 
@@ -92,6 +92,7 @@ namespace Ezreal
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
@@ -111,7 +112,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.9 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 1.9.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -179,6 +180,9 @@ namespace Ezreal
             {
                 Esmart = false;
             }
+
+
+
             if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 ManaMenager();
@@ -186,13 +190,13 @@ namespace Ezreal
                 var t = TargetSelector.GetTarget( 1400, TargetSelector.DamageType.Physical);
 
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA 
-                    && ObjectManager.Player.CountEnemiesInRange(280) > 0 
+                    && ObjectManager.Player.CountEnemiesInRange(260) > 0 
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t.Position.Distance(Game.CursorPos)  > t.Position.Distance(ObjectManager.Player.Position))
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                 else if (ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 
                     && !ObjectManager.Player.UnderTurret(true) 
-                    && (Game.Time - OverKill > 0.6)
+                    && (Game.Time - OverKill > 0.4)
                     
                      && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
                 {
@@ -235,7 +239,19 @@ namespace Ezreal
 
             if (Q.IsReady())
             {
+                //Q.Cast(ObjectManager.Player);
                 ManaMenager();
+                if (Config.Item("mura").GetValue<bool>())
+                {
+                    int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
+                    if (Orbwalker.ActiveMode.ToString() == "Combo" && Items.HasItem(Mur) && Items.CanUseItem(Mur) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                    {
+                        if (!ObjectManager.Player.HasBuff("Muramana"))
+                            Items.UseItem(Mur);
+                    }
+                    else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
+                        Items.UseItem(Mur);
+                }
                 bool cast = false;
                 bool wait = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
@@ -319,6 +335,7 @@ namespace Ezreal
             }
             if (W.IsReady() && attackNow)
             {
+                //W.Cast(ObjectManager.Player);
                 ManaMenager();
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
@@ -354,7 +371,7 @@ namespace Ezreal
             }
             PotionMenager();
            
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(700) == 0 && (Game.Time - OverKill > 0.6))
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(750) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
@@ -481,8 +498,18 @@ namespace Ezreal
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-
             attackNow = false;
+            if (Config.Item("mura").GetValue<bool>())
+            {
+                int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
+                if (args.Target.IsEnemy && args.Target.IsValid<Obj_AI_Hero>() && Items.HasItem(Mur) && Items.CanUseItem(Mur) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                {
+                    if (!ObjectManager.Player.HasBuff("Muramana"))
+                        Items.UseItem(Mur);
+                }
+                else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
+                    Items.UseItem(Mur);
+            }
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
