@@ -41,6 +41,8 @@ namespace Ezreal
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
         public static Items.Item Youmuu = new Items.Item(3142, 0);
         public static int Muramana = 3042;
+        public static int Tear = 3070;
+        public static int Manamune = 3004;
         //Menu
         public static Menu Config;
 
@@ -93,6 +95,8 @@ namespace Ezreal
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
+            Config.AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
+            Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
@@ -112,7 +116,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         public static void farmQ()
@@ -330,8 +334,18 @@ namespace Ezreal
                         }
                     }
                 }
-                if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
+                else if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                     farmQ();
+                else if (Config.Item("stack").GetValue<bool>() && (Items.HasItem(Tear) || Items.HasItem(Manamune)) && ObjectManager.Player.Mana == ObjectManager.Player.MaxMana && Q.IsReady())
+                {
+                    Q.Cast(ObjectManager.Player);
+                }
+                
+
+
+                
+
+
             }
             if (W.IsReady() && attackNow)
             {
@@ -371,7 +385,7 @@ namespace Ezreal
             }
             PotionMenager();
            
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(750) == 0 && (Game.Time - OverKill > 0.6))
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
@@ -509,6 +523,14 @@ namespace Ezreal
                 }
                 else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
                     Items.UseItem(Mur);
+            }
+            if (Config.Item("wPush").GetValue<bool>() && args.Target.IsValid<Obj_AI_Turret>()  && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA + WMANA + RMANA)
+            {
+                foreach (var ally in ObjectManager.Get<Obj_AI_Hero>())
+                {
+                    if (!ally.IsMe && ally.IsAlly && ally.Distance(ObjectManager.Player.Position) < 600)
+                        W.Cast(ally);
+                }
             }
         }
 
