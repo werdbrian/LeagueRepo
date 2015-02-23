@@ -336,16 +336,10 @@ namespace Ezreal
                 }
                 if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                     farmQ();
-                else if (Orbwalker.ActiveMode.ToString() != "Combo" && !t.IsValidTarget() && Config.Item("stack").GetValue<bool>() && (Items.HasItem(Tear) || Items.HasItem(Manamune)) && ObjectManager.Player.Mana == ObjectManager.Player.MaxMana && Q.IsReady())
+                else if (!ObjectManager.Player.HasBuff("Recall")&& Orbwalker.ActiveMode.ToString() != "Combo" && !t.IsValidTarget() && Config.Item("stack").GetValue<bool>() && (Items.HasItem(Tear) || Items.HasItem(Manamune)) && ObjectManager.Player.Mana == ObjectManager.Player.MaxMana && Q.IsReady())
                 {
                     Q.Cast(ObjectManager.Player);
                 }
-                
-
-
-                
-
-
             }
             if (W.IsReady() && attackNow)
             {
