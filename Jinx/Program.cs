@@ -262,7 +262,17 @@ namespace Jinx
                     }
                 }
             }
+
             
+            if ( R.IsReady())
+            {
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget() && Config.Item("useR").GetValue<KeyBind>().Active)
+                {
+                    R1.Cast(t, true, true);
+                }
+            }
+
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
@@ -611,10 +621,6 @@ namespace Jinx
                     {
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                         Render.Circle.DrawCircle(t.ServerPosition, 200, System.Drawing.Color.Red);
-                    }
-                    if (Config.Item("useR").GetValue<KeyBind>().Active)
-                    {
-                        R1.Cast(t, true, true);
                     }
                 }
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);

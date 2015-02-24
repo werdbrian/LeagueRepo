@@ -652,9 +652,9 @@ namespace Ezreal
                 if (orbT.IsValidTarget())
                     Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Aqua);
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-                float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                 if (t.IsValidTarget() && R.IsReady())
                 {
+                    float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                     double rDamage = R.GetDamage(t);
                     if (rDamage > predictedHealth)
                         rDamage = getRdmg(t);
@@ -676,7 +676,6 @@ namespace Ezreal
                     tw = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-
                     Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Gold);
                     if (Q.GetDamage(tw) > tw.Health)
                     {

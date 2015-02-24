@@ -1,10 +1,7 @@
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\Ezreal.exe.config
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\Ezreal.exe
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\Ezreal.pdb
-C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\LeagueSharp.Common.dll
-C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\LeagueSharp.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\Microsoft.Expression.Drawing.dll
-C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\SharpDX.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\SharpDX.Direct3D9.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\clipper_library.dll
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\LeagueSharp.xml
