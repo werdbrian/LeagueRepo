@@ -9,3 +9,4 @@ C:\Users\Sebastian\Dropbox\LeagueRepo\Caitlyn\Caitlyn\bin\Release\clipper_librar
 C:\Users\Sebastian\Dropbox\LeagueRepo\Caitlyn\Caitlyn\bin\Release\LeagueSharp.xml
 C:\Users\Sebastian\Dropbox\LeagueRepo\Caitlyn\Caitlyn\obj\Debug\Caitlyn.exe
 C:\Users\Sebastian\Dropbox\LeagueRepo\Caitlyn\Caitlyn\obj\Debug\Caitlyn.pdb
+C:\Users\Sebastian\Dropbox\LeagueRepo\Caitlyn\Caitlyn\obj\Debug\Caitlyn.csprojResolveAssemblyReference.cache

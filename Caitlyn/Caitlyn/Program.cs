@@ -178,12 +178,12 @@ namespace Caitlyn
                     double Qdmg = Q.GetDamage(t);
                     if (Qdmg > predictedHealth)
                         Qdmg = getQdmg(t);
-                    if (GetRealDistance(t) > bonusRange() + 150 && Qdmg > predictedHealth)
+                    if (GetRealDistance(t) > bonusRange() + 150 && Qdmg > predictedHealth && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                         castQ(t);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + 10 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 250) == 0 && Config.Item("autoQ").GetValue<bool>())
                         castQ(t);
-                    
-                    if (Q.IsReady() && (Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && Orbwalker.GetTarget() == null && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 60) == 0)
+
+                    if (Q.IsReady() && (Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 60) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
