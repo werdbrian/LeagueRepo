@@ -433,7 +433,6 @@ namespace Ezreal
                     }
                 }
             }
-
         }
         private static void castQ(Obj_AI_Hero target)
         {
@@ -502,7 +501,6 @@ namespace Ezreal
                 return rDmg * 0.7;
             else
                 return rDmg - (rDmg * 0.1 * dmg);
-
         }
 
 
@@ -527,7 +525,7 @@ namespace Ezreal
                 else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
                     Items.UseItem(Mur);
             }
-            if (Config.Item("wPush").GetValue<bool>() && args.Target.IsValid<Obj_AI_Turret>() && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA + WMANA + RMANA)
+            if (W.IsReady() && Config.Item("wPush").GetValue<bool>() && args.Target.IsValid<Obj_AI_Turret>() && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA + WMANA + RMANA)
             {
                 foreach (var ally in ObjectManager.Get<Obj_AI_Hero>())
                 {
