@@ -87,7 +87,7 @@ namespace Jinx
                 Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             #endregion
-            Config.AddItem(new MenuItem("Qtype", "new Q method").SetValue(true));
+            Config.AddItem(new MenuItem("Qtype", "new Q method").SetValue(false));
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 2, 0)));
