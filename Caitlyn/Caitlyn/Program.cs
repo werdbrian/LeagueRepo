@@ -195,7 +195,7 @@ namespace Caitlyn
                     }
                     if (Q.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100) == 0)
                         Q.CastIfWillHit(t, 2, true);
-                    if (Q.IsReady() && (Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100) == 0 && Config.Item("autoQ").GetValue<bool>())
+                    if (Q.IsReady() && (Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100) == 0 )
                     {
                         if (t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
