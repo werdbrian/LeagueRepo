@@ -200,7 +200,7 @@ namespace Caitlyn
                         if (t.Path.Count() > 1)
                         {
                             Q.CastIfWillHit(t, 2, true);
-                            if (Q.IsReady())
+                            if (Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA + 20)
                                 Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                                 
                         }
