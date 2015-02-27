@@ -8,7 +8,8 @@ using System.IO;
 using SharpDX;
 using Collision = LeagueSharp.Common.Collision;
 using System.Threading;
-namespace Ezreal
+
+namespace Blitzcrank
 {
     class Program
     {
@@ -58,7 +59,7 @@ namespace Ezreal
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1180);
+            Q = new Spell(SpellSlot.Q, 1200);
             Q2 = new Spell(SpellSlot.Q, 1600);
             W = new Spell(SpellSlot.W, 1000);
             E = new Spell(SpellSlot.E, 475);
@@ -90,37 +91,25 @@ namespace Ezreal
             //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
-
-
-            Config.SubMenu("Iteams").AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
-            Config.SubMenu("Iteams").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
-            Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-
-            Config.SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-
+            Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
+            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
+            Config.AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
+            Config.AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
+            Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
+            Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
+            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
+            Config.AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            #region Combo
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qTarget", "Q Target").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
-
-            Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
-            Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
-            Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
-            Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
-
+            #endregion
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -129,7 +118,7 @@ namespace Ezreal
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
         #region Farm
         public static void farmQ()
@@ -203,7 +192,12 @@ namespace Ezreal
                 if (Config.Item("smartE").GetValue<KeyBind>().Active)
                     Esmart = true;
                 if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 4)
-                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                {
+                    var position = ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range);
+                    if (W.IsReady())
+                        W.Cast(position, true);
+                    E.Cast(position, true);
+                }
             }
             else
                 Esmart = false;
@@ -215,7 +209,7 @@ namespace Ezreal
                 var t = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
 
                 if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA
-                    && ObjectManager.Player.CountEnemiesInRange(260) > 0
+                    && ObjectManager.Player.CountEnemiesInRange(270) > 0
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
                 {
@@ -262,6 +256,7 @@ namespace Ezreal
                      && Q.WillHit(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition)
                          )
                     {
+
                         E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                         debug("E kill W");
                     }
@@ -319,6 +314,7 @@ namespace Ezreal
                             if (cast && target.IsValidTarget(Q.Range + 100))
                             {
                                 castQ(target);
+                                OverKill = Game.Time;
                                 debug("Q ks");
                             }
                         }
@@ -335,7 +331,9 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     var wDmg = W.GetDamage(t);
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
+                    {
                         debug("Q noob mode");
+                    }
                     else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
                         castQ(t);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
@@ -379,7 +377,9 @@ namespace Ezreal
                     else if (wDmg + qDmg > t.Health && Q.IsReady())
                         castW(t);
                     else if (qDmg * 2 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
+                    {
                         debug("W noob mode");
+                    }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         castW(t);
                     else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
@@ -396,15 +396,11 @@ namespace Ezreal
                             }
                         }
                     }
+
                 }
             }
             PotionMenager();
-            var tr = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-            if (Config.Item("useR").GetValue<KeyBind>().Active && tr.IsValidTarget())
-            {
-                R.CastIfWillHit(tr, 2, true);
-                R1.Cast(tr, true, true);
-            }
+
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
@@ -420,7 +416,7 @@ namespace Ezreal
                             Rdmg = getRdmg(target);
                         var qDmg = Q.GetDamage(target);
                         var wDmg = W.GetDamage(target);
-                        if (target.IsValidTarget(R.Range) && Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0 )
+                        if (target.IsValidTarget(R.Range) && Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0)
                         {
                             if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() < 2 && ObjectManager.Player.Distance(target.Position) < ObjectManager.Player.Distance(target.ServerPosition))
                                 R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
@@ -432,18 +428,18 @@ namespace Ezreal
                             R.Cast(target, true, true);
                             debug("R recall");
                         }
-                        else if ((target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                        else if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
                          target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
-                         target.HasBuffOfType(BuffType.Taunt)) && Config.Item("Rcc").GetValue<bool>() &&
-                            target.IsValidTarget(Q.Range + E.Range) && Rdmg * 1.8 > predictedHealth)
+                         target.HasBuffOfType(BuffType.Taunt))
                         {
-                                R.Cast(target, true);
+                            if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + wDmg > predictedHealth)
+                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                         }
-                        else if (target.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo" && Config.Item("Raoe").GetValue<bool>())
+                        else if (target.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo")
                         {
                             R.CastIfWillHit(target, 3, true);
                         }
-                        else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + wDmg > predictedHealth && Orbwalker.ActiveMode.ToString() == "Combo" && Config.Item("Raoe").GetValue<bool>())
+                        else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + wDmg > predictedHealth && Orbwalker.ActiveMode.ToString() == "Combo")
                         {
                             R.CastIfWillHit(target, 2, true);
                         }
@@ -470,13 +466,11 @@ namespace Ezreal
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
-
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
                 Game.PrintChat(msg);
         }
-
         private static double getRdmg(Obj_AI_Hero target)
         {
             var rDmg = R.GetDamage(target);
@@ -521,6 +515,7 @@ namespace Ezreal
             else
                 return rDmg - (rDmg * 0.1 * dmg);
         }
+
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -591,7 +586,7 @@ namespace Ezreal
                             debug("Q ks OPS");
                         }
                     }
-                    if ( target.IsValidTarget(W.Range) && W.IsReady())
+                    if (target.IsValidTarget(W.Range) && W.IsReady())
                     {
                         var wDmg = W.GetDamage(target);
                         if (wDmg > HpLeft && HpLeft > 0)
@@ -600,15 +595,12 @@ namespace Ezreal
                             debug("W ks OPS");
                         }
                     }
-                    if ( Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+                    if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                     {
                         double rDmg = getRdmg(target);
                         if (rDmg > HpLeft && HpLeft > 0 && target.CountAlliesInRange(500) == 0)
                         {
-                            if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() < 2 && ObjectManager.Player.Distance(target.Position) < ObjectManager.Player.Distance(target.ServerPosition))
-                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                            else
-                                R.Cast(target, true);
+                            R.Cast(target, true);
                             debug("R OPS");
                         }
                     }
@@ -664,47 +656,13 @@ namespace Ezreal
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
-            var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-            if (Config.Item("qRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
-                else
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
-            }
-            if (Config.Item("wRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
-            }
-            if (Config.Item("eRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
-            }
-            if (Config.Item("orb").GetValue<bool>())
-            {
-                var orbT = Orbwalker.GetTarget();
-                if (orbT.IsValidTarget())
-                    Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Pink);
-            }
-            if (Config.Item("semi").GetValue<bool>() && R.IsReady())
-            {
-                if (t.IsValidTarget())
-                    Render.Circle.DrawCircle(t.Position, 100, System.Drawing.Color.Red);
-            }
-
 
             if (Config.Item("noti").GetValue<bool>())
             {
-                
+                var orbT = Orbwalker.GetTarget();
+                if (orbT.IsValidTarget())
+                    Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Aqua);
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && R.IsReady())
                 {
                     float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
@@ -716,7 +674,11 @@ namespace Ezreal
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                         Render.Circle.DrawCircle(t.ServerPosition, 200, System.Drawing.Color.Red);
                     }
-                    
+                    if (Config.Item("useR").GetValue<KeyBind>().Active)
+                    {
+                        R.CastIfWillHit(t, 2, true);
+                        R1.Cast(t, true, true);
+                    }
                 }
                 var tw = TargetSelector.GetTarget(Q.Range - 50, TargetSelector.DamageType.Physical);
                 if (ObjectManager.Player.CountEnemiesInRange(900) == 0)
@@ -725,8 +687,7 @@ namespace Ezreal
                     tw = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-                    if (Config.Item("qTarget").GetValue<bool>())
-                        Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Cyan);
+                    Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Gold);
                     if (Q.GetDamage(tw) > tw.Health)
                     {
                         Render.Circle.DrawCircle(tw.ServerPosition, 200, System.Drawing.Color.Red);
