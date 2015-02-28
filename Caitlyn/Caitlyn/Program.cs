@@ -50,7 +50,7 @@ namespace Caitlyn
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1180);
+            Q = new Spell(SpellSlot.Q, 1280);
             Qc = new Spell(SpellSlot.Q, 1100);
             W = new Spell(SpellSlot.W, 800);
             E = new Spell(SpellSlot.E, 980);
@@ -92,6 +92,7 @@ namespace Caitlyn
             Config.SubMenu("E Config").AddItem(new MenuItem("opsE", "OnProcessSpellCastW").SetValue(true));
             Config.SubMenu("E Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.SubMenu("E Config").AddItem(new MenuItem("useE", "Dash E HotKeySmartcast").SetValue(new KeyBind('t', KeyBindType.Press)));
+            Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             #endregion
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -116,6 +117,7 @@ namespace Caitlyn
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < W.Range && Obj.Team != Player.Team && Obj.HasBuff("teleport_target", true)))
                 {
                     W.Cast(Object.Position, true);
+                    debug("W telport");
                 }
             }
 
@@ -132,33 +134,29 @@ namespace Caitlyn
                     double Qdmg = Q.GetDamage(t);
                     if (Qdmg > predictedHealth)
                         Qdmg = getQdmg(t);
-                    if (GetRealDistance(t) > bonusRange() + 40 && Qdmg + eDmg > t.Health && Qdmg < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady())
+                    if ( Qdmg + eDmg > t.Health 
+                        && Qdmg < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady()
+                        && t.Position.Distance(ObjectManager.Player.ServerPosition) > t.Position.Distance(ObjectManager.Player.Position)
+                        && ObjectManager.Player.Position.Distance(t.ServerPosition) < ObjectManager.Player.Position.Distance(t.Position))
+
+                    {
                         E.Cast(t, true);
+                        debug("E + Q combo");
+                    }
                     else if (
                          ObjectManager.Player.Mana > RMANA + EMANA
-                        && ObjectManager.Player.CountEnemiesInRange(250) > 0
+                        && ObjectManager.Player.CountEnemiesInRange(200) > 0
                         && ObjectManager.Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(500) < 3
                         && t2.Position.Distance(Game.CursorPos) > t2.Position.Distance(ObjectManager.Player.Position))
                     {
 
                         var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
                         E.Cast(position, true);
+                        debug("E mele escape");
                     }
+                    
                     else if (ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 500 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
                         E.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo"
-                        && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.3
-                        && ObjectManager.Player.Mana > RMANA + EMANA
-                        && t2.IsValidTarget()
-                        && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t.Health
-                        && !Orbwalking.InAutoAttackRange(t2)
-                        && t2.Position.Distance(Game.CursorPos) + 300 < t2.Position.Distance(ObjectManager.Player.Position)
-                        && ObjectManager.Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(500) < 3
-                        && (Game.Time - WCastTime > 1))
-                    {
-                        var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
-                        E.Cast(position, true);
-                    }
                 }
                 if (Config.Item("useE").GetValue<KeyBind>().Active)
                 {
@@ -179,10 +177,15 @@ namespace Caitlyn
                     if (Qdmg > predictedHealth)
                         Qdmg = getQdmg(t);
                     if (GetRealDistance(t) > bonusRange() + 150 && Qdmg > predictedHealth && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                    {
                         castQ(t);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + 10 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 250) == 0 && !Config.Item("autoQ").GetValue<bool>())
+                        debug("Q KS");
+                    }
+                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + 10 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100 + t.BoundingRadius) == 0 && !Config.Item("autoQ").GetValue<bool>())
+                    {
                         castQ(t);
-
+                        debug("Q combo");
+                    }
                     if (Q.IsReady() && (Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 60) == 0)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
@@ -190,17 +193,23 @@ namespace Caitlyn
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                              enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                            {
                                 Q.CastIfHitchanceEquals(enemy, HitChance.High, true);
+                                debug("Q cc");
+                            }
                         }
                     }
                     if (Q.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100) == 0)
                         Q.CastIfWillHit(t, 2, true);
-                    if (Q.IsReady() && (Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100) == 0)
+                    if (Q.IsReady() && Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA  && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100) == 0)
                     {
-                        if (t.Path.Count() > 1)
+                        debug("Q farm");
+                        Q.CastIfWillHit(t, 2, true);
+                        if(ObjectManager.Player.Mana>ObjectManager.Player.MaxMana * 0.9)
+                            castQ(t);
+                        else if (t.Path.Count() == 1)
                         {
-                            Q.CastIfWillHit(t, 2, true);
-                            if (Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA + 20)
+                            if (Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA )
                                 Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
 
                         }
@@ -260,6 +269,18 @@ namespace Caitlyn
             }
             return;
         }
+        public static Obj_AI_Base getMinion()
+        {
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, 2000, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            if (mobs.Count > 0 )
+            {
+                var mob = mobs[0];
+                return mob;
+            }
+            return null;
+        }
+
+
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -368,6 +389,11 @@ namespace Caitlyn
 
         }
 
+        public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Game.PrintChat(msg);
+        }
         private static void castQ(Obj_AI_Hero target)
         {
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
@@ -463,6 +489,14 @@ namespace Caitlyn
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            var minion = getMinion();
+            if (minion.IsValidTarget())
+            {
+                //Render.Circle.DrawCircle(minion.Position, 100, System.Drawing.Color.Red);
+                //Game.PrintChat("range: " + ObjectManager.Player.Distance(minion.Position));
+               // Game.PrintChat("bount: " + minion.BoundingRadius);
+                
+            }
             if (Config.Item("noti").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(500 * R.Level + 1500, TargetSelector.DamageType.Physical);
@@ -477,6 +511,7 @@ namespace Caitlyn
                         R.Cast(t, true);
                     }
                 }
+                
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
