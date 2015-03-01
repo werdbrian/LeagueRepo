@@ -318,7 +318,7 @@ namespace Ezreal
                             }
                             if (cast && target.IsValidTarget(Q.Range + 100))
                             {
-                                castQ(target);
+                                Q.Cast(target, true);
                                 debug("Q ks");
                             }
                         }
@@ -337,7 +337,7 @@ namespace Ezreal
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
                         debug("Q noob mode");
                     else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
-                        castQ(t);
+                        Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                         castQ(t);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && haras())
@@ -422,10 +422,20 @@ namespace Ezreal
                         var wDmg = W.GetDamage(target);
                         if (target.IsValidTarget(R.Range) && Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0 )
                         {
-                            if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() < 2 && ObjectManager.Player.Distance(target.Position) < ObjectManager.Player.Distance(target.ServerPosition))
-                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                            if (Config.Item("hitchanceR").GetValue<bool>())
+                            {
+                                if (target.Path.Count() < 2
+                                && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                                {
+                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                    debug("R normal High");
+                                }
+                            }
                             else
+                            {
                                 R.Cast(target, true);
+                                debug("R normal");
+                            }
                         }
                         else if (Rdmg > predictedHealth && target.HasBuff("Recall"))
                         {
@@ -456,9 +466,9 @@ namespace Ezreal
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.Cast(target, true);
         }
 
         private static void castW(Obj_AI_Hero target)
@@ -466,9 +476,10 @@ namespace Ezreal
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 W.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
-                W.CastIfHitchanceEquals(target, HitChance.High, true);
+                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
-                W.CastIfHitchanceEquals(target, HitChance.High, true);
+                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+
         }
 
         public static void debug(string msg)
@@ -605,11 +616,20 @@ namespace Ezreal
                         double rDmg = getRdmg(target);
                         if (rDmg > HpLeft && HpLeft > 0 && target.CountAlliesInRange(500) == 0)
                         {
-                            if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() < 2 && ObjectManager.Player.Distance(target.Position) < ObjectManager.Player.Distance(target.ServerPosition))
-                                R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                            if (Config.Item("hitchanceR").GetValue<bool>())
+                            {
+                                if (target.Path.Count() < 2
+                                && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 30)
+                                {
+                                    R.Cast(target, true);
+                                    debug("R OPS High");
+                                }
+                            }
                             else
+                            {
                                 R.Cast(target, true);
-                            debug("R OPS");
+                                debug("R OPS");
+                            }
                         }
                     }
                 }

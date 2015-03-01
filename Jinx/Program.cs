@@ -57,7 +57,7 @@ namespace Jinx
             R = new Spell(SpellSlot.R, 2500f);
             R1 = new Spell(SpellSlot.R, 2500f);
 
-            W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.6f, 70f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.2f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.7f, 200f, 1500f, false, SkillshotType.SkillshotCircle);
@@ -87,10 +87,15 @@ namespace Jinx
                 Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             #endregion
-            Config.AddItem(new MenuItem("Qtype", "new Q method").SetValue(false));
-            Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wTarget", "W Target").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
+
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance W").SetValue(new Slider(2, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -99,7 +104,7 @@ namespace Jinx
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic AI ver 2.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic AI ver 2.7 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -162,7 +167,7 @@ namespace Jinx
                 if (Farm)
                     if (ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
                         farmQ();
-                var t = TargetSelector.GetTarget(bonusRange() + 50, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
                     var distance = GetRealDistance(t);
@@ -171,16 +176,9 @@ namespace Jinx
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo" && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
                             Q.Cast();
-                        else if (Orbwalker.ActiveMode.ToString() == "Mixed" && haras() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange() + t.BoundingRadius + ObjectManager.Player.BoundingRadius)
+                        else if (Orbwalker.ActiveMode.ToString() == "Mixed" && Orbwalker.GetTarget() == null && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + ObjectManager.Player.BoundingRadius)
                             Q.Cast();
                         else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && haras() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
-                            Q.Cast();
-                    }
-                    else if (FishBoneActive && Config.Item("Qtype").GetValue<bool>() && attackNow)
-                    {
-                        if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
-                            Q.Cast();
-                        else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
                             Q.Cast();
                     }
                 }
@@ -230,7 +228,7 @@ namespace Jinx
                             }
                             if (!Orbwalking.InAutoAttackRange(target) && cast && target.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
-                                castW(target);
+                                W.Cast(target, true);
                                 debug("W ks");
                             }
                         }
@@ -244,7 +242,7 @@ namespace Jinx
                     {
                         castW(t);
                     }
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 20) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
                     {
                         castW(t);
                     }
@@ -309,10 +307,15 @@ namespace Jinx
                             
                             if (cast && target.IsValidTarget(R.Range) && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
-                                if (Config.Item("hitchanceR").GetValue<bool>() && target.Path.Count() < 2)
+
+                                if (Config.Item("hitchanceR").GetValue<bool>())
                                 {
-                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    debug("R normal");
+                                    if (target.Path.Count() < 2
+                                    && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                                    {
+                                        R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                        debug("R normal High");
+                                    }
                                 }
                                 else
                                 {
@@ -339,25 +342,13 @@ namespace Jinx
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (!unit.IsMe ) return;
-            attackNow = false;
-            var t = TargetSelector.GetTarget(bonusRange() + 50, TargetSelector.DamageType.Physical);
-            if (Q.IsReady() && !Config.Item("Qtype").GetValue<bool>() && FishBoneActive && t.IsValidTarget())
-            {
-                var distance = GetRealDistance(t);
-                var powPowRange = GetRealPowPowRange(t);
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && (distance < powPowRange) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
-                    Q.Cast();
-                else if (Farm && (distance > bonusRange() || distance < powPowRange || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
-                    Q.Cast();
-            }
+
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-        {
-            attackNow = true;
-            var t = TargetSelector.GetTarget(bonusRange() + 50, TargetSelector.DamageType.Physical);
-            if (Q.IsReady() && !Config.Item("Qtype").GetValue<bool>() && FishBoneActive && t.IsValidTarget())
+        { 
+            var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
+            if (Q.IsReady() && FishBoneActive && t.IsValidTarget())
             {
                 var distance = GetRealDistance(t);
                 var powPowRange = GetRealPowPowRange(t);
@@ -433,9 +424,11 @@ namespace Jinx
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 W.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
-                W.CastIfHitchanceEquals(target, HitChance.High, true);
+                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
-                W.CastIfHitchanceEquals(target, HitChance.High, true);
+                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
         }
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
@@ -500,8 +493,20 @@ namespace Jinx
                          }
                          if (rDmg > HpLeft && HpLeft > 0 && cast && target.CountAlliesInRange(500) == 0)
                          {
-                             R.Cast(target, true);
-                             debug("R OPS");
+                             if (Config.Item("hitchanceR").GetValue<bool>())
+                             {
+                                 if (target.Path.Count() < 2
+                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                                 {
+                                     R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                     debug("R normal High");
+                                 }
+                             }
+                             else
+                             {
+                                 R.Cast(target, true);
+                                 debug("R normal");
+                             }
                          }
                      }
                      
@@ -551,9 +556,9 @@ namespace Jinx
             return 610f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
         }
 
-        private static float GetRealDistance(GameObject target)
+        private static float GetRealDistance(Obj_AI_Base target)
         {
-            return ObjectManager.Player.ServerPosition.Distance(target.Position) + ObjectManager.Player.BoundingRadius +
+            return ObjectManager.Player.ServerPosition.Distance(target.ServerPosition) + ObjectManager.Player.BoundingRadius +
                    target.BoundingRadius;
         }
 
@@ -606,12 +611,23 @@ namespace Jinx
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
+                    if (Q.IsReady())
+                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan);
+                    else
+                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan);
+            }
+            if (Config.Item("orb").GetValue<bool>())
+            {
+                var orbT = Orbwalker.GetTarget();
+                if (orbT.IsValidTarget())
+                    Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Pink);
+            }
             
             if (Config.Item("noti").GetValue<bool>())
             {
-                var orbT=Orbwalker.GetTarget();
-                if (orbT.IsValidTarget())
-                    Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Aqua);
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
                 float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                 if (t.IsValidTarget() && R.IsReady())
@@ -621,11 +637,17 @@ namespace Jinx
                     {
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                         Render.Circle.DrawCircle(t.ServerPosition, 200, System.Drawing.Color.Red);
+                    } 
+                    if (Config.Item("semi").GetValue<bool>())
+                    {
+                            Render.Circle.DrawCircle(t.Position, 100, System.Drawing.Color.Red);
                     }
                 }
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
+                    if (Config.Item("wTarget").GetValue<bool>())
+                        Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Cyan);
                     var wDmg = W.GetDamage(tw);
                     if (wDmg > tw.Health)
                     {
@@ -633,12 +655,7 @@ namespace Jinx
                         Render.Circle.DrawCircle(tw.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     }
-                    
                 }
-            }
-            if (Config.Item("debug").GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Q can change: " + attackNow); 
             }
         }
     }

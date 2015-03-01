@@ -85,7 +85,7 @@ namespace Caitlyn
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("autoQ", "Reduce Q use").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 3, 0)));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             #region E
             Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
@@ -171,14 +171,14 @@ namespace Caitlyn
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
-
+                    
                     float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / Q.Speed) * 1000));
                     double Qdmg = Q.GetDamage(t);
                     if (Qdmg > predictedHealth)
                         Qdmg = getQdmg(t);
                     if (GetRealDistance(t) > bonusRange() + 150 && Qdmg > predictedHealth && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                     {
-                        castQ(t);
+                        Q.Cast(t, true);
                         debug("Q KS");
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + 10 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100 + t.BoundingRadius) == 0 && !Config.Item("autoQ").GetValue<bool>())
@@ -205,7 +205,7 @@ namespace Caitlyn
                     {
                         debug("Q farm");
                         Q.CastIfWillHit(t, 2, true);
-                        if(ObjectManager.Player.Mana>ObjectManager.Player.MaxMana * 0.9)
+                        if(ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                             castQ(t);
                         else if (t.Path.Count() == 1)
                         {
@@ -399,9 +399,11 @@ namespace Caitlyn
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() == 1)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
         }
 
         public static double ShouldUseE(string SpellName)

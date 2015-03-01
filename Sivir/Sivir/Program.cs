@@ -48,7 +48,7 @@ namespace Sivir
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1250f);
+            Q = new Spell(SpellSlot.Q, 1240f);
             Qc = new Spell(SpellSlot.Q, 1200f);
             W = new Spell(SpellSlot.W, float.MaxValue);
             E = new Spell(SpellSlot.E, float.MaxValue);
@@ -77,7 +77,7 @@ namespace Sivir
             Config.AddToMainMenu();
             
             Config.AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 3, 0)));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             #region Shield
                 Config.SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
@@ -162,7 +162,7 @@ namespace Sivir
                     if (Orbwalking.InAutoAttackRange(t))
                         qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
                     if (qDmg  > t.Health)
-                        castQ(t);
+                        Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         castQ(t);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear")))
@@ -201,9 +201,11 @@ namespace Sivir
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
         }
 
         public static bool farmW()
