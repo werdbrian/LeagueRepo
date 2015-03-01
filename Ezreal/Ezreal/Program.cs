@@ -424,10 +424,9 @@ namespace Ezreal
                         {
                             if (Config.Item("hitchanceR").GetValue<bool>())
                             {
-                                if (target.Path.Count() < 2
-                                && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                                if (target.Path.Count() < 2)
                                 {
-                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
+                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                     debug("R normal High");
                                 }
                             }
@@ -618,10 +617,9 @@ namespace Ezreal
                         {
                             if (Config.Item("hitchanceR").GetValue<bool>())
                             {
-                                if (target.Path.Count() < 2
-                                && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 30)
+                                if (target.Path.Count() < 2)
                                 {
-                                    R.Cast(target, true);
+                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                     debug("R OPS High");
                                 }
                             }

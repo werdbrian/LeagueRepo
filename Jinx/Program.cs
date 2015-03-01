@@ -238,6 +238,9 @@ namespace Jinx
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && W.IsReady() && !wait)
                 {
+                    var position = ObjectManager.Player.ServerPosition;
+                    Game.PrintChat("cast " + Math.Abs(position.Distance(t.ServerPosition) - position.Distance(t.Position)) + " " + t.Path.Count());
+
                     if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
                         castW(t);
@@ -310,10 +313,9 @@ namespace Jinx
 
                                 if (Config.Item("hitchanceR").GetValue<bool>())
                                 {
-                                    if (target.Path.Count() < 2
-                                    && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                                    if (target.Path.Count() < 2)
                                     {
-                                        R.CastIfHitchanceEquals(target, HitChance.High, true);
+                                        R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                         debug("R normal High");
                                     }
                                 }
@@ -427,8 +429,10 @@ namespace Jinx
                 W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
-                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
+            {
+                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true); 
+            } 
         }
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
@@ -496,7 +500,7 @@ namespace Jinx
                              if (Config.Item("hitchanceR").GetValue<bool>())
                              {
                                  if (target.Path.Count() < 2
-                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
+                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 30)
                                  {
                                      R.CastIfHitchanceEquals(target, HitChance.High, true);
                                      debug("R normal High");
