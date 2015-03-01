@@ -238,8 +238,6 @@ namespace Jinx
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && W.IsReady() && !wait)
                 {
-                    var position = ObjectManager.Player.ServerPosition;
-                    Game.PrintChat("cast " + Math.Abs(position.Distance(t.ServerPosition) - position.Distance(t.Position)) + " " + t.Path.Count());
 
                     if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
