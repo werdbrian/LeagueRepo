@@ -226,9 +226,9 @@ namespace Jinx
                                 if (length < (W.Width + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (!Orbwalking.InAutoAttackRange(target) && cast && target.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                            if (!Orbwalking.InAutoAttackRange(target) && cast && target.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0 && target.Path.Count() < 2)
                             {
-                                W.Cast(target, true);
+                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
                                 debug("W ks");
                             }
                         }
@@ -498,7 +498,7 @@ namespace Jinx
                              if (Config.Item("hitchanceR").GetValue<bool>())
                              {
                                  if (target.Path.Count() < 2
-                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 30)
+                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 25)
                                  {
                                      R.CastIfHitchanceEquals(target, HitChance.High, true);
                                      debug("R normal High");
