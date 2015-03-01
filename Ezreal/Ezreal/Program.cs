@@ -427,7 +427,7 @@ namespace Ezreal
                                 if (target.Path.Count() < 2
                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 35)
                                 {
-                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
                                     debug("R normal High");
                                 }
                             }
