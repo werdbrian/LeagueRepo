@@ -119,7 +119,7 @@ namespace Ezreal
             Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
             Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 3, 0)));
 
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -424,9 +424,10 @@ namespace Ezreal
                         {
                             if (Config.Item("hitchanceR").GetValue<bool>())
                             {
-                                if (target.Path.Count() < 2)
+                                debug("R before" + (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)));
+                                if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
                                 {
-                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
                                     debug("R normal High");
                                 }
                             }
@@ -467,7 +468,9 @@ namespace Ezreal
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
-                Q.Cast(target, true);
+                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
+                Q.CastIfHitchanceEquals(target, HitChance.High, true);
         }
 
         private static void castW(Obj_AI_Hero target)
@@ -478,6 +481,8 @@ namespace Ezreal
                 W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
+                W.CastIfHitchanceEquals(target, HitChance.High, true);
 
         }
 
@@ -617,9 +622,9 @@ namespace Ezreal
                         {
                             if (Config.Item("hitchanceR").GetValue<bool>())
                             {
-                                if (target.Path.Count() < 2)
+                                if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
                                 {
-                                    R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                    R.CastIfHitchanceEquals(target, HitChance.High, true);
                                     debug("R OPS High");
                                 }
                             }
@@ -743,6 +748,9 @@ namespace Ezreal
                     tw = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
+                    if (Config.Item("debug").GetValue<bool>())
+                        Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.5f, System.Drawing.Color.Red,  " path: " + tw.Path.Count() + " pos: " + (ObjectManager.Player.Distance(tw.ServerPosition) - ObjectManager.Player.Distance(tw.Position))  );
+        
                     if (Config.Item("qTarget").GetValue<bool>())
                         Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Cyan);
                     if (Q.GetDamage(tw) > tw.Health)

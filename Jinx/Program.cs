@@ -311,9 +311,9 @@ namespace Jinx
 
                                 if (Config.Item("hitchanceR").GetValue<bool>())
                                 {
-                                    if (target.Path.Count() < 2)
+                                    if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
                                     {
-                                        R.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                                        R.CastIfHitchanceEquals(target, HitChance.High, true);
                                         debug("R normal High");
                                     }
                                 }
@@ -497,8 +497,7 @@ namespace Jinx
                          {
                              if (Config.Item("hitchanceR").GetValue<bool>())
                              {
-                                 if (target.Path.Count() < 2
-                                 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 25)
+                                 if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
                                  {
                                      R.CastIfHitchanceEquals(target, HitChance.High, true);
                                      debug("R normal High");
