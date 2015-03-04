@@ -195,8 +195,10 @@ namespace Jinx
                 ManaMenager();
                 bool cast = false;
                 bool wait = false;
+
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
+                    
                     if (target.IsValidTarget(W.Range) &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
@@ -612,6 +614,12 @@ namespace Jinx
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("debug").GetValue<bool>())
+            {
+                var tar = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (tar.IsValidTarget())
+                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "isZombie: " + tar.IsZombie + " isDead: " + tar.IsDead  );
+            }
             if (Config.Item("wRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
