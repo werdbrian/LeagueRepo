@@ -36,6 +36,7 @@ namespace Ezreal
         public static double WCastTime = 0;
         public static double OverKill = 0;
         public static double OverFarm = 0;
+        public static double lag  = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -358,12 +359,17 @@ namespace Ezreal
                         }
                     }
                 }
-                if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
-                    farmQ();
-                else if (!Farm && !ObjectManager.Player.HasBuff("Recall") && Orbwalker.ActiveMode.ToString() != "Combo" && !t.IsValidTarget() && Config.Item("stack").GetValue<bool>() && (Items.HasItem(Tear) || Items.HasItem(Manamune)) && ObjectManager.Player.Mana == ObjectManager.Player.MaxMana && Q.IsReady())
+                if (lag > 3)
                 {
-                    Q.Cast(ObjectManager.Player);
+                    lag = 0;
+                    if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
+                        farmQ();
+                    else if (!Farm && !ObjectManager.Player.HasBuff("Recall") && Orbwalker.ActiveMode.ToString() != "Combo" && !t.IsValidTarget() && Config.Item("stack").GetValue<bool>() && (Items.HasItem(Tear) || Items.HasItem(Manamune)) && ObjectManager.Player.Mana == ObjectManager.Player.MaxMana && Q.IsReady())
+                    {
+                        Q.Cast(ObjectManager.Player);
+                    }
                 }
+                lag++;
             }
             if (W.IsReady() && attackNow)
             {
