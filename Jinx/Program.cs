@@ -279,7 +279,7 @@ namespace Jinx
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget() && (Game.Time - WCastTime > 1) &&
+                    if (target.IsValidTarget() && (Game.Time - WCastTime > 1) && !target.IsZombie && !target.IsDead &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
@@ -470,11 +470,10 @@ namespace Jinx
                              debug("W ks OPS");
                          }
                      }
-                     if (GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius &&  target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
-                     {
-                         var rDmg = R.GetDamage(target);
-                         var cast = true;
-                         
+                     var rDmg = R.GetDamage(target);
+                     if (rDmg > HpLeft && HpLeft > 0 && !target.IsZombie && !target.IsDead && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                     {              
+                         var cast = true;  
                          PredictionOutput output = R.GetPrediction(target);
                          Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
                          direction.Normalize();
@@ -495,7 +494,7 @@ namespace Jinx
                              if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                  cast = false;
                          }
-                         if (rDmg > HpLeft && HpLeft > 0 && cast && target.CountAlliesInRange(500) == 0)
+                         if ( cast  )
                          {
                              if (Config.Item("hitchanceR").GetValue<bool>())
                              {
