@@ -64,7 +64,7 @@ namespace Blitzcrank
             E = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 600);
 
-            Q.SetSkillshot(0.25f, 70f, 1800f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 90f, 1800f, true, SkillshotType.SkillshotLine);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -87,13 +87,12 @@ namespace Blitzcrank
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-            Config.SubMenu("Q option").AddItem(new MenuItem("qCC", "Auto Q cc enemy").SetValue(true));
-            Config.SubMenu("Q option").AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
+            Config.SubMenu("Q option").AddItem(new MenuItem("qCC", "Auto Q cc & dash enemy").SetValue(true));
+            Config.SubMenu("Q option").AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 3, 0)));
             Config.SubMenu("Q option").AddItem(new MenuItem("minGrab", "Min range grab").SetValue(new Slider(250, 125, (int)Q.Range)));
             Config.SubMenu("Q option").AddItem(new MenuItem("maxGrab", "Max range grab").SetValue(new Slider((int)Q.Range, 125, (int)Q.Range)));
-            Config.SubMenu("Q option").AddItem(new MenuItem("debug", "Debug").SetValue(false));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu("Grab").AddItem(new MenuItem("grab" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+                Config.SubMenu("Q option").SubMenu("Grab").AddItem(new MenuItem("grab" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
             #region Combo
             Config.SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
@@ -128,22 +127,20 @@ namespace Blitzcrank
         private static void Game_OnGameUpdate(EventArgs args)
         {
             ManaMenager();
-            if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
-                Farm = true;
-            else
-                Farm = false;
 
+            PotionMenager();
             if (Q.IsReady())
             {
                 //Q.Cast(ObjectManager.Player);
                 ManaMenager();
                 foreach (var t in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
+                    if (!t.HasBuffOfType(BuffType.PhysicalImmunity) &&
+                        !t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo")
                             castQ(t);
-                        if (Orbwalker.ActiveMode.ToString() == "qCC")
+                        if (Orbwalker.ActiveMode.ToString() == "qCC" && Q.IsReady())
                         {
                             if (t.HasBuffOfType(BuffType.Stun) || t.HasBuffOfType(BuffType.Snare) ||
                                  t.HasBuffOfType(BuffType.Charm) || t.HasBuffOfType(BuffType.Fear) ||
@@ -151,51 +148,52 @@ namespace Blitzcrank
                             {
                                 Q.Cast(t, true);
                             }
+                            else
+                            {
+                                Q.CastIfHitchanceEquals(t, HitChance.Dashing);
+                                Q.CastIfHitchanceEquals(t, HitChance.Immobile);
+                            }
                         }
                     }
                 }
             }
 
-            PotionMenager();
+            
 
-            if (R.IsReady()  )
-            {
+            if (R.IsReady() && Config.Item("rKs").GetValue<bool>())
+                foreach (Obj_AI_Hero enem in ObjectManager.Get<Obj_AI_Hero>().Where(enem => enem.IsValid && enem.IsEnemy && enem.IsValidTarget(R.Range)))
+                {
+                    if (R.GetDamage(enem) > enem.Health)
+                        R.Cast();
+                }
 
-                if (Config.Item("rKs").GetValue<bool>())
-                    foreach (Obj_AI_Hero enem in ObjectManager.Get<Obj_AI_Hero>().Where(enem => enem.IsValid && enem.IsEnemy && enem.IsValidTarget(R.Range)))
+            if (R.IsReady() && ObjectManager.Player.CountEnemiesInRange(600) >= Config.Item("rCount").GetValue<Slider>().Value && Config.Item("rCount").GetValue<Slider>().Value > 0)
+                R.Cast();
+
+            if (R.IsReady() && Config.Item("afterGrab").GetValue<bool>())
+                foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValid && enemy.IsEnemy ))
+                {
+                    if (enemy.Buffs != null)
                     {
-                        if (R.GetDamage(enem) > enem.Health)
-                            R.Cast();
-                    }
-                
-                if (ObjectManager.Player.CountEnemiesInRange(600) >= Config.Item("rCount").GetValue<Slider>().Value && Config.Item("rCount").GetValue<Slider>().Value > 0)
-                    R.Cast();
-
-                if (Config.Item("afterGrab").GetValue<bool>())
-                    foreach (Obj_AI_Hero enem in ObjectManager.Get<Obj_AI_Hero>().Where(enem => enem.IsValid && enem.IsEnemy ))
-                    {
-                        if (enem.Buffs != null)
+                        foreach (BuffInstance buff in enemy.Buffs)
                         {
-                            foreach (BuffInstance buff in enem.Buffs)
+                            if (buff.Name == "rocketgrab2" && buff.IsActive && buff.EndTime - Game.Time < 0.8)
                             {
-                                if (buff.Name == "rocketgrab2" && buff.IsActive && buff.EndTime - Game.Time < 0.8)
-                                {
-                                    R.Cast();
-                                }
+                                R.Cast();
                             }
                         }
                     }
-            }
+                }
+            
         }
         private static void castQ(Obj_AI_Hero target)
         {
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
-                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.High, true);
-            
         }
 
 
@@ -235,12 +233,6 @@ namespace Blitzcrank
             
         }
 
-        private static float GetRealDistance(GameObject target)
-        {
-            return ObjectManager.Player.ServerPosition.Distance(target.Position) + ObjectManager.Player.BoundingRadius +
-                   target.BoundingRadius;
-        }
-
         public static void ManaMenager()
         {
             QMANA = Q.Instance.ManaCost;
@@ -249,10 +241,7 @@ namespace Blitzcrank
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
-                RMANA = R.Instance.ManaCost; ;
-
-            if (Farm)
-                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
+                RMANA = R.Instance.ManaCost; 
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
