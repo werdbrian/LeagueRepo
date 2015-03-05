@@ -64,7 +64,7 @@ namespace Blitzcrank
             E = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 600);
 
-            Q.SetSkillshot(0.25f, 90f, 1800f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 110f, 1800f, true, SkillshotType.SkillshotLine);
 
             SpellList.Add(Q);
             SpellList.Add(W);
