@@ -693,7 +693,23 @@ namespace Ezreal
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
+
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+
+            foreach (var obj in ObjectManager.Get<Obj_AI_Hero>().Where(obj => obj.Team != ObjectManager.Player.Team))
+            {
+                float distance = 0;
+                if (obj.IsVisible)
+                {
+                    Vector3[] path = obj.GetPath(ObjectManager.Player.Position);
+                    for (int i = 0; i < path.Length - 1; i++)
+                    {
+                        distance += path[i].Distance(path[i + 1]);
+                    }
+                    double time = distance / t.MoveSpeed;
+                }
+            }
+
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
