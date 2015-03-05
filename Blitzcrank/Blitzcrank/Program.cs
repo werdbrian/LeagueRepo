@@ -98,7 +98,7 @@ namespace Blitzcrank
             Config.SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
             Config.SubMenu("R option").AddItem(new MenuItem("afterGrab", "Auto R after grab").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("rKs", "R ks").SetValue(false));
-            Config.SubMenu("R option").AddItem(new MenuItem("inter", "Interrupt")).SetValue(true);
+            Config.SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt")).SetValue(true);
 
             #endregion
             
