@@ -123,7 +123,6 @@ namespace Blitzcrank
                 R.Cast();
         }
 
-
         private static void Game_OnGameUpdate(EventArgs args)
         {
             ManaMenager();
@@ -135,8 +134,7 @@ namespace Blitzcrank
                 ManaMenager();
                 foreach (var t in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (!t.HasBuffOfType(BuffType.PhysicalImmunity) &&
-                        !t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
+                    if (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
                     {
                         if (Orbwalker.ActiveMode.ToString() == "Combo")
                             castQ(t);
