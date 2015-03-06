@@ -121,7 +121,6 @@ namespace Ezreal
             Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 3, 0)));
-
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -192,7 +191,7 @@ namespace Ezreal
         private static void Game_OnGameUpdate(EventArgs args)
         {
             ManaMenager();
-            if (Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear" || Orbwalker.ActiveMode.ToString() == "LastHit")
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 Farm = true;
             else
                 Farm = false;
@@ -209,7 +208,7 @@ namespace Ezreal
             else
                 Esmart = false;
 
-            if (Orbwalker.ActiveMode.ToString() == "Combo" && E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(950, TargetSelector.DamageType.Physical);
@@ -276,7 +275,7 @@ namespace Ezreal
                 if (Config.Item("mura").GetValue<bool>())
                 {
                     int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
-                    if (Orbwalker.ActiveMode.ToString() == "Combo" && Items.HasItem(Mur) && Items.CanUseItem(Mur) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Items.HasItem(Mur) && Items.CanUseItem(Mur) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
                     {
                         if (!ObjectManager.Player.HasBuff("Muramana"))
                             Items.UseItem(Mur);
@@ -339,14 +338,14 @@ namespace Ezreal
                         debug("Q noob mode");
                     else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
                         Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                         castQ(t);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && haras())
                     {
                         castQ(t);
                     }
 
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                    else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                         {
@@ -359,7 +358,7 @@ namespace Ezreal
                         }
                     }
                 }
-                if (lag > 3)
+                if (lag > 20)
                 {
                     lag = 0;
                     if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
@@ -386,11 +385,11 @@ namespace Ezreal
                         castW(t);
                     else if (qDmg * 2 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
                         debug("W noob mode");
-                    else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         castW(t);
                     else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
                         castW(t);
-                    else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
+                    else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                         {
@@ -455,11 +454,11 @@ namespace Ezreal
                         {
                                 R.Cast(target, true);
                         }
-                        else if (target.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo" && Config.Item("Raoe").GetValue<bool>())
+                        else if (target.IsValidTarget(R.Range) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("Raoe").GetValue<bool>())
                         {
                             R.CastIfWillHit(target, 3, true);
                         }
-                        else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + wDmg > predictedHealth && Orbwalker.ActiveMode.ToString() == "Combo" && Config.Item("Raoe").GetValue<bool>())
+                        else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + wDmg > predictedHealth && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("Raoe").GetValue<bool>())
                         {
                             R.CastIfWillHit(target, 2, true);
                         }
@@ -628,7 +627,7 @@ namespace Ezreal
                         {
                             if (Config.Item("hitchanceR").GetValue<bool>())
                             {
-                                if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 20)
+                                if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 10)
                                 {
                                     R.CastIfHitchanceEquals(target, HitChance.High, true);
                                     debug("R OPS High");

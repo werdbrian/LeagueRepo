@@ -37,6 +37,8 @@ namespace Blitzcrank
         public static double WCastTime = 0;
         public static double OverKill = 0;
         public static double OverFarm = 0;
+        public static Vector3 position1 = ObjectManager.Player.ServerPosition;
+        public static Obj_AI_Hero positiont = ObjectManager.Player;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -73,10 +75,6 @@ namespace Blitzcrank
             //Create the menu
             Config = new Menu(ChampionName, ChampionName, true);
 
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
-
             //Orbwalker submenu
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
 
@@ -106,6 +104,7 @@ namespace Blitzcrank
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
+            Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -126,7 +125,7 @@ namespace Blitzcrank
         private static void Game_OnGameUpdate(EventArgs args)
         {
             ManaMenager();
-
+            
             PotionMenager();
             if (Q.IsReady())
             {
@@ -136,7 +135,7 @@ namespace Blitzcrank
                 {
                     if (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
                     {
-                        if (Orbwalker.ActiveMode.ToString() == "Combo")
+                        if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                             castQ(t);
                         if (Orbwalker.ActiveMode.ToString() == "qCC" && Q.IsReady())
                         {
@@ -150,6 +149,7 @@ namespace Blitzcrank
                             {
                                 Q.CastIfHitchanceEquals(t, HitChance.Dashing);
                                 Q.CastIfHitchanceEquals(t, HitChance.Immobile);
+                                
                             }
                         }
                     }
@@ -175,7 +175,7 @@ namespace Blitzcrank
                     {
                         foreach (BuffInstance buff in enemy.Buffs)
                         {
-                            if (buff.Name == "rocketgrab2" && buff.IsActive && buff.EndTime - Game.Time < 0.8)
+                            if (buff.Name == "rocketgrab2" && buff.IsActive && enemy.IsValidTarget(500))
                             {
                                 R.Cast();
                             }
@@ -192,6 +192,13 @@ namespace Blitzcrank
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.High, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2)
+            {
+                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+                
+            }
+
+            
         }
 
 
@@ -228,7 +235,11 @@ namespace Blitzcrank
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            
+           if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Q.IsReady()
+                && unit.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value)
+                && ObjectManager.Player.Distance(unit.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value
+                && Config.Item("Hit").GetValue<Slider>().Value == 3 && unit.IsEnemy && unit.IsValid<Obj_AI_Hero>() && Config.Item("grab" + unit.BaseSkinName).GetValue<bool>())
+                Q.CastIfHitchanceEquals(unit, HitChance.High, true); 
         }
 
         public static void ManaMenager()
@@ -286,6 +297,13 @@ namespace Blitzcrank
                     else
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
             }
+
+                var tw = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
+                if (tw.IsValidTarget())
+                {
+                    if (Config.Item("debug").GetValue<bool>())
+                        Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.5f, System.Drawing.Color.Red, " path: " + tw.Path.Count() + " pos: " + Math.Abs(ObjectManager.Player.Distance(tw.ServerPosition) - ObjectManager.Player.Distance(tw.Position)));
+                }
         }
     }
 }
