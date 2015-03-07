@@ -186,17 +186,15 @@ namespace Blitzcrank
         }
         private static void castQ(Obj_AI_Hero target)
         {
+            List<Vector2> waypoints = target.GetWaypoints();
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.High, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2)
-            {
-                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                
-            }
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > 300 || target.Path.Count() == 0))
+                Q.CastIfHitchanceEquals(target, HitChance.High, true);
 
             
         }
@@ -298,9 +296,12 @@ namespace Blitzcrank
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
             }
 
-                var tw = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
+                var tw = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
+                    List<Vector2> waypoints = tw.GetWaypoints();
+
+                    Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 100, System.Drawing.Color.Red);
                     if (Config.Item("debug").GetValue<bool>())
                         Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.5f, System.Drawing.Color.Red, " path: " + tw.Path.Count() + " pos: " + Math.Abs(ObjectManager.Player.Distance(tw.ServerPosition) - ObjectManager.Player.Distance(tw.Position)));
                 }
