@@ -423,16 +423,15 @@ namespace Jinx
 
         private static void castW(Obj_AI_Hero target)
         {
+            List<Vector2> waypoints = target.GetWaypoints();
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 W.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 10)
-            {
-                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true); 
-            } 
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > 500 || Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 300 || target.Path.Count() == 0))
+                W.CastIfHitchanceEquals(target, HitChance.High, true);
         }
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
