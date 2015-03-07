@@ -311,20 +311,12 @@ namespace Jinx
                             if (cast && target.IsValidTarget(R.Range) && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
 
-                                if (Config.Item("hitchanceR").GetValue<bool>())
-                                {
-                                    if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 10)
-                                    {
-                                        R.CastIfHitchanceEquals(target, HitChance.High, true);
-                                        debug("R normal High");
-                                    }
-                                }
-                                else
-                                {
-                                    R.Cast(target, true);
-                                    debug("R normal");
-                                }
+                                castR(target);
+                                debug("R normal High");
+                               
                             }
+
+
                             else if (cast && target.IsValidTarget(R.Range) && target.CountEnemiesInRange(200) > 2 && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius )
                             {
                                 R1.Cast(target, true, true);
@@ -341,7 +333,19 @@ namespace Jinx
             }
             PotionMenager();
         }
-
+        private static void castR(Obj_AI_Hero target)
+        {
+            if (Config.Item("hitchanceR").GetValue<bool>())
+            {
+                List<Vector2> waypoints = target.GetWaypoints();
+                if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > 400)
+                {
+                    R.CastIfHitchanceEquals(target, HitChance.High, true);
+                }
+            }
+            else
+                R.Cast(target, true);
+        }
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
 
@@ -495,19 +499,9 @@ namespace Jinx
                          }
                          if ( cast  )
                          {
-                             if (Config.Item("hitchanceR").GetValue<bool>())
-                             {
-                                 if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 10)
-                                 {
-                                     R.CastIfHitchanceEquals(target, HitChance.High, true);
-                                     debug("R normal High");
-                                 }
-                             }
-                             else
-                             {
-                                 R.Cast(target, true);
-                                 debug("R normal");
-                             }
+                             
+                             debug("R OPS");
+                             castR(target);
                          }
                      }
                      
