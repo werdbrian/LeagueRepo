@@ -175,7 +175,7 @@ namespace Blitzcrank
                     {
                         foreach (BuffInstance buff in enemy.Buffs)
                         {
-                            if (buff.Name == "rocketgrab2" && buff.IsActive && enemy.IsValidTarget(500))
+                            if (buff.Name == "rocketgrab2" && buff.IsActive && enemy.IsValidTarget(400))
                             {
                                 R.Cast();
                             }
