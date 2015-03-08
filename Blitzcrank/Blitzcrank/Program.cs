@@ -333,7 +333,6 @@ namespace Blitzcrank
                         List<Vector2> waypoints = tw.GetWaypoints();
 
                         Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 100, System.Drawing.Color.Red);
-                        Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.5f, System.Drawing.Color.Red, " path: " + tw.Path.Count() + " pos: " + Math.Abs(ObjectManager.Player.Distance(tw.ServerPosition) - ObjectManager.Player.Distance(tw.Position)));
                     }
            }
         }
