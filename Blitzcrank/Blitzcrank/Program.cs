@@ -29,6 +29,10 @@ namespace Blitzcrank
         //ManaMenager
         public static float QMANA;
         public static int pathe;
+
+        public static float grab=0;
+        public static float grabS=0;
+        public static float grabW = 0;
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
@@ -134,7 +138,8 @@ namespace Blitzcrank
                 ManaMenager();
                 foreach (var t in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
+
+                    if (t.IsEnemy && !t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
                     {
                         if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                             castQ(t);
@@ -156,7 +161,14 @@ namespace Blitzcrank
                     }
                 }
             }
-
+            foreach (var t in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (t.IsEnemy && t.HasBuff("rocketgrab2") && Game.Time - grabW > 2)
+                {
+                    grabS++;
+                    grabW = Game.Time;
+                }
+            }
             
 
             if (R.IsReady() && Config.Item("rKs").GetValue<bool>())
@@ -244,7 +256,11 @@ namespace Blitzcrank
                 && unit.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value)
                 && ObjectManager.Player.Distance(unit.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value
                 && Config.Item("Hit").GetValue<Slider>().Value == 3 && unit.IsEnemy && unit.IsValid<Obj_AI_Hero>() && Config.Item("grab" + unit.BaseSkinName).GetValue<bool>())
-                Q.CastIfHitchanceEquals(unit, HitChance.High, true); 
+                Q.CastIfHitchanceEquals(unit, HitChance.High, true);
+           if (unit.IsMe && args.SData.Name == "RocketGrabMissile")
+           {
+               grab++;
+           }
         }
 
         public static void ManaMenager()
@@ -286,6 +302,11 @@ namespace Blitzcrank
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("debug").GetValue<bool>())
+            {
+
+                Drawing.DrawText(Drawing.Width * 0f, Drawing.Height * 0.4f, System.Drawing.Color.Red, " grab: " + grab + " grab successful: " + grabS + " grab successful % : " + ((grabS / grab) * 100) + "%");
+            }
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
