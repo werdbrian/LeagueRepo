@@ -161,15 +161,17 @@ namespace Blitzcrank
                     }
                 }
             }
-            foreach (var t in ObjectManager.Get<Obj_AI_Hero>())
+            if (!Q.IsReady() && Game.Time - grabW > 2)
             {
-                if (t.IsEnemy && t.HasBuff("rocketgrab2") && Game.Time - grabW > 2)
+                foreach (var t in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    grabS++;
-                    grabW = Game.Time;
+                    if (t.IsEnemy && t.HasBuff("rocketgrab2"))
+                    {
+                        grabS++;
+                        grabW = Game.Time;
+                    }
                 }
             }
-            
 
             if (R.IsReady() && Config.Item("rKs").GetValue<bool>())
                 foreach (Obj_AI_Hero enem in ObjectManager.Get<Obj_AI_Hero>().Where(enem => enem.IsValid && enem.IsEnemy && enem.IsValidTarget(R.Range)))
