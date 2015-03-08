@@ -28,6 +28,8 @@ namespace Sivir
         public static float QMANA;
         public static float WMANA;
         public static float RMANA;
+
+        public static float qRange = 1240;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -78,6 +80,8 @@ namespace Sivir
             
             Config.AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 3, 0)));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             #region Shield
                 Config.SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
@@ -91,7 +95,7 @@ namespace Sivir
             Orbwalking.AfterAttack += Orbwalker_AfterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#9c3232\">S</font>ivir full automatic AI ver 1.7 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
 
         }
 
@@ -165,7 +169,7 @@ namespace Sivir
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         castQ(t);
-                    else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear")))
+                    else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear")) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                             Qc.CastIfHitchanceEquals(t, HitChance.VeryHigh, true);
                         else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9 )
@@ -198,14 +202,22 @@ namespace Sivir
 
         private static void castQ(Obj_AI_Hero target)
         {
+            List<Vector2> waypoints = target.GetWaypoints();
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && Math.Abs(ObjectManager.Player.Distance(target.ServerPosition) - ObjectManager.Player.Distance(target.Position)) > 25)
-                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > 600 || Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 500 || target.Path.Count() == 0))
+            {
+                if (target.Position.Distance(ObjectManager.Player.ServerPosition) > target.Position.Distance(ObjectManager.Player.Position))
+                    Q.Range = qRange - 200;
+                else
+                    Q.Range = qRange;
+                Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                Q.Range = qRange;
+            }
         }
 
         public static bool farmW()
