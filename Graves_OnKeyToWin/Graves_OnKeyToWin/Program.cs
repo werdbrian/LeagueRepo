@@ -29,6 +29,7 @@ namespace Graves_OnKeyToWin
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
+        public static float qRange = 930;
         public static bool Farm = false;
         public static bool Esmart = false;
         public static double secoundDmgR = 0.65;
@@ -53,11 +54,11 @@ namespace Graves_OnKeyToWin
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 930f);
+            Q = new Spell(SpellSlot.Q, qRange);
             W = new Spell(SpellSlot.W, 950f);
             E = new Spell(SpellSlot.E, 450f);
             R = new Spell(SpellSlot.R, 1000f);
-            R1 = new Spell(SpellSlot.R, 1700f);
+            R1 = new Spell(SpellSlot.R, 1500f);
 
             Q.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
@@ -89,7 +90,7 @@ namespace Graves_OnKeyToWin
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 2, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 3, 0)));
             Config.AddItem(new MenuItem("HitR", "Hit Chance R").SetValue(new Slider(2, 2, 0)));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
@@ -172,7 +173,7 @@ namespace Graves_OnKeyToWin
                 var t = TargetSelector.GetTarget(E.Range + Q.Range, TargetSelector.DamageType.Physical);
                 var t2 = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
                 if ( ObjectManager.Player.Mana > RMANA + EMANA
-                    && ObjectManager.Player.CountEnemiesInRange(260) > 0
+                    && ObjectManager.Player.CountEnemiesInRange(240) > 0
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
@@ -306,12 +307,26 @@ namespace Graves_OnKeyToWin
 
         private static void castQ(Obj_AI_Hero target)
         {
+            
             if (Config.Item("Hit").GetValue<Slider>().Value == 0)
                 Q.Cast(target, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 1)
                 Q.CastIfHitchanceEquals(target, HitChance.High, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.High, true);
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() < 2 )
+            {
+                List<Vector2> waypoints = target.GetWaypoints();
+                if((target.Position == waypoints.Last<Vector2>().To3D() || Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 500 || target.Path.Count() == 0))
+                {
+                    if (target.Position.Distance(ObjectManager.Player.ServerPosition) >= target.Position.Distance(ObjectManager.Player.Position))
+                        Q.Range = qRange - 150;
+                    else
+                        Q.Range = qRange;
+                    Q.CastIfHitchanceEquals(target, HitChance.High, true);
+                    Q.Range = qRange;
+                }
+            }
         }
 
         private static void castR(Obj_AI_Hero target)
