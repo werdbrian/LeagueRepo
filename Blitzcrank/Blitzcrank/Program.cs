@@ -208,7 +208,7 @@ namespace Blitzcrank
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() == 0 && (Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 500 || target.Path.Count() == 0))
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() == 0 )
             {
                 if (target.Position.Distance(ObjectManager.Player.ServerPosition) >= target.Position.Distance(ObjectManager.Player.Position))
                     Q.Range = qRange - 200;
