@@ -503,7 +503,7 @@ namespace Jinx
                              if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                  cast = false;
                          }
-                         if ( cast  )
+                         if (cast && Config.Item("autoR").GetValue<bool>())
                          {
                              
                              debug("R OPS");
