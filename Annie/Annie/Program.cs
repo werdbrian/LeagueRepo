@@ -22,10 +22,11 @@ namespace Annie
         public static Spell E;
         public static Spell R;
         //ManaMenager
-        public static int QMANA;
-        public static int WMANA;
-        public static int EMANA;
-        public static int RMANA;
+        public static float QMANA;
+        public static float WMANA;
+        public static float EMANA;
+        public static float RMANA;
+
         public static bool Farm = false;
         public static bool HaveStun = false;
         //AutoPotion
@@ -49,7 +50,7 @@ namespace Annie
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 625f);
-            W = new Spell(SpellSlot.W, 625f);
+            W = new Spell(SpellSlot.W, 600f);
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R, 600f);
             Q.SetTargetted(0.25f, 1400f);
@@ -76,17 +77,22 @@ namespace Annie
             Config.AddToMainMenu();
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
+            Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
+            Config.AddItem(new MenuItem("rCount", "Auto R x enemies").SetValue(new Slider(3, 0, 5)));
+            //Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
-            Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic SI ver 1.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         static void Orbwalking_BeforeAttack(LeagueSharp.Common.Orbwalking.BeforeAttackEventArgs args)
         {
-            if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
+            if (Config.Item("sup").GetValue<bool>() && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
+            {
+                if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
+            }
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -94,11 +100,13 @@ namespace Annie
 
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
+            ManaMenager();
+            PotionMenager();
             HaveStun = GetPassiveStacks();
 
             if ((Q.IsReady() || W.IsReady()) && Orbwalker.ActiveMode.ToString() == "Combo")
             {
-                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
+                var t = TargetSelector.GetTarget(700, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget() && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health)
                     Orbwalking.Attack = true;
                 else
@@ -110,41 +118,77 @@ namespace Annie
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var targetR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
 
-            if (HaveStun && R.IsReady() && Orbwalker.ActiveMode.ToString() == "Combo" && targetR.IsValidTarget())
-                R.Cast(targetR, true, true);
-            else if (HaveStun && W.IsReady() && target.IsValidTarget() && CountEnemies(target, R.Width) > 1)
+            if (HaveStun && R.IsReady()
+                && Orbwalker.ActiveMode.ToString() == "Combo"
+                && targetR.IsValidTarget() 
+                && target.CountEnemiesInRange(R.Width) > 1)
+                    R.Cast(targetR, true, true);
+            else if (HaveStun && W.IsReady() && target.IsValidTarget() && target.CountEnemiesInRange(R.Width) > 1)
                 W.Cast(target, true, true);
-            else if ( Q.IsReady() && target.IsValidTarget())
+
+            if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 Q.Cast(target, true);
+
+            if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
+                         targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
+                         targetR.HasBuffOfType(BuffType.Taunt))
+            {
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && !(targetR.IsValidTarget(Q.Range) && Q.GetDamage(targetR) < targetR.Health))
+                    R.Cast(targetR, true, true);
+            }
+            if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                         target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
+                         target.HasBuffOfType(BuffType.Taunt))
+            {
+                if (W.IsReady() && target.IsValidTarget(W.Range))
+                    W.Cast(target, true, true);
+            }
 
             if (W.IsReady() && !Q.IsReady() && target.IsValidTarget())
                 W.Cast(target, true, true);
-            if (!W.IsReady() && !Q.IsReady() && targetR.IsValidTarget())
-                R.Cast(targetR, true, true);
 
-            if (E.IsReady() && !HaveStun)
+            if (Config.Item("sup").GetValue<bool>())
+            {
+                if (Q.IsReady() &&  Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                    farmQ();
+            }
+            else
+            {
+                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                    farmQ();
+            }
+            if (E.IsReady() && !HaveStun && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
                 E.Cast();
 
+            if (HaveStun && Config.Item("rCount").GetValue<Slider>().Value > 0 && R.IsReady() && targetR.IsValidTarget())
+            {
+                R.CastIfWillHit(targetR, Config.Item("rCount").GetValue<Slider>().Value, true);
+            }
+            if (ObjectManager.Player.InFountain() && !HaveStun)
+                W.Cast(ObjectManager.Player, true, true);
         }
 
-        
-        private static int CountEnemies(Obj_AI_Base target, float range)
+        public static void farmQ()
         {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.IsValidTarget() && hero.Team != ObjectManager.Player.Team &&
-                            hero.ServerPosition.Distance(target.ServerPosition) <= range);
-        }
-        private static int CountAlliesNearTarget(Obj_AI_Base target, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Count(
-                        hero =>
-                            hero.Team == ObjectManager.Player.Team &&
-                            hero.ServerPosition.Distance(target.ServerPosition) <= range);
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+            if (Q.IsReady())
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    Q.Cast(mob, true);
+                }
+            }
+
+            foreach (var minion in allMinionsQ)
+            {
+                if (minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) && minion.Health < Q.GetDamage(minion))
+                {
+                    Q.Cast(minion);
+                }
+            }
+
         }
         public static bool GetPassiveStacks()
         {
@@ -161,16 +205,16 @@ namespace Annie
         }
         public static void ManaMenager()
         {
-            QMANA = 10;
-            WMANA = 40 + 10 * W.Level;
-            EMANA = 50;
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = WMANA - ObjectManager.Player.Level * 2;
+                RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
-                RMANA = 100;
+                RMANA = R.Instance.ManaCost; ;
 
             if (Farm)
-                RMANA = RMANA + (CountEnemies(ObjectManager.Player, 2500) * 20);
+                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
@@ -178,6 +222,24 @@ namespace Annie
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+            }
+        }
+        public static void PotionMenager()
+        {
+            if (Config.Item("pots").GetValue<bool>() && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
+            {
+                if (Potion.IsReady() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
+                {
+                    if (ObjectManager.Player.CountEnemiesInRange(700) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
+                        Potion.Cast();
+                    else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
+                        Potion.Cast();
+                }
+                if (ManaPotion.IsReady() && !ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true))
+                {
+                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < RMANA + WMANA + EMANA + RMANA)
+                        ManaPotion.Cast();
+                }
             }
         }
     }
