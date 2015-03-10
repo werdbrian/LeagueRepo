@@ -104,7 +104,7 @@ namespace Annie
             ManaMenager();
             PotionMenager();
             HaveStun = GetPassiveStacks();
-
+            
             if ((Q.IsReady() || W.IsReady()) && Orbwalker.ActiveMode.ToString() == "Combo")
             {
                 var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange, TargetSelector.DamageType.Magical);
@@ -126,28 +126,29 @@ namespace Annie
                     R.Cast(targetR, true, true);
             else if (HaveStun && W.IsReady() && target.IsValidTarget() && target.CountEnemiesInRange(R.Width) > 1)
                 W.Cast(target, true, true);
-
+            
             if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 Q.Cast(target, true);
 
-            if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
-                         targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
-                         targetR.HasBuffOfType(BuffType.Taunt))
-            {
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady() && !(targetR.IsValidTarget(Q.Range) && Q.GetDamage(targetR) < targetR.Health))
-                    R.Cast(targetR, true, true);
-            }
-            if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                         target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
-                         target.HasBuffOfType(BuffType.Taunt))
-            {
-                if (W.IsReady() && target.IsValidTarget(W.Range))
-                    W.Cast(target, true, true);
-            }
+            if (targetR.IsValidTarget() && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady() && !(targetR.IsValidTarget(Q.Range) && Q.GetDamage(targetR) < targetR.Health))
+                if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
+                             targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
+                             targetR.HasBuffOfType(BuffType.Taunt))
+                {
+                        R.Cast(targetR, true, true);
+                }
+            if (W.IsReady() && target.IsValidTarget(W.Range))
+                if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                             target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
+                             target.HasBuffOfType(BuffType.Taunt))
+                {
+                
+                        W.Cast(target, true, true);
+                }
 
             if (W.IsReady() && !Q.IsReady() && target.IsValidTarget())
                 W.Cast(target, true, true);
-
+            
             if (Config.Item("sup").GetValue<bool>())
             {
                 if (Q.IsReady() &&  Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
@@ -171,7 +172,7 @@ namespace Annie
 
         public static void farmQ()
         {
-            if (Config.Item("farmQ").GetValue<bool>())
+            if (!Config.Item("farmQ").GetValue<bool>())
                 return;
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
             if (Q.IsReady())
