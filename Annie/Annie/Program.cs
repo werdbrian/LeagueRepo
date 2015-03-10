@@ -138,7 +138,7 @@ namespace Annie
             if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 Q.Cast(target, true);
 
-            if (targetR.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady())
+            if (!HaveTibers && targetR.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady())
                 if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
                              targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
                              targetR.HasBuffOfType(BuffType.Taunt))
@@ -158,30 +158,29 @@ namespace Annie
             if (W.IsReady() && !Q.IsReady() && target.IsValidTarget())
                 W.Cast(target, true, true);
             
-            if (Config.Item("sup").GetValue<bool>())
-            {
-                if (Q.IsReady() &&  Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
-                    farmQ();
-            }
-            else
-            {
-                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && ObjectManager.Player.Mana > RMANA + QMANA )
-                    farmQ();
-            }
             if (E.IsReady() && !HaveStun && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
                 E.Cast();
 
-            if (HaveStun && Config.Item("rCount").GetValue<Slider>().Value > 0 && R.IsReady() && targetR.IsValidTarget())
+            if (!HaveTibers && HaveStun && Config.Item("rCount").GetValue<Slider>().Value > 0 && R.IsReady() && targetR.IsValidTarget())
             {
                 R.CastIfWillHit(targetR, Config.Item("rCount").GetValue<Slider>().Value, true);
             }
             if (ObjectManager.Player.InFountain() && !HaveStun)
                 W.Cast(ObjectManager.Player, true, true);
-            if (targetR.IsValidTarget() && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady() && (target.CountEnemiesInRange(R.Width) > 1 || R.GetDamage(targetR) + Q.GetDamage(targetR) > targetR.Health ))
+            if (!HaveTibers && targetR.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady() && (target.CountEnemiesInRange(400) > 1 || R.GetDamage(targetR) + Q.GetDamage(targetR) > targetR.Health))
             {
                 R.Cast(targetR, true, true);
             }
-
+            if (Config.Item("sup").GetValue<bool>())
+            {
+                if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
+                    farmQ();
+            }
+            else
+            {
+                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && ObjectManager.Player.Mana > RMANA + QMANA)
+                    farmQ();
+            }
             if (ObjectManager.Player.HasBuff("infernalguardiantimer"))
                 HaveTibers = true;
             else
