@@ -129,15 +129,16 @@ namespace Annie
 
             if (!HaveTibers && HaveStun && R.IsReady()
                 && Orbwalker.ActiveMode.ToString() == "Combo"
-                && targetR.IsValidTarget() 
+                && targetR.IsValidTarget(R.Range) 
                 && targetR.CountEnemiesInRange(400) > 1)
                     R.Cast(targetR, true, true);
-            else if (HaveStun && W.IsReady() && target.IsValidTarget() && target.CountEnemiesInRange(300) > 1)
+            else if (HaveStun && W.IsReady() && target.IsValidTarget(W.Range) && target.CountEnemiesInRange(300) > 1)
                 W.Cast(target, true, true);
-            else if (Q.IsReady() && target.IsValidTarget(Q.Range))
+
+            if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 Q.Cast(target, true);
-            
-            if (targetR.IsValidTarget() && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady())
+
+            if (targetR.IsValidTarget(R.Range) && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady())
                 if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
                              targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
                              targetR.HasBuffOfType(BuffType.Taunt))
