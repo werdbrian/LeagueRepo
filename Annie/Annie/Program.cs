@@ -181,10 +181,10 @@ namespace Annie
                 R.Cast(targetR, true, true);
             }
 
-                if (ObjectManager.Player.HasBuff("infernalguardiantimer"))
-                    HaveTibers = true;
-                else
-                    HaveTibers = false;
+            if (ObjectManager.Player.HasBuff("infernalguardiantimer"))
+                HaveTibers = true;
+            else
+                HaveTibers = false;
 
         }
 
