@@ -114,7 +114,7 @@ namespace Annie
             if ( Orbwalker.ActiveMode.ToString() == "Combo")
             {
                 var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
+                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA) )
                     Orbwalking.Attack = true;
                 else
                     Orbwalking.Attack = false;
