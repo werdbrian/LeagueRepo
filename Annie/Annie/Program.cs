@@ -29,6 +29,8 @@ namespace Annie
 
         public static bool Farm = false;
         public static bool HaveStun = false;
+        public static bool HaveTibers = false;
+        
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -80,7 +82,11 @@ namespace Annie
             Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
-            Config.AddItem(new MenuItem("rCount", "Auto R x enemies").SetValue(new Slider(3, 0, 5)));
+            Config.AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu("R champions").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+
             //Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
@@ -105,10 +111,10 @@ namespace Annie
             PotionMenager();
             HaveStun = GetPassiveStacks();
             
-            if ((Q.IsReady() || W.IsReady()) && Orbwalker.ActiveMode.ToString() == "Combo")
+            if ( Orbwalker.ActiveMode.ToString() == "Combo")
             {
-                var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() && ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health)
+                var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget() && ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
                     Orbwalking.Attack = true;
                 else
                     Orbwalking.Attack = false;
@@ -118,17 +124,19 @@ namespace Annie
 
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var targetR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+            if (targetR.IsValidTarget() && !Config.Item("ro" + targetR.BaseSkinName).GetValue<bool>())
+                targetR = null;
 
-            if (HaveStun && R.IsReady()
+            if (!HaveTibers && HaveStun && R.IsReady()
                 && Orbwalker.ActiveMode.ToString() == "Combo"
                 && targetR.IsValidTarget() 
-                && target.CountEnemiesInRange(R.Width) > 1)
+                && targetR.CountEnemiesInRange(400) > 1)
                     R.Cast(targetR, true, true);
-            else if (HaveStun && W.IsReady() && target.IsValidTarget() && target.CountEnemiesInRange(R.Width) > 1)
+            else if (HaveStun && W.IsReady() && target.IsValidTarget() && target.CountEnemiesInRange(300) > 1)
                 W.Cast(target, true, true);
             else if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 Q.Cast(target, true);
-
+            
             if (targetR.IsValidTarget() && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady())
                 if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
                              targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
@@ -168,6 +176,16 @@ namespace Annie
             }
             if (ObjectManager.Player.InFountain() && !HaveStun)
                 W.Cast(ObjectManager.Player, true, true);
+            if (targetR.IsValidTarget() && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady() && (target.CountEnemiesInRange(R.Width) > 1 || R.GetDamage(targetR) + Q.GetDamage(targetR) > targetR.Health ))
+            {
+                R.Cast(targetR, true, true);
+            }
+
+                if (ObjectManager.Player.HasBuff("infernalguardiantimer"))
+                    HaveTibers = true;
+                else
+                    HaveTibers = false;
+
         }
 
         public static void farmQ()
