@@ -78,6 +78,7 @@ namespace Annie
             Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
+            Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
             Config.AddItem(new MenuItem("rCount", "Auto R x enemies").SetValue(new Slider(3, 0, 5)));
             //Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -170,6 +171,8 @@ namespace Annie
 
         public static void farmQ()
         {
+            if (Config.Item("farmQ").GetValue<bool>())
+                return;
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
             if (Q.IsReady())
             {
