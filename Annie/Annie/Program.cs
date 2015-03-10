@@ -126,8 +126,7 @@ namespace Annie
                     R.Cast(targetR, true, true);
             else if (HaveStun && W.IsReady() && target.IsValidTarget() && target.CountEnemiesInRange(R.Width) > 1)
                 W.Cast(target, true, true);
-            
-            if (Q.IsReady() && target.IsValidTarget(Q.Range))
+            else if (Q.IsReady() && target.IsValidTarget(Q.Range))
                 Q.Cast(target, true);
 
             if (targetR.IsValidTarget() && Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady())
