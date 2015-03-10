@@ -134,7 +134,7 @@ namespace Annie
                          targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
                          targetR.HasBuffOfType(BuffType.Taunt))
             {
-                if (Orbwalker.ActiveMode.ToString() == "Combo" && !(targetR.IsValidTarget(Q.Range) && Q.GetDamage(targetR) < targetR.Health))
+                if (Orbwalker.ActiveMode.ToString() == "Combo" && R.IsReady() && !(targetR.IsValidTarget(Q.Range) && Q.GetDamage(targetR) < targetR.Health))
                     R.Cast(targetR, true, true);
             }
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
