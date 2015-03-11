@@ -166,7 +166,7 @@ namespace Darius
                 var target =  TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical); 
                 if (target.IsValidTarget())
                 {
-                    if ((target.Path.Count() > 0 || ObjectManager.Player.Distance(target.ServerPosition) > 400) && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 240)
+                    if ((target.Path.Count() > 0 || (ObjectManager.Player.Distance(target.ServerPosition) > 400 && target.Path.Count() == 0)) && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 240)
                         E.Cast(target, true, true);
                 }
             }
