@@ -149,7 +149,7 @@ namespace Darius
                 Farm = true;
             else
                 Farm = false;
-
+            ManaMenager();
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
                 CastR();
@@ -170,7 +170,7 @@ namespace Darius
                         E.Cast(target, true, true);
                 }
             }
-
+            ManaMenager();
             if (Q.IsReady() && ObjectManager.Player.CountEnemiesInRange(Q.Range) > 0)
             {
                 if (ObjectManager.Player.Mana > RMANA + QMANA && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -232,9 +232,9 @@ namespace Darius
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
+                RMANA = QMANA;
             else
-                RMANA = R.Instance.ManaCost + R.Instance.ManaCost * ObjectManager.Player.CountEnemiesInRange(600);
+                RMANA = R.Instance.ManaCost + (R.Instance.ManaCost * ObjectManager.Player.CountEnemiesInRange(600));
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
