@@ -208,7 +208,7 @@ namespace Blitzcrank
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (Config.Item("Hit").GetValue<Slider>().Value == 2 && target.Path.Count() < 2)
                 Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() == 0 )
+            else if (Config.Item("Hit").GetValue<Slider>().Value == 3 && target.Path.Count() == 1 )
             {
                 if (target.Position.Distance(ObjectManager.Player.ServerPosition) >= target.Position.Distance(ObjectManager.Player.Position))
                     Q.Range = qRange - 200;
@@ -255,6 +255,7 @@ namespace Blitzcrank
         {
            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Q.IsReady()
                 && unit.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value)
+                && args.SData.IsAutoAttack()
                 && ObjectManager.Player.Distance(unit.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value
                 && Config.Item("Hit").GetValue<Slider>().Value == 3 && unit.IsEnemy && unit.IsValid<Obj_AI_Hero>() && Config.Item("grab" + unit.BaseSkinName).GetValue<bool>())
                 Q.CastIfHitchanceEquals(unit, HitChance.High, true);
@@ -334,6 +335,7 @@ namespace Blitzcrank
                         List<Vector2> waypoints = tw.GetWaypoints();
 
                         Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 100, System.Drawing.Color.Red);
+                        Render.Circle.DrawCircle(Q.GetPrediction(tw).CastPosition, 100, System.Drawing.Color.Azure);
                     }
            }
         }
