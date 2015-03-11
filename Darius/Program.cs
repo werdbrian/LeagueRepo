@@ -232,9 +232,9 @@ namespace Darius
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = QMANA;
+                RMANA = QMANA - 10;
             else
-                RMANA = R.Instance.ManaCost + (R.Instance.ManaCost * ObjectManager.Player.CountEnemiesInRange(600));
+                RMANA = R.Instance.ManaCost + (R.Instance.ManaCost * ObjectManager.Player.CountEnemiesInRange(R.Range));
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
