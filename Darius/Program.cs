@@ -166,7 +166,7 @@ namespace Darius
                 var target =  TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical); 
                 if (target.IsValidTarget())
                 {
-                    if (target.Path.Count() > 0 && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 240)
+                    if ((target.Path.Count() > 0 || ObjectManager.Player.Distance(target.ServerPosition) > 400) && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 240)
                         E.Cast(target, true, true);
                 }
             }
@@ -197,7 +197,7 @@ namespace Darius
 
         private static void CastR()
         {
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && !target.IsZombie && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield) && !target.HasBuffOfType(BuffType.PhysicalImmunity)))
             {
                 if (R.GetDamage(target) - target.Level > target.Health)
                 {
