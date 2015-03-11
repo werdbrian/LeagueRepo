@@ -193,19 +193,7 @@ namespace Darius
                     if (ObjectManager.Player.Distance(minion.ServerPosition) > 300 && minion.Health <  ObjectManager.Player.GetSpellDamage(minion, SpellSlot.Q) * 0.6)
                         Q.Cast();
             }
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && !target.IsZombie && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield) && !target.HasBuffOfType(BuffType.PhysicalImmunity)))
-            {
-                foreach (var buff in target.Buffs)
-                {
-                    if (buff.Name == "dariushemo")
-                    {
-                        float a = (R.GetDamage(target) * (1 + (float)buff.Count / 5) - 1);
-                        Game.PrintChat("" + a);
-                        Game.PrintChat("R: " + R.GetDamage(target));
-                        
-                    }
-                }
-            }
+           
         }
 
         private static void CastR()
