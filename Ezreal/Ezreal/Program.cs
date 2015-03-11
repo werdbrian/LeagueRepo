@@ -679,8 +679,6 @@ namespace Ezreal
         private static void Drawing_OnDraw(EventArgs args)
         {
 
-            
-
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
@@ -766,7 +764,7 @@ namespace Ezreal
                         Render.Circle.DrawCircle(tw.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q + W kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     }
-                    else if (Q.GetDamage(tw) + Q.GetDamage(tw) + E.GetDamage(tw) > tw.Health)
+                    else if (Q.GetDamage(tw) + W.GetDamage(tw) + E.GetDamage(tw) > tw.Health)
                     {
                         Render.Circle.DrawCircle(tw.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q + W + E kill: " + t.ChampionName + " have: " + t.Health + "hp");
