@@ -130,7 +130,16 @@ namespace Jinx
                 }
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && E.IsReady()))
                 {
-                    if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                    if (enemy.HasBuff("rocketgrab2"))
+                    {
+                        foreach (var ally in ObjectManager.Get<Obj_AI_Hero>())
+                        {
+                            if (ally.BaseSkinName == "Blitzcrank" && ObjectManager.Player.Distance(ally.Position) < E.Range)
+                                E.Cast(ally, true);
+                        }
+
+                    }
+                    else if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                          enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                          enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
                          enemy.IsStunned || enemy.HasBuff("Recall"))
@@ -144,11 +153,11 @@ namespace Jinx
                 {
                     if (ta.HasBuffOfType(BuffType.Slow) && ta.Path.Count() < 2)
                         E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
-                    else if (ta.Path.Count() < 2 && ta.CountEnemiesInRange(300) > 2)
+                    else if (ta.Path.Count() < 2 && ta.CountEnemiesInRange(250) > 2)
                         E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
                     else if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
                     {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.Health < ObjectManager.Player.Health)
                         {
                             E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
                             debug("E run");
@@ -156,7 +165,7 @@ namespace Jinx
                     }
                     else
                     {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.Health > ObjectManager.Player.Health)
                         {
                             E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
                             debug("E escape");
