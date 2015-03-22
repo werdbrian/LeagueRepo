@@ -69,7 +69,6 @@ namespace OneKeyToBrain
             
             Game.OnGameUpdate += Game_OnGameUpdate;
             
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
