@@ -72,12 +72,11 @@ namespace OneKeyToBrain
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (Config.Item("Wards").GetValue<bool>() && (!Config.Item("WardsC").GetValue<bool>() || (Config.Item("WardsC").GetValue<bool>() && Config.Item("Combo").GetValue<KeyBind>().Active)))
+            if (Config.Item("ward").GetValue<bool>() || (Config.Item("Combo").GetValue<KeyBind>().Active && Config.Item("wardC").GetValue<bool>()))
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(1300)))
                 {
-                    if (enemy.IsValidTarget(1300))
-                    {
+
 
                         bool WallOfGrass = NavMesh.IsWallOfGrass(Prediction.GetPrediction(enemy, 0.3f).CastPosition, 0);
                         if (WallOfGrass)
@@ -86,11 +85,11 @@ namespace OneKeyToBrain
                             WardTarget = enemy;
                             WardTime = Game.Time;
                         }
-                    }
+                    
                 }
-                if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 2)
+                if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 4)
                 {
-                    WardTime = Game.Time - 2;
+                    WardTime = Game.Time - 5;
                     if (TrinketN.IsReady())
                         TrinketN.Cast(positionWard);
                     else if (SightStone.IsReady())
