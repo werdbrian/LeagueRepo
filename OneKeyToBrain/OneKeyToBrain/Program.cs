@@ -87,9 +87,9 @@ namespace OneKeyToBrain
                         }
                     
                 }
-                if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 4)
+                if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 5)
                 {
-                    WardTime = Game.Time - 5;
+                    WardTime = Game.Time - 6;
                     if (TrinketN.IsReady())
                         TrinketN.Cast(positionWard);
                     else if (SightStone.IsReady())
