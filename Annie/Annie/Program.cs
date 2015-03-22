@@ -27,7 +27,6 @@ namespace Annie
         public static float EMANA;
         public static float RMANA;
 
-        public static bool Farm = false;
         public static bool HaveStun = false;
         
         //AutoPotion
@@ -53,10 +52,10 @@ namespace Annie
             Q = new Spell(SpellSlot.Q, 625f);
             W = new Spell(SpellSlot.W, 600f);
             E = new Spell(SpellSlot.E);
-            R = new Spell(SpellSlot.R, 600f);
+            R = new Spell(SpellSlot.R, 625f);
             Q.SetTargetted(0.25f, 1400f);
-            W.SetSkillshot(0.60f, 50f * (float)Math.PI / 180, float.MaxValue, false, SkillshotType.SkillshotCone);
-            R.SetSkillshot(0.20f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.50f, 250f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(0.20f, 250f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -90,7 +89,7 @@ namespace Annie
             //Add the events we are going to use:
             Game.OnGameUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
-            Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.2 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         static void Orbwalking_BeforeAttack(LeagueSharp.Common.Orbwalking.BeforeAttackEventArgs args)
@@ -106,61 +105,69 @@ namespace Annie
 
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
+
+
             ManaMenager();
             PotionMenager();
             HaveStun = GetPassiveStacks();
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var targetR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-            if (targetR.IsValidTarget() && !Config.Item("ro" + targetR.BaseSkinName).GetValue<bool>())
-                targetR = null;
+            
+            
+            
             if (Combo)
             {
                 var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA) )
+                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA))
                     Orbwalking.Attack = true;
                 else
                     Orbwalking.Attack = false;
-                if (R.IsReady() && !HaveTibers && HaveStun 
-                    && targetR.IsValidTarget(R.Range) && targetR.CountEnemiesInRange(400) > 1)
-                        R.Cast(targetR, true, true);
-                else if (W.IsReady() && HaveStun && target.IsValidTarget(W.Range) && target.CountEnemiesInRange(300) > 1)
-                    W.Cast(target, true, true);
             }
             else
                 Orbwalking.Attack = true;
-
-            if (Q.IsReady() && target.IsValidTarget(Q.Range))
-                Q.Cast(target, true);
-
-            if (!HaveTibers && targetR.IsValidTarget(R.Range) && Combo && R.IsReady() && Q.GetDamage(targetR) < targetR.Health) 
-                if (targetR.HasBuffOfType(BuffType.Stun) || targetR.HasBuffOfType(BuffType.Snare) ||
-                             targetR.HasBuffOfType(BuffType.Charm) || targetR.HasBuffOfType(BuffType.Fear) ||
-                             targetR.HasBuffOfType(BuffType.Taunt))
-                {
-                        R.Cast(targetR, true, true);
-                }
-
-            if (W.IsReady() && target.IsValidTarget(W.Range))
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            if (target.IsValidTarget())
             {
-                if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                             target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
-                             target.HasBuffOfType(BuffType.Taunt))
+                
+                if (!HaveTibers && R.IsReady())
                 {
-                    W.Cast(target, true, true);
+                    if (Combo && HaveStun && target.CountEnemiesInRange(400) > 1)
+                        R.Cast(target, true, true);
+                    else if (Config.Item("rCount").GetValue<Slider>().Value > 0 && Config.Item("rCount").GetValue<Slider>().Value <= target.CountEnemiesInRange(300))
+                        R.Cast(target, true, true);
+                    else if (Combo && !W.IsReady() && !Q.IsReady()
+                        && Q.GetDamage(target) < target.Health
+                        && (target.CountEnemiesInRange(400) > 1 || R.GetDamage(target) + Q.GetDamage(target) > target.Health))
+                        R.Cast(target, true, true);
+                    else if (Combo && Q.GetDamage(target) < target.Health)
+                        if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                                     target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||target.HasBuffOfType(BuffType.Taunt))
+                        {
+                            R.Cast(target, true, true);
+                        }
                 }
-                else if (!Q.IsReady())
-                    W.Cast(target, true, true);
+                if (W.IsReady() && (Farm || Combo))
+                {
+                    if (Combo && HaveStun && target.CountEnemiesInRange(250) > 1)
+                        W.Cast(target, true, true);
+                    else if (!Q.IsReady())
+                        W.Cast(target, true, true);
+                    else if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Charm) || 
+                    target.HasBuffOfType(BuffType.Fear) ||target.HasBuffOfType(BuffType.Taunt))
+                    {
+                        W.Cast(target, true, true);
+                    }
+                }
+                if (Q.IsReady() && (Farm || Combo))
+                {
+                    if (HaveStun && Combo && target.CountEnemiesInRange(400) > 1 && (W.IsReady() || R.IsReady()))
+                    {
+                        return;
+                    }
+                    else
+                        Q.Cast(target, true);
+                }
             }
 
-            if (!HaveTibers && R.IsReady() && targetR.IsValidTarget(R.Range))
-            {
-                if (Config.Item("rCount").GetValue<Slider>().Value > 0 && Config.Item("rCount").GetValue<Slider>().Value < R.GetPrediction(targetR).AoeTargetsHitCount && HaveStun)
-                    R.Cast(targetR, true, true);
-                if (Combo && R.IsReady() && !W.IsReady() && !Q.IsReady()
-                    && Q.GetDamage(targetR) < targetR.Health
-                    && (targetR.CountEnemiesInRange(400) > 1 || R.GetDamage(targetR) + Q.GetDamage(targetR) > targetR.Health))
-                    R.Cast(targetR, true, true);
-            }
+            
 
             if (Config.Item("sup").GetValue<bool>())
             {
@@ -169,14 +176,14 @@ namespace Annie
             }
             else
             {
-                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && ObjectManager.Player.Mana > RMANA + QMANA)
+                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear))
                     farmQ();
             }
 
             if (Config.Item("autoE").GetValue<bool>() && E.IsReady() && !HaveStun && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
                 E.Cast();
 
-            if (ObjectManager.Player.InFountain() && !HaveStun)
+            if (W.IsReady() && ObjectManager.Player.InFountain() && !HaveStun)
                 W.Cast(ObjectManager.Player, true, true);
         }
 
@@ -214,7 +221,10 @@ namespace Annie
         {
             get { return Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo; }
         }
-
+        private static bool Farm
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) ; }
+        }
         public static bool GetPassiveStacks()
         {
             var buffs = Player.Buffs.Where(buff => (buff.Name.ToLower() == "pyromania" || buff.Name.ToLower() == "pyromania_particle"));

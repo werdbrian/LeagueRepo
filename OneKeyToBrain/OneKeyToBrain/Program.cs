@@ -25,6 +25,14 @@ namespace OneKeyToBrain
         public static float EMANA;
         public static float RMANA;
 
+        public static Vector3 positionWard;
+        private static Obj_AI_Hero WardTarget;
+        private static float WardTime= 0;
+
+        public static Items.Item WardS = new Items.Item(2043, 600f);
+        public static Items.Item WardN = new Items.Item(2044, 600f);
+        public static Items.Item TrinketN = new Items.Item(3340, 600f);
+        public static Items.Item SightStone = new Items.Item(2049, 600f);
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
         public static Items.Item Youmuu = new Items.Item(3142, 0);
@@ -49,14 +57,54 @@ namespace OneKeyToBrain
             Config.AddToMainMenu();
 
             Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.AddItem(new MenuItem("click", "Show enemy click").SetValue(true));
+            Config.AddItem(new MenuItem("infoCombo", "Show info combo").SetValue(true));
+            Config.SubMenu("Wards").AddItem(new MenuItem("ward", "Auto ward enemy in Grass").SetValue(false));
+            Config.SubMenu("Wards").AddItem(new MenuItem("wardC", "Only Combo").SetValue(false));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
+
+            Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             
             Drawing.OnDraw += Drawing_OnDraw;
+            
             Game.OnGameUpdate += Game_OnGameUpdate;
+            
             Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            if (Config.Item("Wards").GetValue<bool>() && (!Config.Item("WardsC").GetValue<bool>() || (Config.Item("WardsC").GetValue<bool>() && Config.Item("Combo").GetValue<KeyBind>().Active)))
+            {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                {
+                    if (enemy.IsValidTarget(1300))
+                    {
+
+                        bool WallOfGrass = NavMesh.IsWallOfGrass(Prediction.GetPrediction(enemy, 0.3f).CastPosition, 0);
+                        if (WallOfGrass)
+                        {
+                            positionWard = Prediction.GetPrediction(enemy, 0.3f).CastPosition;
+                            WardTarget = enemy;
+                            WardTime = Game.Time;
+                        }
+                    }
+                }
+                if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 2)
+                {
+                    WardTime = Game.Time - 2;
+                    if (TrinketN.IsReady())
+                        TrinketN.Cast(positionWard);
+                    else if (SightStone.IsReady())
+                        SightStone.Cast(positionWard);
+                    else if (WardS.IsReady())
+                        WardS.Cast(positionWard);
+                    else if (WardN.IsReady())
+                        WardN.Cast(positionWard);
+                }
+            }
+            
+
+
         }
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
         {
@@ -66,16 +114,20 @@ namespace OneKeyToBrain
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+
+            
             var tw = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
 
             if (tw.IsValidTarget())
             {
-                if (Config.Item("debug").GetValue<bool>())
+                if (Config.Item("click").GetValue<bool>())
                 {
                     List<Vector2> waypoints = tw.GetWaypoints();
-                    Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 20, System.Drawing.Color.Red);
+                    Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 50, System.Drawing.Color.Red);
                 }
             }
+           if (Config.Item("infoCombo").GetValue<bool>())
+            {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
             {
                 string combo;
@@ -102,14 +154,14 @@ namespace OneKeyToBrain
                     drawText(combo, enemy, System.Drawing.Color.Red);
                 else if (hpLeft > 0)
                     drawText(combo, enemy, System.Drawing.Color.Yellow);
-                
             }
-
+            }
 
         }
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
+                
                 Game.PrintChat(msg);
         }
         public static void PotionMenager()
