@@ -66,26 +66,21 @@ namespace OneKeyToBrain
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             
             Drawing.OnDraw += Drawing_OnDraw;
-            
             Game.OnGameUpdate += Game_OnGameUpdate;
-            
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (Config.Item("ward").GetValue<bool>() || (Config.Item("Combo").GetValue<KeyBind>().Active && Config.Item("wardC").GetValue<bool>()))
+            if (Config.Item("ward").GetValue<bool>() || (Config.Item("ward").GetValue<bool>() && Config.Item("Combo").GetValue<KeyBind>().Active && Config.Item("wardC").GetValue<bool>()))
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(1300)))
                 {
-
-
-                        bool WallOfGrass = NavMesh.IsWallOfGrass(Prediction.GetPrediction(enemy, 0.3f).CastPosition, 0);
-                        if (WallOfGrass)
-                        {
-                            positionWard = Prediction.GetPrediction(enemy, 0.3f).CastPosition;
-                            WardTarget = enemy;
-                            WardTime = Game.Time;
-                        }
-                    
+                    bool WallOfGrass = NavMesh.IsWallOfGrass(Prediction.GetPrediction(enemy, 0.3f).CastPosition, 0);
+                    if (WallOfGrass)
+                    {
+                        positionWard = Prediction.GetPrediction(enemy, 0.3f).CastPosition;
+                        WardTarget = enemy;
+                        WardTime = Game.Time;
+                    }
                 }
                 if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 5)
                 {
@@ -100,9 +95,6 @@ namespace OneKeyToBrain
                         WardN.Cast(positionWard);
                 }
             }
-            
-
-
         }
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
         {
@@ -112,8 +104,6 @@ namespace OneKeyToBrain
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-
-            
             var tw = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
 
             if (tw.IsValidTarget())
