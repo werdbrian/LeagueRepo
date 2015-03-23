@@ -161,15 +161,7 @@ namespace Darius
                     R.Cast(targetR, true);
             }
 
-            if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-            {
-                var target =  TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical); 
-                if (target.IsValidTarget())
-                {
-                    if ((target.Path.Count() > 0 || (ObjectManager.Player.Distance(target.ServerPosition) > 400 && target.Path.Count() == 0)) && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 240)
-                        E.Cast(target, true, true);
-                }
-            }
+            
             ManaMenager();
             if (Q.IsReady() && ObjectManager.Player.CountEnemiesInRange(Q.Range) > 0)
             {
@@ -184,7 +176,15 @@ namespace Darius
                         Q.Cast();
                 }
             }
-
+            if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (target.IsValidTarget())
+                {
+                    if ((target.Path.Count() > 0 || (ObjectManager.Player.Distance(target.ServerPosition) > 460 && target.Path.Count() == 0)) && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 260)
+                        E.Cast(target, true, true);
+                }
+            }
             if (Config.Item("farmQ").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range,
@@ -203,6 +203,7 @@ namespace Darius
                 if (R.GetDamage(target) - target.Level > target.Health)
                 {
                     R.Cast(target, true);
+                    
                 }
                 else
                 {
@@ -216,6 +217,7 @@ namespace Darius
                             }
                             else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4 && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R, 1) * 1.2 * ((1 + buff.Count / 5) - 1) > target.Health)
                             {
+
                                 R.CastOnUnit(target, true);
                             }
                             
