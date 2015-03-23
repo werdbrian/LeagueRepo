@@ -121,7 +121,7 @@ namespace Ezreal
             Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
             Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 3, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
@@ -343,7 +343,7 @@ namespace Ezreal
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
-                            CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
+                            CastSpell(Q, enemy, Config.Item("Hit").GetValue<Slider>().Value);
                         }
                     }
 

@@ -102,17 +102,13 @@ namespace Annie
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
-
 
             ManaMenager();
             PotionMenager();
             HaveStun = GetPassiveStacks();
-            
-            
-            
+
             if (Combo)
             {
                 var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
@@ -126,7 +122,6 @@ namespace Annie
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
-                
                 if (!HaveTibers && R.IsReady())
                 {
                     if (Combo && HaveStun && target.CountEnemiesInRange(400) > 1)
