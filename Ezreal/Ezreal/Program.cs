@@ -12,7 +12,6 @@ using System.Threading;
 
 namespace Ezreal
 {
-
     class Program
     {
         public const string ChampionName = "Ezreal";
