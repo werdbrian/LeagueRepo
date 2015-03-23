@@ -32,6 +32,7 @@ namespace OneKeyToBrain
         public static Items.Item WardS = new Items.Item(2043, 600f);
         public static Items.Item WardN = new Items.Item(2044, 600f);
         public static Items.Item TrinketN = new Items.Item(3340, 600f);
+
         public static Items.Item SightStone = new Items.Item(2049, 600f);
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -72,9 +73,10 @@ namespace OneKeyToBrain
         {
             if (Config.Item("ward").GetValue<bool>() || (Config.Item("ward").GetValue<bool>() && Config.Item("Combo").GetValue<KeyBind>().Active && Config.Item("wardC").GetValue<bool>()))
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(1300)))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
                 {
                     bool WallOfGrass = NavMesh.IsWallOfGrass(Prediction.GetPrediction(enemy, 0.3f).CastPosition, 0);
+
                     if (WallOfGrass)
                     {
                         positionWard = Prediction.GetPrediction(enemy, 0.3f).CastPosition;
