@@ -202,9 +202,11 @@ namespace Jinx
                             Q.Cast();
                     }
                 }
-                else if (!FishBoneActive && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo) && ObjectManager.Player.Mana > RMANA + WMANA + 20)
+                else if (!FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 20 && ObjectManager.Player.CountEnemiesInRange(2000) > 0)
                     Q.Cast();
-                else if (FishBoneActive && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo) && ObjectManager.Player.Mana < RMANA + WMANA + 20)
+                else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana < RMANA + WMANA + 20 )
+                    Q.Cast();
+                else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(2000) == 0)
                     Q.Cast();
                 else if (FishBoneActive && Farm)
                     Q.Cast();
