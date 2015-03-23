@@ -157,9 +157,9 @@ namespace KogMaw
                     var eDmg = E.GetDamage(t);
                     if (t.IsValidTarget(W.Range) && qDmg + eDmg > t.Health)
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA * 2 + EMANA  )
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) )
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA*2 + WMANA) && !ObjectManager.Player.UnderTurret(true) )
                     {
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                     }
