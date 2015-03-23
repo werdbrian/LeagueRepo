@@ -124,14 +124,7 @@ namespace KogMaw
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Game.PrintChat("<font color=\"#008aff\">K</font>og Maw full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
-        #region Farm
-        public static void farmQ()
-        {
 
-        }
-
-
-        #endregion
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
@@ -384,7 +377,7 @@ namespace KogMaw
                         var qDmg = Q.GetDamage(target);
                         if (qDmg > HpLeft && HpLeft > 0)
                         {
-                            Q.Cast(target, true);
+                            CastSpell(Q, target, Config.Item("Hit").GetValue<Slider>().Value);
                             debug("Q ks OPS");
                         }
                     }
@@ -393,7 +386,7 @@ namespace KogMaw
                         var wDmg = W.GetDamage(target);
                         if (wDmg > HpLeft && HpLeft > 0)
                         {
-                            W.Cast(target, true);
+                            CastSpell(W, target, Config.Item("Hit").GetValue<Slider>().Value);
                             debug("W ks OPS");
                         }
                     }
@@ -459,14 +452,7 @@ namespace KogMaw
             }
         }
 
-        private static float GetPassiveTime()
-        {
-            return
-                ObjectManager.Player.Buffs.OrderByDescending(buff => buff.EndTime - Game.Time)
-                    .Where(buff => buff.Name == "ezrealrisingspellforce")
-                    .Select(buff => buff.EndTime)
-                    .FirstOrDefault();
-        }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
             Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
