@@ -105,7 +105,6 @@ namespace KogMaw
             Config.SubMenu("R option").AddItem(new MenuItem("Rslow", "R slow").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
@@ -235,9 +234,9 @@ namespace KogMaw
                     }
                     else if (target.HasBuffOfType(BuffType.Slow) && Config.Item("Rslow").GetValue<bool>() && GetRStacks() < 3 && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRStacks() <= Config.Item("comboStack").GetValue<Slider>().Value && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA && Config.Item("comboStack").GetValue<Slider>().Value > 0)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRStacks() < Config.Item("comboStack").GetValue<Slider>().Value && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Config.Item("harasStack").GetValue<Slider>().Value > 0 && Farm && GetRStacks() <= Config.Item("harasStack").GetValue<Slider>().Value && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                    else if ( Farm && GetRStacks() < Config.Item("harasStack").GetValue<Slider>().Value && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
                 }
             }
