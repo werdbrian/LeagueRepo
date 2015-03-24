@@ -317,8 +317,6 @@ namespace KogMaw
                 Game.PrintChat(msg);
         }
 
-        
-
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe)
