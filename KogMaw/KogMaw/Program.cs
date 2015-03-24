@@ -413,12 +413,7 @@ namespace KogMaw
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
-
-
-            if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
-            else
-                RMANA = R.Instance.ManaCost; ;
+            RMANA = R.Instance.ManaCost; ;
 
             if (Farm)
                 RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
