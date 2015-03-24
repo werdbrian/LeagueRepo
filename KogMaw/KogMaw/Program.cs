@@ -454,7 +454,6 @@ namespace KogMaw
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
