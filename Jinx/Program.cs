@@ -155,27 +155,20 @@ namespace Jinx
                         E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
                     else if (ta.Path.Count() < 2 && ta.CountEnemiesInRange(250) > 2)
                         E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
+                    else if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
+                    {
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
+                        {
+                            castE(ta);
+                            debug("E run");
+                        }
+                    }
                     else
                     {
-                        foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(E.Range) && E.IsReady()))
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range))
                         {
-                            List<Vector2> waypoints = target.GetWaypoints();
-                            if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) <= ObjectManager.Player.Distance(target.Position))
-                            {
-                                if (target.Position.Distance(ObjectManager.Player.ServerPosition) < target.Position.Distance(ObjectManager.Player.Position) && target.Health < ObjectManager.Player.Health)
-                                {
-                                    CastSpell(E,target,3);
-                                    debug("E run");
-                                }
-                            }
-                            else
-                            {
-                                if (target.Position.Distance(ObjectManager.Player.ServerPosition) > target.Position.Distance(ObjectManager.Player.Position) && target.Health > ObjectManager.Player.Health)
-                                {
-                                    CastSpell(E, target, 3);
-                                    debug("E escape");
-                                }
-                            }
+                            castE(ta);
+                            debug("E escape");
                         }
                     }
                 }
@@ -447,7 +440,7 @@ namespace Jinx
         private static void castE(Obj_AI_Hero target)
         {
             List<Vector2> waypoints = target.GetWaypoints();
-            if ( target.Path.Count() < 2 && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > 500 || Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 400 || target.Path.Count() == 0))
+            if ( target.Path.Count() < 2 && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > 500 || Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 400))
             {
                 E.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             }
