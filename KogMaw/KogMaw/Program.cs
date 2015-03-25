@@ -58,18 +58,17 @@ namespace KogMaw
         private static void Game_OnGameLoad(EventArgs args)
         {
             Player = ObjectManager.Player;
-            if (Player.BaseSkinName != ChampionName) return;
+            if (Player.ChampionName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1000);
+            Q = new Spell(SpellSlot.Q, 980);
             W = new Spell(SpellSlot.W, 1000);
             E = new Spell(SpellSlot.E, 1200);
             R = new Spell(SpellSlot.R, 1800);
 
-
             Q.SetSkillshot(0.25f, 50f, 2000f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 120f, 1400f, false, SkillshotType.SkillshotLine);
-            R.SetSkillshot(1.5f, 225f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(1.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -89,14 +88,13 @@ namespace KogMaw
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
 
-
             Config.SubMenu("Iteams").AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
             Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
             Config.SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
 
-            Config.SubMenu("W config").AddItem(new MenuItem("autoW", "auto W").SetValue(true));
-            Config.SubMenu("W config").AddItem(new MenuItem("harasW", "haras W").SetValue(true));
+            Config.SubMenu("W config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu("W config").AddItem(new MenuItem("harasW", "Haras W").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("comboStack", "Max combo stack R").SetValue(new Slider(2, 5, 0)));
@@ -131,7 +129,6 @@ namespace KogMaw
 
             W.Range = 650 + 110 + 20 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Level;
             
-
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 Farm = true;
             else
@@ -140,44 +137,8 @@ namespace KogMaw
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
 
-            if (Config.Item("autoW").GetValue<bool>() && W.IsReady() && ObjectManager.Player.CountEnemiesInRange(W.Range) > 0 )
-            {
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                    W.Cast();
-                else if (Farm && Config.Item("harasW").GetValue<bool>())
-                    W.Cast();
-            }
-            if (Q.IsReady())
-            {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-                if (t.IsValidTarget())
-                {
-                    var qDmg = Q.GetDamage(t);
-                    var eDmg = E.GetDamage(t);
-                    if (t.IsValidTarget(W.Range) && qDmg + eDmg > t.Health)
-                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA * 2 + EMANA  )
-                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA*2 + WMANA) && !ObjectManager.Player.UnderTurret(true) )
-                    {
-                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    }
 
-                    else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
-                    {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
-                        {
-                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
-                            {
-                                Q.Cast(enemy, true);
-                            }
-                        }
-                    }
-                }
-            }
             if (E.IsReady() && attackNow)
             {
                 //W.Cast(ObjectManager.Player);
@@ -195,7 +156,7 @@ namespace KogMaw
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                         {
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
@@ -207,36 +168,77 @@ namespace KogMaw
                     }
                 }
             }
+            if (Q.IsReady())
+            {
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                {
+                    var qDmg = Q.GetDamage(t);
+                    var eDmg = E.GetDamage(t);
+                    if (t.IsValidTarget(W.Range) && qDmg + eDmg > t.Health)
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA * 2 + EMANA  )
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA*2 + WMANA) && !ObjectManager.Player.UnderTurret(true) )
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                    {
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
+                        {
+                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
+                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                            {
+                                Q.Cast(enemy, true);
+                            }
+                        }
+                    }
+                }
+            }
             PotionMenager();
+
+            if (Config.Item("autoW").GetValue<bool>() && W.IsReady() && ObjectManager.Player.CountEnemiesInRange(W.Range) > 0)
+            {
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                    W.Cast();
+                else if (Farm && Config.Item("harasW").GetValue<bool>())
+                    W.Cast();
+            }
 
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && attackNow)
             {
                 R.Range = 900 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-                if (target.IsValidTarget(R.Range) && !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
+                if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
                     !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                 {
-                    float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                     double Rdmg = R.GetDamage(target);
+                    var harasStack = Config.Item("harasStack").GetValue<Slider>().Value;
+                    var comboStack = Config.Item("comboStack").GetValue<Slider>().Value;
 
                     if ( R.GetDamage(target) > target.Health)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && R.GetDamage(target) * 2 > target.Health && GetRStacks() < 3 && ObjectManager.Player.Mana > RMANA * 3)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Rdmg * 2 > target.Health && GetRStacks() < 3 && ObjectManager.Player.Mana > RMANA * 3)
+                        CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if ( GetRStacks() < comboStack + 2 && ObjectManager.Player.Mana > RMANA * 3)
                     {
-                        CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(R.Range)))
+                        {
+                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                                    enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
+                                    enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
+                                    enemy.IsStunned || enemy.HasBuff("Recall"))
+                                R.Cast(enemy, true);
+                            else
+                                R.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
+                        }
                     }
-                   
-                    else if ((target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                        target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
-                        target.HasBuffOfType(BuffType.Taunt)) && Config.Item("Rcc").GetValue<bool>() && GetRStacks() < 4 && ObjectManager.Player.Mana > RMANA * 3)
-                    {
-                        R.Cast(target, true);
-                    }
-                    else if (target.HasBuffOfType(BuffType.Slow) && Config.Item("Rslow").GetValue<bool>() && GetRStacks() < 3 && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
+
+                    if (target.HasBuffOfType(BuffType.Slow) && Config.Item("Rslow").GetValue<bool>() && GetRStacks() < comboStack + 1 && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRStacks() < Config.Item("comboStack").GetValue<Slider>().Value && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRStacks() < comboStack && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ( Farm && GetRStacks() < Config.Item("harasStack").GetValue<Slider>().Value && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                    else if ( Farm && GetRStacks() < harasStack  && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
                 }
             }
@@ -271,7 +273,6 @@ namespace KogMaw
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 2;
                 if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
                 {
-
                     if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) <= ObjectManager.Player.Distance(target.Position))
                     {
                         if (ObjectManager.Player.Distance(target.ServerPosition) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)))
@@ -342,7 +343,7 @@ namespace KogMaw
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
@@ -354,14 +355,12 @@ namespace KogMaw
             return;
         }
 
-
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
             foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
             {
                 if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
                 {
-
                     var dmg = unit.GetSpellDamage(target, args.SData.Name);
                     double HpLeft = target.Health - dmg;
                     if (HpLeft < 0 && target.IsValidTarget() && target.IsValidTarget(R.Range))
@@ -387,7 +386,7 @@ namespace KogMaw
                             debug("W ks OPS");
                         }
                     }
-                    if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+                    if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() )
                     {
                         double rDmg = R.GetDamage(target);
                         if (rDmg > HpLeft && HpLeft > 0)
@@ -398,12 +397,6 @@ namespace KogMaw
                     }
                 }
             }
-        }
-
-        private static float GetRealDistance(GameObject target)
-        {
-            return ObjectManager.Player.ServerPosition.Distance(target.Position) + ObjectManager.Player.BoundingRadius +
-                   target.BoundingRadius;
         }
 
         public static void ManaMenager()
