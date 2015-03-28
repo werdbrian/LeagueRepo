@@ -347,7 +347,8 @@ namespace Jinx
                 if (target.Path.Count() < 2 &&  (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > 500 || Math.Abs((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position))) > 400 || target.Path.Count() == 0))
                 {
                     if (ObjectManager.Player.Distance(target.ServerPosition) > ObjectManager.Player.Distance(target.Position))
-                        R.CastIfHitchanceEquals(target, HitChance.High, true);
+                       
+                    CastSpell(R, target, 3);
                 }
             }
             else
