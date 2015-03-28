@@ -87,7 +87,7 @@ namespace Annie
 
             //Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }

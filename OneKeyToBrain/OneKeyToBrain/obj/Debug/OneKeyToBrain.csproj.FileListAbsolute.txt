@@ -1,0 +1,12 @@
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\OneKeyToBrain.exe.config
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\OneKeyToBrain.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\OneKeyToBrain.pdb
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\LeagueSharp.Common.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\LeagueSharp.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\SharpDX.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\clipper_library.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\bin\Release\LeagueSharp.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\obj\Debug\OneKeyToBrain.csprojResolveAssemblyReference.cache
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\obj\Debug\OneKeyToBrain.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\OneKeyToBrain\OneKeyToBrain\obj\Debug\OneKeyToBrain.pdb

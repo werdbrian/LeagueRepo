@@ -91,7 +91,7 @@ namespace Sivir
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
             //Add the events we are going to use:
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.AfterAttack += Orbwalker_AfterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;

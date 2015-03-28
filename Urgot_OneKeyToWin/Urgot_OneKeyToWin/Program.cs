@@ -123,12 +123,12 @@ namespace Urgot_OneKeyToWin
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.5 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">U</font>rgot full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
         #region Farm
         public static void farmQ()

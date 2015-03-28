@@ -75,7 +75,7 @@ namespace Darius
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
             Orbwalking.BeforeAttack += BeforeAttack;
             Game.PrintChat("<font color=\"#008aff\">D</font>arius full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");

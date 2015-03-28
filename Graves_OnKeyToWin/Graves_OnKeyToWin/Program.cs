@@ -96,7 +96,7 @@ namespace Graves_OnKeyToWin
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Orbwalking.AfterAttack += afterAttack;

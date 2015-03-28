@@ -1,1 +1,12 @@
 C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\Darius.exe.config
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\Darius.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\Darius.pdb
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\LeagueSharp.Common.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\LeagueSharp.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\SharpDX.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\clipper_library.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\bin\Release\LeagueSharp.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\obj\Debug\Darius.csprojResolveAssemblyReference.cache
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\obj\Debug\Darius.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Darius\obj\Debug\Darius.pdb

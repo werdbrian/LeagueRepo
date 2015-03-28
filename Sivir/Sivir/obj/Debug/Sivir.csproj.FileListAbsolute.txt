@@ -1,1 +1,12 @@
 C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\Sivir.exe.config
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\Sivir.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\Sivir.pdb
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\clipper_library.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\LeagueSharp.Common.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\LeagueSharp.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\SharpDX.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\bin\Release\LeagueSharp.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\obj\Debug\Sivir.csprojResolveAssemblyReference.cache
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\obj\Debug\Sivir.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Sivir\Sivir\obj\Debug\Sivir.pdb

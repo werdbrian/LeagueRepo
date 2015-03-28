@@ -113,7 +113,7 @@ namespace Blitzcrank
 
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnGameUpdate += Game_OnGameUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
