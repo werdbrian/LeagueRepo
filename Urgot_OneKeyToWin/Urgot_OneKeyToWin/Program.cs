@@ -14,7 +14,7 @@ namespace Urgot_OneKeyToWin
 {
     class Program
     {
-        public const string ChampionName = "Ezreal";
+        public const string ChampionName = "Urgot";
 
         //Orbwalker instance
         public static Orbwalking.Orbwalker Orbwalker;
@@ -64,15 +64,13 @@ namespace Urgot_OneKeyToWin
             Q = new Spell(SpellSlot.Q, 1000);
             Q2 = new Spell(SpellSlot.Q, 1200);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 900);
+            E = new Spell(SpellSlot.E, 1100);
             R = new Spell(SpellSlot.R, 700);
 
-
             Q.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
-            Q2.SetTargetted(0.25f, 1600f);
-            E.SetSkillshot(0.25f, 0f, 1750f, false, SkillshotType.SkillshotCircle);
+            Q2.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.25f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetTargetted(1f, 100f);
-            
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -115,6 +113,12 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("Draw").AddItem(new MenuItem("qTarget", "Q Target").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
+            #region Shield
+            Config.SubMenu("W Shield Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu("W Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserW").SetValue(true));
+            Config.SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "W dmg % hp").SetValue(new Slider(0, 100, 0)));
+            #endregion
+
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
             Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
@@ -152,14 +156,6 @@ namespace Urgot_OneKeyToWin
                 if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion))
                     Q.Cast(minion);
             }
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)) && (Game.Time - GetPassiveTime() > -1.5 || ((!E.IsReady() || !R.IsReady()) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.6)))
-            {
-                foreach (var minion in minions)
-                {
-                    if (minion.Health > 3 * minion.GetAutoAttackDamage(minion))
-                        Q.Cast(minion);
-                }
-            }
         }
 
         public static bool haras()
@@ -191,146 +187,63 @@ namespace Urgot_OneKeyToWin
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
+
+            
             if (E.IsReady())
             {
-                if (Config.Item("smartE").GetValue<KeyBind>().Active)
-                    Esmart = true;
-                if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 4)
-                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-            }
-            else
-                Esmart = false;
-
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("autoE").GetValue<bool>())
-            {
+                //W.Cast(ObjectManager.Player);
                 ManaMenager();
-                var t2 = TargetSelector.GetTarget(950, TargetSelector.DamageType.Physical);
-                var t = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
-
-                if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA
-                    && ObjectManager.Player.CountEnemiesInRange(260) > 0
-                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
-                    && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
+                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
                 {
-
-                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-                }
-                else if (ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4
-                    && !ObjectManager.Player.UnderTurret(true)
-                    && (Game.Time - OverKill > 0.4)
-
-                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
-                {
-                    if (t.IsValidTarget()
-                     && ObjectManager.Player.Mana > QMANA + EMANA + WMANA
-                     && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
-                     && Q.IsReady()
-                     && Q.GetDamage(t) + E.GetDamage(t) > t.Health
-                     && !Orbwalking.InAutoAttackRange(t)
-                     && Q.WillHit(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition)
-                         )
+                    var qDmg = Q.GetDamage(t);
+                    var eDmg = E.GetDamage(t);
+                    if (eDmg > t.Health)
+                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if (eDmg + qDmg > t.Health && Q.IsReady())
+                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana >EMANA + QMANA)
+                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
+                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
-                        E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-                        debug("E kill Q");
-                    }
-                    else if (t2.IsValidTarget()
-                     && t2.Position.Distance(Game.CursorPos) + 300 < t2.Position.Distance(ObjectManager.Player.Position)
-                     && ObjectManager.Player.Mana > EMANA + RMANA
-                     && ObjectManager.Player.GetAutoAttackDamage(t2) + E.GetDamage(t2) > t2.Health
-                     && !Orbwalking.InAutoAttackRange(t2))
-                    {
-                        var position = ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range);
-                        if (W.IsReady())
-                            W.Cast(position, true);
-                        E.Cast(position, true);
-                        debug("E kill aa");
-                        OverKill = Game.Time;
-                    }
-                    else if (t.IsValidTarget()
-                     && ObjectManager.Player.Mana > QMANA + EMANA + WMANA
-                     && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(ObjectManager.Player.Position)
-                     && W.IsReady()
-                     && W.GetDamage(t) + E.GetDamage(t) > t.Health
-                     && !Orbwalking.InAutoAttackRange(t)
-                     && Q.WillHit(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition)
-                         )
-                    {
-                        E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-                        debug("E kill W");
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
+                        {
+                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
+                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                            {
+                                E.Cast(enemy, true);
+                            }
+                        }
                     }
                 }
             }
 
             if (Q.IsReady())
             {
-                //Q.Cast(ObjectManager.Player);
                 ManaMenager();
-                if (Config.Item("mura").GetValue<bool>())
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q2.Range)))
                 {
-                    int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
-                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Items.HasItem(Mur) && Items.CanUseItem(Mur) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                    if (enemy.HasBuff("urgotcorrosivedebuff"))
                     {
-                        if (!ObjectManager.Player.HasBuff("Muramana"))
-                            Items.UseItem(Mur);
-                    }
-                    else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
-                        Items.UseItem(Mur);
-                }
-                bool cast = false;
-                bool wait = false;
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
-                {
-                    if (target.IsValidTarget(Q.Range + 100) &&
-                        !target.HasBuffOfType(BuffType.PhysicalImmunity))
-                    {
-                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(Q.Delay + (Player.Distance(target.ServerPosition) / Q.Speed) * 1000));
-                        var Qdmg = Q.GetDamage(target);
-                        if (Qdmg > predictedHealth)
-                        {
-                            cast = true;
-                            wait = true;
-                            PredictionOutput output = R.GetPrediction(target);
-                            Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-                            direction.Normalize();
-                            List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-                            foreach (var enemy in enemies)
-                            {
-                                if (enemy.SkinName == target.SkinName || !cast)
-                                    continue;
-                                PredictionOutput prediction = R.GetPrediction(enemy);
-                                Vector3 predictedPosition = prediction.CastPosition;
-                                Vector3 v = output.CastPosition - Player.ServerPosition;
-                                Vector3 w = predictedPosition - Player.ServerPosition;
-                                double c1 = Vector3.Dot(w, v);
-                                double c2 = Vector3.Dot(v, v);
-                                double b = c1 / c2;
-                                Vector3 pb = Player.ServerPosition + ((float)b * v);
-                                float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (Q.Width + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                                    cast = false;
-                            }
-                            if (cast && target.IsValidTarget(Q.Range + 100))
-                            {
-                                Q.Cast(target, true);
-                                debug("Q ks");
-                            }
-                        }
+                        Q2.Cast(enemy.ServerPosition);
                     }
                 }
+
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (ObjectManager.Player.CountEnemiesInRange(900) == 0)
+                if (ObjectManager.Player.CountEnemiesInRange(Q.Range - 200) == 0)
                     t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 else
-                    t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
+                    t = TargetSelector.GetTarget(Q.Range - 200, TargetSelector.DamageType.Physical);
 
-                if (t.IsValidTarget() && Q.IsReady() && !wait)
+                if (t.IsValidTarget())
                 {
 
                     var qDmg = Q.GetDamage(t);
-                    var wDmg = W.GetDamage(t);
-                    if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
-                        debug("Q noob mode");
-                    else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
+                    var eDmg = E.GetDamage(t);
+                    if (t.IsValidTarget(W.Range) && qDmg + eDmg > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
@@ -365,47 +278,9 @@ namespace Urgot_OneKeyToWin
                 }
 
             }
-            if (W.IsReady() && attackNow)
-            {
-                //W.Cast(ObjectManager.Player);
-                ManaMenager();
-                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                {
-                    var qDmg = Q.GetDamage(t);
-                    var wDmg = W.GetDamage(t);
-                    if (wDmg > t.Health)
-                        CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (wDmg + qDmg > t.Health && Q.IsReady())
-                        CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (qDmg * 2 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
-                        debug("W noob mode");
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
-                        CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
-                        CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
-                    {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
-                        {
-                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
-                            {
-                                W.Cast(enemy, true);
-                            }
-                        }
-                    }
-                }
-            }
+            
             PotionMenager();
-            var tr = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            if (Config.Item("useR").GetValue<KeyBind>().Active && tr.IsValidTarget())
-            {
-                R.CastIfWillHit(tr, 2, true);
-
-            }
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
@@ -418,8 +293,8 @@ namespace Urgot_OneKeyToWin
 
                         if (target.CountAlliesInRange(400) == 0)
                         {
-                            castR(target);
-                            debug("R normal");
+                            
+                           
                         }
                     }
                 }
@@ -485,19 +360,6 @@ namespace Urgot_OneKeyToWin
             }
         }
 
-        private static void castR(Obj_AI_Hero target)
-        {
-            if (Config.Item("hitchanceR").GetValue<bool>())
-            {
-                List<Vector2> waypoints = target.GetWaypoints();
-                if (target.Path.Count() < 2 && (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > 400)
-                {
-                    R.CastIfHitchanceEquals(target, HitChance.High, true);
-                }
-            }
-            else
-                R.Cast(target, true);
-        }
 
         public static void debug(string msg)
         {
@@ -505,50 +367,7 @@ namespace Urgot_OneKeyToWin
                 Game.PrintChat(msg);
         }
 
-        private static double getRdmg(Obj_AI_Hero target)
-        {
-            var rDmg = R.GetDamage(target);
-            var dmg = 0;
-            PredictionOutput output = R.GetPrediction(target);
-            Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-            direction.Normalize();
-            List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-            foreach (var enemy in enemies)
-            {
-                PredictionOutput prediction = R.GetPrediction(enemy);
-                Vector3 predictedPosition = prediction.CastPosition;
-                Vector3 v = output.CastPosition - Player.ServerPosition;
-                Vector3 w = predictedPosition - Player.ServerPosition;
-                double c1 = Vector3.Dot(w, v);
-                double c2 = Vector3.Dot(v, v);
-                double b = c1 / c2;
-                Vector3 pb = Player.ServerPosition + ((float)b * v);
-                float length = Vector3.Distance(predictedPosition, pb);
-                if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                    dmg++;
-            }
-            var allMinionsR = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, R.Range, MinionTypes.All);
-            foreach (var minion in allMinionsR)
-            {
-                PredictionOutput prediction = R.GetPrediction(minion);
-                Vector3 predictedPosition = prediction.CastPosition;
-                Vector3 v = output.CastPosition - Player.ServerPosition;
-                Vector3 w = predictedPosition - Player.ServerPosition;
-                double c1 = Vector3.Dot(w, v);
-                double c2 = Vector3.Dot(v, v);
-                double b = c1 / c2;
-                Vector3 pb = Player.ServerPosition + ((float)b * v);
-                float length = Vector3.Distance(predictedPosition, pb);
-                if (length < (R.Width + 100 + minion.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                    dmg++;
-            }
-            //if (Config.Item("debug").GetValue<bool>())
-            //    Game.PrintChat("R collision" + dmg);
-            if (dmg > 7)
-                return rDmg * 0.7;
-            else
-                return rDmg - (rDmg * 0.1 * dmg);
-        }
+     
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -598,46 +417,13 @@ namespace Urgot_OneKeyToWin
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
+            var dmg = unit.GetSpellDamage(ObjectManager.Player, args.SData.Name);
+            double HpLeft = ObjectManager.Player.Health - dmg;
+            double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
+            if (unit.IsValid<Obj_AI_Hero>() && HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value && !unit.IsValid<Obj_AI_Turret>() && unit.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoW").GetValue<bool>() && E.IsReady())
             {
-                if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
-                {
-
-                    var dmg = unit.GetSpellDamage(target, args.SData.Name);
-                    double HpLeft = target.Health - dmg;
-                    if (HpLeft < 0 && target.IsValidTarget() && target.IsValidTarget(R.Range))
-                    {
-                        OverKill = Game.Time;
-                        debug("OverKill detection " + target.ChampionName);
-                    }
-                    if (target.IsValidTarget(Q.Range) && Q.IsReady())
-                    {
-                        var qDmg = Q.GetDamage(target);
-                        if (qDmg > HpLeft && HpLeft > 0)
-                        {
-                            Q.Cast(target, true);
-                            debug("Q ks OPS");
-                        }
-                    }
-                    if (target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        var wDmg = W.GetDamage(target);
-                        if (wDmg > HpLeft && HpLeft > 0)
-                        {
-                            W.Cast(target, true);
-                            debug("W ks OPS");
-                        }
-                    }
-                    if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
-                    {
-                        double rDmg = getRdmg(target);
-                        if (rDmg > HpLeft && HpLeft > 0 && target.CountAlliesInRange(500) == 0)
-                        {
-                            debug("R OPS");
-                            castR(target);
-                        }
-                    }
-                }
+                W.Cast();
+                //Game.PrintChat("" + HpPercentage);
             }
         }
 
@@ -742,19 +528,7 @@ namespace Urgot_OneKeyToWin
             if (Config.Item("noti").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() && R.IsReady())
-                {
-                    float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
-                    double rDamage = R.GetDamage(t);
-                    if (rDamage > predictedHealth)
-                        rDamage = getRdmg(t);
-                    if (rDamage > predictedHealth)
-                    {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
-                        Render.Circle.DrawCircle(t.ServerPosition, 200, System.Drawing.Color.Red);
-                    }
 
-                }
                 var target = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
 
                 if (target.IsValidTarget())
