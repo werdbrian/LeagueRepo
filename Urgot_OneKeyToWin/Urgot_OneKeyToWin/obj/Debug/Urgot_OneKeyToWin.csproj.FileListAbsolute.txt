@@ -1,1 +1,12 @@
 C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\Urgot_OneKeyToWin.exe.config
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\Urgot_OneKeyToWin.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\Urgot_OneKeyToWin.pdb
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\LeagueSharp.Common.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\LeagueSharp.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\SharpDX.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\SharpDX.Direct3D9.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\clipper_library.dll
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\bin\Release\LeagueSharp.xml
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\obj\Debug\Urgot_OneKeyToWin.csprojResolveAssemblyReference.cache
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\obj\Debug\Urgot_OneKeyToWin.exe
+C:\Users\Sebastian\Dropbox\LeagueRepo\Urgot_OneKeyToWin\Urgot_OneKeyToWin\obj\Debug\Urgot_OneKeyToWin.pdb

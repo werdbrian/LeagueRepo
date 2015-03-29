@@ -61,7 +61,7 @@ namespace Urgot_OneKeyToWin
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1000);
+            Q = new Spell(SpellSlot.Q, 980);
             Q2 = new Spell(SpellSlot.Q, 1200);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 1100);
@@ -71,7 +71,6 @@ namespace Urgot_OneKeyToWin
             Q2.SetSkillshot(0.25f, 60f, 1600f, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
     
-
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
@@ -97,6 +96,7 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R under turrent").SetValue(true));
+            Config.SubMenu("R config").AddItem(new MenuItem("inter", "OnPossibleToInterrupt R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Rhp", "dont R if i have under % hp").SetValue(new Slider(0, 100, 0)));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
@@ -125,9 +125,17 @@ namespace Urgot_OneKeyToWin
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
             Game.PrintChat("<font color=\"#008aff\">U</font>rgot full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
         #region Farm
+
+        private static void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
+        {
+            if (Config.Item("inter").GetValue<bool>() && R.IsReady() && unit.IsValidTarget(R.Range))
+                R.Cast(unit);
+        }
+
         public static void farmQ()
         {
 
@@ -181,7 +189,6 @@ namespace Urgot_OneKeyToWin
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
 
-            
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 //W.Cast(ObjectManager.Player);
