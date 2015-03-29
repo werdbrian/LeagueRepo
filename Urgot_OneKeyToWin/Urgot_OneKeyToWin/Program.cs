@@ -96,7 +96,7 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R under turrent").SetValue(true));
-            Config.SubMenu("R config").AddItem(new MenuItem("inter", "OnPossibleToInterrupt R").SetValue(true));
+            Config.SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Rhp", "dont R if under % hp").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
@@ -138,9 +138,6 @@ namespace Urgot_OneKeyToWin
 
         public static void farmQ()
         {
-
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 var mobs = MinionManager.GetMinions(Player.ServerPosition, 800, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -152,10 +149,13 @@ namespace Urgot_OneKeyToWin
             }
 
             var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-            foreach (var minion in minions.Where(minion => !Orbwalking.InAutoAttackRange(minion)))
+            foreach (var minion in minions)
             {
-                if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion))
+                if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) && !Orbwalking.InAutoAttackRange(minion))
                     Q.Cast(minion);
+                else if (ObjectManager.Player.ManaPercentage() > 50 && minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+                    Q.Cast(minion);
+
             }
         }
 
