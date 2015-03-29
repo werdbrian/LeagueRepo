@@ -421,7 +421,7 @@ namespace Urgot_OneKeyToWin
             double HpLeft = ObjectManager.Player.Health - dmg;
             double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
             double shieldValue = 20 + W.Level * 40 + 0.08 * ObjectManager.Player.MaxMana + 0.8 * ObjectManager.Player.FlatMagicDamageMod;
-            if ( unit.IsEnemy && args.Target.IsMe && Config.Item("autoW").GetValue<bool>() && W.IsReady())
+            if (unit.IsEnemy && args.Target.IsMe && Config.Item("autoW").GetValue<bool>() && W.IsReady() && (ObjectManager.Player.Mana > RMANA + EMANA || ObjectManager.Player.Health - dmg < dmg))
             {
                 if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
                     W.Cast();
