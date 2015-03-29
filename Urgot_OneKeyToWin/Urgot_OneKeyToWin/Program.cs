@@ -202,7 +202,7 @@ namespace Urgot_OneKeyToWin
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if (eDmg + qDmg > t.Health && Q.IsReady())
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana >EMANA + QMANA)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana >EMANA + QMANA && Q.IsReady())
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
@@ -291,7 +291,7 @@ namespace Urgot_OneKeyToWin
                         !target.HasBuffOfType(BuffType.SpellShield))
                     {
 
-                        if (target.CountAlliesInRange(400) == 0)
+                        if (target.CountAlliesInRange(500) == 0)
                         {
                             
                            
@@ -420,11 +420,16 @@ namespace Urgot_OneKeyToWin
             var dmg = unit.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
             double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
-            if (unit.IsValid<Obj_AI_Hero>() && HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value && !unit.IsValid<Obj_AI_Turret>() && unit.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoW").GetValue<bool>() && E.IsReady())
+            double shieldValue = 20 + W.Level * 40 + 0.08 * ObjectManager.Player.MaxMana + 0.8 * ObjectManager.Player.FlatMagicDamageMod;
+            if ( unit.IsEnemy && args.Target.IsMe && Config.Item("autoW").GetValue<bool>() && W.IsReady())
             {
-                W.Cast();
+                if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
+                    W.Cast();
+                else if (dmg > shieldValue)
+                    W.Cast();
                 //Game.PrintChat("" + HpPercentage);
             }
+           
         }
 
         private static float GetRealDistance(GameObject target)
