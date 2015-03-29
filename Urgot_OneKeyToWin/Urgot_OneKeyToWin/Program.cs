@@ -97,12 +97,12 @@ namespace Urgot_OneKeyToWin
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R under turrent").SetValue(true));
             Config.SubMenu("R config").AddItem(new MenuItem("inter", "OnPossibleToInterrupt R").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("Rhp", "dont R if i have under % hp").SetValue(new Slider(0, 100, 0)));
+            Config.SubMenu("R option").AddItem(new MenuItem("Rhp", "dont R if under % hp").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("qTarget", "Q Target").SetValue(true));
@@ -111,7 +111,7 @@ namespace Urgot_OneKeyToWin
             #region Shield
             Config.SubMenu("W Shield Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu("W Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserW").SetValue(true));
-            Config.SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "W dmg % hp").SetValue(new Slider(0, 100, 0)));
+            Config.SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "W dmg % hp").SetValue(new Slider(10, 100, 0)));
             #endregion
 
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
@@ -132,7 +132,7 @@ namespace Urgot_OneKeyToWin
 
         private static void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
         {
-            if (Config.Item("inter").GetValue<bool>() && R.IsReady() && unit.IsValidTarget(R.Range))
+            if (Config.Item("inter").GetValue<bool>() && R.IsReady() && unit.IsValidTarget(R.Range) && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value)
                 R.Cast(unit);
         }
 
@@ -490,6 +490,17 @@ namespace Urgot_OneKeyToWin
                     else
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
             }
+            if (Config.Item("rRange").GetValue<bool>() && ObjectManager.Player.UnderTurret(false))
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
+                    if (Q.IsReady())
+                        Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
+                    else
+                        Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
+            }
+
+
+            
             if (Config.Item("orb").GetValue<bool>())
             {
                 var orbT = Orbwalker.GetTarget();
@@ -504,46 +515,7 @@ namespace Urgot_OneKeyToWin
             }
 
 
-            if (Config.Item("noti").GetValue<bool>())
-            {
-                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-
-                var target = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
-
-                if (target.IsValidTarget())
-                {
-                    if (Config.Item("debug").GetValue<bool>())
-                    {
-
-
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q range: " + (Orbwalking.LastAATick));
-
-                        List<Vector2> waypoints = target.GetWaypoints();
-                        Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 100, System.Drawing.Color.Red);
-
-                        Render.Circle.DrawCircle(target.Position.Extend(waypoints.Last<Vector2>().To3D(), 400), 100, System.Drawing.Color.Blue);
-
-                    }
-
-                    if (Config.Item("qTarget").GetValue<bool>())
-                        Render.Circle.DrawCircle(target.ServerPosition, 100, System.Drawing.Color.Cyan);
-                    if (Q.GetDamage(target) > target.Health)
-                    {
-                        Render.Circle.DrawCircle(target.ServerPosition, 200, System.Drawing.Color.Red);
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q kill: " + t.ChampionName + " have: " + t.Health + "hp");
-                    }
-                    else if (Q.GetDamage(target) + W.GetDamage(target) > target.Health)
-                    {
-                        Render.Circle.DrawCircle(target.ServerPosition, 200, System.Drawing.Color.Red);
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q + W kill: " + t.ChampionName + " have: " + t.Health + "hp");
-                    }
-                    else if (Q.GetDamage(target) + W.GetDamage(target) + E.GetDamage(target) > target.Health)
-                    {
-                        Render.Circle.DrawCircle(target.ServerPosition, 200, System.Drawing.Color.Red);
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q + W + E kill: " + t.ChampionName + " have: " + t.Health + "hp");
-                    }
-                }
-            }
+           
         }
     }
 }
