@@ -68,7 +68,7 @@ namespace Urgot_OneKeyToWin
             R = new Spell(SpellSlot.R, 850);
 
             Q.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
-            Q2.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
+            Q2.SetSkillshot(0.25f, 60f, 1600f, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
     
 
@@ -362,8 +362,6 @@ namespace Urgot_OneKeyToWin
                 Game.PrintChat(msg);
         }
 
-     
-
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe)
@@ -431,7 +429,6 @@ namespace Urgot_OneKeyToWin
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
 
-
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
@@ -466,15 +463,6 @@ namespace Urgot_OneKeyToWin
                         ManaPotion.Cast();
                 }
             }
-        }
-
-        private static float GetPassiveTime()
-        {
-            return
-                ObjectManager.Player.Buffs.OrderByDescending(buff => buff.EndTime - Game.Time)
-                    .Where(buff => buff.Name == "ezrealrisingspellforce")
-                    .Select(buff => buff.EndTime)
-                    .FirstOrDefault();
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
