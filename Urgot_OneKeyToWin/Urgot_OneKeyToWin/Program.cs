@@ -94,8 +94,6 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("Iteams").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
             Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
-            Config.SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R under turrent").SetValue(true));
@@ -104,7 +102,6 @@ namespace Urgot_OneKeyToWin
 
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
@@ -119,8 +116,6 @@ namespace Urgot_OneKeyToWin
 
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
-            Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
-            Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -187,7 +182,7 @@ namespace Urgot_OneKeyToWin
                 attackNow = true;
 
             
-            if (E.IsReady())
+            if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 //W.Cast(ObjectManager.Player);
                 ManaMenager();
@@ -222,7 +217,7 @@ namespace Urgot_OneKeyToWin
                 ManaMenager();
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q2.Range)))
                 {
-                    if (enemy.HasBuff("urgotcorrosivedebuff"))
+                    if (enemy.HasBuff("urgotcorrosivedebuff") && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm))
                     {
                         Q2.Cast(enemy.ServerPosition);
                     }
@@ -491,14 +486,6 @@ namespace Urgot_OneKeyToWin
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
                     else
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
-            }
-            if (Config.Item("wRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
             }
             if (Config.Item("eRange").GetValue<bool>())
             {
