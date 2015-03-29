@@ -98,10 +98,8 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
-            Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
+            Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R under turrent").SetValue(true));
+            Config.SubMenu("R option").AddItem(new MenuItem("Rhp", "dont R if i have under % hp").SetValue(new Slider(0, 100, 0)));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
@@ -280,21 +278,19 @@ namespace Urgot_OneKeyToWin
             }
             
             PotionMenager();
-
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
+            
+            if (R.IsReady() && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
+                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
                 {
-                    if (target.IsValidTarget(R.Range) &&
-                        !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
+                    if (!target.HasBuffOfType(BuffType.PhysicalImmunity) &&
                         !target.HasBuffOfType(BuffType.SpellImmunity) &&
                         !target.HasBuffOfType(BuffType.SpellShield))
                     {
 
-                        if (target.CountAlliesInRange(500) == 0)
+                        if (ObjectManager.Player.UnderTurret(false) && Config.Item("autoR").GetValue<bool>() && target.UnderTurret(false))
                         {
-                            
-                           
+                            R.Cast(target);
                         }
                     }
                 }
@@ -390,24 +386,16 @@ namespace Urgot_OneKeyToWin
                 else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
                     Items.UseItem(Mur);
             }
-            if (W.IsReady() && Config.Item("wPush").GetValue<bool>() && args.Target.IsValid<Obj_AI_Turret>() && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA + WMANA + RMANA)
-            {
-                foreach (var ally in ObjectManager.Get<Obj_AI_Hero>())
-                {
-                    if (!ally.IsMe && ally.IsAlly && ally.Distance(ObjectManager.Player.Position) < 600)
-                        W.Cast(ally);
-                }
-            }
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
+            if (Config.Item("AGC").GetValue<bool>() && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA )
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
                 {
-                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                    W.Cast();
                     debug("E AGC");
                 }
             }
