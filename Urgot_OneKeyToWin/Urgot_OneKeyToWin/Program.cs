@@ -65,12 +65,12 @@ namespace Urgot_OneKeyToWin
             Q2 = new Spell(SpellSlot.Q, 1200);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 1100);
-            R = new Spell(SpellSlot.R, 700);
+            R = new Spell(SpellSlot.R, 850);
 
             Q.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
             Q2.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
-            R.SetTargetted(1f, 100f);
+    
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -198,11 +198,9 @@ namespace Urgot_OneKeyToWin
                     var eDmg = E.GetDamage(t);
                     if (eDmg > t.Health)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (eDmg + qDmg > t.Health && Q.IsReady())
+                    else if (eDmg + qDmg > t.Health && Q.IsReady() && ObjectManager.Player.Mana > EMANA + QMANA)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana >EMANA + QMANA && Q.IsReady())
-                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Farm && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana >EMANA + QMANA * 2 && Q.IsReady())
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
@@ -278,17 +276,23 @@ namespace Urgot_OneKeyToWin
             }
             
             PotionMenager();
-            
-            if (R.IsReady() && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
+            var tr = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+            if (Config.Item("useR").GetValue<KeyBind>().Active && tr.IsValidTarget())
             {
+                R.Cast(tr);
+            }
+
+            if (R.IsReady() && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value )
+            {
+                R.Range = 400 + 150 * R.Level;
+
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
                 {
                     if (!target.HasBuffOfType(BuffType.PhysicalImmunity) &&
                         !target.HasBuffOfType(BuffType.SpellImmunity) &&
                         !target.HasBuffOfType(BuffType.SpellShield))
                     {
-
-                        if (ObjectManager.Player.UnderTurret(false) && Config.Item("autoR").GetValue<bool>() && target.UnderTurret(false))
+                        if (ObjectManager.Player.UnderTurret(false) && Config.Item("autoR").GetValue<bool>() && !target.UnderTurret(false) && target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
                         {
                             R.Cast(target);
                         }
