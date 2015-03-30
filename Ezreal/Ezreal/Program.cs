@@ -349,7 +349,7 @@ namespace Ezreal
                         }
                     }
                 }
-                if ((Game.Time - lag > 0.1) && Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
+                if ( Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                 {
                     farmQ();
                     lag = Game.Time;

@@ -30,6 +30,7 @@ namespace Jinx
         public static float RMANA;
         public static bool Farm = false;
         public static bool attackNow = true;
+        public static double lag = 0;
         public static double WCastTime = 0;
         public static double QCastTime = 0;
         //AutoPotion
@@ -178,9 +179,12 @@ namespace Jinx
             if (Q.IsReady())
             {
                 ManaMenager();
-                if (Farm && Config.Item("farmQ").GetValue<bool>())
-                    if (ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
-                        farmQ();
+
+                if (Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
+                {
+                    farmQ();
+                    lag = Game.Time;
+                }
                 var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
@@ -192,7 +196,7 @@ namespace Jinx
                             Q.Cast();
                         else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Orbwalker.GetTarget() == null && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + ObjectManager.Player.BoundingRadius)
                             Q.Cast();
-                        else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && haras() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
+                        else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear &&  !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
                             Q.Cast();
                     }
                 }
@@ -259,7 +263,7 @@ namespace Jinx
 
                     if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                         CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && haras())
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 )
                         CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
@@ -418,20 +422,6 @@ namespace Jinx
             }
         }
 
-        public static bool haras()
-        {
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange(), MinionTypes.All);
-            var haras = true;
-            foreach (var minion in allMinionsQ)
-            {
-                if (minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) * 1.5 && bonusRange() > GetRealDistance(minion))
-                    haras = false;
-            }
-            if (haras)
-                return true;
-            else
-                return false;
-        }
 
         private static void castE(Obj_AI_Hero target)
         {
@@ -444,9 +434,8 @@ namespace Jinx
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            double ShouldUse = ShouldUseE(args.SData.Name);
 
-            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUse >= 0f && unit.IsValidTarget(E.Range))
+            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUseE(args.SData.Name) && unit.IsValidTarget(E.Range))
             {
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
@@ -455,89 +444,33 @@ namespace Jinx
             {
                 WCastTime = Game.Time;
             }
-
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
-                {
-
-                    var dmg = unit.GetSpellDamage(target, args.SData.Name);
-                    double HpLeft = target.Health - dmg;
-                    if (HpLeft < 0 && target.IsValidTarget())
-                    {
-                        QCastTime = Game.Time;
-                    }
-                    if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        var wDmg = W.GetDamage(target);
-                        if (wDmg > HpLeft && HpLeft > 0)
-                        {
-                            W.Cast(target, true);
-                            WCastTime = Game.Time;
-                            debug("W ks OPS");
-                        }
-                    }
-                    var rDmg = R.GetDamage(target);
-                    if (rDmg > HpLeft && HpLeft > 0 && !target.IsZombie && !target.IsDead && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(400) == 0)
-                    {
-                        var cast = true;
-                        PredictionOutput output = R.GetPrediction(target);
-                        Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-                        direction.Normalize();
-                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-                        foreach (var enemy in enemies)
-                        {
-                            if (enemy.SkinName == target.SkinName || !cast)
-                                continue;
-                            PredictionOutput prediction = R.GetPrediction(enemy);
-                            Vector3 predictedPosition = prediction.CastPosition;
-                            Vector3 v = output.CastPosition - Player.ServerPosition;
-                            Vector3 w = predictedPosition - Player.ServerPosition;
-                            double c1 = Vector3.Dot(w, v);
-                            double c2 = Vector3.Dot(v, v);
-                            double b = c1 / c2;
-                            Vector3 pb = Player.ServerPosition + ((float)b * v);
-                            float length = Vector3.Distance(predictedPosition, pb);
-                            if (length < (R.Width + 100 + enemy.BoundingRadius / 2) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                                cast = false;
-                        }
-                        if (cast && Config.Item("autoR").GetValue<bool>())
-                        {
-
-                            debug("R OPS");
-                            castR(target);
-                        }
-                    }
-
-                }
-            }
         }
 
-        public static double ShouldUseE(string SpellName)
+        public static bool ShouldUseE(string SpellName)
         {
             if (SpellName == "ThreshQ")
-                return 0;
+                return true;
             if (SpellName == "KatarinaR")
-                return 0;
+                return true;
             if (SpellName == "AlZaharNetherGrasp")
-                return 0;
+                return true;
             if (SpellName == "GalioIdolOfDurand")
-                return 0;
+                return true;
             if (SpellName == "LuxMaliceCannon")
-                return 0;
+                return true;
             if (SpellName == "MissFortuneBulletTime")
-                return 0;
+                return true;
             if (SpellName == "RocketGrabMissile")
-                return 0;
+                return true;
             if (SpellName == "CaitlynPiltoverPeacemaker")
-                return 0;
+                return true;
             if (SpellName == "EzrealTrueshotBarrage")
-                return 0;
+                return true;
             if (SpellName == "InfiniteDuress")
-                return 0;
+                return true;
             if (SpellName == "VelkozR")
-                return 0;
-            return -1;
+                return true;
+            return false;
         }
 
         public static float bonusRange()
