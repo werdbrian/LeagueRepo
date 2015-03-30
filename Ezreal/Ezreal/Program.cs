@@ -153,7 +153,10 @@ namespace Ezreal
                 if (ObjectManager.Player.Distance(minion.Position) < ObjectManager.Player.AttackRange + 150)
                 {
                     if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion))
+                    {
                         Q.Cast(minion);
+                        return;
+                    }
                 }
             }
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)) && (Game.Time - GetPassiveTime() > -1.5 || ((!E.IsReady() || !R.IsReady()) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.6)))
@@ -161,7 +164,10 @@ namespace Ezreal
                 foreach (var minion in minions)
                 {
                     if (minion.Health > 3 * minion.GetAutoAttackDamage(minion))
+                    {
                         Q.Cast(minion);
+                        return;
+                    }
                 }
             }
         }

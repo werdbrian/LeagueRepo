@@ -71,6 +71,7 @@ namespace OneKeyToBrain
         }
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            PotionMenager();
             if (Config.Item("ward").GetValue<bool>() || (Config.Item("ward").GetValue<bool>() && Config.Item("Combo").GetValue<KeyBind>().Active && Config.Item("wardC").GetValue<bool>()))
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))

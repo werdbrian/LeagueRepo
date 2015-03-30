@@ -115,7 +115,6 @@ namespace Urgot_OneKeyToWin
             #endregion
 
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
-            Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -159,22 +158,6 @@ namespace Urgot_OneKeyToWin
             }
         }
 
-        public static bool haras()
-        {
-            if (Config.Item("haras").GetValue<bool>())
-                return true;
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, ObjectManager.Player.AttackRange, MinionTypes.All);
-            var haras = true;
-            foreach (var minion in allMinions)
-            {
-                if (minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) * 1.4 && Orbwalking.InAutoAttackRange(minion))
-                    haras = false;
-            }
-            if (haras)
-                return true;
-            else
-                return false;
-        }
         #endregion
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -227,6 +210,8 @@ namespace Urgot_OneKeyToWin
                     if (enemy.HasBuff("urgotcorrosivedebuff") && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm))
                     {
                         Q2.Cast(enemy.ServerPosition);
+                        if (ObjectManager.Player.Mana > EMANA + QMANA * 4)
+                            W.Cast();
                     }
                 }
 
@@ -245,7 +230,7 @@ namespace Urgot_OneKeyToWin
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && haras())
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
@@ -270,9 +255,10 @@ namespace Urgot_OneKeyToWin
                 {
                     farmQ();
                 }
-                else if (!Farm && Config.Item("stack").GetValue<bool>() && !ObjectManager.Player.HasBuff("Recall") && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && !t.IsValidTarget() && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
+                else if ((Game.Time - OverFarm > 4.1) && !Farm && Config.Item("stack").GetValue<bool>() && !ObjectManager.Player.HasBuff("Recall") && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && !t.IsValidTarget() && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
                 {
                     Q.Cast(ObjectManager.Player);
+                    OverFarm = Game.Time;
                 }
 
             }
