@@ -151,9 +151,6 @@ namespace Urgot_OneKeyToWin
             {
                 if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) && !Orbwalking.InAutoAttackRange(minion))
                     Q.Cast(minion);
-                else if (ObjectManager.Player.ManaPercentage() > 50 && minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
-                    Q.Cast(minion);
-
             }
         }
 
