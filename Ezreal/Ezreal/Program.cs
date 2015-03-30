@@ -365,9 +365,10 @@ namespace Ezreal
                         }
                     }
                 }
-                if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
+                if ((Game.Time - lag > 0.1) && Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                 {
                     farmQ();
+                    lag = Game.Time;
                 }
                 else if (!Farm && Config.Item("stack").GetValue<bool>() && !ObjectManager.Player.HasBuff("Recall") && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && !t.IsValidTarget() && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
                 {

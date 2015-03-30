@@ -171,8 +171,10 @@ namespace Urgot_OneKeyToWin
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
+
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
+                var qCd = Q.Instance.CooldownExpires - Game.Time;
                 //W.Cast(ObjectManager.Player);
                 ManaMenager();
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
@@ -184,7 +186,7 @@ namespace Urgot_OneKeyToWin
                         E.Cast(t);
                     else if (eDmg + qDmg > t.Health && ObjectManager.Player.Mana > EMANA + QMANA)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA * 2)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA * 2 && qCd < 0.5f)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
@@ -250,9 +252,10 @@ namespace Urgot_OneKeyToWin
                         }
                     }
                 }
-                if (Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
+                if ((Game.Time - lag > 0.1) && Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                 {
                     farmQ();
+                    lag = Game.Time;
                 }
                 else if ((Game.Time - OverFarm > 4.1) && !Farm && Config.Item("stack").GetValue<bool>() && !ObjectManager.Player.HasBuff("Recall") && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && !t.IsValidTarget() && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
                 {
