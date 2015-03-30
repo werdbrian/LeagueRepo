@@ -210,7 +210,7 @@ namespace Urgot_OneKeyToWin
                     if (enemy.HasBuff("urgotcorrosivedebuff") && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm))
                     {
                         Q2.Cast(enemy.ServerPosition);
-                        if (ObjectManager.Player.Mana > EMANA + QMANA * 4)
+                        if (ObjectManager.Player.Mana > EMANA + QMANA * 4 && !Orbwalking.InAutoAttackRange(enemy))
                             W.Cast();
                     }
                 }
