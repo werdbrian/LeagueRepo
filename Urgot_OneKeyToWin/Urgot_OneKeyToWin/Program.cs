@@ -171,25 +171,24 @@ namespace Urgot_OneKeyToWin
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
-
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
             {
                 //W.Cast(ObjectManager.Player);
                 ManaMenager();
-                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(t);
                     var eDmg = E.GetDamage(t);
                     if (eDmg > t.Health)
+                        E.Cast(t);
+                    else if (eDmg + qDmg > t.Health && ObjectManager.Player.Mana > EMANA + QMANA)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (eDmg + qDmg > t.Health && Q.IsReady() && ObjectManager.Player.Mana > EMANA + QMANA)
-                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana >EMANA + QMANA * 2 && Q.IsReady())
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA * 2)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                         {
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
@@ -210,7 +209,7 @@ namespace Urgot_OneKeyToWin
                     if (enemy.HasBuff("urgotcorrosivedebuff") && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm))
                     {
                         Q2.Cast(enemy.ServerPosition);
-                        if (ObjectManager.Player.Mana > EMANA + QMANA * 4 && !Orbwalking.InAutoAttackRange(enemy))
+                        if (ObjectManager.Player.Mana > EMANA + QMANA * 4 && !Orbwalking.InAutoAttackRange(enemy) && W.IsReady())
                             W.Cast();
                     }
                 }
@@ -228,7 +227,7 @@ namespace Urgot_OneKeyToWin
                     var eDmg = E.GetDamage(t);
                     if (t.IsValidTarget(W.Range) && qDmg + eDmg > t.Health)
                         Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA )
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                     {
@@ -421,6 +420,7 @@ namespace Urgot_OneKeyToWin
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
+            
 
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
