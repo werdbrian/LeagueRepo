@@ -207,7 +207,7 @@ namespace Urgot_OneKeyToWin
                     if (enemy.HasBuff("urgotcorrosivedebuff") && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm))
                     {
                         Q2.Cast(enemy.ServerPosition);
-                        if (ObjectManager.Player.Mana > EMANA + QMANA * 4 && !Orbwalking.InAutoAttackRange(enemy) && W.IsReady())
+                        if ((ObjectManager.Player.Mana > EMANA + QMANA * 4 || Q.GetDamage(enemy) * 3 > enemy.Health) && !Orbwalking.InAutoAttackRange(enemy) && W.IsReady())
                             W.Cast();
                     }
                 }
@@ -278,7 +278,7 @@ namespace Urgot_OneKeyToWin
                         !target.HasBuffOfType(BuffType.SpellImmunity) &&
                         !target.HasBuffOfType(BuffType.SpellShield))
                     {
-                        if (ObjectManager.Player.UnderTurret(false) && Config.Item("autoR").GetValue<bool>() && !target.UnderTurret(false) && target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
+                        if (ObjectManager.Player.UnderTurret(false) && Config.Item("autoR").GetValue<bool>() && !target.UnderTurret(true) && target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
                         {
                             R.Cast(target);
                         }
@@ -483,9 +483,6 @@ namespace Urgot_OneKeyToWin
                     else
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
             }
-
-
-            
             if (Config.Item("orb").GetValue<bool>())
             {
                 var orbT = Orbwalker.GetTarget();
@@ -498,9 +495,6 @@ namespace Urgot_OneKeyToWin
                 if (t.IsValidTarget())
                     Render.Circle.DrawCircle(t.Position, 100, System.Drawing.Color.Red);
             }
-
-
-           
         }
     }
 }
