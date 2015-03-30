@@ -117,7 +117,6 @@ namespace Ezreal
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
-            Config.AddItem(new MenuItem("haras", "Haras over farm").SetValue(true));
             Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
@@ -158,6 +157,7 @@ namespace Ezreal
                         return;
                     }
                 }
+                
             }
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)) && (Game.Time - GetPassiveTime() > -1.5 || ((!E.IsReady() || !R.IsReady()) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.6)))
             {
@@ -172,22 +172,6 @@ namespace Ezreal
             }
         }
 
-        public static bool haras()
-        {
-            if (Config.Item("haras").GetValue<bool>())
-                return true;
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, ObjectManager.Player.AttackRange, MinionTypes.All);
-            var haras = true;
-            foreach (var minion in allMinions)
-            {
-                if (minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) * 1.4 && Orbwalking.InAutoAttackRange(minion))
-                    haras = false;
-            }
-            if (haras)
-                return true;
-            else
-                return false;
-        }
         #endregion
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -344,7 +328,7 @@ namespace Ezreal
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && haras())
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         {
@@ -623,47 +607,7 @@ namespace Ezreal
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
-                {
-
-                    var dmg = unit.GetSpellDamage(target, args.SData.Name);
-                    double HpLeft = target.Health - dmg;
-                    if (HpLeft < 0 && target.IsValidTarget() && target.IsValidTarget(R.Range))
-                    {
-                        OverKill = Game.Time;
-                        debug("OverKill detection " + target.ChampionName);
-                    }
-                    if (target.IsValidTarget(Q.Range) && Q.IsReady())
-                    {
-                        var qDmg = Q.GetDamage(target);
-                        if (qDmg > HpLeft && HpLeft > 0)
-                        {
-                            Q.Cast(target, true);
-                            debug("Q ks OPS");
-                        }
-                    }
-                    if (target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        var wDmg = W.GetDamage(target);
-                        if (wDmg > HpLeft && HpLeft > 0)
-                        {
-                            W.Cast(target, true);
-                            debug("W ks OPS");
-                        }
-                    }
-                    if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() && ObjectManager.Player.CountEnemiesInRange(700) == 0)
-                    {
-                        double rDmg = getRdmg(target);
-                        if (rDmg > HpLeft && HpLeft > 0 && target.CountAlliesInRange(500) == 0)
-                        {
-                            debug("R OPS");
-                            castR(target);
-                        }
-                    }
-                }
-            }
+            
         }
 
         private static float GetRealDistance(GameObject target)
