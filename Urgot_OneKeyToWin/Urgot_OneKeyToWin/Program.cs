@@ -88,7 +88,6 @@ namespace Urgot_OneKeyToWin
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
 
-
             Config.SubMenu("Iteams").AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
             Config.SubMenu("Iteams").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
             Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));

@@ -142,7 +142,7 @@ namespace Blitzcrank
                     if (t.IsEnemy && !t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && t.IsValidTarget(Config.Item("maxGrab").GetValue<Slider>().Value) && Config.Item("grab" + t.BaseSkinName).GetValue<bool>() && ObjectManager.Player.Distance(t.ServerPosition) > Config.Item("minGrab").GetValue<Slider>().Value)
                     {
                         if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                            castQ(t);
+                            CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                         if (Orbwalker.ActiveMode.ToString() == "qCC" && Q.IsReady())
                         {
                             if (t.HasBuffOfType(BuffType.Stun) || t.HasBuffOfType(BuffType.Snare) ||
@@ -246,7 +246,53 @@ namespace Blitzcrank
                 }
             }
         }
+        private static void CastSpell(Spell QWER, Obj_AI_Hero target, int HitChanceNum)
+        {
+            //HitChance 0 - 2
+            // example CastSpell(Q, ts, 2);
+            if (HitChanceNum == 0)
+                QWER.Cast(target, true);
+            else if (HitChanceNum == 1)
+                QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (HitChanceNum == 2)
+            {
+                if (QWER.Delay < 0.3)
+                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
+                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
+                QWER.CastIfWillHit(target, 2, true);
+                if (target.Path.Count() < 2)
+                    QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            }
+            else if (HitChanceNum == 3)
+            {
+                if (QWER.Delay < 0.3)
+                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
+                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
+                QWER.CastIfWillHit(target, 2, true);
 
+                List<Vector2> waypoints = target.GetWaypoints();
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 5;
+                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
+                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                else if (target.Path.Count() < 2
+                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) < 0 - BackToFront
+                    || (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > (target.MoveSpeed * QWER.Delay)
+                    || target.Path.Count() == 0))
+                {
+                    if (target.IsFacing(ObjectManager.Player))
+                    {
+                        if (ObjectManager.Player.Distance(target.ServerPosition) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)))
+                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                    else
+                    {
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                }
+            }
+        }
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             
