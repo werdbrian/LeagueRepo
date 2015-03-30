@@ -85,7 +85,7 @@ namespace Caitlyn
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.AddItem(new MenuItem("autoQ", "Reduce Q use").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(2, 3, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             #region E
             Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
@@ -183,7 +183,7 @@ namespace Caitlyn
                     }
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + 10 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 100 + t.BoundingRadius) == 0 && !Config.Item("autoQ").GetValue<bool>())
                     {
-                        castQ(t);
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                         debug("Q combo");
                     }
                     if (Q.IsReady() && (Orbwalker.ActiveMode.ToString() == "Combo" || Farm) && ObjectManager.Player.Mana > RMANA + QMANA && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0 && ObjectManager.Player.CountEnemiesInRange(bonusRange() + 60) == 0)
@@ -488,7 +488,53 @@ namespace Caitlyn
                 }
             }
         }
+        private static void CastSpell(Spell QWER, Obj_AI_Hero target, int HitChanceNum)
+        {
+            //HitChance 0 - 2
+            // example CastSpell(Q, ts, 2);
+            if (HitChanceNum == 0)
+                QWER.Cast(target, true);
+            else if (HitChanceNum == 1)
+                QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            else if (HitChanceNum == 2)
+            {
+                if (QWER.Delay < 0.3)
+                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
+                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
+                QWER.CastIfWillHit(target, 2, true);
+                if (target.Path.Count() < 2)
+                    QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
+            }
+            else if (HitChanceNum == 3)
+            {
+                if (QWER.Delay < 0.3)
+                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
+                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
+                QWER.CastIfWillHit(target, 2, true);
 
+                List<Vector2> waypoints = target.GetWaypoints();
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 5;
+                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
+                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                else if (target.Path.Count() < 2
+                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) < 0 - BackToFront
+                    || (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > (target.MoveSpeed * QWER.Delay)
+                    || target.Path.Count() == 0))
+                {
+                    if (target.IsFacing(ObjectManager.Player))
+                    {
+                        if (ObjectManager.Player.Distance(target.ServerPosition) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)))
+                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                    else
+                    {
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                }
+            }
+        }
         private static void Drawing_OnDraw(EventArgs args)
         {
             var minion = getMinion();

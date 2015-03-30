@@ -274,7 +274,7 @@ namespace Ezreal
                 bool wait = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(Q.Range + 100) &&
+                    if (target.IsValidTarget(Q.Range ) &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(Q.Delay + (Player.Distance(target.ServerPosition) / Q.Speed) * 1000));
@@ -303,9 +303,10 @@ namespace Ezreal
                                 if (length < (Q.Width + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
                                     cast = false;
                             }
-                            if (cast && target.IsValidTarget(qRange + 100))
+                            if (cast )
                             {
                                 Q.Cast(target, true);
+                                OverKill = Game.Time;
                                 debug("Q ks");
                             }
                         }
@@ -325,7 +326,10 @@ namespace Ezreal
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
                         debug("Q noob mode");
                     else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
+                    {
                         Q.Cast(t, true);
+                        OverKill = Game.Time;
+                    }
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
@@ -370,7 +374,10 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     var wDmg = W.GetDamage(t);
                     if (wDmg > t.Health)
+                    {
                         CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
+                        OverKill = Game.Time;
+                    }
                     else if (wDmg + qDmg > t.Health && Q.IsReady())
                         CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if (qDmg * 2 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
