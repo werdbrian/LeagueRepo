@@ -425,7 +425,7 @@ namespace Urgot_OneKeyToWin
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
-                RMANA = R.Instance.ManaCost; ;
+                RMANA = R.Instance.ManaCost;
 
             if (Farm)
                 RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
@@ -479,7 +479,7 @@ namespace Urgot_OneKeyToWin
             if (Config.Item("rRange").GetValue<bool>() && ObjectManager.Player.UnderTurret(false))
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
+                    if (R.IsReady())
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
                     else
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
