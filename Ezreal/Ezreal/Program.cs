@@ -499,7 +499,7 @@ namespace Ezreal
                     || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
                     ))
                 {
-                    if (target.IsFacing(ObjectManager.Player) )
+                    if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
                         if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
