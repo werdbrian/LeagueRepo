@@ -47,7 +47,7 @@ namespace Annie
         {
             Player = ObjectManager.Player;
             if (Player.BaseSkinName != ChampionName) return;
-
+           
             //Create the spells
             Q = new Spell(SpellSlot.Q, 625f);
             W = new Spell(SpellSlot.W, 600f);
@@ -223,7 +223,7 @@ namespace Annie
         }
         private static bool Farm
         {
-            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) ; }
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
         }
         public static bool GetPassiveStacks()
         {

@@ -26,7 +26,7 @@ namespace Darius
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
-        public static bool Farm;
+
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
@@ -112,7 +112,7 @@ namespace Darius
             if (Config.Item("eRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
+                    if (E.IsReady())
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
                     else
                         Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
@@ -145,10 +145,6 @@ namespace Darius
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
-                Farm = true;
-            else
-                Farm = false;
             ManaMenager();
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
@@ -195,7 +191,10 @@ namespace Darius
             }
            
         }
-
+        private static bool Farm
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
+        }
         private static void CastR()
         {
             foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && !target.IsZombie && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield) && !target.HasBuffOfType(BuffType.PhysicalImmunity)))

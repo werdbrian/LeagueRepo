@@ -39,6 +39,8 @@ namespace Ezreal
         public static double OverKill = 0;
         public static double OverFarm = 0;
         public static double lag = 0;
+        public static double diag = 0;
+        public static double diagF = 0;
         public static Stopwatch stopWatch = new Stopwatch();
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
@@ -62,7 +64,7 @@ namespace Ezreal
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1180);
+            Q = new Spell(SpellSlot.Q, 1200);
 
             W = new Spell(SpellSlot.W, 1000);
             E = new Spell(SpellSlot.E, 475);
@@ -176,6 +178,12 @@ namespace Ezreal
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+
+
+            diagF = diag - Game.Time;
+            
+            //debug("diag" + diagF);
+            diag = Game.Time;
             ManaMenager();
 
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
@@ -257,6 +265,8 @@ namespace Ezreal
 
             if (Q.IsReady())
             {
+                
+
                 //Q.Cast(ObjectManager.Player);
                 ManaMenager();
                 if (Config.Item("mura").GetValue<bool>())
@@ -312,15 +322,14 @@ namespace Ezreal
                         }
                     }
                 }
-                var t = TargetSelector.GetTarget(qRange, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (ObjectManager.Player.CountEnemiesInRange(900) == 0)
-                    t = TargetSelector.GetTarget(qRange, TargetSelector.DamageType.Physical);
+                    t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 else
                     t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
                 if (t.IsValidTarget() && Q.IsReady() && !wait)
                 {
-
                     var qDmg = Q.GetDamage(t);
                     var wDmg = W.GetDamage(t);
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
@@ -353,7 +362,7 @@ namespace Ezreal
                         }
                     }
                 }
-                if ( Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
+                if ((Game.Time - lag > 0.1) && Farm && attackNow && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
                 {
                     farmQ();
                     lag = Game.Time;
@@ -472,28 +481,30 @@ namespace Ezreal
             }
             else if (HitChanceNum == 3)
             {
+                List<Vector2> waypoints = target.GetWaypoints();
+                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
                 if (QWER.Delay < 0.3)
                     QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
                 QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
                 QWER.CastIfWillHit(target, 2, true);
-
-                List<Vector2> waypoints = target.GetWaypoints();
+                
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 5;
-                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite )
                     QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                 else if (target.Path.Count() < 2
                     && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) < 0 - BackToFront
-                    || (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > (target.MoveSpeed * QWER.Delay)
-                    || target.Path.Count() == 0))
+                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) >  BackToFront
+                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
+                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
+                    ))
                 {
-                    if (target.IsFacing(ObjectManager.Player))
+                    if (target.IsFacing(ObjectManager.Player) )
                     {
-                        if (ObjectManager.Player.Distance(target.ServerPosition) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)))
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
-                    else
+                    else 
                     {
                         QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
