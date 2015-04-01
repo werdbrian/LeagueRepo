@@ -110,8 +110,9 @@ namespace KogMaw
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
 
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(2, 3, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
+            Config.AddItem(new MenuItem("urf", "Urf mode").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
@@ -204,11 +205,15 @@ namespace KogMaw
                 else if (Farm && Config.Item("harasW").GetValue<bool>())
                     W.Cast();
             }
-
+           
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && attackNow)
             {
                 R.Range = 900 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+                if (target.IsValidTarget(R.Range) && Config.Item("urf").GetValue<bool>() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
+                {
+                    CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
+                }
                 if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
                     !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                 {

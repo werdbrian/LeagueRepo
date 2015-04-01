@@ -591,7 +591,8 @@ namespace Ezreal
             if (!unit.IsMe)
                 return;
             attackNow = true;
-            
+            if (FarmId != target.NetworkId)
+                FarmId = target.NetworkId;
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
