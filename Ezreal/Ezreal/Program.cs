@@ -26,8 +26,10 @@ namespace Ezreal
         public static Spell E;
         public static Spell R;
         public static Spell R1;
+        public static List<Obj_AI_Base> minions;
         public static bool attackNow = true;
         //ManaMenager
+        public static int FarmId;
         public static float qRange = 1100;
         public static float QMANA;
         public static float WMANA;
@@ -118,7 +120,9 @@ namespace Ezreal
             Config.SubMenu("Draw").AddItem(new MenuItem("qTarget", "Q Target").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
-            Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("LC", "LaneClear").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("LCP", "LaneClear passiv stack & E,R CD").SetValue(true));
             Config.AddItem(new MenuItem("wPush", "W ally (push tower)").SetValue(true));
             Config.AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
@@ -135,9 +139,6 @@ namespace Ezreal
         #region Farm
         public static void farmQ()
         {
-
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 800, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -148,30 +149,38 @@ namespace Ezreal
                 }
             }
 
-            var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-            foreach (var minion in minions.Where(minion => !Orbwalking.InAutoAttackRange(minion)))
+            minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+            foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId))
             {
-                if (ObjectManager.Player.Distance(minion.Position) < ObjectManager.Player.AttackRange + 150)
+                if (!Orbwalker.InAutoAttackRange(minion))
                 {
-                    if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion))
+                    if (minion.Health < Q.GetDamage(minion))
                     {
                         Q.Cast(minion);
+                        FarmId = minion.NetworkId;
                         return;
                     }
                 }
-                
-            }
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (!t.IsValidTarget() || ObjectManager.Player.UnderTurret(false)) && (Game.Time - GetPassiveTime() > -1.5 || ((!E.IsReady() || !R.IsReady()) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.6)))
-            {
-                foreach (var minion in minions)
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("LC").GetValue<bool>())
                 {
-                    if (minion.Health > 3 * minion.GetAutoAttackDamage(minion))
+                    if ( minion.Health < Q.GetDamage(minion) * 0.9)
                     {
                         Q.Cast(minion);
+                        FarmId = minion.NetworkId;
+                        return;
+                    }
+                    else if (ObjectManager.Player.UnderTurret(false))
+                    {
+                        return;
+                    }
+                    else if ((((!E.IsReady() || !R.IsReady()) || Game.Time - GetPassiveTime() > -1.5) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.6 && Config.Item("LCP").GetValue<bool>()))
+                    {
+                        Q.Cast(minion);
+                        FarmId = minion.NetworkId;
                         return;
                     }
                 }
-            }
+            }   
         }
 
         #endregion
@@ -582,11 +591,15 @@ namespace Ezreal
             if (!unit.IsMe)
                 return;
             attackNow = true;
+            
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             attackNow = false;
+            if (FarmId != args.Target.NetworkId)
+                FarmId = args.Target.NetworkId;
+
             if (Config.Item("mura").GetValue<bool>())
             {
                 int Mur = Items.HasItem(Muramana) ? 3042 : 3043;

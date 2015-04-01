@@ -28,6 +28,7 @@ namespace Urgot_OneKeyToWin
         public static Spell R;
         public static bool attackNow = true;
         //ManaMenager
+        public static int FarmId;
         public static float QMANA;
         public static float WMANA;
         public static float EMANA;
@@ -38,7 +39,7 @@ namespace Urgot_OneKeyToWin
         public static double OverKill = 0;
         public static double OverFarm = 0;
         public static double lag = 0;
-        public static Stopwatch stopWatch = new Stopwatch();
+        public static List<Obj_AI_Base> minions;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -113,7 +114,8 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "W dmg % hp").SetValue(new Slider(10, 100, 0)));
             #endregion
 
-            Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("LC", "LaneClear").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -138,7 +140,7 @@ namespace Urgot_OneKeyToWin
         {
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
-                var mobs = MinionManager.GetMinions(Player.ServerPosition, 800, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 800, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                 if (mobs.Count > 0)
                 {
                     var mob = mobs[0];
@@ -146,11 +148,27 @@ namespace Urgot_OneKeyToWin
                 }
             }
 
-            var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-            foreach (var minion in minions)
+            minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+            foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId))
             {
-                if (minion.Health < Q.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) && !Orbwalking.InAutoAttackRange(minion))
-                    Q.Cast(minion);
+                if (!Orbwalker.InAutoAttackRange(minion))
+                {
+                    if (minion.Health < Q.GetDamage(minion))
+                    {
+                        Q.Cast(minion);
+                        FarmId = minion.NetworkId;
+                        return;
+                    }
+                }
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("LC").GetValue<bool>())
+                {
+                    if (minion.Health < Q.GetDamage(minion) * 0.9)
+                    {
+                        Q.Cast(minion);
+                        FarmId = minion.NetworkId;
+                        return;
+                    }   
+                }
             }
         }
 
@@ -183,6 +201,8 @@ namespace Urgot_OneKeyToWin
                     else if (eDmg + qDmg > t.Health && ObjectManager.Player.Mana > EMANA + QMANA)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA * 2 && qCd < 0.5f)
+                        CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
+                    else if (Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA * 5)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
@@ -363,6 +383,8 @@ namespace Urgot_OneKeyToWin
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             attackNow = false;
+            if (FarmId != args.Target.NetworkId)
+                FarmId = args.Target.NetworkId;
             if (Config.Item("mura").GetValue<bool>())
             {
                 int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
