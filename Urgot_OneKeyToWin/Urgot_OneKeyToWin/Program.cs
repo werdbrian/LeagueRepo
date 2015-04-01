@@ -219,7 +219,7 @@ namespace Urgot_OneKeyToWin
                     }
                 }
             }
-            if (W.IsReady() && Config.Item("urf").GetValue<bool>())
+            if (W.IsReady() && Config.Item("urf").GetValue<bool>() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
             {
                 W.Cast();
             }
