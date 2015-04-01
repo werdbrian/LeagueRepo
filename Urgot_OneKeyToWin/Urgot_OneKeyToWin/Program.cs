@@ -118,6 +118,7 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("Farm").AddItem(new MenuItem("LC", "LaneClear").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
+            Config.AddItem(new MenuItem("urf", "Urf mode").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
@@ -218,7 +219,10 @@ namespace Urgot_OneKeyToWin
                     }
                 }
             }
-
+            if (W.IsReady() && Config.Item("urf").GetValue<bool>())
+            {
+                W.Cast();
+            }
             if (Q.IsReady())
             {
                 ManaMenager();
