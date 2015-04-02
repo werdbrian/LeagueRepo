@@ -78,6 +78,8 @@ namespace Annie
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
             Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
+
             Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
             Config.AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
 
@@ -207,6 +209,10 @@ namespace Annie
                 if (minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) && minion.Health < Q.GetDamage(minion))
                 {
                     Q.Cast(minion);
+                }
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
+                {
+                    W.Cast(W.GetCircularFarmLocation(allMinionsQ, W.Width).Position);
                 }
             }
 
