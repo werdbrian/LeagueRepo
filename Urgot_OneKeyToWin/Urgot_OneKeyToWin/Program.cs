@@ -93,7 +93,7 @@ namespace Urgot_OneKeyToWin
             Config.SubMenu("Iteams").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
             Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
-            Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E haras").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R under turrent").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt R").SetValue(true));
@@ -187,7 +187,7 @@ namespace Urgot_OneKeyToWin
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
 
-            if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (E.IsReady())
             {
                 var qCd = Q.Instance.CooldownExpires - Game.Time;
                 //W.Cast(ObjectManager.Player);
@@ -203,7 +203,7 @@ namespace Urgot_OneKeyToWin
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA * 2 && qCd < 0.5f)
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA * 5)
+                    else if (Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA * 5 && Config.Item("autoE").GetValue<bool>())
                         CastSpell(E, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                     {
