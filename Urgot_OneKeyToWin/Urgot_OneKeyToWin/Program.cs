@@ -291,7 +291,6 @@ namespace Urgot_OneKeyToWin
             {
                 R.Cast(tr);
             }
-
             if (R.IsReady() && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value )
             {
                 R.Range = 400 + 150 * R.Level;
@@ -302,7 +301,7 @@ namespace Urgot_OneKeyToWin
                         !target.HasBuffOfType(BuffType.SpellImmunity) &&
                         !target.HasBuffOfType(BuffType.SpellShield))
                     {
-                        if (ObjectManager.Player.UnderTurret(false) && Config.Item("autoR").GetValue<bool>() && !target.UnderTurret(true) && target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
+                        if (ObjectManager.Player.UnderTurret(false) && !ObjectManager.Player.UnderTurret(true) && Config.Item("autoR").GetValue<bool>() && target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
                         {
                             R.Cast(target);
                         }
