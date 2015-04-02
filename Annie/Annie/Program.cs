@@ -212,7 +212,9 @@ namespace Annie
                 }
                 else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
                 {
-                    W.Cast(W.GetCircularFarmLocation(allMinionsQ, W.Width).Position);
+                    var Wfarm = W.GetCircularFarmLocation(allMinionsQ, W.Width);
+                    if (Wfarm.MinionsHit > 2)
+                        W.Cast(Wfarm.Position);
                 }
             }
 
