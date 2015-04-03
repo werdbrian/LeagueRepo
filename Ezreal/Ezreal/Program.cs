@@ -44,7 +44,6 @@ namespace Ezreal
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
-        public static bool Farm = false;
         public static bool Esmart = false;
         public static double WCastTime = 0;
         public static double OverKill = 0;
@@ -86,7 +85,7 @@ namespace Ezreal
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(1.2f, 160f, 2000f, false, SkillshotType.SkillshotLine);
             R1.SetSkillshot(1.2f, 200f, 2000f, false, SkillshotType.SkillshotCircle);
-
+            
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
@@ -113,6 +112,7 @@ namespace Ezreal
             Config.SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu("E config").AddItem(new MenuItem("autoEwall", "Try E over wall BETA").SetValue(false));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
@@ -148,6 +148,7 @@ namespace Ezreal
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Game.PrintChat("<font color=\"#008aff\">E</font>zreal full automatic AI ver 2.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
+
         #region Farm
         public static void farmQ()
         {
@@ -167,25 +168,34 @@ namespace Ezreal
             minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
             foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion)))
             {
-                Q.Cast(minion);
+                if (minion.IsMoving)
+                    Q.Cast(minion);
+                else
+                    Q.Cast(minion.Position);
                 FarmId = minion.NetworkId;
             }
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("LC").GetValue<bool>() && !Orbwalking.CanAttack() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
+            if (Config.Item("LC").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
             {
                 foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && Orbwalker.InAutoAttackRange(minion)))
                 {
                     if (minion.Health < Q.GetDamage(minion) * 0.9 && minion.Health > minion.FlatPhysicalDamageMod)
                     {
-                        Q.Cast(minion);
+                        if (minion.IsMoving)
+                            Q.Cast(minion);
+                        else
+                            Q.Cast(minion.Position);
                         FarmId = minion.NetworkId;
                     }
 
                 }
-                if ((((!E.IsReady() || !R.IsReady()) || Game.Time - GetPassiveTime() > -1.5) && Config.Item("LCP").GetValue<bool>() ))
+                if (Config.Item("LCP").GetValue<bool>() && ((!E.IsReady() || Game.Time - GetPassiveTime() > -1.5)))
                 {
                     foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && minion.Health > Q.GetDamage(minion) * 1.5 && Orbwalker.InAutoAttackRange(minion)))
                     {
-                        Q.Cast(minion);
+                        if (minion.IsMoving)
+                            Q.Cast(minion);
+                        else
+                            Q.Cast(minion.Position);
                         FarmId = minion.NetworkId;
                     }
                 }
@@ -196,23 +206,17 @@ namespace Ezreal
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
-
             diagF = diag - Game.Time;
-            
             //debug("diag" + diagF);
             diag = Game.Time;
-            ManaMenager();
-
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
-                Farm = true;
-            else
-                Farm = false;
+            
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
+
             if (E.IsReady())
             {
+                ManaMenager();
                 if (Config.Item("smartE").GetValue<KeyBind>().Active)
                     Esmart = true;
                 if (Esmart && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 4)
@@ -221,7 +225,7 @@ namespace Ezreal
             else
                 Esmart = false;
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Config.Item("autoE").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() )
             {
                 ManaMenager();
                 var t2 = TargetSelector.GetTarget(950, TargetSelector.DamageType.Physical);
@@ -232,7 +236,8 @@ namespace Ezreal
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
                     && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
                 {
-
+                    if (Config.Item("autoEwall").GetValue<bool>())
+                        FindWall();
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                 }
                 else if (ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4
@@ -283,9 +288,6 @@ namespace Ezreal
 
             if (Q.IsReady())
             {
-                
-
-                //Q.Cast(ObjectManager.Player);
                 ManaMenager();
                 if (Config.Item("mura").GetValue<bool>())
                 {
@@ -298,58 +300,19 @@ namespace Ezreal
                     else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
                         Items.UseItem(Mur);
                 }
-                bool cast = false;
-                bool wait = false;
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
-                {
-                    if (target.IsValidTarget(Q.Range ) &&
-                        !target.HasBuffOfType(BuffType.PhysicalImmunity))
-                    {
-                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(Q.Delay + (Player.Distance(target.ServerPosition) / Q.Speed) * 1000));
-                        var Qdmg = Q.GetDamage(target);
-                        if (Qdmg > predictedHealth)
-                        {
-                            cast = true;
-                            wait = true;
-                            PredictionOutput output = R.GetPrediction(target);
-                            Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-                            direction.Normalize();
-                            List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-                            foreach (var enemy in enemies)
-                            {
-                                if (enemy.SkinName == target.SkinName || !cast)
-                                    continue;
-                                PredictionOutput prediction = R.GetPrediction(enemy);
-                                Vector3 predictedPosition = prediction.CastPosition;
-                                Vector3 v = output.CastPosition - Player.ServerPosition;
-                                Vector3 w = predictedPosition - Player.ServerPosition;
-                                double c1 = Vector3.Dot(w, v);
-                                double c2 = Vector3.Dot(v, v);
-                                double b = c1 / c2;
-                                Vector3 pb = Player.ServerPosition + ((float)b * v);
-                                float length = Vector3.Distance(predictedPosition, pb);
-                                if (length < (Q.Width + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                                    cast = false;
-                            }
-                            if (cast )
-                            {
-                                Q.Cast(target, true);
-                                OverKill = Game.Time;
-                                debug("Q ks");
-                            }
-                        }
-                    }
-                }
+                
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (ObjectManager.Player.CountEnemiesInRange(900) == 0)
                     t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 else
                     t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
-                if (t.IsValidTarget() && Q.IsReady() && !wait)
+                if (t.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(t);
                     var wDmg = W.GetDamage(t);
+                    if (qDmg  > t.Health)
+                        Q.Cast(t, true);
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
                         debug("Q noob mode");
                     else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
@@ -517,7 +480,7 @@ namespace Ezreal
                 {
                     if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius / 2)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                     else 
@@ -602,6 +565,11 @@ namespace Ezreal
                 FarmId = target.NetworkId;
         }
 
+        private static bool Farm
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
+        }
+
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             attackNow = false;
@@ -649,6 +617,8 @@ namespace Ezreal
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
                 {
+                    if (Config.Item("autoEwall").GetValue<bool>())
+                        FindWall();
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
                     debug("E AGC");
                 }
@@ -664,6 +634,8 @@ namespace Ezreal
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3 )
             {
 
+                if (Config.Item("autoEwall").GetValue<bool>())
+                    FindWall();
                 E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
             }
         }
@@ -725,8 +697,36 @@ namespace Ezreal
                     .Select(buff => buff.EndTime)
                     .FirstOrDefault();
         }
+
+        private static void FindWall()
+        {
+            var CircleLineSegmentN = 20;
+
+            var outRadius = 700 / (float)Math.Cos(2 * Math.PI / CircleLineSegmentN);
+            var inRadius = 300 / (float)Math.Cos(2 * Math.PI / CircleLineSegmentN);
+            var bestPoint = ObjectManager.Player.Position;
+            for (var i = 1; i <= CircleLineSegmentN; i++)
+            {
+                
+                var angle = i * 2 * Math.PI / CircleLineSegmentN;
+                var point = new Vector2(ObjectManager.Player.Position.X + outRadius * (float)Math.Cos(angle), ObjectManager.Player.Position.Y + outRadius * (float)Math.Sin(angle)).To3D();
+                var point2 = new Vector2(ObjectManager.Player.Position.X + inRadius * (float)Math.Cos(angle), ObjectManager.Player.Position.Y + inRadius * (float)Math.Sin(angle)).To3D();
+                if (!point.IsWall() && point2.IsWall() && Game.CursorPos.Distance(point) < Game.CursorPos.Distance(bestPoint))
+                    bestPoint = point;
+            }
+            if (bestPoint != ObjectManager.Player.Position && bestPoint.Distance(Game.CursorPos) < bestPoint.Distance(ObjectManager.Player.Position) && bestPoint.CountEnemiesInRange(500) < 3)
+                E.Cast(bestPoint);
+        }
+            
+
+
         private static void Drawing_OnDraw(EventArgs args)
         {
+
+
+
+
+            
 
             if (Config.Item("qRange").GetValue<bool>())
             {
