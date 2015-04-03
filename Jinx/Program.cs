@@ -295,8 +295,7 @@ namespace Jinx
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget() && (Game.Time - WCastTime > 1) && !target.IsZombie && !target.IsDead &&
-                        !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
+                    if (target.IsValidTarget() && (Game.Time - WCastTime > 1) && ValidUlt(target))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
@@ -349,6 +348,18 @@ namespace Jinx
             PotionMenager();
         }
 
+        private static bool ValidUlt(Obj_AI_Hero target)
+        {
+            if (target.HasBuffOfType(BuffType.PhysicalImmunity)
+            || target.HasBuffOfType(BuffType.SpellImmunity)
+            || target.IsZombie
+            || target.HasBuffOfType(BuffType.Invulnerability)
+            || target.HasBuffOfType(BuffType.SpellShield)
+            )
+                return false;
+            else
+                return true;
+        }
 
         private static void castR(Obj_AI_Hero target)
         {
