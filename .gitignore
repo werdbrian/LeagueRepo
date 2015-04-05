@@ -12,6 +12,7 @@ $RECYCLE.BIN/
 *.cab
 *.msi
 *.msm
+*.suo
 *.msp
 
 # =========================
@@ -41,3 +42,5 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+*.suo
