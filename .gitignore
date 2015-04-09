@@ -7,7 +7,7 @@ Desktop.ini
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
-**/Relase/
+**/Relase
 
 # Windows Installer files
 *.cab
@@ -17,6 +17,7 @@ $RECYCLE.BIN/
 *.msp
 *.sln
 *.exe
+*.dll
 # =========================
 # Operating System Files
 # =========================
