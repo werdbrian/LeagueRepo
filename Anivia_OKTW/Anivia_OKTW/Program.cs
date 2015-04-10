@@ -57,7 +57,7 @@ namespace Annie
 
             Q.SetSkillshot(.25f, 110f, 850f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(.5f, 1f, float.MaxValue, false, SkillshotType.SkillshotLine);
-            R.SetSkillshot(2f, 250f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(2f, 400f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             SpellList.Add(Q);
             SpellList.Add(W);
@@ -89,18 +89,24 @@ namespace Annie
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
-
-
+            Config.AddItem(new MenuItem("inter", "OnPossibleToInterrupt W")).SetValue(true);
+            Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
             Game.OnUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
             Obj_AI_Base.OnCreate +=Obj_AI_Base_OnCreate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.PrintChat("<font color=\"#ff00d8\">A</font>nivia full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
+        private static void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
+        {
+            if (Config.Item("inter").GetValue<bool>() && W.IsReady() && unit.IsValidTarget(W.Range))
+                W.Cast(unit);
+        }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
@@ -125,7 +131,7 @@ namespace Annie
 
         static void Orbwalking_BeforeAttack(LeagueSharp.Common.Orbwalking.BeforeAttackEventArgs args)
         {
-         
+
          
         }
 
@@ -166,7 +172,54 @@ namespace Annie
             else
                 Orbwalking.Attack = true;
 
-
+            if (R.IsReady())
+            {
+                var t = TargetSelector.GetTarget(R.Range + 400, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                {
+                   
+                    if (RMissile == null && ObjectManager.Player.Mana > RMANA + QMANA && Q.GetDamage(t) * 2 + R.GetDamage(t) > t.Health)
+                        R.Cast(t, true, true);
+                    if (RMissile == null && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                    {
+                        R.Cast(t, true, true);
+                    }
+                }
+                if (RMissile != null && (RMissile.Position.CountEnemiesInRange(450) == 0 || ObjectManager.Player.Mana < EMANA + QMANA) && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+                {
+                    R.Cast();
+                }
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmR").GetValue<bool>() && ObjectManager.Player.Mana > QMANA + EMANA)
+                {
+                    var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, R.Range, MinionTypes.All);
+                    var Wfarm = R.GetCircularFarmLocation(allMinionsQ, R.Width);
+                    if (Wfarm.MinionsHit > 2 && RMissile == null)
+                    {
+                        R.Cast(Wfarm.Position);
+                    }
+                    else if (Wfarm.MinionsHit < 2 && RMissile != null)
+                    {
+                        R.Cast();
+                    }
+                }
+            }
+            if (W.IsReady())
+            {
+                var ta = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ta.IsValidTarget(W.Range) && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1 && W.GetPrediction(ta).CastPosition.Distance(ta.Position) > 150)
+                {
+                    if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
+                    {
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(W.Range - 200))
+                            CastSpell(W, ta, Config.Item("Hit").GetValue<Slider>().Value);
+                    }
+                    else
+                    {
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range) && ta.HasBuffOfType(BuffType.Slow))
+                            CastSpell(W, ta, Config.Item("Hit").GetValue<Slider>().Value);
+                    }
+                }
+            }
             if (Q.IsReady() && QMissile == null)
             {
                 ManaMenager();
@@ -212,81 +265,32 @@ namespace Annie
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
+
                     var eDmg = E.GetDamage(t);
-                    if (t.HasBuffOfType(BuffType.Slow))
+                    if (t.HasBuff("chilled"))
+                    {
                         eDmg = 2 * eDmg;
-
-                    if (eDmg > t.Health)
-                        E.Cast(t, true);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + EMANA && QMissile == null)
-                    {
-                        if (RMissile == null && R.IsReady())
-                            R.Cast(t, true, true);
-                        E.Cast(t, true);
-                    }
-                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && QMissile == null)
-                    {
-                        if (RMissile == null && R.IsReady())
-                            R.Cast(t, true, true);
-                        E.Cast(t, true);
-                    }
-                }
-            }
-            if (R.IsReady())
-            {
-                var t = TargetSelector.GetTarget(R.Range + 400 , TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                {
-                    if (RMissile == null && ObjectManager.Player.Mana > RMANA + QMANA && Q.GetDamage(t) * 2 + R.GetDamage(t) > t.Health)
-                        R.Cast(t, true, true);
-                    if (RMissile == null && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
-                    {
-                        R.Cast(t, true, true);
-                    }
-                }
-                if (RMissile != null && (RMissile.Position.CountEnemiesInRange(450) == 0 || ObjectManager.Player.Mana < EMANA + QMANA) && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
-                {
-                    R.Cast();
-                }
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmR").GetValue<bool>() && ObjectManager.Player.Mana >  QMANA + EMANA )
-                {
-                    var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, R.Range, MinionTypes.All);
-                    var Wfarm = R.GetCircularFarmLocation(allMinionsQ, R.Width);
-                    if (Wfarm.MinionsHit > 2 && RMissile == null)
-                    {
-                        R.Cast(Wfarm.Position);
-                    }
-                    else if (Wfarm.MinionsHit < 2 && RMissile != null)
-                    {
-                        R.Cast();
-                    }
-                }
-            }
-            if (W.IsReady())
-            {
-                var ta = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ta.IsValidTarget(W.Range) && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1 && W.GetPrediction(ta).CastPosition.Distance(ta.Position) > 150)
-                {
-                    if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
-                    {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(W.Range - 200))
-                        {
-
-                            CastSpell(W, ta, Config.Item("Hit").GetValue<Slider>().Value);
-
-                        }
+                        debug("true");
                     }
                     else
+                        debug("false");
+                    if (eDmg > t.Health)
+                        E.Cast(t, true);
+                    else if (t.HasBuff("chilled") && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + EMANA && QMissile == null)
                     {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range) && ta.HasBuffOfType(BuffType.Slow))
-                        {
-                            CastSpell(W, ta, Config.Item("Hit").GetValue<Slider>().Value);
-
-                        }
+                        if (RMissile == null && R.IsReady())
+                            R.Cast(t, true, true);
+                        E.Cast(t, true);
+                    }
+                    else if (t.HasBuff("chilled") && (Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && QMissile == null)
+                    {
+                        if (RMissile == null && R.IsReady())
+                            R.Cast(t, true, true);
+                        E.Cast(t, true);
                     }
                 }
             }
-
+            
         }
 
         private static void CastSpell(Spell QWER, Obj_AI_Hero target, int HitChanceNum)
@@ -388,6 +392,12 @@ namespace Annie
                         ManaPotion.Cast();
                 }
             }
+        }
+
+       public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Game.PrintChat(msg);
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
