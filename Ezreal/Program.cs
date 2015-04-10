@@ -213,7 +213,7 @@ namespace Ezreal
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
-
+            
             if (E.IsReady())
             {
                 ManaMenager();

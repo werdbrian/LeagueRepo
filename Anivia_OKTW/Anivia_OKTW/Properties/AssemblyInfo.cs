@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Zed")]
+[assembly: AssemblyTitle("Anivia_OKTW")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Zed")]
+[assembly: AssemblyProduct("Anivia_OKTW")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("026bacfa-5c3c-48a7-8597-777727e3f36a")]
+[assembly: Guid("be973cae-4bee-42e8-b3e3-b3d7a0b2bf8c")]
 
 // Version information for an assembly consists of the following four values:
 //
