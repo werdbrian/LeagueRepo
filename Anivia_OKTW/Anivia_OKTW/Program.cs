@@ -278,7 +278,7 @@ namespace Annie
                     }
                     else
                     {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(W.Range))
+                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) && ta.IsValidTarget(E.Range) && ta.HasBuffOfType(BuffType.Slow))
                         {
                             CastSpell(W, ta, Config.Item("Hit").GetValue<Slider>().Value);
 
