@@ -75,28 +75,30 @@ namespace Annie
             //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
-            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
-            Config.AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
-            Config.AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
-
-            Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
-            Config.AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
+            
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
+            Config.SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 30)));
 
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
+            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
+            Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
+            Config.AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
+
+            Config.AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu("R champions").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
-            //Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             //Add the events we are going to use:
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
         static void Orbwalking_BeforeAttack(LeagueSharp.Common.Orbwalking.BeforeAttackEventArgs args)
@@ -116,7 +118,7 @@ namespace Annie
             PotionMenager();
             HaveStun = GetPassiveStacks();
 
-            if (Combo)
+            if (Combo && !Config.Item("AACombo").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA))
@@ -126,6 +128,7 @@ namespace Annie
             }
             else
                 Orbwalking.Attack = true;
+
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
@@ -169,8 +172,6 @@ namespace Annie
                 }
             }
 
-            
-
             if (Config.Item("sup").GetValue<bool>())
             {
                 if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
@@ -210,7 +211,7 @@ namespace Annie
                 {
                     Q.Cast(minion);
                 }
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
                 {
                     var Wfarm = W.GetCircularFarmLocation(allMinionsQ, W.Width);
                     if (Wfarm.MinionsHit > 2)

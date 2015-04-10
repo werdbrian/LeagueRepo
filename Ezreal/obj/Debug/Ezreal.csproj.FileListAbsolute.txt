@@ -1,1 +1,2 @@
 C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\Ezreal\bin\Release\Ezreal.exe.config
+C:\Users\Sebastian\Dropbox\LeagueRepo\Ezreal\bin\Release\Ezreal.exe.config
