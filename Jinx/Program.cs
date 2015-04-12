@@ -94,15 +94,15 @@ namespace Jinx
 
             #endregion
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("", "pls disable Orbwalking > Drawing > AAcirlce"));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
             Config.AddItem(new MenuItem("farmQ", "Q farm").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
