@@ -80,10 +80,16 @@ namespace Annie
             Config.SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
             Config.SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 30)));
 
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
@@ -202,6 +208,8 @@ namespace Annie
                 {
                     var mob = mobs[0];
                     Q.Cast(mob, true);
+                    if (Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && W.IsReady())
+                        W.Cast(mob, true);
                 }
             }
 
@@ -210,15 +218,15 @@ namespace Annie
                 if (minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) && minion.Health < Q.GetDamage(minion))
                 {
                     Q.Cast(minion);
-                }
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
-                {
-                    var Wfarm = W.GetCircularFarmLocation(allMinionsQ, W.Width);
-                    if (Wfarm.MinionsHit > 2)
-                        W.Cast(Wfarm.Position);
+                    return;
                 }
             }
-
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
+            {
+                var Wfarm = W.GetCircularFarmLocation(allMinionsQ, W.Width);
+                if (Wfarm.MinionsHit > 2 && W.IsReady())
+                    W.Cast(Wfarm.Position);
+            }
         }
 
         private static bool HaveTibers
@@ -288,29 +296,61 @@ namespace Annie
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("OrbDraw").GetValue<bool>())
+            {
+                if (ObjectManager.Player.HealthPercentage() > 60)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
+                else if (ObjectManager.Player.HealthPercentage() > 30)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
+            }
             if (Config.Item("qRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
                     if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
-            }
-            if (Config.Item("rRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>() && R.IsReady())
-                    if (R.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Red);
+                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
             }
             if (Config.Item("wRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
                     if (W.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Yellow);
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+            }
+
+            if (Config.Item("rRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range + R.Width/2, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range + R.Width/2, System.Drawing.Color.Gray, 1, 1);
+            }
+
+            if (Config.Item("orb").GetValue<bool>())
+            {
+                var orbT = Orbwalker.GetTarget();
+
+                if (orbT.IsValidTarget())
+                {
+                    if (orbT.Health > orbT.MaxHealth * 0.6)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 5, 1);
+                    else if (orbT.Health > orbT.MaxHealth * 0.3)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 10, 1);
                     else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Yellow);
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 10, 1);
+                }
+
             }
             
         }
