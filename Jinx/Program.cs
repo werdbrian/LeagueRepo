@@ -93,12 +93,16 @@ namespace Jinx
             Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             #endregion
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("", "pls disable Orbwalking > Drawing > AAcirlce"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("", "My HP: 0-30 red, 30-60 orange,60-100 green"));
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wTarget", "W Target").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
             Config.AddItem(new MenuItem("farmQ", "Q farm").SetValue(true));
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
@@ -605,26 +609,68 @@ namespace Jinx
         private static void Drawing_OnDraw(EventArgs args)
         {
 
-            if (Config.Item("wRange").GetValue<bool>())
+            if (Config.Item("OrbDraw").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan);
+                if (ObjectManager.Player.HealthPercentage() > 60)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
+                else if (ObjectManager.Player.HealthPercentage() > 30)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
             }
             if (Config.Item("qRange").GetValue<bool>())
             {
-                if (FishBoneActive)
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, 590f + ObjectManager.Player.BoundingRadius, System.Drawing.Color.Orange);
-                else
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, bonusRange() - 40, System.Drawing.Color.Orange);
+
+                    if (FishBoneActive)
+                        Utility.DrawCircle(ObjectManager.Player.Position, 590f + ObjectManager.Player.BoundingRadius, System.Drawing.Color.DeepPink, 1, 1);
+                    else
+                        Utility.DrawCircle(ObjectManager.Player.Position, bonusRange() - 40, System.Drawing.Color.DeepPink, 1, 1);
             }
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
+            }
+            if (Config.Item("rRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+            }
+
             if (Config.Item("orb").GetValue<bool>())
             {
                 var orbT = Orbwalker.GetTarget();
+
                 if (orbT.IsValidTarget())
-                    Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Pink);
+                {
+                    if (orbT.Health > orbT.MaxHealth * 0.6)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 5, 1);
+                    else if (orbT.Health > orbT.MaxHealth * 0.3)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 10, 1);
+                    else
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 10, 1);
+                }
+                    
             }
 
             if (Config.Item("noti").GetValue<bool>())
@@ -633,6 +679,7 @@ namespace Jinx
                 float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                 if (t.IsValidTarget() && R.IsReady())
                 {
+                    
                     var rDamage = R.GetDamage(t);
                     if (rDamage > predictedHealth)
                     {
@@ -647,8 +694,7 @@ namespace Jinx
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-                    if (Config.Item("wTarget").GetValue<bool>())
-                        Render.Circle.DrawCircle(tw.ServerPosition, 100, System.Drawing.Color.Cyan);
+                   
                     var wDmg = W.GetDamage(tw);
                     if (wDmg > tw.Health)
                     {
@@ -656,10 +702,6 @@ namespace Jinx
                         Render.Circle.DrawCircle(tw.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
                     }
-
-
-
-
                 }
             }
         }
