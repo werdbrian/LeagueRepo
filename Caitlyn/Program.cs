@@ -81,12 +81,23 @@ namespace Caitlyn
             //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
-            Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
+
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.AddItem(new MenuItem("autoQ", "Reduce Q use").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(3, 3, 0)));
-            Config.AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            
             #region E
             Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu("E Config").AddItem(new MenuItem("opsE", "OnProcessSpellCastW").SetValue(true));
@@ -216,7 +227,15 @@ namespace Caitlyn
                     }
                 }
             }
+            if (Config.Item("useR").GetValue<KeyBind>().Active)
+            {
+                var t = TargetSelector.GetTarget(500 * R.Level + 1500, TargetSelector.DamageType.Physical);
 
+                if (t.IsValidTarget() && R.IsReady())
+                {
+                    R.Cast(t, true);
+                }
+            }
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && !ObjectManager.Player.UnderTurret(true))
             {
                 bool cast = false;
@@ -324,24 +343,7 @@ namespace Caitlyn
             {
                 WCastTime = Game.Time;
             }
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
-                {
-                    var dmg = unit.GetSpellDamage(target, args.SData.Name);
-                    double HpLeft = target.Health - dmg;
-                    if (GetRealDistance(target) > bonusRange() + 60 && target.IsValidTarget(Q.Range) && Q.IsReady())
-                    {
-                        var qDmg = getQdmg(target);
-                        if (qDmg > HpLeft && HpLeft > 0)
-                        {
-                            Q.Cast(target, true);
-                        }
                     }
-
-                }
-            }
-        }
 
         private static double getQdmg(Obj_AI_Hero target)
         {
@@ -539,27 +541,82 @@ namespace Caitlyn
         }
         private static void Drawing_OnDraw(EventArgs args)
         {
-            var minion = getMinion();
-            if (minion.IsValidTarget())
+            if (Config.Item("OrbDraw").GetValue<bool>())
             {
-                //Render.Circle.DrawCircle(minion.Position, 100, System.Drawing.Color.Red);
-                //Game.PrintChat("range: " + ObjectManager.Player.Distance(minion.Position));
-               // Game.PrintChat("bount: " + minion.BoundingRadius);
-                
+                if (ObjectManager.Player.HealthPercentage() > 60)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
+                else if (ObjectManager.Player.HealthPercentage() > 30)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
+            }
+            if (Config.Item("qRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (Q.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+            }
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+            }
+            if (Config.Item("rRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+            }
+
+            if (Config.Item("orb").GetValue<bool>())
+            {
+                var orbT = Orbwalker.GetTarget();
+
+                if (orbT.IsValidTarget())
+                {
+                    if (orbT.Health > orbT.MaxHealth * 0.6)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 5, 1);
+                    else if (orbT.Health > orbT.MaxHealth * 0.3)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 10, 1);
+                    else
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 10, 1);
+                }
+
             }
             if (Config.Item("noti").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(500 * R.Level + 1500, TargetSelector.DamageType.Physical);
-                float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
+                
                 if (t.IsValidTarget() && R.IsReady())
                 {
+                    float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
                     var rDamage = R.GetDamage(t);
                     if (rDamage > predictedHealth)
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
-                    if (Config.Item("useR").GetValue<KeyBind>().Active)
-                    {
-                        R.Cast(t, true);
-                    }
+                    
                 }
                 
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);

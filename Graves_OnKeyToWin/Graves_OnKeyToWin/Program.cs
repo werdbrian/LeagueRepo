@@ -550,7 +550,7 @@ namespace Graves_OnKeyToWin
             if (Config.Item("wRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
-                    if (Q.IsReady())
+                    if (W.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
                     else
                         Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
@@ -558,15 +558,15 @@ namespace Graves_OnKeyToWin
             if (Config.Item("eRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
+                    if (E.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
                     else
                         Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
             }
             if (Config.Item("rRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
+                if (Config.Item("onlyRdy").GetValue<bool>() && R.IsReady())
+                    if (R.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
                     else
                         Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
