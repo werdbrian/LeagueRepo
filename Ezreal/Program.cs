@@ -521,7 +521,7 @@ namespace Ezreal
                 Game.PrintChat(msg);
         }
 
-        private static double getRdmg(Obj_AI_Hero target)
+        private static double getRdmg(Obj_AI_Base target)
         {
             var rDmg = R.GetDamage(target);
             var dmg = 0;
@@ -736,7 +736,6 @@ namespace Ezreal
                 //debug(mob.SkinName);
                 if ((mob.SkinName == "SRU_Dragon" || mob.SkinName == "SRU_Red" || mob.SkinName == "SRU_Baron" || mob.SkinName == "SRU_Blue") && mob.CountAlliesInRange(600) == 0)
                 {
-
                     if (DragonDmg == 0)
                         DragonDmg = mob.Health;
 
@@ -755,7 +754,7 @@ namespace Ezreal
                         if (DragonDmg - mob.Health > 0)
                         {
                             var timeTravel = GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position);
-                            var timeR = (mob.Health - R.GetDamage(mob)) / (DmgSec / 4);
+                            var timeR = (mob.Health - getRdmg(mob)) / (DmgSec / 4);
                             debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + R.GetDamage(mob));
                             if (mob.CountAlliesInRange(500) == 0 && timeTravel > timeR )
                                 R.Cast(mob.Position);
