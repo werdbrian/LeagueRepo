@@ -110,6 +110,8 @@ namespace Sivir
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (args.Target == null)
+                return;
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
             double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;

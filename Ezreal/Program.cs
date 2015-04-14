@@ -52,6 +52,8 @@ namespace Ezreal
         public static double diag = 0;
         public static double diagF = 0;
         public static Stopwatch stopWatch = new Stopwatch();
+        public static float DragonDmg = 0;
+        public static double DragonTime = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -117,6 +119,7 @@ namespace Ezreal
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
+            Config.SubMenu("R option").AddItem(new MenuItem("Rjungle", "R KS Jungle Buff").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
@@ -401,7 +404,11 @@ namespace Ezreal
                 R.CastIfWillHit(tr, 2, true);
                 R1.Cast(tr, true, true);
             }
-            
+            if (R.IsReady() && Config.Item("Rjungle").GetValue<bool>())
+            {
+                KsJungle();
+            }
+
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
@@ -720,7 +727,68 @@ namespace Ezreal
             if (bestPoint != ObjectManager.Player.Position && bestPoint.Distance(Game.CursorPos) < bestPoint.Distance(ObjectManager.Player.Position) && bestPoint.CountEnemiesInRange(500) < 3)
                 E.Cast(bestPoint);
         }
-            
+
+        private static void KsJungle()
+        {
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            foreach (var mob in mobs)
+            {
+                //debug(mob.SkinName);
+                if ((mob.SkinName == "SRU_Dragon" || mob.SkinName == "SRU_Red" || mob.SkinName == "SRU_Baron" || mob.SkinName == "SRU_Blue") && mob.CountAlliesInRange(600) == 0)
+                {
+
+                    if (DragonDmg == 0)
+                        DragonDmg = mob.Health;
+
+                    if (Game.Time - DragonTime > 4)
+                    {
+                        if (DragonDmg - mob.Health > 0)
+                        {
+                            DragonDmg = mob.Health;
+                        }
+                        DragonTime = Game.Time;
+                    }
+                    else
+                    {
+                        var DmgSec = (DragonDmg - mob.Health) * (Math.Abs(DragonTime - Game.Time) / 4);
+                        //debug("DS  " + DmgSec);
+                        if (DragonDmg - mob.Health > 0)
+                        {
+                            var timeTravel = GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position);
+                            var timeR = (mob.Health - R.GetDamage(mob)) / (DmgSec / 4);
+                            debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + R.GetDamage(mob));
+                            if (mob.CountAlliesInRange(500) == 0 && timeTravel > timeR )
+                                R.Cast(mob.Position);
+                        }
+                        else
+                        {
+                            DragonDmg = mob.Health;
+                        }
+                        //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
+                    }
+                }     
+            }
+        }
+
+        private static float GetUltTravelTime(Obj_AI_Hero source, float speed, float delay, Vector3 targetpos)
+        {
+            float distance = Vector3.Distance(source.ServerPosition, targetpos);
+            float missilespeed = speed;
+            if (source.ChampionName == "Jinx" && distance > 1350)
+            {
+                const float accelerationrate = 0.3f; //= (1500f - 1350f) / (2200 - speed), 1 unit = 0.3units/second
+
+                var acceldifference = distance - 1350f;
+
+                if (acceldifference > 150f) //it only accelerates 150 units
+                    acceldifference = 150f;
+
+                var difference = distance - 1500f;
+
+                missilespeed = (1350f * speed + acceldifference * (speed + accelerationrate * acceldifference) + difference * 2200f) / distance;
+            }
+            return (distance / missilespeed + delay);
+        }    
 
 
         private static void Drawing_OnDraw(EventArgs args)

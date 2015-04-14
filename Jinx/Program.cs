@@ -33,6 +33,8 @@ namespace Jinx
         public static double lag = 0;
         public static double WCastTime = 0;
         public static double QCastTime = 0;
+        public static float DragonDmg = 0;
+        public static double DragonTime = 0;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -89,6 +91,7 @@ namespace Jinx
             #endregion
             #region R
             Config.SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu("R Config").AddItem(new MenuItem("Rjungle", "R KS Jungle Buff").SetValue(true));
             Config.SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
@@ -294,7 +297,10 @@ namespace Jinx
                     R1.Cast(t, true, true);
                 }
             }
-
+            if (R.IsReady() && Config.Item("Rjungle").GetValue<bool>())
+            {
+                KsJungle();
+            }
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
@@ -352,7 +358,67 @@ namespace Jinx
             }
             PotionMenager();
         }
+        private static void KsJungle()
+        {
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            foreach (var mob in mobs)
+            {
+                //debug(mob.SkinName);
+                if ((mob.SkinName == "SRU_Dragon" ||  mob.SkinName == "SRU_Baron" ) && mob.CountAlliesInRange(600) == 0)
+                {
 
+                    if (DragonDmg == 0)
+                        DragonDmg = mob.Health;
+
+                    if (Game.Time - DragonTime > 4)
+                    {
+                        if (DragonDmg - mob.Health > 0)
+                        {
+                            DragonDmg = mob.Health;
+                        }
+                        DragonTime = Game.Time;
+                    }
+                    else
+                    {
+                        var DmgSec = (DragonDmg - mob.Health) * (Math.Abs(DragonTime - Game.Time) / 4);
+                        //debug("DS  " + DmgSec);
+                        if (DragonDmg - mob.Health > 0)
+                        {
+                            var timeTravel = GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position);
+                            var timeR = (mob.Health - ((150 + (100 * R.Level + 200) + ObjectManager.Player.FlatPhysicalDamageMod))) / (DmgSec / 4);
+                            //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + ((150 + (100 * R.Level + 200) + ObjectManager.Player.FlatPhysicalDamageMod)));
+                            if (mob.CountAlliesInRange(500) == 0 && timeTravel > timeR)
+                                R.Cast(mob.Position);
+                        }
+                        else
+                        {
+                            DragonDmg = mob.Health;
+                        }
+                        //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
+                    }
+                }
+            }
+        }
+
+        private static float GetUltTravelTime(Obj_AI_Hero source, float speed, float delay, Vector3 targetpos)
+        {
+            float distance = Vector3.Distance(source.ServerPosition, targetpos);
+            float missilespeed = speed;
+            if (source.ChampionName == "Jinx" && distance > 1350)
+            {
+                const float accelerationrate = 0.3f; //= (1500f - 1350f) / (2200 - speed), 1 unit = 0.3units/second
+
+                var acceldifference = distance - 1350f;
+
+                if (acceldifference > 150f) //it only accelerates 150 units
+                    acceldifference = 150f;
+
+                var difference = distance - 1500f;
+
+                missilespeed = (1350f * speed + acceldifference * (speed + accelerationrate * acceldifference) + difference * 2200f) / distance;
+            }
+            return (distance / missilespeed + delay);
+        }    
         private static bool ValidUlt(Obj_AI_Hero target)
         {
             if (target.HasBuffOfType(BuffType.PhysicalImmunity)
