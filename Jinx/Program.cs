@@ -378,6 +378,7 @@ namespace Jinx
                         }
                         DragonTime = Game.Time;
                     }
+
                     else
                     {
                         var DmgSec = (DragonDmg - mob.Health) * (Math.Abs(DragonTime - Game.Time) / 4);
@@ -385,9 +386,9 @@ namespace Jinx
                         if (DragonDmg - mob.Health > 0)
                         {
                             var timeTravel = GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position);
-                            var timeR = (mob.Health - ((150 + (100 * R.Level + 200) + ObjectManager.Player.FlatPhysicalDamageMod))) / (DmgSec / 4);
+                            var timeR = (mob.Health - ObjectManager.Player.CalcDamage(mob, Damage.DamageType.Physical, (150 + (100 * R.Level)) + ObjectManager.Player.FlatPhysicalDamageMod + 300)) / (DmgSec / 4);
                             //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + ((150 + (100 * R.Level + 200) + ObjectManager.Player.FlatPhysicalDamageMod)));
-                            if (mob.CountAlliesInRange(500) == 0 && timeTravel > timeR)
+                            if (timeTravel > timeR)
                                 R.Cast(mob.Position);
                         }
                         else
