@@ -91,7 +91,9 @@ namespace Jinx
             #endregion
             #region R
             Config.SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu("R Config").AddItem(new MenuItem("Rjungle", "R KS Jungle Buff").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rjungle", "R Jungle stealer").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rdragon", "Dragon").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rbaron", "Baron").SetValue(true));
             Config.SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
@@ -288,7 +290,7 @@ namespace Jinx
                 }
             }
 
-
+            KsJungle();
             if (R.IsReady())
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
@@ -364,9 +366,8 @@ namespace Jinx
             foreach (var mob in mobs)
             {
                 //debug(mob.SkinName);
-                if ((mob.SkinName == "SRU_Dragon" ||  mob.SkinName == "SRU_Baron" ) && mob.CountAlliesInRange(600) == 0)
+                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>()) || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())) && mob.CountAlliesInRange(1000) == 0)
                 {
-
                     if (DragonDmg == 0)
                         DragonDmg = mob.Health;
 
@@ -741,6 +742,7 @@ namespace Jinx
                     
             }
 
+            
             if (Config.Item("noti").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
