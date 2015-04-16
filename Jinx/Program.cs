@@ -370,7 +370,7 @@ namespace Jinx
                     || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())) 
                     && mob.CountAlliesInRange(1000) == 0 
                     && mob.Health < mob.MaxHealth
-                    && mob.Distance(Player.Position) > 100)
+                    && mob.Distance(Player.Position) > 1000)
                 {
                     if (DragonDmg == 0)
                         DragonDmg = mob.Health;
