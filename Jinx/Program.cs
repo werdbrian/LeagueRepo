@@ -366,7 +366,11 @@ namespace Jinx
             foreach (var mob in mobs)
             {
                 //debug(mob.SkinName);
-                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>()) || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())) && mob.CountAlliesInRange(1000) == 0)
+                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>()) 
+                    || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())) 
+                    && mob.CountAlliesInRange(1000) == 0 
+                    && mob.Health < mob.MaxHealth
+                    && mob.Distance(Player.Position) > 100)
                 {
                     if (DragonDmg == 0)
                         DragonDmg = mob.Health;

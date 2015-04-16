@@ -116,12 +116,17 @@ namespace Ezreal
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu("E config").AddItem(new MenuItem("autoEwall", "Try E over wall BETA").SetValue(false));
 
-            Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("Rjungle", "R KS Jungle Buff").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu("R Config").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
+            Config.SubMenu("R Config").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rjungle", "R Jungle stealer").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rdragon", "Dragon").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rbaron", "Baron").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rred", "Red").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rblue", "Blue").SetValue(true));
+            Config.SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rally", "Ally stealer").SetValue(false));
+            Config.SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
+            Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
@@ -734,7 +739,14 @@ namespace Ezreal
             foreach (var mob in mobs)
             {
                 //debug(mob.SkinName);
-                if ((mob.SkinName == "SRU_Dragon" || mob.SkinName == "SRU_Red" || mob.SkinName == "SRU_Baron" || mob.SkinName == "SRU_Blue") && mob.CountAlliesInRange(600) == 0)
+                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Red" && Config.Item("Rred").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Blue" && Config.Item("Rblue").GetValue<bool>()))
+                    && (mob.CountAlliesInRange(1000) == 0 || Config.Item("Rally").GetValue<bool>())
+                    && mob.Health < mob.MaxHealth
+                    && mob.Distance(Player.Position) > 1000
+                    )
                 {
                     if (DragonDmg == 0)
                         DragonDmg = mob.Health;
@@ -765,6 +777,7 @@ namespace Ezreal
                         }
                         //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
                     }
+
                 }     
             }
         }
