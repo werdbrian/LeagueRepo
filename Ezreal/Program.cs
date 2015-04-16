@@ -176,10 +176,10 @@ namespace Ezreal
                     Q.Cast(mob, true);
                 }
             }
-            
+
             if (!Config.Item("farmQ").GetValue<bool>())
                 return;
-
+            
             minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
             foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion)))
             {
@@ -900,10 +900,19 @@ namespace Ezreal
             {
 
 
+                if (Game.Time - NotTime < 10)
+                {
+                    Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, MsgDebug);
+                }
+                else
+                {
+                    MsgDebug = "wait";
+                    Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, MsgDebug);
+                }
 
-
-                        Render.Circle.DrawCircle(target.Position.Extend(waypoints.Last<Vector2>().To3D(), 400), 100, System.Drawing.Color.Blue);
-
+                var target = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
+                if (target.IsValidTarget())
+                {
                     if (Q.GetDamage(target) > target.Health)
                     {
                         Render.Circle.DrawCircle(target.ServerPosition, 200, System.Drawing.Color.Red);
