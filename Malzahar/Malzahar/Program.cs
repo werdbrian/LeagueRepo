@@ -57,8 +57,8 @@ namespace Malzahar
             E = new Spell(SpellSlot.E, 650);
             R = new Spell(SpellSlot.R, 700);
 
-            Q.SetSkillshot(1f, 100, float.MaxValue, false, SkillshotType.SkillshotCircle);
-            W.SetSkillshot(0.5f, 240, 20, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(1.5f, 50, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.25f, 240, 20, false, SkillshotType.SkillshotCircle);
 
 
             SpellList.Add(Q);
@@ -81,13 +81,15 @@ namespace Malzahar
             Config.AddToMainMenu();
 
             Config.SubMenu("Farm").AddItem(new MenuItem("LCE", "Lane clear E").SetValue(false));
-            Config.SubMenu("Farm").AddItem(new MenuItem("farmR", "Lane clear R").SetValue(false));
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmR", "Lane clear W").SetValue(false));
             Config.SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 30)));
 
             Config.SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCQ", "Q").SetValue(false));
             Config.SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCW", "W").SetValue(false));
 
-            Config.AddItem(new MenuItem("inter", "OnPossibleToInterrupt Q")).SetValue(true);
+            Config.SubMenu("OnPossibleToInterrupt").AddItem(new MenuItem("interQ", "OnPossibleToInterrupt Q")).SetValue(true);
+            Config.SubMenu("OnPossibleToInterrupt").AddItem(new MenuItem("interR", "OnPossibleToInterrupt R")).SetValue(true);
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
@@ -115,8 +117,12 @@ namespace Malzahar
 
         private static void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
         {
-            if (Config.Item("inter").GetValue<bool>() && Q.IsReady() && unit.IsValidTarget(Q.Range))
-                Q.Cast(unit);
+
+                if (Q.IsReady() && unit.IsValidTarget(Q.Range) && Config.Item("interQ").GetValue<bool>())
+                    Q.Cast(unit);
+                else if (R.IsReady() && unit.IsValidTarget(R.Range) && Config.Item("interR").GetValue<bool>())
+                    R.Cast(unit);
+
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -159,9 +165,21 @@ namespace Malzahar
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+            if (Player.IsChannelingImportantSpell())
+            {
+                Orbwalking.Attack = false;
+                Orbwalking.Move = false;
+                debug("cast R");
+                return;
+            }
+            else
+            {
+                Orbwalking.Attack = false;
+                Orbwalking.Move = false;
+            }
             ManaMenager();
             PotionMenager();
-            if (Combo && !Config.Item("AACombo").GetValue<bool>())
+            if (Combo && !Config.Item("AACombo").GetValue<bool>() && R.IsReady())
             {
                     Orbwalking.Attack = false;
             }
@@ -170,11 +188,11 @@ namespace Malzahar
 
             if (W.IsReady())
             {
-                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
                     var eDmg = E.GetDamage(t);
-                    var wDmg = W.GetDamage(t) * 2;
+                    var wDmg = W.GetDamage(t) * 3;
                     var rDmg = R.GetDamage(t);
                     debug("W " + wDmg);
                     if (rDmg > t.Health)
@@ -191,7 +209,7 @@ namespace Malzahar
                         W.Cast(t, true, true);
                 }
 
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range + 400, MinionTypes.All);
+                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, W.Range, MinionTypes.All);
                 var Rfarm = W.GetCircularFarmLocation(allMinionsQ, W.Width);
 
                 if ( ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value
@@ -262,17 +280,21 @@ namespace Malzahar
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
- 
 
+                    if (Config.Item("useR").GetValue<KeyBind>().Active && t.IsValidTarget())
+                    {
+                        
+                        R.Cast(t, true);
+                        Q.Cast(t.Position, true);
+                    }
                     var eCd = E.Instance.CooldownExpires - Game.Time;
 
                     var eDmg = E.GetDamage(t);
-                    var wDmg = W.GetDamage(t) * 2;
-                    var rDmg = R.GetDamage(t);
+                    var wDmg = W.GetDamage(t) * 3;
+                    var rDmg = R.GetDamage(t) * 1.2;
                     debug("W " + wDmg);
-                    if (rDmg > t.Health)
-                        R.Cast(t, true);
-                    else if (rDmg + wDmg > t.Health && W.IsReady()&& ObjectManager.Player.Mana > RMANA + WMANA)
+                    
+                    if (rDmg + wDmg > t.Health && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
                     {
                         W.Cast(t, true);
                         R.Cast(t, true);
@@ -282,8 +304,10 @@ namespace Malzahar
                         W.Cast(t, true);
                         R.Cast(t, true);
                     }
+                    else if (rDmg > t.Health)
+                        R.Cast(t, true);
                 }
-                farmE();
+
             }
             
         }
