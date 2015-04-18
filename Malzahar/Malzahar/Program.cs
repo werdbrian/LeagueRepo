@@ -58,7 +58,7 @@ namespace Malzahar
             R = new Spell(SpellSlot.R, 700);
 
             Q.SetSkillshot(1.5f, 50, float.MaxValue, false, SkillshotType.SkillshotCircle);
-            W.SetSkillshot(0.25f, 240, 20, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.25f, 230, 20, false, SkillshotType.SkillshotCircle);
 
 
             SpellList.Add(Q);
@@ -172,23 +172,19 @@ namespace Malzahar
                 debug("cast R");
                 return;
             }
-            else
-            {
-                Orbwalking.Attack = false;
-                Orbwalking.Move = false;
-            }
+
             ManaMenager();
             PotionMenager();
-            if (Combo && !Config.Item("AACombo").GetValue<bool>() && R.IsReady())
+            if (Combo && !Config.Item("AACombo").GetValue<bool>() && (R.IsReady() || E.IsReady()))
             {
-                    Orbwalking.Attack = false;
+                Orbwalking.Attack = false;
             }
             else
                 Orbwalking.Attack = true;
 
             if (W.IsReady())
             {
-                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
                     var eDmg = E.GetDamage(t);
@@ -224,7 +220,7 @@ namespace Malzahar
             if (Q.IsReady() )
             {
                 ManaMenager();
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(t);
@@ -258,7 +254,7 @@ namespace Malzahar
             if (E.IsReady())
             {
                 ManaMenager();
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
 
@@ -270,7 +266,10 @@ namespace Malzahar
                     {
                         E.Cast(t, true);
                     }
-
+                    else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
+                    {
+                        E.Cast(t, true);
+                    }
                 }
                 farmE();
             }
@@ -296,12 +295,12 @@ namespace Malzahar
                     
                     if (rDmg + wDmg > t.Health && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
                     {
-                        W.Cast(t, true);
+                        W.Cast(t.Position, true);
                         R.Cast(t, true);
                     }
                     else if (rDmg + wDmg + eDmg > t.Health && (E.IsReady() || eCd > E.Instance.Cooldown - 3) && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
                     {
-                        W.Cast(t, true);
+                        W.Cast(t.Position, true);
                         R.Cast(t, true);
                     }
                     else if (rDmg > t.Health)
