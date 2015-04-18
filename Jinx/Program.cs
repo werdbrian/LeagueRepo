@@ -119,7 +119,6 @@ namespace Jinx
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
-            Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Game.PrintChat("<font color=\"#ff00d8\">J</font>inx full automatic AI ver 3.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
@@ -127,7 +126,7 @@ namespace Jinx
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            ManaMenager();
+            
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
                 Farm = true;
             else
@@ -142,18 +141,9 @@ namespace Jinx
                         E.Cast(Object.Position, true);
                     }
                 }
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && E.IsReady()))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !enemy.HasBuff("rocketgrab2") && E.IsReady()))
                 {
-                    if (enemy.HasBuff("rocketgrab2"))
-                    {
-                        foreach (var ally in ObjectManager.Get<Obj_AI_Hero>())
-                        {
-                            if (ally.BaseSkinName == "Blitzcrank" && ObjectManager.Player.Distance(ally.Position) < E.Range)
-                                E.Cast(ally, true);
-                        }
-
-                    }
-                    else if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                    if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                          enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
                          enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
                          enemy.IsStunned || enemy.HasBuff("Recall"))
@@ -194,7 +184,6 @@ namespace Jinx
             if (Q.IsReady())
             {
                 ManaMenager();
-
                 if (Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
                 {
                     farmQ();
@@ -227,7 +216,6 @@ namespace Jinx
 
             if (W.IsReady() && (Game.Time - QCastTime > 0.6))
             {
-                ManaMenager();
                 bool cast = false;
                 bool wait = false;
 
@@ -273,12 +261,11 @@ namespace Jinx
                 }
 
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() && W.IsReady() && !wait)
+                if (t.IsValidTarget() && !wait)
                 {
 
                     if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                     {
-
                         if (Config.Item("humanzier").GetValue<bool>())
                             Utility.DelayAction.Add(500, () => CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value));
                         else
@@ -307,19 +294,18 @@ namespace Jinx
                 }
             }
 
-            KsJungle();
             if (R.IsReady())
             {
-                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() && Config.Item("useR").GetValue<KeyBind>().Active)
+                if (Config.Item("useR").GetValue<KeyBind>().Active)
                 {
-                    R1.Cast(t, true, true);
+                    var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget())
+                        R1.Cast(t, true, true);
                 }
-            }
-
-            if (R.IsReady() && Config.Item("Rjungle").GetValue<bool>())
-            {
-                KsJungle();
+                if (Config.Item("Rjungle").GetValue<bool>())
+                {
+                    KsJungle();
+                }
             }
 
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>())
@@ -327,7 +313,7 @@ namespace Jinx
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(R.Range)  && (Game.Time - WCastTime > 1) && ValidUlt(target))
+                    if (target.IsValidTarget(R.Range)  && (Game.Time - WCastTime > 0.8) && ValidUlt(target))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
@@ -361,8 +347,6 @@ namespace Jinx
                                 debug("R normal High");
 
                             }
-
-
                             else if (cast && target.CountEnemiesInRange(200) > 2 && GetRealDistance(target) > bonusRange() + 200 + target.BoundingRadius)
                             {
                                 R1.Cast(target, true, true);
@@ -460,10 +444,6 @@ namespace Jinx
             }
             else
                 R.Cast(target, true);
-        }
-        private static void afterAttack(AttackableUnit unit, AttackableUnit target)
-        {
-
         }
 
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -592,12 +572,9 @@ namespace Jinx
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = WMANA - ObjectManager.Player.Level * 2;
+                RMANA = WMANA - ObjectManager.Player.PARRegenRate * W.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost; ;
-
-            if (Farm)
-                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
