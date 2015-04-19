@@ -18,6 +18,7 @@ namespace Malzahar
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
         public static Spell Q;
+        public static Spell Qr;
         public static Spell W;
         public static Spell E;
         public static Spell R;
@@ -28,14 +29,10 @@ namespace Malzahar
         public static float RMANA;
 
         public static int FarmId;
-
-        public static GameObject QMissile;
-        public static GameObject RMissile;
-
+        public static GameObject WMissile;
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
-        public static Items.Item Youmuu = new Items.Item(3142, 0);
         //Menu
         public static Menu Config;
 
@@ -53,14 +50,16 @@ namespace Malzahar
 
             //Create the spells
             Q = new Spell(SpellSlot.Q, 900);
+            Qr = new Spell(SpellSlot.Q, 900);
             W = new Spell(SpellSlot.W, 800);
             E = new Spell(SpellSlot.E, 650);
             R = new Spell(SpellSlot.R, 700);
 
+            Qr.SetSkillshot(0.25f, 50, float.MaxValue, false, SkillshotType.SkillshotCircle);
             Q.SetSkillshot(1.5f, 50, float.MaxValue, false, SkillshotType.SkillshotCircle);
-            W.SetSkillshot(0.25f, 230, 20, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.7f, 230, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-
+            SpellList.Add(Qr);
             SpellList.Add(Q);
             SpellList.Add(W);
             SpellList.Add(E);
@@ -97,11 +96,12 @@ namespace Malzahar
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "Combo Info").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
-            Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.SubMenu("R Config").AddItem(new MenuItem("useR", "FastFullCombo OneKey").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 4, 0)));
 
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -155,12 +155,26 @@ namespace Malzahar
 
         private static void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
         {
-
+            if (obj.IsValid )
+            {
+                debug(obj.Name);
+            }
+            if (obj.IsValid)
+            {
+                if (obj.Name == "Malzahar_Base_W_flash.troy")
+                    WMissile = obj;
+ 
+            }
         }
 
         private static void Obj_AI_Base_OnDelete(GameObject obj, EventArgs args)
         {
+            if (obj.IsValid)
+            {
+                if (obj.Name == "Malzahar_Base_W_flash.troy")
+                    WMissile = null;
 
+            }
         }
 
         private static void Game_OnGameUpdate(EventArgs args)
@@ -182,6 +196,18 @@ namespace Malzahar
             else
                 Orbwalking.Attack = true;
 
+
+            var buffT = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Magical);
+            if (buffT.IsValidTarget())
+            {
+                foreach (var buff in buffT.Buffs)
+                {
+                    debug(buff.Name);
+                    if (buff.Name == "AlZaharMaleficVisions")
+                        debug("true");
+                }
+                
+            }
             if (W.IsReady())
             {
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
@@ -190,7 +216,6 @@ namespace Malzahar
                     var eDmg = E.GetDamage(t);
                     var wDmg = W.GetDamage(t) * 3;
                     var rDmg = R.GetDamage(t);
-                    debug("W " + wDmg);
                     if (rDmg > t.Health)
                         R.Cast(t, true);
                     if (rDmg + wDmg > t.Health)
@@ -248,6 +273,16 @@ namespace Malzahar
                             }
                         }
                     }
+                    var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+                    var Rfarm = Q.GetCircularFarmLocation(allMinionsQ, Q.Width);
+
+                    if (ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value
+                        && Config.Item("farmR").GetValue<bool>() && ObjectManager.Player.Mana > QMANA + EMANA
+                        && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
+                        && Rfarm.MinionsHit > 2)
+                    {
+                        Q.Cast(Rfarm.Position);
+                    }
                 }
             }
 
@@ -259,7 +294,6 @@ namespace Malzahar
                 {
 
                     var eDmg = E.GetDamage(t);
-                    debug("" + eDmg);
                     if (eDmg > t.Health)
                         E.Cast(t, true);
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + EMANA )
@@ -276,31 +310,51 @@ namespace Malzahar
             if (R.IsReady())
             {
                 ManaMenager();
-                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
 
                     if (Config.Item("useR").GetValue<KeyBind>().Active && t.IsValidTarget())
                     {
-                        
+                        if (E.IsReady())
+                            E.Cast(t, true);
+                        if (W.IsReady())
+                            W.Cast(t, true);
+                        if (Q.IsReady())
+                            Qr.Cast(t, true);
                         R.Cast(t, true);
-                        Q.Cast(t.Position, true);
+                        
                     }
                     var eCd = E.Instance.CooldownExpires - Game.Time;
-
+                    var qDmg = Q.GetDamage(t);
                     var eDmg = E.GetDamage(t);
+
                     var wDmg = W.GetDamage(t) * 3;
-                    var rDmg = R.GetDamage(t) * 1.2;
-                    debug("W " + wDmg);
-                    
-                    if (rDmg + wDmg > t.Health && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
+
+                    var rDmg = R.GetDamage(t) * 1.1;
+                    if (eDmg > t.Health && (E.IsReady() || eCd > E.Instance.Cooldown - 3 || t.HasBuff("AlZaharMaleficVisions")))
                     {
-                        W.Cast(t.Position, true);
+                        //wait
+                    }
+                    if (rDmg + wDmg > t.Health && (W.IsReady() || WMissile.Position.Distance(t.Position) < 200) && ObjectManager.Player.Mana > RMANA + WMANA)
+                    {
+                        if (W.IsReady())
+                            W.Cast(t, true);
+
                         R.Cast(t, true);
                     }
-                    else if (rDmg + wDmg + eDmg > t.Health && (E.IsReady() || eCd > E.Instance.Cooldown - 3) && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
+                    else if (rDmg + wDmg + eDmg > t.Health && (E.IsReady() || eCd > E.Instance.Cooldown - 3 || t.HasBuff("AlZaharMaleficVisions")) && (W.IsReady() || WMissile.Position.Distance(t.Position) < 200) && ObjectManager.Player.Mana > RMANA + WMANA)
                     {
-                        W.Cast(t.Position, true);
+                        if (W.IsReady())
+                            W.Cast(t, true);
+                        R.Cast(t, true);
+                    }
+                    else if (rDmg + wDmg + eDmg + qDmg > t.Health && (E.IsReady() || eCd > E.Instance.Cooldown - 3 || t.HasBuff("AlZaharMaleficVisions")) && (W.IsReady() || WMissile.Position.Distance(t.Position) < 200) && Q.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
+                    {
+
+                        if (W.IsReady())
+                            W.Cast(t, true);
+                        Qr.Cast(t, true);
                         R.Cast(t, true);
                     }
                     else if (rDmg > t.Health)
@@ -327,12 +381,10 @@ namespace Malzahar
                 var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
                 foreach (var minion in minions.Where(minion => minion.Health  < E.GetDamage(minion)))
                 {
-
-                        foreach (var minion2 in minions.Where(minion2 => minion.Distance(minion2.Position) < 400 && minion.NetworkId != minion2.NetworkId))
-                        {
-                            E.Cast(minion);
-                        }
-                    
+                    foreach (var minion2 in minions.Where(minion2 => minion.Distance(minion2.Position) < 400 && !minion.HasBuff("AlZaharMaleficVisions") && !minion2.HasBuff("AlZaharMaleficVisions")))
+                    {
+                        E.Cast(minion);
+                    }
                 }
             }
         }
@@ -376,7 +428,38 @@ namespace Malzahar
                 {
                     if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius)))
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
+                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                    else
+                    {
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                }
+            }
+            else if (HitChanceNum == 4 && (int)QWER.GetPrediction(target).Hitchance > 4)
+            {
+                List<Vector2> waypoints = target.GetWaypoints();
+                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
+                if (QWER.Delay < 0.3)
+                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
+                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
+                QWER.CastIfWillHit(target, 2, true);
+
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
+                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                else if (target.Path.Count() < 2
+                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > BackToFront
+                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
+                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
+                    ))
+                {
+                    if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
+                    {
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                     else
@@ -403,20 +486,11 @@ namespace Malzahar
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
+                RMANA = R.Instance.ManaCost - ObjectManager.Player.PARRegenRate * R.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
 
-            if (Farm)
-                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
 
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
-            {
-                QMANA = 0;
-                WMANA = 0;
-                EMANA = 0;
-                RMANA = 0;
-            }
         }
 
         public static void PotionMenager()
@@ -443,11 +517,36 @@ namespace Malzahar
             if (Config.Item("debug").GetValue<bool>())
                 Game.PrintChat(msg);
         }
+
+        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero.Position);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
+        }
+
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (RMissile != null)
-                Render.Circle.DrawCircle(RMissile.Position, 200, System.Drawing.Color.Cyan);
+            if (Config.Item("ComboInfo").GetValue<bool>())
+            {
+                var combo = "haras";
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
+                {
+                    if (E.GetDamage(enemy) > enemy.Health)
+                        combo = "E";
+                    else if (R.GetDamage(enemy) > enemy.Health)
+                        combo = "R";
+                    else if (R.GetDamage(enemy) + W.GetDamage(enemy) * 3 > enemy.Health)
+                        combo = "RW";
+                    else if (R.GetDamage(enemy) + W.GetDamage(enemy) * 3 + E.GetDamage(enemy) > enemy.Health)
+                        combo = "RWE";
+                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy) * 3 + E.GetDamage(enemy) + R.GetDamage(enemy) > enemy.Health)
+                        combo = "QWER";
+                    else
+                        combo = "haras: " + (int)(enemy.Health - (Q.GetDamage(enemy) + W.GetDamage(enemy) * 3 + E.GetDamage(enemy) + R.GetDamage(enemy)));
 
+                    drawText(combo, enemy, System.Drawing.Color.GreenYellow);
+                }
+            }
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
