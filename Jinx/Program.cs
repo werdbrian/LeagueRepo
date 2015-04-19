@@ -60,7 +60,7 @@ namespace Jinx
             R = new Spell(SpellSlot.R, 2500f);
             R1 = new Spell(SpellSlot.R, 2500f);
 
-            W.SetSkillshot(0.6f, 70f, 3300f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.6f, 75f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.2f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.7f, 200f, 1500f, false, SkillshotType.SkillshotCircle);
