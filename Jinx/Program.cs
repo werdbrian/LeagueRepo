@@ -131,6 +131,7 @@ namespace Jinx
                 Farm = true;
             else
                 Farm = false;
+            
             if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
             {
                 if (Config.Item("telE").GetValue<bool>())
@@ -312,7 +313,7 @@ namespace Jinx
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(R.Range)  && (Game.Time - WCastTime > 1) && ValidUlt(target))
+                    if (target.IsValidTarget(R.Range)  && (Game.Time - WCastTime > 0.8) && ValidUlt(target))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
@@ -613,28 +614,19 @@ namespace Jinx
         {
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
+
             if (HitChanceNum == 0)
                 QWER.Cast(target, true);
             else if (HitChanceNum == 1)
                 QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (HitChanceNum == 2)
             {
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-                if (target.Path.Count() < 2)
+                if (target.Path.Count() < 2 && (int)QWER.GetPrediction(target).Hitchance > 4)
                     QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             }
             else if (HitChanceNum == 3)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
@@ -648,7 +640,7 @@ namespace Jinx
                 {
                     if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                     else
@@ -661,11 +653,6 @@ namespace Jinx
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
@@ -677,9 +664,9 @@ namespace Jinx
                     || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
                     ))
                 {
-                    if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
+                    if ((target.IsFacing(ObjectManager.Player)) || target.Path.Count() == 0)
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                     else
@@ -761,7 +748,7 @@ namespace Jinx
             if (Config.Item("noti").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-                
+
                 if (t.IsValidTarget() && R.IsReady())
                 {
                     float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / R.Speed) * 1000));
