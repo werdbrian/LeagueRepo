@@ -12,15 +12,6 @@ using System.Threading;
 
 namespace Ezreal
 {
-
-    class ManaManager
-    {
-        public static float QMANA;
-        public static float WMANA;
-        public static float EMANA;
-        public static float RMANA;
-    }
-
     class Program
     {
         public const string ChampionName = "Ezreal";
@@ -51,7 +42,6 @@ namespace Ezreal
         public static double lag = 0;
         public static double diag = 0;
         public static double diagF = 0;
-        public static Stopwatch stopWatch = new Stopwatch();
         public static float DragonDmg = 0;
         public static float DragonDmg2 = 0;
         public static double DragonTime = 0;
@@ -80,7 +70,7 @@ namespace Ezreal
             if (Player.BaseSkinName != ChampionName) return;
 
             //Create the spells
-            Q = new Spell(SpellSlot.Q, 1200);
+            Q = new Spell(SpellSlot.Q, 1160);
 
             W = new Spell(SpellSlot.W, 1000);
             E = new Spell(SpellSlot.E, 475);
@@ -109,7 +99,6 @@ namespace Ezreal
             //Load the orbwalker and add it to the submenu.
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
-
 
             Config.SubMenu("Iteams").AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
             Config.SubMenu("Iteams").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
@@ -180,7 +169,7 @@ namespace Ezreal
             if (!Config.Item("farmQ").GetValue<bool>())
                 return;
             
-            minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+            minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
             foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion)))
             {
                 if (minion.IsMoving)
@@ -189,21 +178,20 @@ namespace Ezreal
                     Q.Cast(minion.Position);
                 FarmId = minion.NetworkId;
             }
-            if (Config.Item("LC").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
+            if (Config.Item("LC").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && (ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || ObjectManager.Player.UnderTurret(false)))
             {
                 foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && Orbwalker.InAutoAttackRange(minion)))
                 {
-                    if (minion.Health < Q.GetDamage(minion) * 0.9 && minion.Health > minion.FlatPhysicalDamageMod)
+                    if (minion.Health < Q.GetDamage(minion) * 0.8 && minion.Health > minion.FlatPhysicalDamageMod)
                     {
                         if (minion.IsMoving)
                             Q.Cast(minion);
                         else
                             Q.Cast(minion.Position);
-                        FarmId = minion.NetworkId;
                     }
 
                 }
-                if (Config.Item("LCP").GetValue<bool>() && ((!E.IsReady() || Game.Time - GetPassiveTime() > -1.5)))
+                if (Config.Item("LCP").GetValue<bool>() && ((!E.IsReady() || Game.Time - GetPassiveTime() > -1.5)) && !ObjectManager.Player.UnderTurret(false))
                 {
                     foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && minion.Health > Q.GetDamage(minion) * 1.5 && Orbwalker.InAutoAttackRange(minion)))
                     {
@@ -211,7 +199,6 @@ namespace Ezreal
                             Q.Cast(minion);
                         else
                             Q.Cast(minion.Position);
-                        FarmId = minion.NetworkId;
                     }
                 }
             }
@@ -224,10 +211,6 @@ namespace Ezreal
             diagF = diag - Game.Time;
             //debug("diag" + diagF);
             diag = Game.Time;
-            
-
-            if (Orbwalker.GetTarget() == null)
-                attackNow = true;
             
             if (E.IsReady())
             {
@@ -322,11 +305,8 @@ namespace Ezreal
                 else
                     t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 
-                
                 if (t.IsValidTarget())
                 {
-                    
-
                     var qDmg = Q.GetDamage(t);
                     var wDmg = W.GetDamage(t);
                     if (qDmg  > t.Health)
@@ -374,7 +354,6 @@ namespace Ezreal
             }
             if (W.IsReady() && attackNow)
             {
-                //W.Cast(ObjectManager.Player);
                 ManaMenager();
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
@@ -435,7 +414,7 @@ namespace Ezreal
                             Rdmg = getRdmg(target);
                         var qDmg = Q.GetDamage(target);
                         var wDmg = W.GetDamage(target);
-                        if (target.IsValidTarget(R.Range) && Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0)
+                        if ( Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0)
                         {
                             castR(target);
                             debug("R normal");
@@ -450,6 +429,7 @@ namespace Ezreal
                          target.HasBuffOfType(BuffType.Taunt)) && Config.Item("Rcc").GetValue<bool>() &&
                             target.IsValidTarget(Q.Range + E.Range) && Rdmg +  qDmg * 4 > predictedHealth)
                         {
+                            R.CastIfWillHit(target, 2, true);
                             R.Cast(target, true);
                         }
                         else if (target.IsValidTarget(R.Range) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("Raoe").GetValue<bool>())
@@ -463,6 +443,9 @@ namespace Ezreal
                     }
                 }
             }
+
+            if (Orbwalker.GetTarget() == null)
+                attackNow = true;
         }
 
         private static void CastSpell(Spell QWER, Obj_AI_Hero target, int HitChanceNum)
@@ -476,24 +459,12 @@ namespace Ezreal
                 QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (HitChanceNum == 2)
             {
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-                if (target.Path.Count() < 2)
+                if (target.Path.Count() < 2 && (int)QWER.GetPrediction(target).Hitchance > 4)
                     QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             }
             else if (HitChanceNum == 3 )
             {
-
-                var poutput = QWER.GetPrediction(target);
                 List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-                
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite )
@@ -505,22 +476,42 @@ namespace Ezreal
                     || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
                     ))
                 {
-                    if ((target.IsFacing(ObjectManager.Player) && (int)poutput.Hitchance > 5) || target.Path.Count() == 0)
+                    if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
                         if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
-                    else if ((int)poutput.Hitchance > 5)
+                    else 
                     {
                         QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                 }
             }
-            else if (HitChanceNum == 4)
+            else if (HitChanceNum == 4 && (int)QWER.GetPrediction(target).Hitchance > 4)
             {
-                var poutput = QWER.GetPrediction(target);
-                if ((int)poutput.Hitchance > 5)
-                    QWER.Cast(target, true);
+                List<Vector2> waypoints = target.GetWaypoints();
+                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
+                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                else if (target.Path.Count() < 2
+                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > BackToFront
+                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
+                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
+                    ))
+                {
+                    if ((target.IsFacing(ObjectManager.Player) ) || target.Path.Count() == 0)
+                    {
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
+                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                    else
+                    {
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                }
             }
         }
 
@@ -664,11 +655,9 @@ namespace Ezreal
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-
             if (args.Target != null && Config.Item("autoE").GetValue<bool>() && args.Target.IsMe && unit.IsValid<Obj_AI_Hero>() && unit.IsMelee() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && args.SData.IsAutoAttack()
                     && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3 )
             {
-
                 if (Config.Item("autoEwall").GetValue<bool>())
                     FindWall();
                 E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
@@ -686,7 +675,6 @@ namespace Ezreal
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
-
 
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
@@ -741,8 +729,7 @@ namespace Ezreal
             var inRadius = 300 / (float)Math.Cos(2 * Math.PI / CircleLineSegmentN);
             var bestPoint = ObjectManager.Player.Position;
             for (var i = 1; i <= CircleLineSegmentN; i++)
-            {
-                
+            {                
                 var angle = i * 2 * Math.PI / CircleLineSegmentN;
                 var point = new Vector2(ObjectManager.Player.Position.X + outRadius * (float)Math.Cos(angle), ObjectManager.Player.Position.Y + outRadius * (float)Math.Sin(angle)).To3D();
                 var point2 = new Vector2(ObjectManager.Player.Position.X + inRadius * (float)Math.Cos(angle), ObjectManager.Player.Position.Y + inRadius * (float)Math.Sin(angle)).To3D();
@@ -778,7 +765,6 @@ namespace Ezreal
                             DragonDmg = mob.Health;
                         }
                         DragonTime = Game.Time;
-                        
                     }
                     else
                     {
@@ -801,7 +787,6 @@ namespace Ezreal
                         }
                         //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
                     }
-
                 }     
             }
         }
@@ -810,19 +795,7 @@ namespace Ezreal
         {
             float distance = Vector3.Distance(source.ServerPosition, targetpos);
             float missilespeed = speed;
-            if (source.ChampionName == "Jinx" && distance > 1350)
-            {
-                const float accelerationrate = 0.3f; //= (1500f - 1350f) / (2200 - speed), 1 unit = 0.3units/second
-
-                var acceldifference = distance - 1350f;
-
-                if (acceldifference > 150f) //it only accelerates 150 units
-                    acceldifference = 150f;
-
-                var difference = distance - 1500f;
-
-                missilespeed = (1350f * speed + acceldifference * (speed + accelerationrate * acceldifference) + difference * 2200f) / distance;
-            }
+            
             return (distance / missilespeed + delay);
         }    
 
@@ -895,14 +868,11 @@ namespace Ezreal
 
             }
 
-
             if (Config.Item("noti").GetValue<bool>())
             {
-
-
                 if (Game.Time - NotTime < 10)
                 {
-                    Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, MsgDebug);
+                    Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.5f, System.Drawing.Color.Red, MsgDebug);
                 }
                 else
                 {
