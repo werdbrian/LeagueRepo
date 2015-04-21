@@ -28,7 +28,6 @@ namespace Jinx
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
-        public static bool Farm = false;
         public static bool attackNow = true;
         public static double lag = 0;
         public static double WCastTime = 0;
@@ -126,12 +125,6 @@ namespace Jinx
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
-                Farm = true;
-            else
-                Farm = false;
-            
             if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
             {
                 if (Config.Item("telE").GetValue<bool>())
@@ -221,7 +214,6 @@ namespace Jinx
 
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-
                     if (target.IsValidTarget(W.Range) &&
                         !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                     {
@@ -358,6 +350,12 @@ namespace Jinx
             }
             PotionMenager();
         }
+
+        private static bool Farm
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
+        }
+
         private static void KsJungle()
         {
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -439,7 +437,7 @@ namespace Jinx
                 List<Vector2> waypoints = target.GetWaypoints();
                 if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > 400)
                 {
-                    CastSpell(R, target, 3);
+                    R.Cast(target, true);
                 }
             }
             else
@@ -691,7 +689,6 @@ namespace Jinx
             }
             if (Config.Item("qRange").GetValue<bool>())
             {
-
                     if (FishBoneActive)
                         Utility.DrawCircle(ObjectManager.Player.Position, 590f + ObjectManager.Player.BoundingRadius, System.Drawing.Color.DeepPink, 1, 1);
                     else
@@ -740,10 +737,8 @@ namespace Jinx
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 10, 1);
                     else
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 10, 1);
-                }
-                    
+                }      
             }
-
             
             if (Config.Item("noti").GetValue<bool>())
             {
