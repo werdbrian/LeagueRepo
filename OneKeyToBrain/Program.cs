@@ -26,6 +26,9 @@ namespace OneKeyToBrain
         public static float RMANA;
 
         public static Vector3 positionWard;
+        public static int timer;
+        public static float JungleTime;
+        public static Obj_AI_Hero jungler;
         private static Obj_AI_Hero WardTarget;
         private static float WardTime= 0;
 
@@ -62,18 +65,15 @@ namespace OneKeyToBrain
             Config.AddItem(new MenuItem("infoCombo", "Show info combo").SetValue(true));
             Config.SubMenu("Wards").AddItem(new MenuItem("ward", "Auto ward enemy in Grass").SetValue(false));
             Config.SubMenu("Wards").AddItem(new MenuItem("wardC", "Only Combo").SetValue(false));
+            Config.SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(false));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            Obj_AI_Base.OnNewPath +=Obj_AI_Base_OnNewPath;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
         }
 
-        private static void Obj_AI_Base_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
-        {
-            throw new NotImplementedException();
-        }
+
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
@@ -124,37 +124,82 @@ namespace OneKeyToBrain
                 }
             }
            if (Config.Item("infoCombo").GetValue<bool>())
-            {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
-            {
-                string combo;
-                var hpCombo = Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy);
-                var hpLeft = enemy.Health - Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) + R.GetDamage(enemy);
-                if (Q.GetDamage(enemy) > enemy.Health)
-                    combo = "Q";
-                else if (Q.GetDamage(enemy) + W.GetDamage(enemy)> enemy.Health)
-                    combo = "QW";
-                else if (Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) > enemy.Health)
-                    combo = "QWE";
-                else if (Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) + R.GetDamage(enemy) > enemy.Health)
-                    combo = "QWER";
-                else 
+           {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
                 {
-                    if (myHero.FlatPhysicalDamageMod > myHero.FlatMagicDamageMod)
-                        combo = "QWER+" + (int)(hpLeft / (myHero.Crit * myHero.GetAutoAttackDamage(enemy) + myHero.GetAutoAttackDamage(enemy))) + " AA";
-                    else
-                        combo = "QWER+" + (int)(hpLeft / hpCombo) + "QWE";
+                    string combo;
+                    var hpCombo = Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy);
+                    var hpLeft = enemy.Health - Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) + R.GetDamage(enemy);
+                    if (Q.GetDamage(enemy) > enemy.Health)
+                        combo = "Q";
+                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy)> enemy.Health)
+                        combo = "QW";
+                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) > enemy.Health)
+                        combo = "QWE";
+                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) + R.GetDamage(enemy) > enemy.Health)
+                        combo = "QWER";
+                    else 
+                    {
+                        if (myHero.FlatPhysicalDamageMod > myHero.FlatMagicDamageMod)
+                            combo = "QWER+" + (int)(hpLeft / (myHero.Crit * myHero.GetAutoAttackDamage(enemy) + myHero.GetAutoAttackDamage(enemy))) + " AA";
+                        else
+                            combo = "QWER+" + (int)(hpLeft / hpCombo) + "QWE";
+                    }
+                    if (hpLeft > hpCombo)
+                        drawText(combo, enemy, System.Drawing.Color.Red);
+                    else if (hpLeft < 0)
+                        drawText(combo, enemy, System.Drawing.Color.Red);
+                    else if (hpLeft > 0)
+                        drawText(combo, enemy, System.Drawing.Color.Yellow);
                 }
-                if (hpLeft > hpCombo)
-                    drawText(combo, enemy, System.Drawing.Color.Red);
-                else if (hpLeft < 0)
-                    drawText(combo, enemy, System.Drawing.Color.Red);
-                else if (hpLeft > 0)
-                    drawText(combo, enemy, System.Drawing.Color.Yellow);
             }
-            }
+           if (Config.Item("timer").GetValue<bool>() )
+           {
 
+               foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+               {
+                   float Way = 0;
+                   if (IsJungler(enemy) && enemy.IsVisible && enemy.IsEnemy)
+                   {
+                       jungler = enemy;
+                       var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, enemy.Position);
+                       var PointStart = ObjectManager.Player.Position;
+                       
+                       foreach (var point in JunglerPath)
+                       {
+                           if (PointStart.Distance(point) > 0)
+                           {
+                               Way += PointStart.Distance(point);
+                               PointStart = point;
+                           }
+                       }
+                       timer = (int)(Way / enemy.MoveSpeed);
+                       drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.GreenYellow);
+                   }
+               }
+               if (!jungler.IsVisible )
+               {
+                   Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.55f, System.Drawing.Color.Red, " " + timer);
+                   if (timer>0)
+                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
+                   else
+                       drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
+                   if (Game.Time - JungleTime >= 1)
+                   {
+                       timer = timer - 1;
+                       JungleTime = Game.Time;
+                   }
+               }
+ 
+           }
+            
         }
+
+        private static bool IsJungler(Obj_AI_Hero hero)
+        {
+            return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));
+        }
+
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
