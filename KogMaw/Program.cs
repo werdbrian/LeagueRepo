@@ -150,7 +150,6 @@ namespace KogMaw
             if (E.IsReady() && attackNow && Sheen())
             {
                 //W.Cast(ObjectManager.Player);
-                ManaMenager();
                 var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
@@ -217,10 +216,6 @@ namespace KogMaw
             {
                 R.Range = 900 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-                if (target.IsValidTarget(R.Range) && Config.Item("urf").GetValue<bool>() && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.None)
-                {
-                    CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                }
                 if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
                     !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                 {
@@ -259,11 +254,10 @@ namespace KogMaw
         private static bool Sheen()
         {
             var target = Orbwalker.GetTarget();
-            if (Player.HasBuff("sheen") && Config.Item("sheen").GetValue<bool>() && target is Obj_AI_Hero)
+            if (target.IsValidTarget() && Player.HasBuff("sheen") && Config.Item("sheen").GetValue<bool>() && target is Obj_AI_Hero)
             {
                 debug("shen true");
                 return false;
-                
             }
             else
             {
