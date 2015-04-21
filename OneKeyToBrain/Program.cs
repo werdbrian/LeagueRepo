@@ -65,7 +65,7 @@ namespace OneKeyToBrain
             Config.AddItem(new MenuItem("infoCombo", "Show info combo").SetValue(true));
             Config.SubMenu("Wards").AddItem(new MenuItem("ward", "Auto ward enemy in Grass").SetValue(false));
             Config.SubMenu("Wards").AddItem(new MenuItem("wardC", "Only Combo").SetValue(false));
-            Config.SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(false));
+            Config.SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
