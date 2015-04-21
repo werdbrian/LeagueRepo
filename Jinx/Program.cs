@@ -183,11 +183,11 @@ namespace Jinx
                     lag = Game.Time;
                 }
                 var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
-                if (!FishBoneActive && t.IsValidTarget())
+                if ( t.IsValidTarget())
                 {
                     var distance = GetRealDistance(t);
                     var powPowRange = GetRealPowPowRange(t);
-                    if ( !Orbwalking.InAutoAttackRange(t))
+                    if (!FishBoneActive && !Orbwalking.InAutoAttackRange(t))
                     {
                         if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
                             Q.Cast();
