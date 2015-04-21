@@ -32,7 +32,6 @@ namespace KogMaw
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
-        public static bool Farm = false;
         public static bool Esmart = false;
         public static double WCastTime = 0;
         public static double OverKill = 0;
@@ -103,16 +102,22 @@ namespace KogMaw
             Config.SubMenu("R option").AddItem(new MenuItem("Rslow", "R slow").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
 
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 3, 0)));
+            Config.AddItem(new MenuItem("sheen", "Sheen logic").SetValue(false));
+
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 4, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
-            Config.AddItem(new MenuItem("urf", "Urf mode").SetValue(false));
             //Add the events we are going to use:
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
@@ -120,7 +125,7 @@ namespace KogMaw
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">K</font>og Maw full automatic AI ver 1.0 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">K</font>og Maw full automatic AI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
 
@@ -130,17 +135,22 @@ namespace KogMaw
 
             W.Range = 650 + 110 + 20 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Level;
             
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
-                Farm = true;
-            else
-                Farm = false;
+        
 
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
+            foreach (var buff in Player.Buffs)
+            {
+               // debug(buff.Name);
+            }
+            if (Player.IsZombie)
+            {
+                var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget())
+                Player.IssueOrder(GameObjectOrder.MoveTo, t.ServerPosition);
+            }
 
-
-
-            if (E.IsReady() && attackNow)
+            if (E.IsReady() && attackNow && Sheen())
             {
                 //W.Cast(ObjectManager.Player);
                 ManaMenager();
@@ -169,10 +179,10 @@ namespace KogMaw
                     }
                 }
             }
-            if (Q.IsReady())
+            if (Q.IsReady() && Sheen())
             {
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
+                if (t.IsValidTarget() )
                 {
                     var qDmg = Q.GetDamage(t);
                     var eDmg = E.GetDamage(t);
@@ -198,15 +208,15 @@ namespace KogMaw
             }
             PotionMenager();
 
-            if (Config.Item("autoW").GetValue<bool>() && W.IsReady() && ObjectManager.Player.CountEnemiesInRange(W.Range) > 0)
+            if (Config.Item("autoW").GetValue<bool>() && W.IsReady() && ObjectManager.Player.CountEnemiesInRange(W.Range) > 0 && Sheen())
             {
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                     W.Cast();
                 else if (Farm && Config.Item("harasW").GetValue<bool>())
                     W.Cast();
             }
-           
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && attackNow)
+
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && attackNow && Sheen())
             {
                 R.Range = 900 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
@@ -246,6 +256,21 @@ namespace KogMaw
                     else if ( Farm && GetRStacks() < harasStack  && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
                 }
+            }
+        }
+
+        private static bool Sheen()
+        {
+            var target = Orbwalker.GetTarget();
+            if (Player.HasBuff("sheen") && Config.Item("sheen").GetValue<bool>() && target is Obj_AI_Hero)
+            {
+                debug("shen true");
+                return false;
+                
+            }
+            else
+            {
+                return true;
             }
         }
 
@@ -315,7 +340,10 @@ namespace KogMaw
                 }
             }
         }
-
+        private static bool Farm
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
+        }
         private static int GetRStacks()
         {
             foreach (var buff in ObjectManager.Player.Buffs)
@@ -454,43 +482,70 @@ namespace KogMaw
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("OrbDraw").GetValue<bool>())
+            {
+                if (ObjectManager.Player.HealthPercentage() > 60)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
+                else if (ObjectManager.Player.HealthPercentage() > 30)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
+            }
             if (Config.Item("qRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && Q.IsReady())
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
                     if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan);
+                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
             }
             if (Config.Item("wRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && W.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange);
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
             }
             if (Config.Item("eRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow);
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
             }
             if (Config.Item("rRange").GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>() && E.IsReady())
-                    if (Q.IsReady())
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
-                    else
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Green);
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
             }
+
             if (Config.Item("orb").GetValue<bool>())
             {
                 var orbT = Orbwalker.GetTarget();
+
                 if (orbT.IsValidTarget())
-                    Render.Circle.DrawCircle(orbT.Position, 100, System.Drawing.Color.Pink);
+                {
+                    if (orbT.Health > orbT.MaxHealth * 0.6)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 5, 1);
+                    else if (orbT.Health > orbT.MaxHealth * 0.3)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 10, 1);
+                    else
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 10, 1);
+                }
+
             }
         }
     }
