@@ -114,8 +114,7 @@ namespace KogMaw
             Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
-            Config.AddItem(new MenuItem("sheen", "Sheen logic").SetValue(false));
-
+            Config.AddItem(new MenuItem("sheen", "Sheen logic").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 4, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -135,8 +134,6 @@ namespace KogMaw
 
             W.Range = 650 + 110 + 20 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Level;
             
-        
-
             if (Orbwalker.GetTarget() == null)
                 attackNow = true;
             foreach (var buff in Player.Buffs)
