@@ -65,10 +65,16 @@ namespace OneKeyToBrain
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            
+            Obj_AI_Base.OnNewPath +=Obj_AI_Base_OnNewPath;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
         }
+
+        private static void Obj_AI_Base_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
+        {
+            throw new NotImplementedException();
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
             PotionMenager();
