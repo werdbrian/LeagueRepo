@@ -101,15 +101,19 @@ namespace Graves_OnKeyToWin
                 Config.SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
             Config.SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu("R config").AddItem(new MenuItem("fastR", "Fast R ks Combo").SetValue(false));
             Config.SubMenu("R config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
-            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCE", "AntiGapcloserE").SetValue(true));
+            Config.SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCW", "AntiGapcloserW").SetValue(true));
 
-            
-            Config.AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+
+            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("Hit", "Hit Chance skills").SetValue(new Slider(3, 3, 0)));
             
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
@@ -119,9 +123,31 @@ namespace Graves_OnKeyToWin
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Orbwalking.AfterAttack += afterAttack;
-            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.6 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Game.PrintChat("<font color=\"#9c3232\">G</font>raves full automatic AI ver 1.7 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
+        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if ( ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
+            {
+                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                if (Target.IsValidTarget(E.Range) && E.IsReady() )
+                {
+                    if (Config.Item("AGCE").GetValue<bool>() && E.IsReady())
+                    {
+                        E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
+                        debug("E AGC");
+                    }
+                    if (Config.Item("AGCW").GetValue<bool>() && W.IsReady())
+                    {
+                        W.Cast(ObjectManager.Player.Position, true);
+                        debug("W AGC");
+                    }
+                }
+            }
+            return;
+        }
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
@@ -201,7 +227,7 @@ namespace Graves_OnKeyToWin
                     if (t.IsValidTarget()
                     && Q.IsReady()
                     && ObjectManager.Player.Mana > RMANA + EMANA
-                    && Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t.Health
+                    && Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t2) * 3 > t.Health
                     && t.Position.Distance(Game.CursorPos) + 200 < t.Position.Distance(ObjectManager.Player.Position) 
                     && !Orbwalking.InAutoAttackRange(t)
                     )
@@ -219,7 +245,6 @@ namespace Graves_OnKeyToWin
                         E.Cast(Game.CursorPos, true);
                         debug("E + aa");
                     }
-                    
                 }
             }
 
@@ -229,6 +254,14 @@ namespace Graves_OnKeyToWin
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
+                    if (Config.Item("fastR").GetValue<bool>() && R.IsReady() && Q.GetDamage(t) + R.GetDamage(t) + Q.GetDamage(t) > t.Health && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                    {
+                        CastSpell(W, t, Config.Item("Hit").GetValue<Slider>().Value);
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
+                        CastSpell(R, t, Config.Item("Hit").GetValue<Slider>().Value);
+                        debug("fastR");
+                    }
+
                     if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
                     {
                         Q.Cast(t, true);
@@ -254,6 +287,13 @@ namespace Graves_OnKeyToWin
                                 Q.Cast(enemy, true);
                         }
                     }
+                }
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA )
+                {
+                    var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+                    var Qfarm = Q.GetCircularFarmLocation(allMinionsQ, 200);
+                    if (Qfarm.MinionsHit > 3 && Q.IsReady())
+                        Q.Cast(Qfarm.Position);
                 }
             }
             var tar = TargetSelector.GetTarget(1800, TargetSelector.DamageType.Physical);
@@ -455,21 +495,6 @@ namespace Graves_OnKeyToWin
                     }
                 }
             }
-        }
-
-        private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
-        {
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
-            {
-                var Target = (Obj_AI_Hero)gapcloser.Sender;
-                if (Target.IsValidTarget(E.Range))
-                {
-                    E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-                    debug("E agc");
-                }
-                return;
-            }
-            return;
         }
 
         private static void afterAttack(AttackableUnit unit, AttackableUnit target)
