@@ -188,7 +188,13 @@ namespace OneKeyToBrain
             }
            if (Config.Item("timer").GetValue<bool>() && jungler != null)
            {
-               if (jungler.IsVisible)
+               if (jungler.IsDead)
+                {
+                    Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
+                    timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
+                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
+                }
+               else if (jungler.IsVisible)
                {
                     float Way = 0;
                     var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
@@ -206,13 +212,8 @@ namespace OneKeyToBrain
                }
                else
                {
-                   if (jungler.IsDead)
-                   {
-                       Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
-                       timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
-                       drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
-                   }
-                   else if (timer>0)
+                   
+                   if (timer>0)
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
                    else
                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
