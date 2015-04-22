@@ -211,7 +211,7 @@ namespace Annie
                 W.Cast(ObjectManager.Player, true, true);
             if (Config.Item("tibers").GetValue<bool>() && HaveTibers)
             {
-                if (Game.Time - TibbersTimer > 1)
+                if (Game.Time - TibbersTimer > 2)
                 {
                     var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(1500)))
@@ -221,9 +221,6 @@ namespace Annie
                     }
                     if (BestEnemy.IsValidTarget(2000))
                         R.Cast(BestEnemy.Position);
-                    else
-                        R.Cast(ObjectManager.Player.Position);
-                    TibbersTimer = Game.Time;
                 }
             }
             else
