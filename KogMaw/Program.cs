@@ -96,8 +96,8 @@ namespace KogMaw
             Config.SubMenu("W config").AddItem(new MenuItem("harasW", "Haras W").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("comboStack", "Max combo stack R").SetValue(new Slider(2, 5, 0)));
-            Config.SubMenu("R option").AddItem(new MenuItem("harasStack", "Max haras stack R").SetValue(new Slider(1, 5, 0)));
+            Config.SubMenu("R option").AddItem(new MenuItem("comboStack", "Max combo stack R").SetValue(new Slider(2, 10, 0)));
+            Config.SubMenu("R option").AddItem(new MenuItem("harasStack", "Max haras stack R").SetValue(new Slider(1, 10, 0)));
             Config.SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Rslow", "R slow").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
@@ -150,7 +150,7 @@ namespace KogMaw
             if (E.IsReady() && attackNow && Sheen())
             {
                 //W.Cast(ObjectManager.Player);
-                var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
                 {
                     var qDmg = Q.GetDamage(t);
