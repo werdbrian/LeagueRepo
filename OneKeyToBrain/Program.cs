@@ -76,7 +76,7 @@ namespace OneKeyToBrain
             Config.SubMenu("Wards").AddItem(new MenuItem("wardC", "Only Combo").SetValue(false));
             Config.SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
 
-            Config.SubMenu("Dev option").AddItem(new MenuItem("OnCreate", "OnCreate / OnDelete").SetValue(true));
+            Config.SubMenu("Dev option").AddItem(new MenuItem("OnCreate", "OnCreate / OnDelete").SetValue(false));
             Config.SubMenu("Dev option").AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -211,7 +211,6 @@ namespace OneKeyToBrain
                        Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
                        timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370); 
                    }
-                   Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.55f, System.Drawing.Color.Red, " " + timer);
                    if (timer>0)
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
                    else
