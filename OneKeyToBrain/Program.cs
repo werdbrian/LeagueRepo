@@ -43,7 +43,7 @@ namespace OneKeyToBrain
 
         public static Menu Config;
 
-        private static Obj_AI_Hero myHero;
+        private static Obj_AI_Hero Player;
 
         static void Main(string[] args)
         {
@@ -51,11 +51,20 @@ namespace OneKeyToBrain
         }
         private static void Game_OnGameLoad(EventArgs args)
         {
-            myHero = ObjectManager.Player;
+            Player = ObjectManager.Player;
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R);
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (IsJungler(enemy)  && enemy.IsEnemy)
+                {
+                    jungler = enemy;
+                    Game.PrintChat("OKTW Brain enemy jungler: " + enemy.SkinName);
+                }
+            }
 
             Config = new Menu("OKTW Brain", "OKTW Brain", true);
             Config.AddToMainMenu();
@@ -115,7 +124,7 @@ namespace OneKeyToBrain
                         WardTime = Game.Time;
                     }
                 }
-                if (myHero.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 5)
+                if (Player.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 5)
                 {
                     WardTime = Game.Time - 6;
                     if (TrinketN.IsReady())
@@ -164,8 +173,8 @@ namespace OneKeyToBrain
                         combo = "QWER";
                     else 
                     {
-                        if (myHero.FlatPhysicalDamageMod > myHero.FlatMagicDamageMod)
-                            combo = "QWER+" + (int)(hpLeft / (myHero.Crit * myHero.GetAutoAttackDamage(enemy) + myHero.GetAutoAttackDamage(enemy))) + " AA";
+                        if (Player.FlatPhysicalDamageMod > Player.FlatMagicDamageMod)
+                            combo = "QWER+" + (int)(hpLeft / (Player.Crit * Player.GetAutoAttackDamage(enemy) + Player.GetAutoAttackDamage(enemy))) + " AA";
                         else
                             combo = "QWER+" + (int)(hpLeft / hpCombo) + "QWE";
                     }
@@ -179,28 +188,23 @@ namespace OneKeyToBrain
             }
            if (Config.Item("timer").GetValue<bool>() )
            {
-               foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+               if (jungler.IsVisible)
                {
-                   float Way = 0;
-                   if (IsJungler(enemy) && enemy.IsVisible && enemy.IsEnemy)
-                   {
-                       jungler = enemy;
-                       var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, enemy.Position);
-                       var PointStart = ObjectManager.Player.Position;
-                       
-                       foreach (var point in JunglerPath)
-                       {
-                           if (PointStart.Distance(point) > 0)
-                           {
-                               Way += PointStart.Distance(point);
-                               PointStart = point;
-                           }
-                       }
-                       timer = (int)(Way / enemy.MoveSpeed);
-                       drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.GreenYellow);
-                   }
+                    float Way = 0;
+                    var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
+                    var PointStart = ObjectManager.Player.Position;
+                    foreach (var point in JunglerPath)
+                    {
+                        if (PointStart.Distance(point) > 0)
+                        {
+                            Way += PointStart.Distance(point);
+                            PointStart = point;
+                        }
+                    }
+                    timer = (int)(Way / jungler.MoveSpeed);
+                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.GreenYellow);
                }
-               if (!jungler.IsVisible )
+               else
                {
                    if (jungler.IsDead)
                    {
@@ -218,8 +222,7 @@ namespace OneKeyToBrain
                        JungleTime = Game.Time;
                    }
                }
-           }
-            
+           } 
         }
 
         private static bool IsJungler(Obj_AI_Hero hero)

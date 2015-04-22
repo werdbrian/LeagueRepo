@@ -133,27 +133,7 @@ namespace Annie
         {
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
-            if (Config.Item("tibers").GetValue<bool>() && HaveTibers)
-            {
-                if (Game.Time - TibbersTimer > 1)
-                {
-                var BestEnemy = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
-                    {
-                        if ( enemy.IsEnemy && BestEnemy.Distance(Tibbers.Position) > enemy.Distance(Tibbers.Position))
-                            BestEnemy = enemy;
-                    }
-                    if (BestEnemy.IsValidTarget(1500))
-                        R.Cast(BestEnemy);
-                    else
-                        R.Cast(ObjectManager.Player.Position);
-                    TibbersTimer = Game.Time;
-                }
-            }
-            else
-            {
-                Tibbers = null;
-            }
+       
 
             ManaMenager();
             PotionMenager();
@@ -229,6 +209,27 @@ namespace Annie
 
             if (W.IsReady() && ObjectManager.Player.InFountain() && !HaveStun)
                 W.Cast(ObjectManager.Player, true, true);
+            if (Config.Item("tibers").GetValue<bool>() && HaveTibers)
+            {
+                if (Game.Time - TibbersTimer > 1)
+                {
+                    var BestEnemy = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+                    {
+                        if (enemy.IsValidTarget(1500) &&enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
+                            BestEnemy = enemy;
+                    }
+                    if (BestEnemy.IsValidTarget(1500))
+                        R.Cast(BestEnemy);
+                    else
+                        R.Cast(ObjectManager.Player.Position);
+                    TibbersTimer = Game.Time;
+                }
+            }
+            else
+            {
+                Tibbers = null;
+            }
         }
 
         public static void farmQ()
