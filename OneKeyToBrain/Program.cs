@@ -66,17 +66,41 @@ namespace OneKeyToBrain
             Config.SubMenu("Wards").AddItem(new MenuItem("ward", "Auto ward enemy in Grass").SetValue(false));
             Config.SubMenu("Wards").AddItem(new MenuItem("wardC", "Only Combo").SetValue(false));
             Config.SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
-            Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
+
+            Config.SubMenu("Dev option").AddItem(new MenuItem("OnCreate", "OnCreate / OnDelete").SetValue(true));
+            Config.SubMenu("Dev option").AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
+            Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
+            Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
         }
 
+        private static void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
+        {
+            if (!Config.Item("OnCreate").GetValue<bool>())
+                return;
+            if (obj.IsValid)
+            {
+                debug("OnCreate: " + obj.Name);
+            }
+        }
 
+        private static void Obj_AI_Base_OnDelete(GameObject obj, EventArgs args)
+        {
+            if (!Config.Item("OnCreate").GetValue<bool>())
+                return;
+            if (obj.IsValid)
+            {
+
+                debug("OnDelete: " + obj.Name  );
+            }
+        }
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
+
             PotionMenager();
             if (Config.Item("ward").GetValue<bool>() || (Config.Item("ward").GetValue<bool>() && Config.Item("Combo").GetValue<KeyBind>().Active && Config.Item("wardC").GetValue<bool>()))
             {
@@ -155,7 +179,6 @@ namespace OneKeyToBrain
             }
            if (Config.Item("timer").GetValue<bool>() )
            {
-
                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
                {
                    float Way = 0;
@@ -179,6 +202,11 @@ namespace OneKeyToBrain
                }
                if (!jungler.IsVisible )
                {
+                   if (jungler.IsDead)
+                   {
+                       Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
+                       timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370); 
+                   }
                    Drawing.DrawText(Drawing.Width * 0.01f, Drawing.Height * 0.55f, System.Drawing.Color.Red, " " + timer);
                    if (timer>0)
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
@@ -190,7 +218,6 @@ namespace OneKeyToBrain
                        JungleTime = Game.Time;
                    }
                }
- 
            }
             
         }

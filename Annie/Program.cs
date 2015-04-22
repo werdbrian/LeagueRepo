@@ -22,6 +22,9 @@ namespace Annie
         public static Spell E;
         public static Spell R;
         //ManaMenager
+        public static GameObject Tibbers;
+
+        public static float TibbersTimer = 0;
         public static float QMANA;
         public static float WMANA;
         public static float EMANA;
@@ -94,6 +97,7 @@ namespace Annie
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
             Config.AddItem(new MenuItem("sup", "Support mode").SetValue(true));
+            Config.AddItem(new MenuItem("tibers", "TibbersAutoPilot").SetValue(true));
             Config.AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
 
             Config.AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
@@ -104,6 +108,7 @@ namespace Annie
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Game.PrintChat("<font color=\"#ff00d8\">A</font>nie full automatic AI ver 1.4 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
@@ -115,10 +120,40 @@ namespace Annie
             }
         }
 
+        private static void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
+        {
+            if (obj.IsValid)
+            {
+                if (obj.Name == "Tibbers")
+                    Tibbers = obj;
+            }
+        }
+
         private static void Game_OnGameUpdate(EventArgs args)
         {
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
+            if (Config.Item("tibers").GetValue<bool>() && HaveTibers)
+            {
+                if (Game.Time - TibbersTimer > 1)
+                {
+                var BestEnemy = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+                    {
+                        if ( enemy.IsEnemy && BestEnemy.Distance(Tibbers.Position) > enemy.Distance(Tibbers.Position))
+                            BestEnemy = enemy;
+                    }
+                    if (BestEnemy.IsValidTarget(1500))
+                        R.Cast(BestEnemy);
+                    else
+                        R.Cast(ObjectManager.Player.Position);
+                    TibbersTimer = Game.Time;
+                }
+            }
+            else
+            {
+                Tibbers = null;
+            }
 
             ManaMenager();
             PotionMenager();
