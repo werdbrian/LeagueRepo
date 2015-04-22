@@ -93,7 +93,7 @@ namespace KogMaw
             Config.SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
 
             Config.SubMenu("W config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
-            Config.SubMenu("W config").AddItem(new MenuItem("harasW", "Haras W").SetValue(true));
+            Config.SubMenu("W config").AddItem(new MenuItem("harasW", "Haras W on max range").SetValue(true));
 
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("comboStack", "Max combo stack R").SetValue(new Slider(2, 10, 0)));
@@ -210,16 +210,19 @@ namespace KogMaw
                     W.Cast();
                 else if (Farm && Config.Item("harasW").GetValue<bool>())
                     W.Cast();
+                else if (Farm && Orbwalker.GetTarget() is Obj_AI_Hero)
+                    W.Cast();
             }
 
             if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && attackNow && Sheen())
             {
-                R.Range = 900 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
+                R.Range = 800 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
                 if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
                     !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
                 {
-                    double Rdmg = R.GetDamage(target);
+                    double Rdmg = R.GetDamage(target) +( R.GetDamage(target) * target.CountAlliesInRange(400));
+                    
                     var harasStack = Config.Item("harasStack").GetValue<Slider>().Value;
                     var comboStack = Config.Item("comboStack").GetValue<Slider>().Value;
 
