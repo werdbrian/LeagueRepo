@@ -213,14 +213,14 @@ namespace Annie
             {
                 if (Game.Time - TibbersTimer > 1)
                 {
-                    var BestEnemy = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Magical);
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+                    var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(1500)))
                     {
-                        if (enemy.IsValidTarget(1500) &&enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
+                        if (enemy.IsValidTarget(2000) && BestEnemy.IsValidTarget(2000) && enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
                             BestEnemy = enemy;
                     }
-                    if (BestEnemy.IsValidTarget(1500))
-                        R.Cast(BestEnemy);
+                    if (BestEnemy.IsValidTarget(2000))
+                        R.Cast(BestEnemy.Position);
                     else
                         R.Cast(ObjectManager.Player.Position);
                     TibbersTimer = Game.Time;

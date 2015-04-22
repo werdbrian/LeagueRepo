@@ -28,7 +28,7 @@ namespace OneKeyToBrain
         public static Vector3 positionWard;
         public static int timer;
         public static float JungleTime;
-        public static Obj_AI_Hero jungler;
+        public static Obj_AI_Hero jungler = null;
         private static Obj_AI_Hero WardTarget;
         private static float WardTime= 0;
 
@@ -186,7 +186,7 @@ namespace OneKeyToBrain
                         drawText(combo, enemy, System.Drawing.Color.Yellow);
                 }
             }
-           if (Config.Item("timer").GetValue<bool>() )
+           if (Config.Item("timer").GetValue<bool>() && jungler != null)
            {
                if (jungler.IsVisible)
                {
