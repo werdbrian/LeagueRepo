@@ -209,9 +209,10 @@ namespace OneKeyToBrain
                    if (jungler.IsDead)
                    {
                        Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
-                       timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370); 
+                       timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
+                       drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
                    }
-                   if (timer>0)
+                   else if (timer>0)
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
                    else
                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
