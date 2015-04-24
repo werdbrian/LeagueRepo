@@ -154,9 +154,9 @@ namespace Jinx
                         E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
                     else
                     {
-                        if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position) )
+                        if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
                         {
-                            if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position) )
+                            if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position))
                             {
                                 CastSpell(E, ta, Config.Item("Hit").GetValue<Slider>().Value);
                                 debug("E run");
@@ -164,7 +164,7 @@ namespace Jinx
                         }
                         else
                         {
-                            if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position) )
+                            if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position))
                             {
                                 CastSpell(E, ta, Config.Item("Hit").GetValue<Slider>().Value);
                                 debug("E escape");
@@ -183,7 +183,7 @@ namespace Jinx
                     lag = Game.Time;
                 }
                 var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
-                if ( t.IsValidTarget())
+                if (t.IsValidTarget())
                 {
                     var distance = GetRealDistance(t);
                     var powPowRange = GetRealPowPowRange(t);
@@ -193,7 +193,7 @@ namespace Jinx
                             Q.Cast();
                         else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Orbwalker.GetTarget() == null && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + ObjectManager.Player.BoundingRadius)
                             Q.Cast();
-                        else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear &&  !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
+                        else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
                             Q.Cast();
                     }
                 }
@@ -305,7 +305,7 @@ namespace Jinx
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(R.Range)  && (Game.Time - WCastTime > 0.8) && ValidUlt(target))
+                    if (target.IsValidTarget(R.Range) && (Game.Time - WCastTime > 0.8) && ValidUlt(target))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
@@ -333,7 +333,7 @@ namespace Jinx
                                     cast = false;
                             }
 
-                            if (cast  && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                            if (cast && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
                             {
                                 castR(target);
                                 debug("R normal High");
@@ -362,9 +362,9 @@ namespace Jinx
             foreach (var mob in mobs)
             {
                 //debug(mob.SkinName);
-                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>()) 
-                    || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())) 
-                    && mob.CountAlliesInRange(1000) == 0 
+                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>()))
+                    && mob.CountAlliesInRange(1000) == 0
                     && mob.Health < mob.MaxHealth
                     && mob.Distance(Player.Position) > 1000)
                 {
@@ -416,7 +416,7 @@ namespace Jinx
                 missilespeed = (1350f * speed + acceldifference * (speed + accelerationrate * acceldifference) + difference * 2200f) / distance;
             }
             return (distance / missilespeed + delay);
-        }    
+        }
         private static bool ValidUlt(Obj_AI_Hero target)
         {
             if (target.HasBuffOfType(BuffType.PhysicalImmunity)
@@ -432,7 +432,7 @@ namespace Jinx
 
         private static void castR(Obj_AI_Hero target)
         {
-            if (Config.Item("hitchanceR").GetValue<bool>() )
+            if (Config.Item("hitchanceR").GetValue<bool>())
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > 400)
@@ -647,30 +647,19 @@ namespace Jinx
                     }
                 }
             }
-            else if (HitChanceNum == 4 && (int)QWER.GetPrediction(target).Hitchance > 4)
+            else if (HitChanceNum == 4)
             {
-                List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
-                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                else if (target.Path.Count() < 2
-                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > BackToFront
-                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
-                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
-                    ))
+                var poutput = QWER.GetPrediction(target);
+                if ((target.IsFacing(ObjectManager.Player) && (int)poutput.Hitchance == 5) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
                 {
-                    if ((target.IsFacing(ObjectManager.Player)) || target.Path.Count() == 0)
+                    if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        QWER.Cast(poutput.CastPosition);
                     }
-                    else
-                    {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                    }
+                }
+                else if ((int)poutput.Hitchance == 5)
+                {
+                    QWER.Cast(poutput.CastPosition);
                 }
             }
         }
@@ -689,10 +678,10 @@ namespace Jinx
             }
             if (Config.Item("qRange").GetValue<bool>())
             {
-                    if (FishBoneActive)
-                        Utility.DrawCircle(ObjectManager.Player.Position, 590f + ObjectManager.Player.BoundingRadius, System.Drawing.Color.DeepPink, 1, 1);
-                    else
-                        Utility.DrawCircle(ObjectManager.Player.Position, bonusRange() - 40, System.Drawing.Color.DeepPink, 1, 1);
+                if (FishBoneActive)
+                    Utility.DrawCircle(ObjectManager.Player.Position, 590f + ObjectManager.Player.BoundingRadius, System.Drawing.Color.DeepPink, 1, 1);
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, bonusRange() - 40, System.Drawing.Color.DeepPink, 1, 1);
             }
             if (Config.Item("wRange").GetValue<bool>())
             {
@@ -737,9 +726,9 @@ namespace Jinx
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 10, 1);
                     else
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 10, 1);
-                }      
+                }
             }
-            
+
             if (Config.Item("noti").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
@@ -761,8 +750,8 @@ namespace Jinx
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
                 if (tw.IsValidTarget())
                 {
-                   if (Config.Item("debug").GetValue<bool>())
-                       Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.GreenYellow, "Pred: " + (int)R.GetPrediction(tw).Hitchance );
+                    if (Config.Item("debug").GetValue<bool>())
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.GreenYellow, "Pred: " + (int)R.GetPrediction(tw).Hitchance);
 
                     var wDmg = W.GetDamage(tw);
                     if (wDmg > tw.Health)

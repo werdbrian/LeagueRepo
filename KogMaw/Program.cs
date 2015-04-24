@@ -307,33 +307,23 @@ namespace KogMaw
                     }
                 }
             }
-            else if (HitChanceNum == 4 && (int)QWER.GetPrediction(target).Hitchance > 4)
+            else if (HitChanceNum == 4)
             {
-                List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
-                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                else if (target.Path.Count() < 2
-                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > BackToFront
-                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
-                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
-                    ))
+                var poutput = QWER.GetPrediction(target);
+                if ((target.IsFacing(ObjectManager.Player) && (int)poutput.Hitchance == 5) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
                 {
-                    if ((target.IsFacing(ObjectManager.Player)) || target.Path.Count() == 0)
+                    if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        QWER.Cast(poutput.CastPosition);
                     }
-                    else
-                    {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                    }
+                }
+                else if ((int)poutput.Hitchance == 5)
+                {
+                    QWER.Cast(poutput.CastPosition);
                 }
             }
         }
+
         private static bool Farm
         {
             get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
@@ -424,7 +414,7 @@ namespace KogMaw
                     }
                     if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() )
                     {
-                        double rDmg = R.GetDamage(target);
+                        double rDmg = R.GetDamage(target) + (R.GetDamage(target) * target.CountAlliesInRange(400));
                         if (rDmg > HpLeft && HpLeft > 0)
                         {
                             debug("R OPS");
