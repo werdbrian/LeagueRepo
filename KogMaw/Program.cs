@@ -213,7 +213,10 @@ namespace KogMaw
                 if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && ValidUlt(target))
                 {
                     double Rdmg = R.GetDamage(target) +( R.GetDamage(target) * target.CountAlliesInRange(400));
-                    
+                    // Overkill protection
+                    if (target.Health < R.GetDamage(target) * target.CountAlliesInRange(400) * 0.2)
+                        Rdmg = 0;
+
                     var harasStack = Config.Item("harasStack").GetValue<Slider>().Value;
                     var comboStack = Config.Item("comboStack").GetValue<Slider>().Value;
 
@@ -363,6 +366,8 @@ namespace KogMaw
 
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
+            if (args.Target == null)
+                return;
             foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
             {
                 if (args.Target.NetworkId == target.NetworkId && args.Target.IsEnemy)
