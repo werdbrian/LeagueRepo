@@ -88,14 +88,14 @@ namespace Sivir
 
             Config.AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
             Config.AddItem(new MenuItem("forceW", "Force W").SetValue(false));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(3, 4, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(4, 4, 0)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
             Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             #region Shield
-                Config.SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-                Config.SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-                Config.SubMenu("E Shield Config").AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0))); 
+            Config.SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
+            Config.SubMenu("E Shield Config").AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
             #endregion
             Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
@@ -127,7 +127,7 @@ namespace Sivir
                 {
 
                     dmg = sender.GetSpellDamage(target, args.SData.Name);
-                     HpLeft = target.Health - dmg;
+                    HpLeft = target.Health - dmg;
 
                     if (!Orbwalking.InAutoAttackRange(target) && target.IsValidTarget(Q.Range) && Q.IsReady())
                     {
@@ -137,7 +137,7 @@ namespace Sivir
                             Q.Cast(target, true);
                         }
                     }
-                    
+
                 }
             }
         }
@@ -154,13 +154,13 @@ namespace Sivir
                 return;
             ManaMenager();
             var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-            if (W.IsReady() )
+            if (W.IsReady())
             {
                 if (Orbwalker.ActiveMode.ToString() == "Combo" && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast();
                 else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA  && (farmW() || t.IsValidTarget()))
+                else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
                     W.Cast();
             }
         }
@@ -177,14 +177,14 @@ namespace Sivir
                     var qDmg = Q.GetDamage(t) * 1.9;
                     if (Orbwalking.InAutoAttackRange(t))
                         qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
-                    if (qDmg  > t.Health)
+                    if (qDmg > t.Health)
                         Q.Cast(t, true);
                     else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA)
                         CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                     else if (((Orbwalker.ActiveMode.ToString() == "Mixed" || Orbwalker.ActiveMode.ToString() == "LaneClear")) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
                         if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                             CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
-                        else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9 )
+                        else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                             CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                         else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA)
                             Q.CastIfWillHit(t, 2, true);
@@ -194,7 +194,7 @@ namespace Sivir
                         {
                             if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
                              enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall")) 
+                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
                                 Q.Cast(enemy, true);
                             else
                                 Q.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
@@ -206,13 +206,13 @@ namespace Sivir
             {
                 var target = Orbwalker.GetTarget();
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-                if (W.IsReady() )
+                if (W.IsReady())
                 {
                     if (Orbwalker.ActiveMode.ToString() == "Combo" && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                         Utility.DelayAction.Add(250, () => W.Cast());
                     else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                         Utility.DelayAction.Add(250, () => W.Cast());
-                    else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA  && (farmW() || t.IsValidTarget()))
+                    else if (Orbwalker.ActiveMode.ToString() == "LaneClear" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
                         Utility.DelayAction.Add(250, () => W.Cast());
                 }
             }
@@ -265,39 +265,27 @@ namespace Sivir
                     }
                 }
             }
-            else if (HitChanceNum == 4 && (int)QWER.GetPrediction(target).Hitchance > 4)
+            else if (HitChanceNum == 4)
             {
-                List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
-                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                else if (target.Path.Count() < 2
-                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > BackToFront
-                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
-                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
-                    ))
+                var poutput = QWER.GetPrediction(target);
+                if ((target.IsFacing(ObjectManager.Player) && (int)poutput.Hitchance == 5) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
                 {
-                    if ((target.IsFacing(ObjectManager.Player)) || target.Path.Count() == 0)
+                    if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        QWER.Cast(poutput.CastPosition);
                     }
-                    else
-                    {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                    }
+                }
+                else if ((int)poutput.Hitchance == 5)
+                {
+                    QWER.Cast(poutput.CastPosition);
                 }
             }
         }
-        
 
         public static bool farmW()
         {
             var allMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 1300, MinionTypes.All);
-            int num=0;
+            int num = 0;
             foreach (var minion in allMinionsW)
             {
                 num++;
@@ -307,7 +295,7 @@ namespace Sivir
             else
                 return false;
         }
-       
+
         public static void ManaMenager()
         {
             QMANA = Q.Instance.ManaCost;
@@ -362,7 +350,7 @@ namespace Sivir
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
             }
-            
+
 
             if (Config.Item("orb").GetValue<bool>())
             {
@@ -391,7 +379,7 @@ namespace Sivir
                         Render.Circle.DrawCircle(target.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q kill: " + target.ChampionName + " have: " + target.Health + "hp");
                     }
-                    
+
                 }
             }
         }

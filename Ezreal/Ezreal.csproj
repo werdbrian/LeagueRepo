@@ -36,14 +36,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

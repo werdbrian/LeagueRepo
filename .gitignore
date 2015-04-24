@@ -50,3 +50,6 @@ Temporary Items
 
 *.suo
 Ezreal/bin/Release/Ezreal.vshost.exe.manifest
+*.pdb
+*.config
+*.txt

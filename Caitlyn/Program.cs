@@ -96,7 +96,7 @@ namespace Caitlyn
             Config.SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.AddItem(new MenuItem("autoQ", "Reduce Q use").SetValue(true));
-            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(3, 3, 0)));
+            Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(4, 4, 0)));
             
             #region E
             Config.SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
@@ -494,28 +494,19 @@ namespace Caitlyn
         {
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
+
             if (HitChanceNum == 0)
                 QWER.Cast(target, true);
             else if (HitChanceNum == 1)
                 QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             else if (HitChanceNum == 2)
             {
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-                if (target.Path.Count() < 2)
+                if (target.Path.Count() < 2 && (int)QWER.GetPrediction(target).Hitchance > 4)
                     QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
             }
             else if (HitChanceNum == 3)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                if (QWER.Delay < 0.3)
-                    QWER.CastIfHitchanceEquals(target, HitChance.Dashing, true);
-                QWER.CastIfHitchanceEquals(target, HitChance.Immobile, true);
-                QWER.CastIfWillHit(target, 2, true);
-
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
@@ -529,13 +520,28 @@ namespace Caitlyn
                 {
                     if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed)))
+                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                     else
                     {
                         QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
+                }
+            }
+            else if (HitChanceNum == 4)
+            {
+                var poutput = QWER.GetPrediction(target);
+                if ((target.IsFacing(ObjectManager.Player) && (int)poutput.Hitchance == 5) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
+                {
+                    if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
+                    {
+                        QWER.Cast(poutput.CastPosition);
+                    }
+                }
+                else if ((int)poutput.Hitchance == 5)
+                {
+                    QWER.Cast(poutput.CastPosition);
                 }
             }
         }

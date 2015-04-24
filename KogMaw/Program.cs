@@ -27,24 +27,15 @@ namespace KogMaw
         public static Spell R;
         public static bool attackNow = true;
         //ManaMenager
-        public static float qRange = 1100;
         public static float QMANA;
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
-        public static bool Esmart = false;
-        public static double WCastTime = 0;
         public static double OverKill = 0;
-        public static double OverFarm = 0;
-        public static double lag = 0;
-        public static Stopwatch stopWatch = new Stopwatch();
         //AutoPotion
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
-        public static Items.Item Youmuu = new Items.Item(3142, 0);
-        public static int Muramana = 3042;
-        public static int Tear = 3070;
-        public static int Manamune = 3004;
+
         //Menu
         public static Menu Config;
 
@@ -115,6 +106,7 @@ namespace KogMaw
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
             Config.AddItem(new MenuItem("sheen", "Sheen logic").SetValue(true));
+
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 4, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -140,7 +132,7 @@ namespace KogMaw
             {
                // debug(buff.Name);
             }
-            if (Player.IsZombie)
+            if (Player.IsZombie && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
                 if (t.IsValidTarget())
@@ -218,8 +210,7 @@ namespace KogMaw
             {
                 R.Range = 800 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-                if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && !target.HasBuffOfType(BuffType.PhysicalImmunity) &&
-                    !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
+                if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && ValidUlt(target))
                 {
                     double Rdmg = R.GetDamage(target) +( R.GetDamage(target) * target.CountAlliesInRange(400));
                     
@@ -228,7 +219,7 @@ namespace KogMaw
 
                     if ( R.GetDamage(target) > target.Health)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Rdmg * 2 > target.Health && GetRStacks() < 3 && ObjectManager.Player.Mana > RMANA * 3)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Rdmg * 2 > target.Health && ObjectManager.Player.Mana > RMANA * 3)
                         CastSpell(R, target, Config.Item("Hit").GetValue<Slider>().Value);
                     else if ( GetRStacks() < comboStack + 2 && ObjectManager.Player.Mana > RMANA * 3)
                     {
@@ -354,17 +345,6 @@ namespace KogMaw
         static void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             attackNow = false;
-            if (Config.Item("mura").GetValue<bool>())
-            {
-                int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
-                if (args.Target.IsEnemy && args.Target.IsValid<Obj_AI_Hero>() && Items.HasItem(Mur) && Items.CanUseItem(Mur) && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
-                {
-                    if (!ObjectManager.Player.HasBuff("Muramana"))
-                        Items.UseItem(Mur);
-                }
-                else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
-                    Items.UseItem(Mur);
-            }
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -463,6 +443,18 @@ namespace KogMaw
             }
         }
 
+        private static bool ValidUlt(Obj_AI_Hero target)
+        {
+            if (target.HasBuffOfType(BuffType.PhysicalImmunity)
+            || target.HasBuffOfType(BuffType.SpellImmunity)
+            || target.IsZombie
+            || target.HasBuffOfType(BuffType.Invulnerability)
+            || target.HasBuffOfType(BuffType.SpellShield)
+            )
+                return false;
+            else
+                return true;
+        }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
@@ -515,6 +507,9 @@ namespace KogMaw
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
             }
+
+
+
 
             if (Config.Item("orb").GetValue<bool>())
             {

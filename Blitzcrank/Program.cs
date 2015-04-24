@@ -91,7 +91,7 @@ namespace Blitzcrank
             Config.AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu("Q option").AddItem(new MenuItem("qCC", "Auto Q cc & dash enemy").SetValue(true));
-            Config.SubMenu("Q option").AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(3, 4, 0)));
+            Config.SubMenu("Q option").AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(4, 4, 0)));
             Config.SubMenu("Q option").AddItem(new MenuItem("minGrab", "Min range grab").SetValue(new Slider(250, 125, (int)Q.Range)));
             Config.SubMenu("Q option").AddItem(new MenuItem("maxGrab", "Max range grab").SetValue(new Slider((int)Q.Range, 125, (int)Q.Range)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
@@ -264,33 +264,23 @@ namespace Blitzcrank
                     }
                 }
             }
-            else if (HitChanceNum == 4 && (int)QWER.GetPrediction(target).Hitchance > 4)
+            else if (HitChanceNum == 4)
             {
-                List<Vector2> waypoints = target.GetWaypoints();
-                //debug("" + target.Path.Count() + " " + (target.Position == target.ServerPosition) + (waypoints.Last<Vector2>().To3D() == target.ServerPosition));
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                if (ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || ObjectManager.Player.Distance(target.Position) < SiteToSite)
-                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                else if (target.Path.Count() < 2
-                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > BackToFront
-                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
-                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
-                    ))
+                var poutput = QWER.GetPrediction(target);
+                if ((target.IsFacing(ObjectManager.Player) && (int)poutput.Hitchance == 5) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
                 {
-                    if ((target.IsFacing(ObjectManager.Player)) || target.Path.Count() == 0)
+                    if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
                     {
-                        if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        QWER.Cast(poutput.CastPosition);
                     }
-                    else
-                    {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                    }
+                }
+                else if ((int)poutput.Hitchance == 5)
+                {
+                    QWER.Cast(poutput.CastPosition);
                 }
             }
         }
+
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             

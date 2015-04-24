@@ -30,7 +30,7 @@ namespace OneKeyToBrain
         public static float JungleTime;
         public static Obj_AI_Hero jungler = null;
         private static Obj_AI_Hero WardTarget;
-        private static float WardTime= 0;
+        private static float WardTime = 0;
 
         public static Items.Item WardS = new Items.Item(2043, 600f);
         public static Items.Item WardN = new Items.Item(2044, 600f);
@@ -53,13 +53,16 @@ namespace OneKeyToBrain
         {
             Player = ObjectManager.Player;
             Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E);
             R = new Spell(SpellSlot.R);
 
+            W = new Spell(SpellSlot.W, 1500f);
+            W.SetSkillshot(0.6f, 75f, 3300f, false, SkillshotType.SkillshotLine);
+
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
             {
-                if (IsJungler(enemy)  && enemy.IsEnemy)
+                if (IsJungler(enemy) && enemy.IsEnemy)
                 {
                     jungler = enemy;
                     Game.PrintChat("OKTW Brain enemy jungler: " + enemy.SkinName);
@@ -77,6 +80,7 @@ namespace OneKeyToBrain
             Config.SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
 
             Config.SubMenu("Dev option").AddItem(new MenuItem("OnCreate", "OnCreate / OnDelete").SetValue(false));
+            Config.SubMenu("Dev option").AddItem(new MenuItem("Prediction", "ShowPredictionInfo").SetValue(false));
             Config.SubMenu("Dev option").AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -103,7 +107,7 @@ namespace OneKeyToBrain
             if (obj.IsValid)
             {
 
-                debug("OnDelete: " + obj.Name  );
+                debug("OnDelete: " + obj.Name);
             }
         }
 
@@ -116,7 +120,6 @@ namespace OneKeyToBrain
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
                 {
                     bool WallOfGrass = NavMesh.IsWallOfGrass(Prediction.GetPrediction(enemy, 0.3f).CastPosition, 0);
-
                     if (WallOfGrass)
                     {
                         positionWard = Prediction.GetPrediction(enemy, 0.3f).CastPosition;
@@ -137,6 +140,8 @@ namespace OneKeyToBrain
                         WardN.Cast(positionWard);
                 }
             }
+            
+
         }
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
         {
@@ -156,8 +161,17 @@ namespace OneKeyToBrain
                     Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 50, System.Drawing.Color.Red);
                 }
             }
-           if (Config.Item("infoCombo").GetValue<bool>())
-           {
+            if (Config.Item("Prediction").GetValue<bool>())
+            {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
+                {
+                    var poutput = W.GetPrediction(enemy);
+                    drawText("HitChance: " + (int)poutput.Hitchance, enemy, System.Drawing.Color.GreenYellow);
+                }
+
+            }
+            else if (Config.Item("infoCombo").GetValue<bool>())
+            {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
                 {
                     string combo;
@@ -165,13 +179,13 @@ namespace OneKeyToBrain
                     var hpLeft = enemy.Health - Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) + R.GetDamage(enemy);
                     if (Q.GetDamage(enemy) > enemy.Health)
                         combo = "Q";
-                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy)> enemy.Health)
+                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy) > enemy.Health)
                         combo = "QW";
                     else if (Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) > enemy.Health)
                         combo = "QWE";
                     else if (Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) + R.GetDamage(enemy) > enemy.Health)
                         combo = "QWER";
-                    else 
+                    else
                     {
                         if (Player.FlatPhysicalDamageMod > Player.FlatMagicDamageMod)
                             combo = "QWER+" + (int)(hpLeft / (Player.Crit * Player.GetAutoAttackDamage(enemy) + Player.GetAutoAttackDamage(enemy))) + " AA";
@@ -186,16 +200,17 @@ namespace OneKeyToBrain
                         drawText(combo, enemy, System.Drawing.Color.Yellow);
                 }
             }
-           if (Config.Item("timer").GetValue<bool>() && jungler != null)
-           {
-               if (jungler.IsDead)
+
+            if (Config.Item("timer").GetValue<bool>() && jungler != null)
+            {
+                if (jungler.IsDead)
                 {
                     Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
                     timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
                 }
-               else if (jungler.IsVisible)
-               {
+                else if (jungler.IsVisible)
+                {
                     float Way = 0;
                     var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
                     var PointStart = ObjectManager.Player.Position;
@@ -209,21 +224,21 @@ namespace OneKeyToBrain
                     }
                     timer = (int)(Way / jungler.MoveSpeed);
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.GreenYellow);
-               }
-               else
-               {
-                   
-                   if (timer>0)
-                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
-                   else
-                       drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
-                   if (Game.Time - JungleTime >= 1)
-                   {
-                       timer = timer - 1;
-                       JungleTime = Game.Time;
-                   }
-               }
-           } 
+                }
+                else
+                {
+
+                    if (timer > 0)
+                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
+                    else
+                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
+                    if (Game.Time - JungleTime >= 1)
+                    {
+                        timer = timer - 1;
+                        JungleTime = Game.Time;
+                    }
+                }
+            }
         }
 
         private static bool IsJungler(Obj_AI_Hero hero)
@@ -234,7 +249,7 @@ namespace OneKeyToBrain
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
-                
+
                 Game.PrintChat(msg);
         }
         public static void PotionMenager()
@@ -245,7 +260,7 @@ namespace OneKeyToBrain
             if (!R.IsReady())
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
-                RMANA = R.Instance.ManaCost; ;   
+                RMANA = R.Instance.ManaCost; ;
             if (Config.Item("pots").GetValue<bool>() && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
             {
                 if (Potion.IsReady() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
@@ -257,7 +272,7 @@ namespace OneKeyToBrain
                 }
                 if (ManaPotion.IsReady() && !ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true))
                 {
-                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < RMANA )
+                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < RMANA)
                         ManaPotion.Cast();
                 }
             }
