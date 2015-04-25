@@ -36,18 +36,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\clipper_library.dll</HintPath>
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\clipper_library.dll</HintPath>
     </Reference>
-    <Reference Include="LeagueSharp, Version=1.0.0.25, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\LeagueSharp.dll</HintPath>
+    <Reference Include="LeagueSharp">
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
-    <Reference Include="LeagueSharp.Common, Version=1.0.0.22, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+    <Reference Include="LeagueSharp.Common">
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Sebastian\Desktop\VM\LeagueSharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\Sebastian\Desktop\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

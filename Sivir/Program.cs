@@ -86,6 +86,9 @@ namespace Sivir
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
 
+            Config.SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
+            Config.SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+
             Config.AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
             Config.AddItem(new MenuItem("forceW", "Force W").SetValue(false));
             Config.AddItem(new MenuItem("Hit", "Hit Chance Q").SetValue(new Slider(4, 4, 0)));
@@ -200,6 +203,13 @@ namespace Sivir
                                 Q.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
                         }
                     }
+                }
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                {
+                    var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+                    var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
+                    if (Qfarm.MinionsHit > 5 && Q.IsReady())
+                        Q.Cast(Qfarm.Position);
                 }
             }
             if (Config.Item("forceW").GetValue<bool>() && W.IsReady())
