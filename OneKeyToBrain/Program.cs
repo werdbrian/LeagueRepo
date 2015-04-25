@@ -24,7 +24,8 @@ namespace OneKeyToBrain
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
-
+        public static Vector2 WayPoint;
+        public static float WayPointTime;
         public static Vector3 positionWard;
         public static int timer;
         public static float JungleTime;
@@ -82,6 +83,8 @@ namespace OneKeyToBrain
             Config.SubMenu("Dev option").AddItem(new MenuItem("OnCreate", "OnCreate / OnDelete").SetValue(false));
             Config.SubMenu("Dev option").AddItem(new MenuItem("Prediction", "ShowPredictionInfo").SetValue(false));
             Config.SubMenu("Dev option").AddItem(new MenuItem("debug", "Debug").SetValue(false));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+                Config.SubMenu("Dev option").SubMenu("Good Player").AddItem(new MenuItem("GoodPlayer" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
 
             Config.SubMenu("Combo Key").AddItem(new MenuItem("Combo", "Combo").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Drawing.OnDraw += Drawing_OnDraw;
@@ -152,15 +155,36 @@ namespace OneKeyToBrain
         private static void Drawing_OnDraw(EventArgs args)
         {
             var tw = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
-
-            if (tw.IsValidTarget())
+            foreach (var champion in ObjectManager.Get<Obj_AI_Hero>().Where(champion => Config.Item("GoodPlayer" + champion.BaseSkinName).GetValue<bool>() && champion.IsVisible))
             {
-                if (Config.Item("click").GetValue<bool>())
+                List<Vector2> waypoints = champion.GetWaypoints();
+
+                if (WayPoint != waypoints.Last<Vector2>())
+                {
+                    if (WayPointTime - Game.Time > -0.11)
+                        Render.Circle.DrawCircle(champion.Position, 50, System.Drawing.Color.Cyan);
+
+                    WayPointTime = Game.Time;
+
+                }
+                WayPoint = waypoints.Last<Vector2>();
+                
+            }
+            
+                if (Config.Item("click").GetValue<bool>() && tw.IsValidTarget())
                 {
                     List<Vector2> waypoints = tw.GetWaypoints();
+
+                    if (WayPoint != waypoints.Last<Vector2>())
+                    {
+                        debug("" + (WayPointTime - Game.Time));
+                        WayPointTime = Game.Time;
+
+                    }
+                    WayPoint = waypoints.Last<Vector2>();
                     Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 50, System.Drawing.Color.Red);
                 }
-            }
+            
             if (Config.Item("Prediction").GetValue<bool>())
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
@@ -192,6 +216,8 @@ namespace OneKeyToBrain
                         else
                             combo = "QWER+" + (int)(hpLeft / hpCombo) + "QWE";
                     }
+
+                    
                     if (hpLeft > hpCombo)
                         drawText(combo, enemy, System.Drawing.Color.Red);
                     else if (hpLeft < 0)
