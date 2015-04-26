@@ -197,7 +197,7 @@ namespace Darius
         }
         private static void CastR()
         {
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && !target.IsZombie && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield) && !target.HasBuffOfType(BuffType.PhysicalImmunity)))
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => ValidUlt(target) && target.IsValidTarget(R.Range) && !target.IsZombie && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield) && !target.HasBuffOfType(BuffType.PhysicalImmunity)))
             {
                 if (R.GetDamage(target) - target.Level > target.Health)
                 {
@@ -226,7 +226,18 @@ namespace Darius
             }
             
         }
-
+        private static bool ValidUlt(Obj_AI_Hero target)
+        {
+            if (target.HasBuffOfType(BuffType.PhysicalImmunity)
+            || target.HasBuffOfType(BuffType.SpellImmunity)
+            || target.IsZombie
+            || target.HasBuffOfType(BuffType.Invulnerability)
+            || target.HasBuffOfType(BuffType.SpellShield)
+            )
+                return false;
+            else
+                return true;
+        }
         public static void ManaMenager()
         {
             QMANA = Q.Instance.ManaCost;
