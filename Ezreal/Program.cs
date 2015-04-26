@@ -308,12 +308,12 @@ namespace Ezreal
                     var qDmg = Q.GetDamage(t);
                     var wDmg = W.GetDamage(t);
                     if (qDmg > t.Health)
-                        Q.Cast(t, true);
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                     if (qDmg * 3 > t.Health && Config.Item("noob").GetValue<bool>() && t.CountAlliesInRange(800) > 1)
                         debug("Q noob mode");
                     else if (t.IsValidTarget(W.Range) && qDmg + wDmg > t.Health)
                     {
-                        Q.Cast(t, true);
+                        CastSpell(Q, t, Config.Item("Hit").GetValue<Slider>().Value);
                         OverKill = Game.Time;
                     }
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
