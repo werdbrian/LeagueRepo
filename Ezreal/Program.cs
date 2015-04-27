@@ -502,6 +502,7 @@ namespace Ezreal
             }
             else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
             {
+
                 List<Vector2> waypoints = target.GetWaypoints();
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
@@ -514,6 +515,7 @@ namespace Ezreal
                     || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
                     ))
                 {
+                    // max range fix
                     if (target.IsFacing(ObjectManager.Player) || target.Path.Count() == 0)
                     {
                         if (ObjectManager.Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
