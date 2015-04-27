@@ -24,6 +24,8 @@ namespace OneKeyToBrain
         public static float WMANA;
         public static float EMANA;
         public static float RMANA;
+
+        public static float potionProtect=0;
         public static Vector2 WayPoint;
         public static float WayPointTime;
         public static Vector3 positionWard;
@@ -74,6 +76,7 @@ namespace OneKeyToBrain
             Config.AddToMainMenu();
 
             Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.SubMenu("Iteams").AddItem(new MenuItem("buyPots", "Buy 1 hp pot").SetValue(false));
             Config.AddItem(new MenuItem("click", "Show enemy click").SetValue(true));
             Config.AddItem(new MenuItem("infoCombo", "Show info combo").SetValue(true));
             Config.SubMenu("Wards").AddItem(new MenuItem("ward", "Auto ward enemy in Grass").SetValue(false));
@@ -130,6 +133,7 @@ namespace OneKeyToBrain
                         WardTime = Game.Time;
                     }
                 }
+
                 if (Player.Distance(positionWard) < 600 && !WardTarget.IsValidTarget() && Game.Time - WardTime < 5)
                 {
                     WardTime = Game.Time - 6;
@@ -143,7 +147,14 @@ namespace OneKeyToBrain
                         WardN.Cast(positionWard);
                 }
             }
-            
+            Obj_SpawnPoint allySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsAlly);
+            if (ObjectManager.Player.Distance(allySpawn.Position) > 600 &&!Items.HasItem(Potion.Id) && Config.Item("buyPots").GetValue<bool>() && ObjectManager.Player.InFountain() && Game.Time - potionProtect >= 0.2)
+            {
+                
+                
+                Potion.Buy();
+                potionProtect = Game.Time;
+            }
 
         }
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
@@ -154,33 +165,28 @@ namespace OneKeyToBrain
 
         private static void Drawing_OnDraw(EventArgs args)
         {
-            var tw = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
-            foreach (var champion in ObjectManager.Get<Obj_AI_Hero>().Where(champion => Config.Item("GoodPlayer" + champion.BaseSkinName).GetValue<bool>() && champion.IsVisible))
+            if (Config.Item("click").GetValue<bool>() )
             {
-                List<Vector2> waypoints = champion.GetWaypoints();
-
-                if (WayPoint != waypoints.Last<Vector2>())
+                foreach (var champion in ObjectManager.Get<Obj_AI_Hero>().Where(champion => Config.Item("GoodPlayer" + champion.BaseSkinName).GetValue<bool>() && champion.IsVisible && champion.IsValid))
                 {
-                    if (WayPointTime - Game.Time > -0.11)
-                        Render.Circle.DrawCircle(champion.Position, 50, System.Drawing.Color.Cyan);
-
-                    WayPointTime = Game.Time;
-
-                }
-                WayPoint = waypoints.Last<Vector2>();
-                
-            }
-            
-                if (Config.Item("click").GetValue<bool>() && tw.IsValidTarget())
-                {
-                    List<Vector2> waypoints = tw.GetWaypoints();
+                    List<Vector2> waypoints = champion.GetWaypoints();
 
                     if (WayPoint != waypoints.Last<Vector2>())
                     {
-                        debug("" + (WayPointTime - Game.Time));
+                        if (WayPointTime - Game.Time > -0.11)
+                            Render.Circle.DrawCircle(champion.Position, 50, System.Drawing.Color.Cyan);
+
                         WayPointTime = Game.Time;
 
                     }
+                    WayPoint = waypoints.Last<Vector2>();
+
+                }
+            }
+            var tw = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
+                if (Config.Item("click").GetValue<bool>() && tw.IsValidTarget())
+                {
+                    List<Vector2> waypoints = tw.GetWaypoints();
                     WayPoint = waypoints.Last<Vector2>();
                     Render.Circle.DrawCircle(waypoints.Last<Vector2>().To3D(), 50, System.Drawing.Color.Red);
                 }
