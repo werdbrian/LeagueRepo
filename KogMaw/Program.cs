@@ -96,6 +96,7 @@ namespace KogMaw
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+            Config.SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "R killable info").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
@@ -106,7 +107,8 @@ namespace KogMaw
             Config.SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
 
             Config.AddItem(new MenuItem("sheen", "Sheen logic").SetValue(true));
-
+            Config.AddItem(new MenuItem("AApriority", "AA priority over spell").SetValue(true));
+            
             Config.AddItem(new MenuItem("Hit", "Hit Chance Skillshot").SetValue(new Slider(3, 4, 0)));
             Config.AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Add the events we are going to use:
@@ -117,7 +119,7 @@ namespace KogMaw
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Game.PrintChat("<font color=\"#008aff\">K</font>og Maw full automatic AI ver 1.1 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
+            Game.PrintChat("<font color=\"#008aff\">K</font>og Maw full automatic AI ver 1.3 <font color=\"#000000\">by sebastiank1</font> - <font color=\"#00BFFF\">Loaded</font>");
         }
 
 
@@ -125,14 +127,6 @@ namespace KogMaw
         {
             ManaMenager();
 
-            
-            
-            if (Orbwalker.GetTarget() == null)
-                attackNow = true;
-            foreach (var buff in Player.Buffs)
-            {
-               // debug(buff.Name);
-            }
             if (Player.IsZombie && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
@@ -140,7 +134,7 @@ namespace KogMaw
                 Player.IssueOrder(GameObjectOrder.MoveTo, t.ServerPosition);
             }
 
-            if (E.IsReady() && attackNow && Sheen())
+            if (E.IsReady() && Sheen())
             {
                 //W.Cast(ObjectManager.Player);
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
@@ -211,15 +205,15 @@ namespace KogMaw
                 }
             }
 
-            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && attackNow && Sheen())
+            if (R.IsReady() && Config.Item("autoR").GetValue<bool>() && Sheen())
             {
                 R.Range = 800 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
                 if (target.IsValidTarget(R.Range) && (Game.Time - OverKill > 0.6) && ValidUlt(target))
                 {
-                    double Rdmg = R.GetDamage(target) +( R.GetDamage(target) * target.CountAlliesInRange(400));
+                    double Rdmg = R.GetDamage(target) + (R.GetDamage(target) * target.CountAlliesInRange(500));
                     // Overkill protection
-                    if (target.Health < R.GetDamage(target) * target.CountAlliesInRange(400) * 0.2)
+                    if (target.Health < R.GetDamage(target) * target.CountAlliesInRange(500) * 0.2)
                         Rdmg = 0;
 
                     var harasStack = Config.Item("harasStack").GetValue<Slider>().Value;
@@ -256,9 +250,16 @@ namespace KogMaw
         private static bool Sheen()
         {
             var target = Orbwalker.GetTarget();
+            if (!(target is Obj_AI_Hero))
+                attackNow = true;
             if (target.IsValidTarget() && Player.HasBuff("sheen") && Config.Item("sheen").GetValue<bool>() && target is Obj_AI_Hero)
             {
                 debug("shen true");
+                return false;
+            }
+            else if (target.IsValidTarget() && Config.Item("AApriority").GetValue<bool>() && target is Obj_AI_Hero && !attackNow )
+            {
+                debug("spellDisable");
                 return false;
             }
             else
@@ -269,6 +270,7 @@ namespace KogMaw
 
         private static void CastSpell(Spell QWER, Obj_AI_Hero target, int HitChanceNum)
         {
+            
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
@@ -429,7 +431,7 @@ namespace KogMaw
                     }
                     if (Config.Item("autoR").GetValue<bool>() && target.IsValidTarget(R.Range) && R.IsReady() )
                     {
-                        double rDmg = R.GetDamage(target) + (R.GetDamage(target) * target.CountAlliesInRange(400));
+                        double rDmg = R.GetDamage(target) + (R.GetDamage(target) * target.CountAlliesInRange(500));
                         if (rDmg > HpLeft && HpLeft > 0)
                         {
                             debug("R OPS");
@@ -445,10 +447,7 @@ namespace KogMaw
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
-            RMANA = R.Instance.ManaCost; ;
-
-            if (Farm)
-                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
+            RMANA = R.Instance.ManaCost;
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
@@ -491,8 +490,33 @@ namespace KogMaw
                 return true;
         }
 
+
+        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero.Position);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
+        }
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("ComboInfo").GetValue<bool>())
+            {
+                var combo = "haras";
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget()))
+                {
+                    if (R.GetDamage(enemy) > enemy.Health)
+                    {
+                        combo = "KILL R";
+                        drawText(combo, enemy, System.Drawing.Color.GreenYellow);
+                    }
+                    else
+                    {
+                        combo = (int)(enemy.Health / R.GetDamage(enemy)) + " R";
+                        drawText(combo, enemy, System.Drawing.Color.Red);
+                    }
+                    
+                }
+            }
+
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
                 if (ObjectManager.Player.HealthPercentage() > 60)
