@@ -56,6 +56,9 @@ namespace OneKeyToWin_AIO_Sebby
                 case "Jinx":
                     new Jinx().LoadOKTW();
                     break;
+                case "Sivir":
+                    new Sivir().LoadOKTW();
+                    break;
             }
             Config.AddItem(new MenuItem("watermark", "Disabe Watermark").SetValue(false));
             Game.OnUpdate += OnUpdate;
