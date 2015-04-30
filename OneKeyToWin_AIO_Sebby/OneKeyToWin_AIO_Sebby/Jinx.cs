@@ -263,9 +263,10 @@ namespace OneKeyToWin_AIO_Sebby
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(R.Range) && (Game.Time - WCastTime > 0.9) && Program.ValidUlt(target))
+                    if (target.IsValidTarget(R.Range) && (Game.Time - WCastTime > 1) && Program.ValidUlt(target))
                     {
-                        float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
+
+                        float predictedHealth = target.Health + target.HPRegenRate * 2;
                         var Rdmg = R.GetDamage(target);
                         if (Rdmg > predictedHealth)
                         {
