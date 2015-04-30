@@ -11,8 +11,6 @@ namespace OneKeyToWin_AIO_Sebby
 {
     class Jinx
     {
-
-
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
 
@@ -62,8 +60,9 @@ namespace OneKeyToWin_AIO_Sebby
         {
             SetMana();
 
-            if (E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
+            if (E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
                 LogicE();
+
             if (Q.IsReady())
                 LogicQ();
 
@@ -78,43 +77,9 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast(t, true, true);
                 }
                 if (Config.Item("Rjungle").GetValue<bool>())
-                {
                     KsJungle();
-                }
 
                 LogicR();
-            }
-
-        }
-
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            if (Config.Item("qRange").GetValue<bool>())
-            {
-                if (FishBoneActive)
-                    Utility.DrawCircle(ObjectManager.Player.Position, 590f + ObjectManager.Player.BoundingRadius, System.Drawing.Color.DeepPink, 1, 1);
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, bonusRange() - 40, System.Drawing.Color.DeepPink, 1, 1);
-            }
-            if (Config.Item("wRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (W.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
-            }
-            if (Config.Item("eRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (E.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
             }
         }
 
@@ -123,22 +88,21 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
             if (Q.IsReady() && FishBoneActive && t.IsValidTarget())
             {
-
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (Player.Mana < RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
-                else if (Farm && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
+                else if (Farm && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
             }
-            if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && ObjectManager.Player.Mana < RMANA + EMANA + WMANA + 30)
+            if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && Player.Mana < RMANA + EMANA + WMANA + 30)
             {
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
                 foreach (var minion in allMinionsQ)
                 {
-                    if (Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion))
+                    if (Orbwalking.InAutoAttackRange(minion) && minion.Health < Player.GetAutoAttackDamage(minion))
                     {
                         foreach (var minion2 in allMinionsQ)
                         {
-                            if (minion2.Health < ObjectManager.Player.GetAutoAttackDamage(minion2) && minion.ServerPosition.Distance(minion2.Position) < 150 && minion2.Position != minion.Position)
+                            if (minion2.Health < Player.GetAutoAttackDamage(minion2) && minion.ServerPosition.Distance(minion2.Position) < 150 && minion2.Position != minion.Position)
                             {
                                 Q.Cast();
                             }
@@ -149,12 +113,12 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && Player.Mana > RMANA + EMANA)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
                 {
-                    E.Cast(ObjectManager.Player.ServerPosition, true);
+                    E.Cast(Player.ServerPosition, true);
                     debug("E agc");
                 }
                 return;
@@ -162,10 +126,10 @@ namespace OneKeyToWin_AIO_Sebby
             return;
         }
 
-        public void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
 
-            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUseE(args.SData.Name) && unit.IsValidTarget(E.Range))
+            if (Config.Item("opsE").GetValue<bool>() && unit.Team != Player.Team && ShouldUseE(args.SData.Name) && unit.IsValidTarget(E.Range))
             {
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
@@ -178,7 +142,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicQ()
         {
-            if (Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
+            if (Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
             {
                 farmQ();
                 lag = Game.Time;
@@ -190,19 +154,19 @@ namespace OneKeyToWin_AIO_Sebby
                 var powPowRange = GetRealPowPowRange(t);
                 if (!FishBoneActive && !Orbwalking.InAutoAttackRange(t))
                 {
-                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
+                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (Player.Mana > RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 > t.Health))
                         Q.Cast();
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Orbwalker.GetTarget() == null && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + ObjectManager.Player.BoundingRadius)
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Orbwalker.GetTarget() == null && Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + Player.BoundingRadius)
                         Q.Cast();
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Player.UnderTurret(true) && Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
                         Q.Cast();
                 }
             }
-            else if (!FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 20 && ObjectManager.Player.CountEnemiesInRange(2000) > 0)
+            else if (!FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
                 Q.Cast();
-            else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana < RMANA + WMANA + 20)
+            else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.Mana < RMANA + WMANA + 20)
                 Q.Cast();
-            else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(2000) == 0)
+            else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.CountEnemiesInRange(2000) == 0)
                 Q.Cast();
             else if (FishBoneActive && Farm)
                 Q.Cast();
@@ -210,61 +174,22 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
-            bool cast = false;
-            bool wait = false;
-
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (target.IsValidTarget(W.Range) &&
-                    !target.HasBuffOfType(BuffType.PhysicalImmunity) && !target.HasBuffOfType(BuffType.SpellImmunity) && !target.HasBuffOfType(BuffType.SpellShield))
-                {
-                    float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(W.Delay + (Player.Distance(target.ServerPosition) / W.Speed) * 1000));
-                    var Wdmg = W.GetDamage(target);
-                    if (Wdmg > predictedHealth)
-                    {
-                        cast = true;
-                        wait = true;
-                        PredictionOutput output = R.GetPrediction(target);
-                        Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
-                        direction.Normalize();
-                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
-                        foreach (var enemy in enemies)
-                        {
-                            if (enemy.SkinName == target.SkinName || !cast)
-                                continue;
-                            PredictionOutput prediction = R.GetPrediction(enemy);
-                            Vector3 predictedPosition = prediction.CastPosition;
-                            Vector3 v = output.CastPosition - Player.ServerPosition;
-                            Vector3 w = predictedPosition - Player.ServerPosition;
-                            double c1 = Vector3.Dot(w, v);
-                            double c2 = Vector3.Dot(v, v);
-                            double b = c1 / c2;
-                            Vector3 pb = Player.ServerPosition + ((float)b * v);
-                            float length = Vector3.Distance(predictedPosition, pb);
-                            if (length < (W.Width + enemy.BoundingRadius) && Player.Distance(predictedPosition) < Player.Distance(target.ServerPosition))
-                                cast = false;
-                        }
-                        if (!Orbwalking.InAutoAttackRange(target) && cast && target.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0 && target.Path.Count() < 2)
-                        {
-                            W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                            debug("W ks");
-                        }
-                    }
-                }
-            }
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && !wait)
+            if (t.IsValidTarget())
             {
-
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                if (W.GetDamage(t) > t.Health)
+                {
+                    Program.CastSpell(W, t);
+                }
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.Mana > RMANA + WMANA + 10 && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                      Program.CastSpell(W, t);
                 }
-                else if ((Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0)
+                else if ((Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0)
                 {
                      Program.CastSpell(W, t);
                 }
-                else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                     {
@@ -286,6 +211,7 @@ namespace OneKeyToWin_AIO_Sebby
                 foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && E.IsReady() && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
                 {
                     E.Cast(Object.Position, true);
+                    return;
                 }
             }
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !enemy.HasBuff("rocketgrab2") && E.IsReady()))
@@ -300,7 +226,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (ObjectManager.Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
+            if (Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
             {
                 if (ta.HasBuffOfType(BuffType.Slow))
                     E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
@@ -308,20 +234,22 @@ namespace OneKeyToWin_AIO_Sebby
                     E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
                 else
                 {
-                    if (ObjectManager.Player.Position.Distance(ta.ServerPosition) > ObjectManager.Player.Position.Distance(ta.Position))
+                    if (Player.Position.Distance(ta.ServerPosition) > Player.Position.Distance(ta.Position))
                     {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) < ta.Position.Distance(ObjectManager.Player.Position))
+                        if (ta.Position.Distance(Player.ServerPosition) < ta.Position.Distance(Player.Position))
                         {
                             Program.CastSpell(E, ta);
                             debug("E run");
+                            return;
                         }
                     }
                     else
                     {
-                        if (ta.Position.Distance(ObjectManager.Player.ServerPosition) > ta.Position.Distance(ObjectManager.Player.Position))
+                        if (ta.Position.Distance(Player.ServerPosition) > ta.Position.Distance(Player.Position))
                         {
                             Program.CastSpell(E, ta);
                             debug("E escape");
+                            return;
                         }
                     }
                 }
@@ -335,7 +263,7 @@ namespace OneKeyToWin_AIO_Sebby
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>())
                 {
-                    if (target.IsValidTarget(R.Range) && (Game.Time - WCastTime > 0.8) && Program.ValidUlt(target))
+                    if (target.IsValidTarget(R.Range) && (Game.Time - WCastTime > 0.9) && Program.ValidUlt(target))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
                         var Rdmg = R.GetDamage(target);
@@ -363,7 +291,7 @@ namespace OneKeyToWin_AIO_Sebby
                                     cast = false;
                             }
 
-                            if (cast && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                            if (cast && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && Player.CountEnemiesInRange(400) == 0)
                             {
                                 castR(target);
                                 debug("R normal High");
@@ -385,7 +313,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("hitchanceR").GetValue<bool>())
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > 400)
+                if ((Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > 400)
                 {
                     R.Cast(target, true);
                 }
@@ -396,7 +324,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void KsJungle()
         {
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             foreach (var mob in mobs)
             {
                 //debug(mob.SkinName);
@@ -424,9 +352,9 @@ namespace OneKeyToWin_AIO_Sebby
                         //debug("DS  " + DmgSec);
                         if (DragonDmg - mob.Health > 0)
                         {
-                            var timeTravel = GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position);
-                            var timeR = (mob.Health - ObjectManager.Player.CalcDamage(mob, Damage.DamageType.Physical, (250 + (100 * R.Level)) + ObjectManager.Player.FlatPhysicalDamageMod + 300)) / (DmgSec / 4);
-                            //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + ((150 + (100 * R.Level + 200) + ObjectManager.Player.FlatPhysicalDamageMod)));
+                            var timeTravel = GetUltTravelTime(Player, R.Speed, R.Delay, mob.Position);
+                            var timeR = (mob.Health - Player.CalcDamage(mob, Damage.DamageType.Physical, (250 + (100 * R.Level)) + Player.FlatPhysicalDamageMod + 300)) / (DmgSec / 4);
+                            //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + ((150 + (100 * R.Level + 200) + Player.FlatPhysicalDamageMod)));
                             if (timeTravel > timeR)
                                 R.Cast(mob.Position);
                         }
@@ -434,7 +362,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             DragonDmg = mob.Health;
                         }
-                        //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
+                        //debug("" + GetUltTravelTime(Player, R.Speed, R.Delay, mob.Position));
                     }
                 }
             }
@@ -458,10 +386,10 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void farmQ()
         {
-            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
+            var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange() + 30, MinionTypes.All);
             foreach (var minion in allMinionsQ)
             {
-                if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion))
+                if (!Orbwalking.InAutoAttackRange(minion) && minion.Health < Player.GetAutoAttackDamage(minion) && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion))
                 {
                     Q.Cast();
                     return;
@@ -495,6 +423,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return true;
             return false;
         }
+
         private bool Farm
         {
             get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
@@ -502,29 +431,28 @@ namespace OneKeyToWin_AIO_Sebby
 
         private float bonusRange()
         {
-            return 620f + ObjectManager.Player.BoundingRadius + 50 + 25 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).Level;
+            return 620f + Player.BoundingRadius + 50 + 25 * Player.Spellbook.GetSpell(SpellSlot.Q).Level;
         }
 
         private bool FishBoneActive
         {
-            get { return Math.Abs(ObjectManager.Player.AttackRange - 525f) > float.Epsilon; }
+            get { return Player.AttackRange > 525f; }
         }
 
         private  float GetRealPowPowRange(GameObject target)
         {
-            return 630f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
+            return 630f + Player.BoundingRadius + target.BoundingRadius;
         }
 
         private float GetRealDistance(Obj_AI_Base target)
         {
-            return ObjectManager.Player.ServerPosition.Distance(target.ServerPosition) + ObjectManager.Player.BoundingRadius +
+            return Player.ServerPosition.Distance(target.ServerPosition) + Player.BoundingRadius +
                    target.BoundingRadius;
         }
 
         private void LoadMenuOKTW()
         {
             #region E
-
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu("W Config").SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
             Config.SubMenu("W Config").AddItem(new MenuItem("humanzier", "Humanizer W (0.5 delay)").SetValue(false));
@@ -545,7 +473,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             #endregion
-            
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
@@ -563,24 +490,55 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("debug").GetValue<bool>())
                 Console.WriteLine(msg);
-
         }
+
         private void SetMana()
         {
             QMANA = 10;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
             if (!R.IsReady())
-                RMANA = WMANA - ObjectManager.Player.PARRegenRate * W.Instance.Cooldown;
+                RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost; ;
 
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            if (Player.Health < Player.MaxHealth * 0.2)
             {
                 QMANA = 0;
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+            }
+        }
+
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            if (Config.Item("qRange").GetValue<bool>())
+            {
+                if (FishBoneActive)
+                    Utility.DrawCircle(Player.Position, 590f + Player.BoundingRadius, System.Drawing.Color.DeepPink, 1, 1);
+                else
+                    Utility.DrawCircle(Player.Position, bonusRange() - 40, System.Drawing.Color.DeepPink, 1, 1);
+            }
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
             }
         }
     }

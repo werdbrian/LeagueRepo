@@ -61,7 +61,6 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnDamage += Obj_AI_Base_OnDamage;
             Drawing.OnDraw += OnDraw;
-
         }
 
         private static void Obj_AI_Base_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
@@ -72,8 +71,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
-            HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
-            
             if (Config.Item("pots").GetValue<bool>())
                PotionManagement();
         }
@@ -82,8 +79,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (!Config.Item("watermark").GetValue<bool>())
             {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.01f, System.Drawing.Color.YellowGreen, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
-
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.01f, System.Drawing.Color.GreenYellow, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
             }
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
@@ -130,6 +126,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
+            HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
