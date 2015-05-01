@@ -67,7 +67,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "1 - real time "));
             Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "2-5 - skipp heavy ticks (more fps)"));
 
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "OneKeyToWin by Sebby"));
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "AIO OneKeyToWin by Sebby"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("1", "Supported champions:"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("2", "Jinx, Sivir"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("3", "visit joduska.me"));
