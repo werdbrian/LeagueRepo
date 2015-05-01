@@ -96,46 +96,9 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             SetMana();
-            if (Q.IsReady())
-            {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget())
-                {
-                    var qDmg = Q.GetDamage(t) * 1.9;
-                    if (Orbwalking.InAutoAttackRange(t))
-                        qDmg = qDmg + Player.GetAutoAttackDamage(t) * 3;
-                    if (qDmg > t.Health)
-                        Q.Cast(t, true);
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.Mana > RMANA + QMANA)
-                        Program.CastSpell(Q, t);
-                    else if (Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
-                        if (Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
-                            Program.CastSpell(Qc, t);
-                        else if (Player.Mana > Player.MaxMana * 0.9)
-                            Program.CastSpell(Q, t);
-                        else if (Player.Mana > RMANA + WMANA + QMANA + QMANA)
-                            Q.CastIfWillHit(t, 2, true);
-                    if (Player.Mana > RMANA + QMANA + WMANA && Q.IsReady())
-                    {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
-                        {
-                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
-                                Q.Cast(enemy, true);
-                            else
-                                Q.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
-                        }
-                    }
-                }
-                else if (Program.LagFree(1) && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)
-                {
-                    var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
-                    var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
-                    if (Qfarm.MinionsHit > 5 && Q.IsReady())
-                        Q.Cast(Qfarm.Position);
-                }
-            }
+
+            if (Program.LagFree(1) && Q.IsReady())
+                LogicQ();
 
             if (Config.Item("forceW").GetValue<bool>() && W.IsReady())
             {
@@ -151,8 +114,14 @@ namespace OneKeyToWin_AIO_Sebby
                         Utility.DelayAction.Add(250, () => W.Cast());
                 }
             }
+            if (Program.LagFree(2) && R.IsReady())
+                LogicR();
+            
+        }
 
-            if (R.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("autoR").GetValue<bool>())
+        private void LogicR()
+        {
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("autoR").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
                 if (Player.CountEnemiesInRange(800f) > 2)
@@ -162,6 +131,46 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+        private void LogicQ()
+        {
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget())
+            {
+                var qDmg = Q.GetDamage(t) * 1.9;
+                if (Orbwalking.InAutoAttackRange(t))
+                    qDmg = qDmg + Player.GetAutoAttackDamage(t) * 3;
+                if (qDmg > t.Health)
+                    Q.Cast(t, true);
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.Mana > RMANA + QMANA)
+                    Program.CastSpell(Q, t);
+                else if (Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
+                    if (Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
+                        Program.CastSpell(Qc, t);
+                    else if (Player.Mana > Player.MaxMana * 0.9)
+                        Program.CastSpell(Q, t);
+                    else if (Player.Mana > RMANA + WMANA + QMANA + QMANA)
+                        Q.CastIfWillHit(t, 2, true);
+                if (Player.Mana > RMANA + QMANA + WMANA && Q.IsReady())
+                {
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
+                    {
+                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
+                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
+                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                            Q.Cast(enemy, true);
+                        else
+                            Q.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
+                    }
+                }
+            }
+            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)
+            {
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
+                var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
+                if (Qfarm.MinionsHit > 5 && Q.IsReady())
+                    Q.Cast(Qfarm.Position);
+            }
+        }
         private bool Farm
         {
             get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
@@ -169,8 +178,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public bool farmW()
         {
-            if (!Program.LagFree(2))
-                return false;
             var allMinionsW = MinionManager.GetMinions(Player.ServerPosition, 1300, MinionTypes.All);
             int num = 0;
             foreach (var minion in allMinionsW)
