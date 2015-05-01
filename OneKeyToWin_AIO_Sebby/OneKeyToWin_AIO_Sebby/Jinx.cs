@@ -159,7 +159,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast();
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed && Orbwalker.GetTarget() == null && Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + Player.BoundingRadius)
                         Q.Cast();
-                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Player.UnderTurret(true) && Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
+                    else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Player.Mana > RMANA + WMANA + EMANA + WMANA + 20 && distance < bonusRange())
                         Q.Cast();
                 }
             }

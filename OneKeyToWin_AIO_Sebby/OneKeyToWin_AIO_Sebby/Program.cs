@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker;
 
         public static int HitChanceNum= 4;
-        public static int tickSkip = 10;
+        public static bool tickSkip = true;
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
 
@@ -25,7 +25,7 @@ namespace OneKeyToWin_AIO_Sebby
             CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;
         }
 
-        public static Obj_AI_Hero Player
+        private static Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
         }
@@ -39,7 +39,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.AddSubMenu(targetSelectorMenu);
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            Config.AddToMainMenu();
+            
             switch (Player.ChampionName)
             {
                 case "Jinx":
@@ -48,6 +48,9 @@ namespace OneKeyToWin_AIO_Sebby
                 case "Sivir":
                     new Sivir().LoadOKTW();
                     break;
+                case "Ezreal":
+                    new Ezreal().LoadOKTW();
+                    break;
             }
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
@@ -55,25 +58,26 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
             Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("Hit", "Prediction OKTW").SetValue(new Slider(4, 4, 0)));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("0", "0 - normal"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("1", "1 - high"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("2", "2 - high + max range fix"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
 
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("pre", "Performance OKTW").SetValue(new Slider(5, 5, 1)));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("0", "Performance OKTW is tick limiter"));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "1 - real time "));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "2-5 - skipp heavy ticks (more fps)"));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "ON - increase fps"));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "OFF - normal mode"));
 
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "AIO OneKeyToWin by Sebby"));
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "OneKeyToWin by Sebby"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("1", "Supported champions:"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("2", "Jinx, Sivir"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("3", "visit joduska.me"));
 
             
             Config.AddItem(new MenuItem("watermark", "Disabe Watermark").SetValue(false));
+            Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnDamage += Obj_AI_Base_OnDamage;
             Drawing.OnDraw += OnDraw;
@@ -90,16 +94,16 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("pots").GetValue<bool>())
                     PotionManagement();
-                tickSkip = Config.Item("pre").GetValue<Slider>().Value;
+                tickSkip = Config.Item("pre").GetValue<bool>();
             }
         }
 
 
         public static bool LagFree(int offset)
         {
-            if (tickSkip == 1)
+            if (!tickSkip)
                 return true;
-            else if ((Utils.TickCount + offset) % tickSkip == 0)
+            else if (Utils.TickCount % 5 == offset)
                 return true;
             else
                 return false;
