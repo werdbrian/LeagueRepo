@@ -180,6 +180,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+
             if (t.IsValidTarget())
             {
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Player.Mana > RMANA + WMANA + 10 && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
@@ -192,11 +193,10 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                     {
-                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) || enemy.HasBuffOfType(BuffType.Charm) || 
+                            enemy.HasBuffOfType(BuffType.Fear) || enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
                         {
                             W.Cast(enemy, true);
                         }
