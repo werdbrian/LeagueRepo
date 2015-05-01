@@ -16,6 +16,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker;
 
         public static int HitChanceNum= 4;
+        public static int tickSkip = 10;
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
 
@@ -31,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void GameOnOnGameLoad(EventArgs args)
         {
-            Config = new Menu("OneKeyToWin AIO " + ObjectManager.Player.ChampionName, "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
+            Config = new Menu("OneKeyToWin AIO", "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
@@ -43,13 +44,21 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-            Config.SubMenu("Iteams").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
+            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("Hit", "Prediction OKTW").SetValue(new Slider(4, 4, 0)));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("0", "0 - normal"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("1", "1 - high"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("2", "2 - high + max range fix"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
             Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
+
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("pre", "Performance OKTW").SetValue(new Slider(1, 10, 1)));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("0", "Performance OKTW is tick limiter"));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "1 - real time "));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "2-10 - skipp heavy ticks (more fps)"));
+
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "Pe OKTW is tick limiter"));
 
             switch (Player.ChampionName)
             {
@@ -68,21 +77,25 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void Obj_AI_Base_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
         {
-            if (Config.Item("pots").GetValue<bool>())
-              PotionManagement();
+            
         }
 
         private static void OnUpdate(EventArgs args)
         {
-            if (Config.Item("pots").GetValue<bool>())
-               PotionManagement();
+            if (LagFree(0))
+            {
+                if (Config.Item("pots").GetValue<bool>())
+                    PotionManagement();
+                tickSkip = Config.Item("pre").GetValue<Slider>().Value;
+            }
         }
-
+        
         private static void OnDraw(EventArgs args)
         {
             if (!Config.Item("watermark").GetValue<bool>())
             {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0.01f, System.Drawing.Color.GreenYellow, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
+
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
             }
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
@@ -93,6 +106,15 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
             }
+        }
+
+        public static bool LagFree(int offset)
+        {
+
+            if ((Utils.TickCount + offset) % tickSkip == 0)
+                return true;
+            else
+                return false;
         }
 
         public static void PotionManagement()
@@ -129,6 +151,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
+            if (!LagFree(0))
+                return;
             HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
