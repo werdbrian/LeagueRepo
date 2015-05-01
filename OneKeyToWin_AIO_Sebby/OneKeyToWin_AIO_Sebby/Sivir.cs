@@ -32,10 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
         public float DragonDmg = 0;
         public double DragonTime = 0;
 
-        public Obj_AI_Hero Player
-        {
-            get { return Player; }
-        }
+        public Obj_AI_Hero Player { get { return Player; } }
 
         public void LoadOKTW()
         {
@@ -87,6 +84,7 @@ namespace OneKeyToWin_AIO_Sebby
                 //Game.PrintChat("" + HpPercentage);
             }
         }
+
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             var Target = (Obj_AI_Hero)gapcloser.Sender;
@@ -94,6 +92,7 @@ namespace OneKeyToWin_AIO_Sebby
                 E.Cast();
             return;
         }
+
         private void Game_OnGameUpdate(EventArgs args)
         {
             SetMana();
@@ -137,6 +136,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast(Qfarm.Position);
                 }
             }
+
             if (Config.Item("forceW").GetValue<bool>() && W.IsReady())
             {
                 var target = Orbwalker.GetTarget();
@@ -151,6 +151,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Utility.DelayAction.Add(250, () => W.Cast());
                 }
             }
+
             if (R.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("autoR").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
@@ -186,10 +187,11 @@ namespace OneKeyToWin_AIO_Sebby
             QMANA = 10;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
+
             if (!R.IsReady())
                 RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
-                RMANA = R.Instance.ManaCost; ;
+                RMANA = R.Instance.ManaCost;
 
             if (Player.Health < Player.MaxHealth * 0.2)
             {
@@ -229,22 +231,22 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LoadMenuOKTW()
         {
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
-            Config.SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
-            Config.SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
-            Config.SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
 
-            Config.AddItem(new MenuItem("forceW", "Force W (if dont work)").SetValue(false));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("forceW", "Force W (if dont work)").SetValue(false));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
-            Config.AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
 
-            Config.SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-            Config.SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
-            Config.SubMenu("E Shield Config").AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
         }
     }
 }

@@ -40,26 +40,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.AddToMainMenu();
-
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-            Config.SubMenu("Draw").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
-            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("Hit", "Prediction OKTW").SetValue(new Slider(4, 4, 0)));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("0", "0 - normal"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("1", "1 - high"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("2", "2 - high + max range fix"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
-
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("pre", "Performance OKTW").SetValue(new Slider(1, 10, 1)));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("0", "Performance OKTW is tick limiter"));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "1 - real time "));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "2-10 - skipp heavy ticks (more fps)"));
-
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "Pe OKTW is tick limiter"));
-
             switch (Player.ChampionName)
             {
                 case "Jinx":
@@ -69,6 +49,30 @@ namespace OneKeyToWin_AIO_Sebby
                     new Sivir().LoadOKTW();
                     break;
             }
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
+            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+
+            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("Hit", "Prediction OKTW").SetValue(new Slider(4, 4, 0)));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("0", "0 - normal"));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("1", "1 - high"));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("2", "2 - high + max range fix"));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
+            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
+
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("pre", "Performance OKTW").SetValue(new Slider(5, 5, 1)));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("0", "Performance OKTW is tick limiter"));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "1 - real time "));
+            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "2-5 - skipp heavy ticks (more fps)"));
+
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "OneKeyToWin by Sebby"));
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("1", "Supported champions:"));
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("2", "Jinx, Sivir"));
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("3", "visit joduska.me"));
+
+            
             Config.AddItem(new MenuItem("watermark", "Disabe Watermark").SetValue(false));
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnDamage += Obj_AI_Base_OnDamage;
@@ -89,29 +93,13 @@ namespace OneKeyToWin_AIO_Sebby
                 tickSkip = Config.Item("pre").GetValue<Slider>().Value;
             }
         }
-        
-        private static void OnDraw(EventArgs args)
-        {
-            if (!Config.Item("watermark").GetValue<bool>())
-            {
 
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
-            }
-            if (Config.Item("OrbDraw").GetValue<bool>())
-            {
-                if (Player.HealthPercentage() > 60)
-                    Utility.DrawCircle(ObjectManager.Player.Position, Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
-                else if (Player.HealthPercentage() > 30)
-                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
-            }
-        }
 
         public static bool LagFree(int offset)
         {
-
-            if ((Utils.TickCount + offset) % tickSkip == 0)
+            if (tickSkip == 1)
+                return true;
+            else if ((Utils.TickCount + offset) % tickSkip == 0)
                 return true;
             else
                 return false;
@@ -151,8 +139,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
-            if (!LagFree(0))
-                return;
+
             HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
@@ -229,6 +216,39 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
+                }
+            }
+        }
+
+        private static void OnDraw(EventArgs args)
+        {
+            if (!Config.Item("watermark").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
+            }
+
+            if (Config.Item("OrbDraw").GetValue<bool>())
+            {
+                if (Player.HealthPercentage() > 60)
+                    Utility.DrawCircle(ObjectManager.Player.Position, Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
+                else if (Player.HealthPercentage() > 30)
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
+            }
+
+            if (Config.Item("orb").GetValue<bool>())
+            {
+                var orbT = Orbwalker.GetTarget();
+
+                if (orbT.IsValidTarget())
+                {
+                    if (orbT.Health > orbT.MaxHealth * 0.6)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 5, 1);
+                    else if (orbT.Health > orbT.MaxHealth * 0.3)
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 5, 1);
+                    else
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 5, 1);
                 }
             }
         }

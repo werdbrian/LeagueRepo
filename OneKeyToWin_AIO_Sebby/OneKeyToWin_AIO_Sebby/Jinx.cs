@@ -58,18 +58,19 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
-
             SetMana();
             
-            if (E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
+
+            if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
                 LogicE();
 
-            if (Q.IsReady())
+            if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
 
-            if (W.IsReady() && (Game.Time - QCastTime > 0.6))
+            if (Program.LagFree(3) && W.IsReady() && (Game.Time - QCastTime > 0.6))
                 LogicW();
-            if (R.IsReady())
+
+            if (Program.LagFree(4) && R.IsReady())
             {
                 if (Config.Item("useR").GetValue<KeyBind>().Active)
                 {
@@ -143,7 +144,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicQ()
         {
-            if (Program.LagFree(1) && Farm && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
+            if (Farm && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
             {
                 farmQ();
             }
@@ -215,6 +216,7 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
             }
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !enemy.HasBuff("rocketgrab2") && E.IsReady()))
             {
                 if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
@@ -475,12 +477,12 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             #endregion
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
             
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("semi", "Semi-manual R target").SetValue(false));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("farmQ", "Q farm").SetValue(true));
@@ -499,6 +501,7 @@ namespace OneKeyToWin_AIO_Sebby
             QMANA = 10;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
+
             if (!R.IsReady())
                 RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
