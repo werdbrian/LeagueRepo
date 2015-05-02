@@ -16,6 +16,8 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker;
 
         public static int HitChanceNum= 4;
+        public static int tickNum = 4;
+        public static int tickIndex = 0;
         public static bool tickSkip = true;
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -90,6 +92,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
+            tickIndex++;
+            if (tickIndex > 4)
+                tickIndex = 0;
             if (LagFree(0))
             {
                 if (Config.Item("pots").GetValue<bool>())
@@ -102,27 +107,34 @@ namespace OneKeyToWin_AIO_Sebby
         public static bool LagFree(int offset)
         {
             if (!tickSkip)
+            {
                 return true;
-            else if (Utils.TickCount % 5 == offset)
+            }
+            
+            //Console.WriteLine(tickIndex);
+            
+            if (tickIndex == offset)
+            {
                 return true;
+            }
             else
                 return false;
         }
 
         public static void PotionManagement()
         {
-            if (!Player.InFountain() && !Player.HasBuff("Recall"))
+            if (!ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
             {
-                if (Potion.IsReady() && !Player.HasBuff("RegenerationPotion", true))
+                if (Potion.IsReady() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
                 {
-                    if (Player.CountEnemiesInRange(700) > 0 && Player.Health + 200 < Player.MaxHealth)
+                    if (ObjectManager.Player.CountEnemiesInRange(700) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
                         Potion.Cast();
-                    else if (Player.Health < Player.MaxHealth * 0.6)
+                    else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
                         Potion.Cast();
                 }
-                if (ManaPotion.IsReady() && !Player.HasBuff("FlaskOfCrystalWater", true))
+                if (ManaPotion.IsReady() && !ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true))
                 {
-                    if (Player.CountEnemiesInRange(1200) > 0 && Player.Mana < 150)
+                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < 200)
                         ManaPotion.Cast();
                 }
             }
