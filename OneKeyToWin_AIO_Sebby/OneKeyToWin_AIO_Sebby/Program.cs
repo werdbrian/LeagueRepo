@@ -76,18 +76,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW").AddItem(new MenuItem("1", "Supported champions:"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("2", "Jinx, Sivir"));
             Config.SubMenu("About OKTW").AddItem(new MenuItem("3", "visit joduska.me"));
+            Config.SubMenu("About OKTW").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
 
-            
-            Config.AddItem(new MenuItem("watermark", "Disabe Watermark").SetValue(false));
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
-            Obj_AI_Base.OnDamage += Obj_AI_Base_OnDamage;
             Drawing.OnDraw += OnDraw;
-        }
-
-        private static void Obj_AI_Base_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
-        {
-            
         }
 
         private static void OnUpdate(EventArgs args)
@@ -97,6 +90,7 @@ namespace OneKeyToWin_AIO_Sebby
                 tickIndex = 0;
             if (LagFree(0))
             {
+                HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
                 if (Config.Item("pots").GetValue<bool>())
                     PotionManagement();
                 tickSkip = Config.Item("pre").GetValue<bool>();
@@ -156,7 +150,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
 
-            HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
+            
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
@@ -238,10 +232,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-            if (!Config.Item("watermark").GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
-            }
+            
 
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
@@ -266,6 +257,10 @@ namespace OneKeyToWin_AIO_Sebby
                     else
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 5, 1);
                 }
+            }
+            if (Config.Item("watermark").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
             }
         }
     }

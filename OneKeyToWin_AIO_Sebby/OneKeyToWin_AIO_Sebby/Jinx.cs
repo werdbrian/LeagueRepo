@@ -59,7 +59,6 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
             if (Q.IsReady() && FishBoneActive && t.IsValidTarget())
             {
-
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
                 else if (Farm && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
@@ -109,7 +108,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 WCastTime = Game.Time;
             }
-
         }
         private void Game_OnUpdate(EventArgs args)
         {
@@ -277,13 +275,11 @@ namespace OneKeyToWin_AIO_Sebby
                 bool cast = false;
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
                 {
-                    
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     var Rdmg = R.GetDamage(target,1);
 
                     if (Rdmg > predictedHealth)
                     {
-
                         cast = true;
                         PredictionOutput output = R.GetPrediction(target);
                         Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
@@ -317,7 +313,6 @@ namespace OneKeyToWin_AIO_Sebby
                             R.Cast(target, true, true);
                             debug("R aoe 1");
                         }
-                        
                     }
                 }
             }
@@ -342,8 +337,8 @@ namespace OneKeyToWin_AIO_Sebby
             foreach (var minion in MinionManager.GetMinions(bonusRange() + 30).Where(
                 minion => !Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) * 1.2 && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion)))
                 {
-                        Q.Cast();
-                        return;
+                    Q.Cast();
+                    return;
                 }
         }
 
