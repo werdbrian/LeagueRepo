@@ -308,7 +308,7 @@ namespace Jinx
                     if (target.IsValidTarget(R.Range) && (Game.Time - WCastTime > 0.8) && ValidUlt(target))
                     {
                         float predictedHealth = HealthPrediction.GetHealthPrediction(target, (int)(R.Delay + (Player.Distance(target.ServerPosition) / R.Speed) * 1000));
-                        var Rdmg = R.GetDamage(target);
+                        var Rdmg = R.GetDamage(target,1);
                         if (Rdmg > predictedHealth)
                         {
                             cast = true;
