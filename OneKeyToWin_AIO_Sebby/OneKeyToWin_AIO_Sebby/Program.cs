@@ -102,7 +102,14 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
 
             Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
-
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (IsJungler(enemy) && enemy.IsEnemy)
+                {
+                    jungler = enemy;
+                    Game.PrintChat("OKTW Brain enemy jungler: " + enemy.SkinName);
+                }
+            }
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
@@ -294,9 +301,9 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private static void OnDraw(EventArgs args)
         {
-
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
+                debug(jungler.SkinName);
                 if (jungler.IsDead)
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
                 else if (jungler.IsVisible)
