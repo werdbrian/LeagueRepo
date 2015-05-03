@@ -94,6 +94,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
+            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+            
+
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "Supported champions:"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Jinx, Sivir"));
@@ -319,6 +322,26 @@ namespace OneKeyToWin_AIO_Sebby
                         timer = timer - 1;
                         JungleTime = Game.Time;
                     }
+                }
+            }
+            if (Config.Item("championInfo").GetValue<bool>())
+            {
+                float positionDraw = 0.1f;
+
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy=> enemy.IsEnemy))
+                {
+                    var kolor = System.Drawing.Color.GreenYellow;
+                    if (enemy.IsDead)
+                        kolor = System.Drawing.Color.Cyan;
+                    else if (!enemy.IsVisible)
+                        kolor = System.Drawing.Color.Orange;
+                    else if ((int)enemy.HealthPercent < 20)
+                        kolor = System.Drawing.Color.Red;
+
+                    positionDraw += 0.015f;
+                    Drawing.DrawText(Drawing.Width * 0.17f, Drawing.Height * positionDraw, kolor,  enemy.ChampionName );
+                    Drawing.DrawText(Drawing.Width * 0.05f, Drawing.Height * positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
+                    Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent + "HP " + enemy.Level + "lvl");
                 }
             }
 
