@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -17,7 +16,6 @@ namespace OneKeyToWin_AIO_Sebby
         public Spell E;
         public Spell Q;
         public Spell R;
-
         public Spell W;
         
         public float QMANA;
@@ -574,14 +572,12 @@ namespace OneKeyToWin_AIO_Sebby
                             var timeR = (mob.Health - R.GetDamage(mob)) / (DmgSec / 3);
                             //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + R.GetDamage(mob));
                             if (timeTravel > timeR)
-                            {
                                 R.Cast(mob.Position);
-                            }
+                            
                         }
                         else
-                        {
                             DragonDmg = mob.Health;
-                        }
+                        
                         //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
                     }
                 }
@@ -658,6 +654,10 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("watermark").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
+            }
 
             if (Config.Item("qRange").GetValue<bool>())
             {

@@ -15,6 +15,17 @@ namespace OneKeyToWin_AIO_Sebby
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
 
+        public static Spell Q;
+        public static Spell W;
+        public static Spell E;
+        public static Spell R;
+
+
+        public static string championMsg;
+        public static float JungleTime;
+        public static Obj_AI_Hero jungler = null;
+        public static int timer;
+        public static Obj_SpawnPoint enemySpawn;
         public static int HitChanceNum= 4;
         public static int tickNum = 4;
         public static int tickIndex = 0;
@@ -35,7 +46,6 @@ namespace OneKeyToWin_AIO_Sebby
         private static void GameOnOnGameLoad(EventArgs args)
         {
             Config = new Menu("OneKeyToWin AIO", "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
-
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
@@ -53,30 +63,45 @@ namespace OneKeyToWin_AIO_Sebby
                 case "Ezreal":
                     new Ezreal().LoadOKTW();
                     break;
+                case "KogMaw":
+                    new KogMaw().LoadOKTW();
+                    break;
+
             }
+
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
             Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("0", "0 - normal"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("1", "1 - high"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("2", "2 - high + max range fix"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
-            Config.SubMenu("Prediction OKTW").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
 
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("1", "ON - increase fps"));
-            Config.SubMenu("Performance OKTW").AddItem(new MenuItem("2", "OFF - normal mode"));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
 
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("0", "OneKeyToWin by Sebby"));
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("1", "Supported champions:"));
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("2", "Jinx, Sivir"));
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("3", "visit joduska.me"));
-            Config.SubMenu("About OKTW").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
+            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
+            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
+            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
+            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
+
+            Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
+
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "Supported champions:"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Jinx, Sivir"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "visit joduska.me"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
+
+            Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
 
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
@@ -94,28 +119,56 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Config.Item("pots").GetValue<bool>())
                     PotionManagement();
                 tickSkip = Config.Item("pre").GetValue<bool>();
+
+                if (Config.Item("timer").GetValue<bool>() && jungler != null)
+                {
+                    if (jungler.IsDead)
+                        timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
+                    else if (jungler.IsVisible)
+                    {
+                        float Way = 0;
+                        var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
+                        var PointStart = ObjectManager.Player.Position;
+                        foreach (var point in JunglerPath)
+                        {
+                            if (PointStart.Distance(point) > 0)
+                            {
+                                Way += PointStart.Distance(point);
+                                PointStart = point;
+                            }
+                        }
+                        timer = (int)(Way / jungler.MoveSpeed);
+                    }
+                }
             }
         }
-
 
         public static bool LagFree(int offset)
         {
             if (!tickSkip)
-            {
                 return true;
-            }
-            
-            //Console.WriteLine(tickIndex);
-            
             if (tickIndex == offset)
-            {
                 return true;
-            }
             else
                 return false;
         }
 
-        public static void PotionManagement()
+        public static bool Farm
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
+        }
+
+        public static bool Combo
+        {
+            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); }
+        }
+
+        private static bool IsJungler(Obj_AI_Hero hero)
+        {
+            return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));
+        }
+
+        private static void PotionManagement()
         {
             if (!ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
             {
@@ -149,8 +202,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
-
-            
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
@@ -230,9 +281,39 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero.Position);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
+        }
+
+        public static void debug(string msg)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+                Console.WriteLine(msg);
+        }
         private static void OnDraw(EventArgs args)
         {
-            
+
+            if (Config.Item("timer").GetValue<bool>() && jungler != null)
+            {
+                if (jungler.IsDead)
+                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
+                else if (jungler.IsVisible)
+                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.GreenYellow);
+                else
+                {
+                    if (timer > 0)
+                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
+                    else
+                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
+                    if (Game.Time - JungleTime >= 1)
+                    {
+                        timer = timer - 1;
+                        JungleTime = Game.Time;
+                    }
+                }
+            }
 
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
@@ -257,10 +338,6 @@ namespace OneKeyToWin_AIO_Sebby
                     else
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 5, 1);
                 }
-            }
-            if (Config.Item("watermark").GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
             }
         }
     }
