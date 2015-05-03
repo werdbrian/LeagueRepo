@@ -333,10 +333,10 @@ namespace OneKeyToWin_AIO_Sebby
                     var kolor = System.Drawing.Color.GreenYellow;
                     if (enemy.IsDead)
                         kolor = System.Drawing.Color.Cyan;
+                    else if ((int)enemy.HealthPercent < 20)
+                        kolor = System.Drawing.Color.Red;
                     else if (!enemy.IsVisible)
                         kolor = System.Drawing.Color.Orange;
-                    if ((int)enemy.HealthPercent < 20)
-                        kolor = System.Drawing.Color.Red;
 
                     positionDraw += 0.015f;
                     Drawing.DrawText(Drawing.Width * 0.17f, Drawing.Height * positionDraw, kolor,  enemy.ChampionName );
