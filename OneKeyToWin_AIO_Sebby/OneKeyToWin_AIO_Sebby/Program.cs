@@ -335,7 +335,7 @@ namespace OneKeyToWin_AIO_Sebby
                         kolor = System.Drawing.Color.Cyan;
                     else if (!enemy.IsVisible)
                         kolor = System.Drawing.Color.Orange;
-                    else if ((int)enemy.HealthPercent < 20)
+                    if ((int)enemy.HealthPercent < 20)
                         kolor = System.Drawing.Color.Red;
 
                     positionDraw += 0.015f;
