@@ -364,7 +364,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
-                debug(jungler.SkinName);
                 if (jungler.IsDead)
                     drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
                 else if (jungler.IsVisible)
@@ -392,7 +391,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if (enemy.IsDead)
                         kolor = System.Drawing.Color.Gray;
                     else if (!enemy.IsVisible)
-                        kolor = System.Drawing.Color.Yellow;
+                        kolor = System.Drawing.Color.OrangeRed;
 
                     positionDraw += 0.015f;
                     
