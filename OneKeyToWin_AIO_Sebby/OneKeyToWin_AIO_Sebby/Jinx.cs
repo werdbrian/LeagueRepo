@@ -9,6 +9,7 @@ using SharpDX;
 
 namespace OneKeyToWin_AIO_Sebby
 {
+    
     class Jinx
     {
         private Menu Config = Program.Config;
@@ -247,7 +248,7 @@ namespace OneKeyToWin_AIO_Sebby
                     else
                     {
                         List<Vector2> waypoints = ta.GetWaypoints();
-                        if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(ta.Position)) > 400)
+                        if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(ta.Position)) > 100)
                         {
                             if (ta.Position.Distance(Game.CursorPos) < ta.Position.Distance(ObjectManager.Player.Position))
                             {

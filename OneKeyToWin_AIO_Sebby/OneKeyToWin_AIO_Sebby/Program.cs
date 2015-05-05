@@ -10,6 +10,18 @@ using System.Drawing;
 
 namespace OneKeyToWin_AIO_Sebby
 {
+
+    class RecallInfo
+    {
+
+        public int RecallID{ get; set; }
+        public float RecallStart{ get; set; }
+        public int RecallNum { get; set; }
+    }
+    class champions
+    {
+        public Obj_AI_Hero Player;
+    }
     internal class Program
     {
         public static Menu Config;
@@ -30,6 +42,14 @@ namespace OneKeyToWin_AIO_Sebby
         public static int tickNum = 4;
         public static int tickIndex = 0;
         public static bool tickSkip = true;
+        public static int RecallID = 0;
+        public static float RecallStart;
+        public static int RecallFinish = 0;
+        public static int RecallAbort = 0;
+
+
+        public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
+
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
 
@@ -52,6 +72,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             
+            champions champion1 = new champions();
+
             switch (Player.ChampionName)
             {
                 case "Jinx":
@@ -115,6 +137,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
+            Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
         }
 
@@ -291,6 +314,40 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+        private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
+        {
+            var unit = sender as Obj_AI_Hero;
+
+            if (unit == null || !unit.IsValid || unit.IsAlly)
+            {
+                //return;
+            }
+           
+            var recall = Packet.S2C.Teleport.Decoded(unit, args);
+
+            if (recall.Type == Packet.S2C.Teleport.Type.Recall)
+            {
+                switch (recall.Status)
+                {
+
+                    case Packet.S2C.Teleport.Status.Start:
+                        RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
+                        RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time , RecallNum = 0});
+
+                        break;
+                    case Packet.S2C.Teleport.Status.Abort:
+                        RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
+                        RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 1 });
+
+                        break;
+                    case Packet.S2C.Teleport.Status.Finish:
+                        RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
+                        RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 2 });
+                        break;
+                }
+            }
+        }
+
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
         {
             var wts = Drawing.WorldToScreen(Hero.Position);
@@ -302,6 +359,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("debug").GetValue<bool>())
                 Console.WriteLine(msg);
         }
+
         private static void OnDraw(EventArgs args)
         {
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
@@ -328,20 +386,50 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 float positionDraw = 0.1f;
 
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy=> enemy.IsEnemy))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 {
                     var kolor = System.Drawing.Color.GreenYellow;
                     if (enemy.IsDead)
-                        kolor = System.Drawing.Color.Cyan;
-                    else if ((int)enemy.HealthPercent < 20)
-                        kolor = System.Drawing.Color.Red;
+                        kolor = System.Drawing.Color.Gray;
                     else if (!enemy.IsVisible)
-                        kolor = System.Drawing.Color.Orange;
+                        kolor = System.Drawing.Color.Green;
 
                     positionDraw += 0.015f;
-                    Drawing.DrawText(Drawing.Width * 0.17f, Drawing.Height * positionDraw, kolor,  enemy.ChampionName );
-                    Drawing.DrawText(Drawing.Width * 0.05f, Drawing.Height * positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
-                    Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent + "HP " + enemy.Level + "lvl");
+                    
+                    Drawing.DrawText(100, Drawing.Height * positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
+                    //Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent );
+                    foreach (RecallInfo rerecall in RecallInfos)
+                    {
+                        if (rerecall.RecallID == enemy.NetworkId && Game.Time - rerecall.RecallStart < 8)
+                       {
+                           var time = (Game.Time - rerecall.RecallStart) * 10;
+                           if (rerecall.RecallNum == 2)
+                           {
+                               Drawing.DrawText(400, Drawing.Height * positionDraw, System.Drawing.Color.GreenYellow, "rerecall finish");
+                           }
+                           else if (rerecall.RecallNum == 1)
+                           {
+                               Drawing.DrawText(400, Drawing.Height * positionDraw, System.Drawing.Color.Yellow, "rerecall stop");
+                           }
+                           else if (rerecall.RecallNum == 0)
+                           {
+                               Drawing.DrawLine(400, Drawing.Height * positionDraw, 480 - time, Drawing.Height * positionDraw, 12, System.Drawing.Color.Red);
+                               Drawing.DrawLine(480 - time, Drawing.Height * positionDraw, 480, Drawing.Height * positionDraw, 12, System.Drawing.Color.Black);
+                           }
+                       }
+                    }
+                    var kolorHP = System.Drawing.Color.GreenYellow;
+                    if (enemy.IsDead)
+                        kolorHP = System.Drawing.Color.GreenYellow;
+                    else if ((int)enemy.HealthPercent < 30)
+                        kolorHP = System.Drawing.Color.Red;
+                    else if ((int)enemy.HealthPercent < 60)
+                        kolorHP = System.Drawing.Color.Orange;
+                    if ((int)enemy.HealthPercent > 0)
+                        Drawing.DrawLine(200, Drawing.Height * positionDraw, (200 + ((int)enemy.HealthPercent) / 2)+1, Drawing.Height * positionDraw, 12, kolorHP);
+                    if ((int)enemy.HealthPercent<100)
+                        Drawing.DrawLine((200 + ((int)enemy.HealthPercent)/2), Drawing.Height * positionDraw, 200 + 50, Drawing.Height * positionDraw, 12, System.Drawing.Color.Black);
+                    Drawing.DrawText(260, Drawing.Height * positionDraw, kolor, enemy.ChampionName + " " + enemy.Level + "lvl");
                 }
             }
 
