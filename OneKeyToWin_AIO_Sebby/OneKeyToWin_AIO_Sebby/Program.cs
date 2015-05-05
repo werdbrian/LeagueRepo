@@ -392,7 +392,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if (enemy.IsDead)
                         kolor = System.Drawing.Color.Gray;
                     else if (!enemy.IsVisible)
-                        kolor = System.Drawing.Color.Green;
+                        kolor = System.Drawing.Color.Yellow;
 
                     positionDraw += 0.015f;
                     
