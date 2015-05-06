@@ -126,45 +126,52 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast(target, true);
                 }
             }
+            if (Program.LagFree(1))
+            {
+                if (Config.Item("sup").GetValue<bool>())
+                {
+                    if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
+                        farmQ();
+                }
+                else
+                {
+                    if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear))
+                        farmQ();
+                }
+            }
 
-            if (Config.Item("sup").GetValue<bool>())
-            {
-                if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
-                    farmQ();
-            }
-            else
-            {
-                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear))
-                    farmQ();
-            }
             if (Program.LagFree(2))
             {
+                SetMana();
                 if (Config.Item("autoE").GetValue<bool>() && E.IsReady() && !HaveStun && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
                     E.Cast();
 
                 if (W.IsReady() && ObjectManager.Player.InFountain() && !HaveStun)
                     W.Cast(ObjectManager.Player, true, true);
             }
-            if (Program.LagFree(3) && Config.Item("tibers").GetValue<bool>() && HaveTibers)
+            if (Program.LagFree(3) )
             {
-                if (Game.Time - TibbersTimer > 2)
+                if(Config.Item("tibers").GetValue<bool>() && HaveTibers)
                 {
-                    var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
+                    if (Game.Time - TibbersTimer > 2)
                     {
-                        if (enemy.IsValidTarget(2000) && BestEnemy.IsValidTarget(2000) && enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
-                            BestEnemy = enemy;
-                    }
-                    if (BestEnemy.IsValidTarget(2000))
-                    {
-                        Player.IssueOrder(GameObjectOrder.MovePet, BestEnemy.Position);
-                        R.CastOnUnit(BestEnemy);
+                        var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
+                        {
+                            if (enemy.IsValidTarget(2000) && BestEnemy.IsValidTarget(2000) && enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
+                                BestEnemy = enemy;
+                        }
+                        if (BestEnemy.IsValidTarget(2000))
+                        {
+                            Player.IssueOrder(GameObjectOrder.MovePet, BestEnemy.Position);
+                            R.CastOnUnit(BestEnemy);
+                        }
                     }
                 }
-            }
-            else
-            {
-                Tibbers = null;
+                else
+                {
+                    Tibbers = null;
+                }
             }
         }
 
@@ -175,7 +182,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void farmQ()
         {
-            if (!Program.LagFree(1) && !Config.Item("farmQ").GetValue<bool>())
+            if ( !Config.Item("farmQ").GetValue<bool>())
                 return;
             var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
             if (Q.IsReady())
@@ -224,6 +231,26 @@ namespace OneKeyToWin_AIO_Sebby
                         return false;
                 }
                 return false;
+            }
+        }
+
+        private void SetMana()
+        {
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
+
+            if (!R.IsReady())
+                RMANA = QMANA - ObjectManager.Player.Level * 2;
+            else
+                RMANA = R.Instance.ManaCost; ;
+
+            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                EMANA = 0;
+                RMANA = 0;
             }
         }
         private void LoadMenuOKTW()

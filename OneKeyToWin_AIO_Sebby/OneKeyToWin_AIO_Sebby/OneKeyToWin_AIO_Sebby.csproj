@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Annie.cs" />
+    <Compile Include="Ashe.cs" />
     <Compile Include="Ezreal.cs" />
     <Compile Include="Jinx.cs" />
     <Compile Include="KogMaw.cs" />

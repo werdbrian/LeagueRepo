@@ -38,6 +38,7 @@ namespace OneKeyToWin_AIO_Sebby
         public int Muramana = 3042;
         public int Tear = 3070;
         public int Manamune = 3004;
+
         public string MsgDebug = "wait";
         public double NotTime = 0;
         public Obj_AI_Hero Player

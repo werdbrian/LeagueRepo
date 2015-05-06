@@ -106,7 +106,9 @@ namespace OneKeyToWin_AIO_Sebby
                 case "Annie":
                     new Annie().LoadOKTW();
                     break;
-
+                case "Ashe":
+                    new Ashe().LoadOKTW();
+                    break;
             }
 
             Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
@@ -137,7 +139,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
-            
             
 
             Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
