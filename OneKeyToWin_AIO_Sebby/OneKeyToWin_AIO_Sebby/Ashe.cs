@@ -158,7 +158,10 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
+
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+            if (ObjectManager.Player.CountEnemiesInRange(800) == 0)
+                t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
                 var wDmg = W.GetDamage(t);

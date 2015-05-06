@@ -39,7 +39,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static string championMsg;
         public static float JungleTime;
-        public static Obj_AI_Hero jungler = null;
+        public static Obj_AI_Hero jungler = ObjectManager.Player;
         public static int timer;
         public static Obj_SpawnPoint enemySpawn;
         public static int HitChanceNum= 4;
@@ -130,18 +130,21 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
             Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
 
+
+            
+
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            {
+                    Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+            }
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
-            
 
-            Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
             {
                 if (IsJungler(enemy) && enemy.IsEnemy)
@@ -149,6 +152,8 @@ namespace OneKeyToWin_AIO_Sebby
                     jungler = enemy;
                 }
             }
+            
+            
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
@@ -167,24 +172,39 @@ namespace OneKeyToWin_AIO_Sebby
                     PotionManagement();
                 tickSkip = Config.Item("pre").GetValue<bool>();
 
-                if (Config.Item("timer").GetValue<bool>() && jungler != null)
+                if (Config.Item("timer").GetValue<bool>())
                 {
+
+
                     if (jungler.IsDead)
-                        timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
-                    else if (jungler.IsVisible)
                     {
-                        float Way = 0;
-                        var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
-                        var PointStart = ObjectManager.Player.Position;
-                        foreach (var point in JunglerPath)
+                        debug("" + jungler.SkinName);
+                        enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
+                        timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
+                    }
+                    else
+                    {
+                        debug("ss " + jungler.SkinName);
+                        if (jungler.IsVisible)
                         {
-                            if (PointStart.Distance(point) > 0)
+                            float Way = 0;
+                            var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
+                            var PointStart = ObjectManager.Player.Position;
+                            foreach (var point in JunglerPath)
                             {
-                                Way += PointStart.Distance(point);
-                                PointStart = point;
+                                if (PointStart.Distance(point) > 0)
+                                {
+                                    Way += PointStart.Distance(point);
+                                    PointStart = point;
+                                }
                             }
+                            timer = (int)(Way / jungler.MoveSpeed);
                         }
-                        timer = (int)(Way / jungler.MoveSpeed);
+                        if (!Config.Item("ro" + jungler.BaseSkinName).GetValue<bool>())
+                        {
+                            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && Config.Item("ro" + enemy.BaseSkinName).GetValue<bool>()))
+                                jungler = enemy;
+                        }
                     }
                 }
             }
@@ -356,7 +376,12 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                     case Packet.S2C.Teleport.Status.Finish:
                         RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
-
+                        if (jungler.NetworkId == sender.NetworkId)
+                        {
+                            debug("" + jungler.SkinName);
+                            enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
+                            timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
+                        }
                         RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 2 });
                         break;
                 }
