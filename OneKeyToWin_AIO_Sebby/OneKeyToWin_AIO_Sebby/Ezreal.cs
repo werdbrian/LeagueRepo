@@ -62,7 +62,6 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
         }
 
@@ -80,17 +79,6 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
             return;
-        }
-
-        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (args.Target != null && Config.Item("autoE").GetValue<bool>() && args.Target.IsMe && sender.IsValid<Obj_AI_Hero>() && sender.IsMelee() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA && args.SData.IsAutoAttack()
-                    && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3)
-            {
-                if (Config.Item("autoEwall").GetValue<bool>())
-                    FindWall();
-                E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-            }
         }
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)

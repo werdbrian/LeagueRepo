@@ -23,6 +23,7 @@ namespace OneKeyToWin_AIO_Sebby
         public float WMANA;
         public float EMANA;
         public float RMANA;
+        public float WardTime = 0;
         public Vector3 ShowPosition;
         public Obj_AI_Hero ShowTarget;
         public Obj_AI_Hero Player
@@ -34,7 +35,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W, 1200);
-
             E = new Spell(SpellSlot.E, 2500);
             R = new Spell(SpellSlot.R, 3000f);
 
@@ -45,14 +45,21 @@ namespace OneKeyToWin_AIO_Sebby
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-
-
         }
 
 
         private void Drawing_OnDraw(EventArgs args)
         {
-            
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+            }
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -74,18 +81,27 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (Program.LagFree(1) && E.IsReady())
             {
-               
+                E.Range = 1750 + 750 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level;
                 
                 //Program.debug("" + ShowTarget);
+
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
+                {
+
+                        ShowPosition = Prediction.GetPrediction(enemy, 1f).CastPosition;
+                        ShowTarget = enemy;
+                        WardTime = Game.Time;
+                }
+
+                if (Player.Distance(ShowPosition) < E.Range && !ShowTarget.IsValidTarget() && Game.Time - WardTime < 4 && Game.Time - WardTime > 1)
+                {
+                    E.Cast(ObjectManager.Player.Position.Extend(ShowPosition, E.Range));
+                }
 
             }
 
             if (Program.LagFree(2) && Q.IsReady())
-            {
-
                 LogicQ();
-            }
-                
 
             if (Program.LagFree(3) && W.IsReady() )
                 LogicW();
@@ -222,6 +238,10 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQharas", "Auto Q haras").SetValue(true));
+
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRaoe", "Auto R aoe").SetValue(true));
