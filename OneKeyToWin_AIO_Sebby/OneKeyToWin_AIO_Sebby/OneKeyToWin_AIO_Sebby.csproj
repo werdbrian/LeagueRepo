@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Annie.cs" />
     <Compile Include="Ezreal.cs" />
     <Compile Include="Jinx.cs" />
     <Compile Include="KogMaw.cs" />
