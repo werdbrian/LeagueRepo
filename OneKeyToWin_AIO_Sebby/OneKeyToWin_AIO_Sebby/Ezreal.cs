@@ -38,9 +38,6 @@ namespace OneKeyToWin_AIO_Sebby
         public int Muramana = 3042;
         public int Tear = 3070;
         public int Manamune = 3004;
-        public Items.Item Potion = new Items.Item(2003, 0);
-        public Items.Item ManaPotion = new Items.Item(2004, 0);
-        public Items.Item Youmuu = new Items.Item(3142, 0);
         public string MsgDebug = "wait";
         public double NotTime = 0;
         public Obj_AI_Hero Player

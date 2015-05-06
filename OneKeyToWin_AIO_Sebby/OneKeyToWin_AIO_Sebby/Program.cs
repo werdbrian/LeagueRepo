@@ -13,7 +13,6 @@ namespace OneKeyToWin_AIO_Sebby
 
     class RecallInfo
     {
-
         public int RecallID{ get; set; }
         public float RecallStart{ get; set; }
         public int RecallNum { get; set; }
@@ -24,6 +23,12 @@ namespace OneKeyToWin_AIO_Sebby
     }
     internal class Program
     {
+        public static string AnnieVer = "1.6.0.0";
+        public static string JinxVer = "3.1.3.0";
+        public static string EzrealVer = "2.7.3.0";
+        public static string KogMawVer = "1.3.0.0";
+        public static string SivirVer = "2.0.0.0";
+
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
 
@@ -31,7 +36,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static Spell W;
         public static Spell E;
         public static Spell R;
-
 
         public static string championMsg;
         public static float JungleTime;
@@ -46,7 +50,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static float RecallStart;
         public static int RecallFinish = 0;
         public static int RecallAbort = 0;
-
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
@@ -66,9 +69,21 @@ namespace OneKeyToWin_AIO_Sebby
         private static void GameOnOnGameLoad(EventArgs args)
         {
             Config = new Menu("OneKeyToWin AIO", "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Supported champions:"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "Annie " + AnnieVer));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("4", "Jinx " + JinxVer));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal " + EzrealVer));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw " + KogMawVer));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir " + SivirVer));
+
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
             Config.AddSubMenu(targetSelectorMenu);
+
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             
@@ -87,6 +102,9 @@ namespace OneKeyToWin_AIO_Sebby
                     break;
                 case "KogMaw":
                     new KogMaw().LoadOKTW();
+                    break;
+                case "Annie":
+                    new Annie().LoadOKTW();
                     break;
 
             }
@@ -111,6 +129,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
 
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
@@ -118,13 +138,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
             
-
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "Supported champions:"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Jinx, Sivir"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "visit joduska.me"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
+            
 
             Obj_SpawnPoint enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
@@ -132,7 +146,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (IsJungler(enemy) && enemy.IsEnemy)
                 {
                     jungler = enemy;
-                    Game.PrintChat("OKTW Brain enemy jungler: " + enemy.SkinName);
                 }
             }
             Config.AddToMainMenu();
@@ -342,6 +355,7 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                     case Packet.S2C.Teleport.Status.Finish:
                         RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
+
                         RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 2 });
                         break;
                 }

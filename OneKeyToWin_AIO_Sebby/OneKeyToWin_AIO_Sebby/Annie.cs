@@ -1,0 +1,317 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using LeagueSharp;
+using LeagueSharp.Common;
+using SharpDX;
+
+namespace OneKeyToWin_AIO_Sebby
+{
+    class Annie
+    {
+        private Menu Config = Program.Config;
+        public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
+
+        public Spell E;
+        public Spell Q;
+        public Spell R;
+        public Spell W;
+
+        public float QMANA;
+        public float WMANA;
+        public float EMANA;
+        public float RMANA;
+
+        public GameObject Tibbers;
+        public float TibbersTimer = 0;
+
+        public Obj_AI_Hero Player
+        {
+            get { return ObjectManager.Player; }
+        }
+        public void LoadOKTW()
+        {
+            Q = new Spell(SpellSlot.Q, 625f);
+            W = new Spell(SpellSlot.W, 600f);
+            E = new Spell(SpellSlot.E);
+            R = new Spell(SpellSlot.R, 625f);
+            Q.SetTargetted(0.25f, 1400f);
+            W.SetSkillshot(0.50f, 250f, 3000, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(0.20f, 250f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+
+            LoadMenuOKTW();
+
+            Game.OnUpdate += Game_OnGameUpdate;
+            Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+            //Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
+        {
+            if (obj.IsValid)
+            {
+                if (obj.Name == "Tibbers")
+                    Tibbers = obj;
+            }
+        }
+
+        private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (Config.Item("sup").GetValue<bool>()  && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
+            {
+                if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
+            }
+        }
+
+        private void Game_OnGameUpdate(EventArgs args)
+        {
+            if (ObjectManager.Player.HasBuff("Recall"))
+                return;
+
+            if (Combo && !Config.Item("AACombo").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA))
+                    Orbwalking.Attack = true;
+                else
+                    Orbwalking.Attack = false;
+            }
+            else
+                Orbwalking.Attack = true;
+
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+
+            if (target.IsValidTarget() && (Config.Item("stun" + target.BaseSkinName).GetValue<bool>() || !HaveStun))
+            {
+                if (!HaveTibers && R.IsReady())
+                {
+                    if (Combo && HaveStun && target.CountEnemiesInRange(400) > 1)
+                        R.Cast(target, true, true);
+                    else if (Config.Item("rCount").GetValue<Slider>().Value > 0 && Config.Item("rCount").GetValue<Slider>().Value <= target.CountEnemiesInRange(300))
+                        R.Cast(target, true, true);
+                    else if (Combo && !W.IsReady() && !Q.IsReady()
+                        && Q.GetDamage(target) < target.Health
+                        && (target.CountEnemiesInRange(400) > 1 || R.GetDamage(target) + Q.GetDamage(target) > target.Health))
+                        R.Cast(target, true, true);
+                    else if (Combo && Q.GetDamage(target) < target.Health)
+                        if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                                     target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Taunt))
+                        {
+                            R.Cast(target, true, true);
+                        }
+                }
+                if (W.IsReady() && (Program.Farm || Combo))
+                {
+                    if (Combo && HaveStun && target.CountEnemiesInRange(250) > 1)
+                        W.Cast(target, true, true);
+                    else if (!Q.IsReady())
+                        W.Cast(target, true, true);
+                    else if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Charm) ||
+                    target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Taunt))
+                    {
+                        W.Cast(target, true, true);
+                    }
+                }
+                if (Q.IsReady() && (Program.Farm || Combo))
+                {
+                    if (HaveStun && Combo && target.CountEnemiesInRange(400) > 1 && (W.IsReady() || R.IsReady()))
+                    {
+                        return;
+                    }
+                    else
+                        Q.Cast(target, true);
+                }
+            }
+
+            if (Config.Item("sup").GetValue<bool>())
+            {
+                if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
+                    farmQ();
+            }
+            else
+            {
+                if (Q.IsReady() && (!HaveStun || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear))
+                    farmQ();
+            }
+            if (Program.LagFree(2))
+            {
+                if (Config.Item("autoE").GetValue<bool>() && E.IsReady() && !HaveStun && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+                    E.Cast();
+
+                if (W.IsReady() && ObjectManager.Player.InFountain() && !HaveStun)
+                    W.Cast(ObjectManager.Player, true, true);
+            }
+            if (Program.LagFree(3) && Config.Item("tibers").GetValue<bool>() && HaveTibers)
+            {
+                if (Game.Time - TibbersTimer > 2)
+                {
+                    var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
+                    {
+                        if (enemy.IsValidTarget(2000) && BestEnemy.IsValidTarget(2000) && enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
+                            BestEnemy = enemy;
+                    }
+                    if (BestEnemy.IsValidTarget(2000))
+                    {
+                        Player.IssueOrder(GameObjectOrder.MovePet, BestEnemy.Position);
+                        R.CastOnUnit(BestEnemy);
+                    }
+                }
+            }
+            else
+            {
+                Tibbers = null;
+            }
+        }
+
+        private bool Combo
+        {
+            get { return Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo; }
+        }
+
+        public void farmQ()
+        {
+            if (!Program.LagFree(1) && !Config.Item("farmQ").GetValue<bool>())
+                return;
+            var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+            if (Q.IsReady())
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    Q.Cast(mob, true);
+                    if (Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && W.IsReady())
+                        W.Cast(mob, true);
+                }
+            }
+
+            foreach (var minion in allMinionsQ)
+            {
+                if (minion.Health > ObjectManager.Player.GetAutoAttackDamage(minion) && minion.Health < Q.GetDamage(minion))
+                {
+                    Q.Cast(minion);
+                    return;
+                }
+            }
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA * 2)
+            {
+                var Wfarm = W.GetCircularFarmLocation(allMinionsQ, W.Width);
+                if (Wfarm.MinionsHit > 2 && W.IsReady())
+                    W.Cast(Wfarm.Position);
+            }
+        }
+
+        private bool HaveTibers
+        {
+            get { return ObjectManager.Player.HasBuff("infernalguardiantimer"); }
+        }
+
+        public bool HaveStun
+        {
+            get { 
+                var buffs = Player.Buffs.Where(buff => (buff.Name.ToLower() == "pyromania" || buff.Name.ToLower() == "pyromania_particle"));
+                if (buffs.Any())
+                {
+                    var buff = buffs.First();
+                    if (buff.Name.ToLower() == "pyromania_particle")
+                        return true;
+                    else
+                        return false;
+                }
+                return false;
+            }
+        }
+        private void LoadMenuOKTW()
+        {
+            Config.SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "Combo Info").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 30)));
+
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("sup", "Support mode").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("tibers", "TibbersAutoPilot").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
+
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("Stun").AddItem(new MenuItem("stun" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+        }
+
+        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero.Position);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
+        }
+
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            if (Config.Item("watermark").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " " + Program.AnnieVer + " by Sebby");
+            }
+            if (Config.Item("ComboInfo").GetValue<bool>())
+            {
+                var combo = "haras";
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget()))
+                {
+                    if (Q.GetDamage(enemy) > enemy.Health)
+                        combo = "Q";
+                    else if (Q.GetDamage(enemy) + W.GetDamage(enemy) > enemy.Health)
+                        combo = "QW";
+                    else if (Q.GetDamage(enemy) + R.GetDamage(enemy) + W.GetDamage(enemy) > enemy.Health)
+                        combo = "QWR";
+                    else if (Q.GetDamage(enemy) * 2 + R.GetDamage(enemy) + W.GetDamage(enemy) > enemy.Health)
+                        combo = "QWRQ";
+                    else
+                        combo = "haras: " + (int)(enemy.Health - (Q.GetDamage(enemy) * 2 + R.GetDamage(enemy) + W.GetDamage(enemy)));
+                    drawText(combo, enemy, System.Drawing.Color.GreenYellow);
+                }
+            }
+
+          
+            if (Config.Item("qRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (Q.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+            }
+
+            if (Config.Item("rRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range + R.Width / 2, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range + R.Width / 2, System.Drawing.Color.Gray, 1, 1);
+            }
+
+        }
+    }
+}
