@@ -38,8 +38,8 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 2500);
             R = new Spell(SpellSlot.R, 3000f);
 
-            W.SetSkillshot(0.25f,60f , 900f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.377f, 299f, 1400f, false, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.25f, 60f , 1700f, true, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.25f, 299f, 1400f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
             LoadMenuOKTW();
 
@@ -80,25 +80,7 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
             if (Program.LagFree(1) && E.IsReady())
-            {
-                E.Range = 1750 + 750 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level;
-                
-                //Program.debug("" + ShowTarget);
-
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
-                {
-
-                        ShowPosition = Prediction.GetPrediction(enemy, 1f).CastPosition;
-                        ShowTarget = enemy;
-                        WardTime = Game.Time;
-                }
-
-                if (Player.Distance(ShowPosition) < E.Range && !ShowTarget.IsValidTarget() && Game.Time - WardTime < 4 && Game.Time - WardTime > 1)
-                {
-                    E.Cast(ObjectManager.Player.Position.Extend(ShowPosition, E.Range));
-                }
-
-            }
+                LogicE();
 
             if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
@@ -113,6 +95,24 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicE()
         {
+            if (!Config.Item("autoE").GetValue<bool>())
+                return;
+            E.Range = 1750 + 750 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level;
+
+            //Program.debug("" + ShowTarget);
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
+            {
+
+                ShowPosition = Prediction.GetPrediction(enemy, 1f).CastPosition;
+                ShowTarget = enemy;
+                WardTime = Game.Time;
+            }
+
+            if (Player.Distance(ShowPosition) < E.Range && !ShowTarget.IsValidTarget() && !ShowTarget.IsDead && Game.Time - WardTime < 4 && Game.Time - WardTime > 1)
+            {
+                E.Cast(ObjectManager.Player.Position.Extend(ShowPosition, E.Range));
+            }
 
         }
         private void LogicR()
@@ -238,9 +238,9 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQharas", "Auto Q haras").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));

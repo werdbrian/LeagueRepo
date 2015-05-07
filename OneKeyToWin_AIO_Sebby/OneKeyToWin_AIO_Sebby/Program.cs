@@ -152,8 +152,6 @@ namespace OneKeyToWin_AIO_Sebby
                     jungler = enemy;
                 }
             }
-            
-            
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
@@ -172,44 +170,41 @@ namespace OneKeyToWin_AIO_Sebby
                     PotionManagement();
                 tickSkip = Config.Item("pre").GetValue<bool>();
 
-                if (Config.Item("timer").GetValue<bool>())
-                {
-
-
-                    if (jungler.IsDead)
-                    {
-                        debug("" + jungler.SkinName);
-                        enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
-                        timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
-                    }
-                    else
-                    {
-                        debug("ss " + jungler.SkinName);
-                        if (jungler.IsVisible)
-                        {
-                            float Way = 0;
-                            var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
-                            var PointStart = ObjectManager.Player.Position;
-                            foreach (var point in JunglerPath)
-                            {
-                                if (PointStart.Distance(point) > 0)
-                                {
-                                    Way += PointStart.Distance(point);
-                                    PointStart = point;
-                                }
-                            }
-                            timer = (int)(Way / jungler.MoveSpeed);
-                        }
-                        if (!Config.Item("ro" + jungler.BaseSkinName).GetValue<bool>())
-                        {
-                            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && Config.Item("ro" + enemy.BaseSkinName).GetValue<bool>()))
-                                jungler = enemy;
-                        }
-                    }
-                }
+                JunglerTimer();
             }
         }
 
+        public static void JunglerTimer()
+        {
+            if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
+            {
+
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && Config.Item("ro" + enemy.BaseSkinName).GetValue<bool>()))
+                    jungler = enemy;
+                
+
+                if (jungler.IsDead)
+                {
+                    enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
+                    timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
+                }
+                else if (jungler.IsVisible && jungler.IsValid)
+                {
+                    float Way = 0;
+                    var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
+                    var PointStart = ObjectManager.Player.Position;
+                    foreach (var point in JunglerPath)
+                    {
+                        if (PointStart.Distance(point) > 0)
+                        {
+                            Way += PointStart.Distance(point);
+                            PointStart = point;
+                        }
+                    }
+                    timer = (int)(Way / jungler.MoveSpeed);
+                }
+            }
+        }
         public static bool LagFree(int offset)
         {
             if (!tickSkip)
@@ -296,7 +291,7 @@ namespace OneKeyToWin_AIO_Sebby
                     QWER.Cast(poutput.CastPosition);
                 }
             }
-            else if (HitChanceNum == 3)
+            else if (HitChanceNum == 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
@@ -321,7 +316,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-            else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
+            else if (HitChanceNum == 3 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
