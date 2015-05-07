@@ -638,6 +638,12 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("noob", "Noob KS bronze mode").SetValue(false));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("debug", "Debug").SetValue(false));
         }
+
+        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero.Position);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
+        }
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("watermark").GetValue<bool>())

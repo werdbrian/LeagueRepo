@@ -261,12 +261,20 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
+
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
-            if (QWER.Collision && col > 0)
+            if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
+                
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") )
+            {
+                QWER.Cast(poutput.CastPosition);
+                return;
+            }
+
             if (HitChanceNum == 0)
                 QWER.Cast(target, true);
             else if (HitChanceNum == 1)
@@ -276,65 +284,70 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (HitChanceNum == 2)
             {
-                if ((target.IsFacing(Player) && (int)poutput.Hitchance == 5) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
+                List<Vector2> waypoints = target.GetWaypoints();
+                if (waypoints.Last<Vector2>().To3D().Distance(poutput.CastPosition) > QWER.Width  && (int)poutput.Hitchance == 5)
                 {
-                    if (Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) < target.Distance(Player.Position) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
+                    {
+                        if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition) + target.BoundingRadius))
+                        {
+                            QWER.Cast(poutput.CastPosition);
+                            debug("faced " + poutput.CastPosition.Distance(target.ServerPosition));
+                        }
+                    }
+                    else if ((int)poutput.Hitchance == 5)
+                    {
+                        QWER.Cast(poutput.CastPosition);
+                        debug("not faced");
+                    }
+                }
+            }
+            else if (HitChanceNum == 3)
+            {
+                List<Vector2> waypoints = target.GetWaypoints();
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+                if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
+                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
+                {
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) < target.Distance(Player.Position))
+                    {
+                        if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
+                        {
+                            QWER.Cast(poutput.CastPosition);
+                            return;
+                        }
+                    }
+                    else
                     {
                         QWER.Cast(poutput.CastPosition);
                     }
                 }
-                else if ((int)poutput.Hitchance == 5)
-                {
-                    QWER.Cast(poutput.CastPosition);
-                }
             }
-            else if (HitChanceNum == 4)
+            else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+
                 if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
                     QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                else if (target.Path.Count() < 2
-                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront
-                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
-                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
-                    ))
+                else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
                 {
-                    if (target.IsFacing(Player) || target.Path.Count() == 0)
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) < target.Distance(Player.Position))
                     {
-                        if (Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
+                        {
+                            QWER.Cast(poutput.CastPosition);
+                            return;
+                        }
                     }
                     else
                     {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                    }
-                }
-            }
-            else if (HitChanceNum == 3 && (int)poutput.Hitchance > 4)
-            {
-                List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
-                    QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                else if (target.Path.Count() < 2
-                    && (target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront
-                    || target.HasBuffOfType(BuffType.Slow) || target.HasBuff("Recall")
-                    || (target.Path.Count() == 0 && target.Position == target.ServerPosition)
-                    ))
-                {
-                    if (target.IsFacing(Player) || target.Path.Count() == 0)
-                    {
-                        if (Player.Distance(target.Position) < QWER.Range - ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.Position) / QWER.Speed) + (target.BoundingRadius * 2)))
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                    }
-                    else
-                    {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        QWER.Cast(poutput.CastPosition);
                     }
                 }
             }
