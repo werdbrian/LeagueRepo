@@ -176,8 +176,8 @@ namespace OneKeyToWin_AIO_Sebby
         {
 
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (ObjectManager.Player.CountEnemiesInRange(800) == 0)
-                t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
+            if (ObjectManager.Player.CountEnemiesInRange(700) > 0)
+                t = TargetSelector.GetTarget(700, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
                 var wDmg = W.GetDamage(t);
@@ -187,7 +187,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA)
                     Program.CastSpell(W, t);
-                else if (Program.Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8 || W.Level > Q.Level) && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + WMANA)
+                else if (Program.Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + WMANA)
                     Program.CastSpell(W, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + WMANA)
                 {

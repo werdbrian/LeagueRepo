@@ -130,9 +130,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
             Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
 
-
-            
-
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
