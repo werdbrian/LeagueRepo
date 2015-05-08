@@ -37,13 +37,13 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 800f);
             R = new Spell(SpellSlot.R, 1200f);
 
-            Q1.SetSkillshot(0.25f, 150f, 1400f, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.25f, 200f, 1400f, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.29f, 1400f);
             E.SetSkillshot(0.5f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 200f, 2000f, false, SkillshotType.SkillshotCircle);
 
             //LoadMenuOKTW();
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "OneKeyToCast R").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
@@ -109,7 +109,7 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(1) && attackNow && Q.IsReady())
+            if (Program.LagFree(1)  && Q.IsReady())
                 LogicQ();
 
             if (Program.LagFree(2) && attackNow && E.IsReady())
@@ -127,7 +127,7 @@ namespace OneKeyToWin_AIO_Sebby
             if ( t.IsValidTarget(Q.Range))
             {
                 
-                if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
+                if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
                    Q.Cast(t);
                 else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                     Q.Cast(t);
@@ -136,17 +136,17 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (t1.IsValidTarget(Q1.Range))
             {
-                Program.debug("true" );
+
                 var poutput = Q1.GetPrediction(t1);
                 var col = poutput.CollisionObjects;
                 if (col.Count() == 0)
                     return;
-                Program.debug("" +col.Count());
+
                 var minionQ = col.Last();
                 if (minionQ.IsValidTarget(Q.Range) )
                 {
                     Program.debug("" + minionQ.Distance(t1.Position));
-                    if (minionQ.Distance(poutput.CastPosition) < 450 && minionQ.Distance(poutput.CastPosition) > 100)
+                    if (minionQ.Distance(poutput.CastPosition) < 420 && minionQ.Distance(poutput.CastPosition) > 100)
                     {
                         if (Q.GetDamage(t1) + ObjectManager.Player.GetAutoAttackDamage(t1) > t1.Health)
                             Q.Cast(col.Last());

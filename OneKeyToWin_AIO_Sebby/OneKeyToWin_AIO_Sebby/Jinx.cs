@@ -473,7 +473,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (!R.IsReady())
                 RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
-                RMANA = R.Instance.ManaCost; ;
+                RMANA = R.Instance.ManaCost; 
 
             if (Player.Health < Player.MaxHealth * 0.2)
             {
@@ -502,7 +502,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rdragon", "Dragon").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rbaron", "Baron").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "OneKeyToCast R").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             #endregion
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
