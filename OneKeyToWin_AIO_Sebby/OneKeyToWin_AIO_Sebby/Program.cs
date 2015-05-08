@@ -80,60 +80,12 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw " + KogMawVer));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir " + SivirVer));
 
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
-
-            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            
-            champions champion1 = new champions();
-
-            switch (Player.ChampionName)
-            {
-                case "Jinx":
-                    new Jinx().LoadOKTW();
-                    break;
-                case "Sivir":
-                    new Sivir().LoadOKTW();
-                    break;
-                case "Ezreal":
-                    new Ezreal().LoadOKTW();
-                    break;
-                case "KogMaw":
-                    new KogMaw().LoadOKTW();
-                    break;
-                case "Annie":
-                    new Annie().LoadOKTW();
-                    break;
-                case "Ashe":
-                    new Ashe().LoadOKTW();
-                    break;
-            }
-
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
-            Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-
-            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
-
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
-
-            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
-            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
-            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
-            Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
+            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
 
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
-                    Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
             }
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
@@ -141,6 +93,63 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+
+
+            if (!Config.Item("aio").GetValue<bool>())
+            {
+                var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+                TargetSelector.AddToMenu(targetSelectorMenu);
+                Config.AddSubMenu(targetSelectorMenu);
+
+                Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+                Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+            
+
+                switch (Player.ChampionName)
+                {
+                    case "Jinx":
+                        new Jinx().LoadOKTW();
+                        break;
+                    case "Sivir":
+                        new Sivir().LoadOKTW();
+                        break;
+                    case "Ezreal":
+                        new Ezreal().LoadOKTW();
+                        break;
+                    case "KogMaw":
+                        new KogMaw().LoadOKTW();
+                        break;
+                    case "Annie":
+                        new Annie().LoadOKTW();
+                        break;
+                    case "Ashe":
+                        new Ashe().LoadOKTW();
+                        break;
+                    case "MissFortune":
+                        new MissFortune().LoadOKTW();
+                        break;
+                }
+                
+                Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
+                Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
+                Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
+                Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
+
+                Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
+
+                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
+                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
+                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
+                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
+            }
+            
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -287,37 +296,34 @@ namespace OneKeyToWin_AIO_Sebby
                 List<Vector2> waypoints = target.GetWaypoints();
                 if (waypoints.Last<Vector2>().To3D().Distance(poutput.CastPosition) > QWER.Width  && (int)poutput.Hitchance == 5)
                 {
-                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) < target.Distance(Player.Position) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition) + target.BoundingRadius))
                         {
                             QWER.Cast(poutput.CastPosition);
-                            debug("faced " + poutput.CastPosition.Distance(target.ServerPosition));
                         }
                     }
                     else if ((int)poutput.Hitchance == 5)
                     {
                         QWER.Cast(poutput.CastPosition);
-                        debug("not faced");
                     }
                 }
             }
             else if (HitChanceNum == 3)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) - QWER.Width) * 6;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
                     QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                 else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
                     || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
                 {
-                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) < target.Distance(Player.Position))
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
                         {
                             QWER.Cast(poutput.CastPosition);
-                            return;
                         }
                     }
                     else
@@ -329,7 +335,7 @@ namespace OneKeyToWin_AIO_Sebby
             else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) - QWER.Width) * 6;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
 
                 if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
@@ -337,12 +343,11 @@ namespace OneKeyToWin_AIO_Sebby
                 else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
                     || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
                 {
-                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) < target.Distance(Player.Position))
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
                         {
                             QWER.Cast(poutput.CastPosition);
-                            return;
                         }
                     }
                     else

@@ -189,8 +189,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (t.IsValidTarget())
             {
-                getRdmg(t);
-                
                 var qDmg = Q.GetDamage(t);
                 var wDmg = W.GetDamage(t);
                 if (qDmg > t.Health)
@@ -588,9 +586,6 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = QMANA - ObjectManager.Player.Level * 2;
             else
                 RMANA = R.Instance.ManaCost; ;
-
-            if (Farm)
-                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {

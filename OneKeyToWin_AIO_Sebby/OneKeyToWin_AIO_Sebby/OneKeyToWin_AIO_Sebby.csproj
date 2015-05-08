@@ -59,6 +59,7 @@
     <Compile Include="Ezreal.cs" />
     <Compile Include="Jinx.cs" />
     <Compile Include="KogMaw.cs" />
+    <Compile Include="MissFortune.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sivir.cs" />
