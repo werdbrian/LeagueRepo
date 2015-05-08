@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby
         public float WMANA;
         public float EMANA;
         public float RMANA;
-
+        public bool attackNow = true;
         public Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
@@ -37,9 +37,9 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 800f);
             R = new Spell(SpellSlot.R, 1200f);
 
-            Q1.SetSkillshot(0.25f, 100f, 1400f, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.25f, 150f, 1400f, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.29f, 1400f);
-            E.SetSkillshot(0.5f, 100f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.5f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 200f, 2000f, false, SkillshotType.SkillshotCircle);
 
             //LoadMenuOKTW();
@@ -48,12 +48,29 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += Drawing_OnDraw;
+            Orbwalking.AfterAttack += afterAttack;
            // Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             //Drawing.OnDraw += Drawing_OnDraw;
         }
 
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (!unit.IsMe)
+                return;
+            attackNow = true;
+        }
+
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
+            attackNow = false;
+
+            if (Player.IsChannelingImportantSpell())
+            {
+                Orbwalking.Attack = false;
+                Orbwalking.Move = false;
+                Program.debug("cast R");
+                return;
+            }
             if (W.IsReady())
             {
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
@@ -67,7 +84,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-
             if (Player.IsChannelingImportantSpell())
             {
                 Orbwalking.Attack = false;
@@ -79,30 +95,27 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Orbwalking.Attack = true;
                 Orbwalking.Move = true;
-                if (R.IsReady())
+                if (R.IsReady() && Config.Item("useR").GetValue<KeyBind>().Active)
                 {
-                    if (Config.Item("useR").GetValue<KeyBind>().Active)
-                    {
-                        var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-                        if (t.IsValidTarget())
-                            R.Cast(t, true, true);
-                    }
-
+                    var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget())
+                        R.Cast(t, true, true);
                 }
             }
+
 
             if (Program.LagFree(0))
             {
                 SetMana();
             }
 
-            if (Program.LagFree(1) && Q.IsReady())
+            if (Program.LagFree(1) && attackNow && Q.IsReady())
                 LogicQ();
-            
-            if (Program.LagFree(2) && E.IsReady())
+
+            if (Program.LagFree(2) && attackNow && E.IsReady())
                 LogicE();
 
-            if (Program.LagFree(4) && R.IsReady())
+            if (Program.LagFree(4) && attackNow && R.IsReady())
             {
                 LogicR();
             }
@@ -113,6 +126,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t1 = TargetSelector.GetTarget(Q1.Range, TargetSelector.DamageType.Physical);
             if ( t.IsValidTarget(Q.Range))
             {
+                
                 if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
                    Q.Cast(t);
                 else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
@@ -132,7 +146,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (minionQ.IsValidTarget(Q.Range) )
                 {
                     Program.debug("" + minionQ.Distance(t1.Position));
-                    if (minionQ.Distance(poutput.CastPosition) < 400 && minionQ.Distance(poutput.CastPosition) > 100)
+                    if (minionQ.Distance(poutput.CastPosition) < 450 && minionQ.Distance(poutput.CastPosition) > 100)
                     {
                         if (Q.GetDamage(t1) + ObjectManager.Player.GetAutoAttackDamage(t1) > t1.Health)
                             Q.Cast(col.Last());
@@ -156,18 +170,18 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if (E.GetDamage(t) + Q.GetDamage(t) > t.Health && ObjectManager.Player.Mana > QMANA + EMANA + RMANA)
                     Program.CastSpell(E, t);
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Program.CastSpell(E, t);
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + 5
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + 5
                     && !Orbwalking.InAutoAttackRange(t))
                     Program.CastSpell(E, t);
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + QMANA + WMANA
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA
                    && ObjectManager.Player.CountEnemiesInRange(300) > 0)
                     Program.CastSpell(E, t);
-                else if (Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Mana > RMANA + WMANA + EMANA
+                else if (Program.Combo  && ObjectManager.Player.Mana > RMANA + WMANA + EMANA
                     && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
                     Program.CastSpell(E, t);
-                else if ((Orbwalker.ActiveMode.ToString() == "Combo" || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                else if ((Program.Combo|| Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                     {
@@ -186,8 +200,8 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (t.IsValidTarget(R.Range))
             {
-                var rDmg = R.GetDamage(t);
-
+                var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 10);
+ 
                 if (ObjectManager.Player.CountEnemiesInRange(700) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
                 {
                     var tDis = Player.Distance(t.ServerPosition);

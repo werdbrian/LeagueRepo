@@ -166,6 +166,18 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
+
+            if (Player.IsChannelingImportantSpell())
+            {
+                Orbwalking.Attack = false;
+                Orbwalking.Move = false;
+                return;
+            }
+            else
+            {
+                Orbwalking.Attack = true;
+                Orbwalking.Move = true;
+            }
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
