@@ -103,7 +103,6 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-            
 
                 switch (Player.ChampionName)
                 {
@@ -127,6 +126,9 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                     case "MissFortune":
                         new MissFortune().LoadOKTW();
+                        break;
+                    case "Quinn":
+                        new Quinn().LoadOKTW();
                         break;
                 }
                 
@@ -166,7 +168,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
-
             if (Player.IsChannelingImportantSpell())
             {
                 Orbwalking.Attack = false;
@@ -280,6 +281,28 @@ namespace OneKeyToWin_AIO_Sebby
                 return true;
         }
 
+        public static bool CanMove(Obj_AI_Hero target)
+        {
+            
+            if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
+                target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
+                target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
+                target.IsStunned || target.HasBuff("Recall") || target.IsChannelingImportantSpell() 
+            )
+                return false;
+            else
+                return true;
+        }
+
+
+        public static float GetRealDmg(Spell QWER, Obj_AI_Hero target)
+        {
+            if (Orbwalking.InAutoAttackRange(target) || target.CountAlliesInRange(300) > 0)
+                return QWER.GetDamage(target) + (float)ObjectManager.Player.GetAutoAttackDamage(target) * 2;
+            else
+                return QWER.GetDamage(target);
+        }
+
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
 
@@ -385,7 +408,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 switch (recall.Status)
                 {
-
                     case Packet.S2C.Teleport.Status.Start:
                         RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
                         RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time , RecallNum = 0});

@@ -108,7 +108,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-
             if (Program.LagFree(0))
                 SetMana();
             if (Program.LagFree(1) && Q.IsReady())
@@ -121,8 +120,6 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicW();
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
-
-
         }
         private void LogicR()
         {
