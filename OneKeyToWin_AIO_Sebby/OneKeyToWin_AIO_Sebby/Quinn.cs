@@ -1,0 +1,213 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using LeagueSharp;
+using LeagueSharp.Common;
+using SharpDX;
+
+namespace OneKeyToWin_AIO_Sebby
+{
+    class Quinn
+    {
+        private Menu Config = Program.Config;
+        public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
+
+        public Spell E;
+        public Spell Q;
+        public Spell Q1;
+        public Spell R;
+        public Spell W;
+
+        public float QMANA;
+        public float WMANA;
+        public float EMANA;
+        public float RMANA;
+        public bool attackNow = true;
+        private int visableCount = 0;
+        public float WardTime = 0;
+        public Vector3 ShowPosition;
+        public Obj_AI_Hero ShowTarget;
+
+        public Obj_AI_Hero Player
+        {
+            get { return ObjectManager.Player; }
+        }
+        public void LoadOKTW()
+        {
+            Q = new Spell(SpellSlot.Q, 990);
+            E = new Spell(SpellSlot.E, 700);
+            W = new Spell(SpellSlot.W, 2100);
+            R = new Spell(SpellSlot.R, 550);
+
+            Q.SetSkillshot(0.3f, 80f, 1150, true, SkillshotType.SkillshotLine);
+            E.SetTargetted(0.25f, 2000f);
+
+            LoadMenuOKTW(); 
+            Game.OnUpdate += Game_OnGameUpdate;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+            //Drawing.OnDraw += Drawing_OnDraw;
+            Orbwalking.AfterAttack += afterAttack;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            //Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
+            //Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
+        {
+            if (E.IsReady() && unit.IsValidTarget(E.Range) )
+                E.CastOnUnit(unit);
+        }
+
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (!unit.IsMe)
+                return;
+            LogicE();
+        }
+
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (Config.Item("AGC").GetValue<bool>() )
+            {
+                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                if (Target.IsValidTarget(E.Range) && E.IsReady())
+                {
+                    E.Cast(Target, true);
+                    Program.debug("E AGC");
+                }
+                else if (Target.IsValidTarget(Q.Range))
+                {
+                    Q.Cast(Target, true);
+                    Program.debug("Q AGC");
+                }
+            }
+        }
+
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (args.Target == null)
+                return;
+            
+            if (sender.IsValid<Obj_AI_Hero>() && !sender.IsValid<Obj_AI_Turret>() && sender.IsEnemy && args.Target.IsMe && args.SData.IsAutoAttack() && Q.IsReady())
+            {
+                var target2 = ObjectManager.Get<Obj_AI_Hero>().Find(x => x.NetworkId == sender.NetworkId);
+                if (ActiveR && target2.IsValidTarget(500))
+                {
+                    Q.Cast();
+                    return;
+                }
+
+                Q.Cast(target2);
+                //Game.PrintChat("" + HpPercentage);
+            }
+        }
+
+        private void Game_OnGameUpdate(EventArgs args)
+        {
+
+            if (Program.LagFree(0))
+                SetMana();
+            if (Program.LagFree(1) && Q.IsReady())
+                LogicQ();
+
+            if (Program.LagFree(2) && E.IsReady() && ActiveR)
+                LogicE();
+
+            if (Program.LagFree(3) && W.IsReady())
+                LogicW();
+            if (Program.LagFree(4) && R.IsReady())
+                LogicR();
+
+
+        }
+        private void LogicR()
+        {
+            var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+            if (ActiveR)
+            {
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(650)))
+                {
+                    if (Program.GetRealDmg(R, enemy) > enemy.Health)
+                        R.Cast();
+                }
+            }
+        }
+
+        private void LogicQ()
+        {
+            if (ActiveR)
+            {
+                if (ObjectManager.Player.CountEnemiesInRange(500) > 1 && ObjectManager.Player.Mana > EMANA + QMANA)
+                    Q.Cast();
+                return;
+            }
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget(Q.Range))
+            {
+                if (Program.GetRealDmg(Q, t) > t.Health)
+                    Program.CastSpell(Q, t);
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA && !Orbwalking.InAutoAttackRange(t))
+                    Program.CastSpell(Q, t);
+                else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
+                {
+                    Program.CastSpell(Q, t);
+                }
+            }
+
+        }
+
+        private void LogicE()
+        {
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if ( t.IsValidTarget(E.Range))
+            {
+                if (E.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
+                    E.Cast(t);
+                else if (ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(260) > 0)
+                    E.Cast(t);
+                else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.CountEnemiesInRange(1000) < 3)
+                    E.Cast(t);
+            }
+
+        }
+
+        private void LogicW()
+        {
+
+        }
+
+        private bool ActiveR
+        {
+            get { return (Player.HasBuff("quinnrtimeout") || Player.HasBuff("QuinnRForm")); }
+        }
+        private void SetMana()
+        {
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
+
+            if (!R.IsReady())
+                RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
+            else
+                RMANA = R.Instance.ManaCost; 
+
+            if (Player.Health < Player.MaxHealth * 0.2)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                EMANA = 0;
+                RMANA = 0;
+            }
+        }
+        private void LoadMenuOKTW()
+        {
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloser E,Q").SetValue(true));
+
+
+        }
+    }
+}

@@ -131,6 +131,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 SetMana();
                 //debug("" + ObjectManager.Player.AttackRange);
+
             }
 
             if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
@@ -230,10 +231,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !enemy.HasBuff("rocketgrab2") && E.IsReady()))
                 {
-                    if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
-                         enemy.IsStunned || enemy.HasBuff("Recall"))
+                    if (!Program.CanMove(enemy))
                         E.Cast(enemy, true);
                 }
 
@@ -242,7 +240,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (ta.HasBuffOfType(BuffType.Slow))
                     {
-                        E.CastIfHitchanceEquals(ta, HitChance.VeryHigh, true);
+                        Program.CastSpell(E, ta);
                         debug("E slow");
                     }
                     else

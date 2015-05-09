@@ -38,7 +38,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 1200f);
 
             Q1.SetSkillshot(0.25f, 200f, 1400f, true, SkillshotType.SkillshotLine);
-            Q.SetTargetted(0.29f, 1400f);
+            Q.SetTargetted(0.25f, 1400f);
             E.SetSkillshot(0.5f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 200f, 2000f, false, SkillshotType.SkillshotCircle);
 
@@ -129,7 +129,7 @@ namespace OneKeyToWin_AIO_Sebby
                 
                 if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
                    Q.Cast(t);
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                     Q.Cast(t);
                 else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Q.Cast(t);
@@ -143,14 +143,13 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
 
                 var minionQ = col.Last();
-                if (minionQ.IsValidTarget(Q.Range) )
+                if (minionQ.IsValidTarget(Q.Range) && (int)poutput.Hitchance > 4)
                 {
-                    Program.debug("" + minionQ.Distance(t1.Position));
-                    if (minionQ.Distance(poutput.CastPosition) < 420 && minionQ.Distance(poutput.CastPosition) > 100)
+                    if (minionQ.Distance(poutput.CastPosition) < 400 && minionQ.Distance(poutput.CastPosition) > 100)
                     {
                         if (Q.GetDamage(t1) + ObjectManager.Player.GetAutoAttackDamage(t1) > t1.Health)
                             Q.Cast(col.Last());
-                        else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                        else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                             Q.Cast(col.Last());
                         else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA + QMANA)
                             Q.Cast(col.Last());
@@ -231,9 +230,9 @@ namespace OneKeyToWin_AIO_Sebby
             EMANA = E.Instance.ManaCost;
 
             if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
+                RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
             else
-                RMANA = R.Instance.ManaCost; ;
+                RMANA = R.Instance.ManaCost;
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
