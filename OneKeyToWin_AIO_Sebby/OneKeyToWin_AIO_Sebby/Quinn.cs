@@ -172,7 +172,6 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.CountEnemiesInRange(1000) < 3)
                     E.Cast(t);
             }
-
         }
 
         private void LogicW()
