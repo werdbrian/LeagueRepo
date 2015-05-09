@@ -113,13 +113,28 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(1) && Q.IsReady())
                 LogicQ();
 
-            if (Program.LagFree(2) && E.IsReady() && ActiveR)
+            if (Program.LagFree(2) && E.IsReady() )
+            {
+                if (ActiveR)
                 LogicE();
+                else
+                    LogicE2();
+            }
 
             if (Program.LagFree(3) && W.IsReady())
                 LogicW();
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
+        }
+
+        private void LogicE2()
+        {
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget(E.Range))
+            {
+                if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && (Program.Combo || Program.Farm) && t.IsDashing() && t.CountEnemiesInRange(600) < 3)
+                    E.Cast(t);
+            }
         }
         private void LogicR()
         {
@@ -130,6 +145,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Program.GetRealDmg(R, enemy) > enemy.Health)
                         R.Cast();
+                    
                 }
             }
         }
@@ -167,6 +183,8 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (ObjectManager.Player.Mana > RMANA + EMANA && ObjectManager.Player.CountEnemiesInRange(260) > 0)
                     E.Cast(t);
                 else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.CountEnemiesInRange(1000) < 3)
+                    E.Cast(t);
+                else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.IsDashing())
                     E.Cast(t);
             }
         }
