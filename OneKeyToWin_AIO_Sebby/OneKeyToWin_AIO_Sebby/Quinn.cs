@@ -186,7 +186,7 @@ namespace OneKeyToWin_AIO_Sebby
                     E.Cast(t);
                 else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.CountEnemiesInRange(1000) < 3)
                     E.Cast(t);
-                else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.IsDashing())
+                else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo )
                     E.Cast(t);
             }
         }
