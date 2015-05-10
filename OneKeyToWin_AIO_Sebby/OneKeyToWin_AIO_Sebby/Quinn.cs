@@ -131,7 +131,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicE2()
         {
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget(E.Range))
             {
                 if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && (Program.Combo || Program.Farm) && t.IsDashing() && t.CountEnemiesInRange(600) < 3)
@@ -177,7 +177,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicE()
         {
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if ( t.IsValidTarget(E.Range))
             {
                 if (E.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
