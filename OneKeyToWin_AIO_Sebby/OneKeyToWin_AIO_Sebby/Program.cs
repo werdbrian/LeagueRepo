@@ -17,6 +17,14 @@ namespace OneKeyToWin_AIO_Sebby
         public float RecallStart{ get; set; }
         public int RecallNum { get; set; }
     }
+    class VisableInfo
+    {
+        public int VisableID { get; set; }
+        public Vector3 LastPosition { get; set; }
+        public float time { get; set; }
+        public Vector3 PredictedPos { get; set; }
+    }
+
     class champions
     {
         public Obj_AI_Hero Player;
@@ -52,6 +60,8 @@ namespace OneKeyToWin_AIO_Sebby
         public static int RecallAbort = 0;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
+
+        public static List<VisableInfo> VisableInfo = new List<VisableInfo>();
 
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
@@ -94,6 +104,11 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
 
+
+            Q = new Spell(SpellSlot.Q);
+            E = new Spell(SpellSlot.E);
+            W = new Spell(SpellSlot.W);
+            R = new Spell(SpellSlot.R);
 
             if (!Config.Item("aio").GetValue<bool>())
             {
@@ -168,6 +183,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
+           
+
             if (Player.IsChannelingImportantSpell())
             {
                 Orbwalking.Attack = false;
@@ -190,6 +207,41 @@ namespace OneKeyToWin_AIO_Sebby
                 tickSkip = Config.Item("pre").GetValue<bool>();
 
                 JunglerTimer();
+                AutoWard();
+            }
+        }
+
+
+        public static void AutoWard()
+        {
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            {
+                if (enemy.IsVisible && enemy.IsValid && !enemy.IsDead)
+                {
+                    var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
+                    if (prepos != null)
+                    {
+                        VisableInfo.RemoveAll(x => x.VisableID == enemy.NetworkId);
+                        VisableInfo.Add(new VisableInfo() { VisableID = enemy.NetworkId, LastPosition = enemy.Position, time = Game.Time, PredictedPos = prepos });
+                    }
+                }
+                else if (enemy.IsDead)
+                {
+                    VisableInfo.RemoveAll(x => x.VisableID == enemy.NetworkId);
+                }
+                else
+                {
+                    var need = VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
+                    if (need == null)
+                        return;
+
+                    if (Player.ChampionName == "Quinn" && need.time + 5 > Game.Time && need.PredictedPos.Distance(Player.Position) < 1200 && Config.Item("autoW").GetValue<bool>())
+                    {
+     
+                        W.Cast();
+                    }
+
+                }
             }
         }
 

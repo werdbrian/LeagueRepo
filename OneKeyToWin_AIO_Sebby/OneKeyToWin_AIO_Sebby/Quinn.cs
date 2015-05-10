@@ -36,7 +36,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 990);
+            Q = new Spell(SpellSlot.Q, 930);
             E = new Spell(SpellSlot.E, 700);
             W = new Spell(SpellSlot.W, 2100);
             R = new Spell(SpellSlot.R, 550);
@@ -110,6 +110,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
+            if (Player.IsRecalling() && Player.IsDead)
+                return;
+
             if (Program.LagFree(0))
                 SetMana();
             if (Program.LagFree(1) && Q.IsReady())
@@ -129,15 +132,7 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicR();
         }
 
-        private void LogicE2()
-        {
-            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget(E.Range))
-            {
-                if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && (Program.Combo || Program.Farm) && t.IsDashing() && t.CountEnemiesInRange(600) < 3)
-                    E.Cast(t);
-            }
-        }
+        
         private void LogicR()
         {
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
@@ -174,7 +169,15 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
         }
-
+        private void LogicE2()
+        {
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget(E.Range))
+            {
+                if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && (Program.Combo || Program.Farm) && t.IsDashing() && t.CountEnemiesInRange(600) < 3)
+                    E.Cast(t);
+            }
+        }
         private void LogicE()
         {
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
@@ -186,7 +189,7 @@ namespace OneKeyToWin_AIO_Sebby
                     E.Cast(t);
                 else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.CountEnemiesInRange(1000) < 3)
                     E.Cast(t);
-                else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo )
+                else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.IsDashing())
                     E.Cast(t);
             }
         }
@@ -228,6 +231,7 @@ namespace OneKeyToWin_AIO_Sebby
             
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloser E,Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
 
 
         }
