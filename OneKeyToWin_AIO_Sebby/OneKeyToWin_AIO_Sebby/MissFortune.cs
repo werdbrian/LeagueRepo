@@ -142,7 +142,7 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
 
                 var minionQ = col.Last();
-                if (minionQ.IsValidTarget(Q.Range) && (int)poutput.Hitchance > 4)
+                if (minionQ.IsValidTarget(Q.Range))
                 {
                     if (minionQ.Distance(poutput.CastPosition) < 400 && minionQ.Distance(poutput.CastPosition) > 100)
                     {
