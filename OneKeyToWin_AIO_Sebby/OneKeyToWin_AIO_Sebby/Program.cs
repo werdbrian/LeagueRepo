@@ -53,7 +53,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static int HitChanceNum= 4;
         public static int tickNum = 4;
         public static int tickIndex = 0;
-        public static bool tickSkip = true;
+        public static bool tickSkip = true, attackNow = true;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
@@ -152,6 +152,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Quinn":
                         new Quinn().LoadOKTW();
                         break;
+                    case "Kalista":
+                        new Kalista().LoadOKTW();
+                        break;
                 }
                 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
@@ -187,10 +190,21 @@ namespace OneKeyToWin_AIO_Sebby
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
         }
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (!unit.IsMe)
+                return;
+            attackNow = true;
 
+        }
+
+        private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            attackNow = false;
+
+        }
         private static void OnUpdate(EventArgs args)
         {
-           
 
             if (Player.IsChannelingImportantSpell())
             {
@@ -208,6 +222,9 @@ namespace OneKeyToWin_AIO_Sebby
                 tickIndex = 0;
             if (LagFree(0))
             {
+                var target = Orbwalker.GetTarget();
+                if (!(target is Obj_AI_Hero))
+                    attackNow = true;
                 HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
                 if (Config.Item("pots").GetValue<bool>())
                     PotionManagement();
@@ -224,11 +241,12 @@ namespace OneKeyToWin_AIO_Sebby
         {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
-                if (enemy.IsVisible && enemy.IsValid && !enemy.IsDead)
+                if (enemy.IsVisible && enemy.IsValid && !enemy.IsDead && enemy != null)
                 {
-                    var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
-                    if (prepos != null)
+                    
+                    if (Prediction.GetPrediction(enemy, 0.4f).CastPosition != null)
                     {
+                        var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
                         VisableInfo.RemoveAll(x => x.VisableID == enemy.NetworkId);
                         VisableInfo.Add(new VisableInfo() { VisableID = enemy.NetworkId, LastPosition = enemy.Position, time = Game.Time, PredictedPos = prepos });
                     }
@@ -240,7 +258,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                 {
                     var need = VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
-                    if (need == null)
+                    if (need == null || need.PredictedPos == null)
                         return;
 
                     if (W.IsReady() && Player.ChampionName == "Quinn" && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
@@ -253,6 +271,20 @@ namespace OneKeyToWin_AIO_Sebby
                         if (need.PredictedPos.Distance(Player.Position) < eRange)
                         {
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, eRange));
+                        }
+                    }
+                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo)
+                    {
+                        if (need.PredictedPos.Distance(Player.Position) < 800)
+                        {
+                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
+                        }
+                    }
+                    if (W.IsReady() && Game.Time - need.time > 3 && Game.Time - need.time < 4 && Player.ChampionName == "Kalista" && !Combo && Config.Item("autoW").GetValue<bool>())
+                    {
+                        if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
+                        {
+                            W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
                         }
                     }
                     if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>() )
@@ -521,7 +553,6 @@ namespace OneKeyToWin_AIO_Sebby
                         RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
                         if (jungler.NetworkId == sender.NetworkId)
                         {
-                            debug("" + jungler.SkinName);
                             enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
                             timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
                         }

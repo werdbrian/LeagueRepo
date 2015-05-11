@@ -58,6 +58,7 @@
     <Compile Include="Ashe.cs" />
     <Compile Include="Ezreal.cs" />
     <Compile Include="Jinx.cs" />
+    <Compile Include="Kalista.cs" />
     <Compile Include="KogMaw.cs" />
     <Compile Include="MissFortune.cs" />
     <Compile Include="Program.cs" />

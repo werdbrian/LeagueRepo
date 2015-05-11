@@ -143,7 +143,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var minionQ = col.Last();
                 if (minionQ.IsValidTarget(Q.Range))
                 {
-                    if (minionQ.Distance(poutput.CastPosition) < 380 && minionQ.Distance(poutput.CastPosition) > 100)
+                    if (minionQ.Distance(poutput.CastPosition) < 380 && minionQ.Distance(t1.Position) < 380 && minionQ.Distance(poutput.CastPosition) > 100)
                     {
                         if (Q.GetDamage(t1) + ObjectManager.Player.GetAutoAttackDamage(t1) > t1.Health)
                             Q.Cast(col.Last());
