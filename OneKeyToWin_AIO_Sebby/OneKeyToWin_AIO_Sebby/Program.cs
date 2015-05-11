@@ -99,7 +99,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
-                Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(false));
+                Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
             }
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
@@ -292,8 +292,11 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
             {
 
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid && Config.Item("ro" + enemy.BaseSkinName).GetValue<bool>()))
-                    jungler = enemy;
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
+                {
+                    if (Config.Item("ro" + enemy.ChampionName) != null && Config.Item("ro" + enemy.ChampionName).GetValue<bool>())
+                        jungler = enemy;
+                }
                 
 
                 if (jungler.IsDead)
@@ -306,6 +309,8 @@ namespace OneKeyToWin_AIO_Sebby
                     float Way = 0;
                     var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
                     var PointStart = ObjectManager.Player.Position;
+                    if (JunglerPath == null)
+                        return;
                     foreach (var point in JunglerPath)
                     {
                         if (PointStart.Distance(point) > 0)

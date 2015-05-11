@@ -56,8 +56,6 @@ namespace OneKeyToWin_AIO_Sebby
             //Drawing.OnDraw += Drawing_OnDraw;
         }
 
-
-
         private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
         {
             if (E.IsReady() && unit.IsValidTarget(E.Range) )
