@@ -214,11 +214,18 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast(t, true, true);
                     else if (rDmg > t.Health && tDis < 1300)
                         R.Cast(t, true, true);
+                    return;
                 }
-                else if (rDmg * 8 > t.Health && t.CountEnemiesInRange(300) > 2 && ObjectManager.Player.CountEnemiesInRange(700) == 0 )
+                else if (rDmg * 8 > t.Health && t.CountEnemiesInRange(300) > 2 && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+                {
                     R.Cast(t, true, true);
+                    return;
+                }
                 else if (rDmg * 8 > t.Health && !Program.CanMove(t) && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+                {
                     R.Cast(t, true, true);
+                    return;
+                }
             }
 
         }
