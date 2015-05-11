@@ -108,7 +108,8 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
 
-            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
 
 
             Q = new Spell(SpellSlot.Q);
@@ -254,8 +255,10 @@ namespace OneKeyToWin_AIO_Sebby
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, eRange));
                         }
                     }
-                    if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
+                    if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>() )
                     {
+                        if (Config.Item("AutoWardCombo").GetValue<bool>() && Combo)
+                            return;
                         if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
                         {
                             if (TrinketN.IsReady())
