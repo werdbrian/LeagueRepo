@@ -37,9 +37,9 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 800f);
             R = new Spell(SpellSlot.R, 1200f);
 
-            Q1.SetSkillshot(0.25f, 200f, 1400f, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.25f, 100f, 2000f, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.25f, 1400f);
-            E.SetSkillshot(0.5f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 200f, 2000f, false, SkillshotType.SkillshotCircle);
 
             LoadMenuOKTW();
@@ -143,7 +143,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var minionQ = col.Last();
                 if (minionQ.IsValidTarget(Q.Range))
                 {
-                    if (minionQ.Distance(poutput.CastPosition) < 400 && minionQ.Distance(poutput.CastPosition) > 100)
+                    if (minionQ.Distance(poutput.CastPosition) < 380 && minionQ.Distance(poutput.CastPosition) > 100)
                     {
                         if (Q.GetDamage(t1) + ObjectManager.Player.GetAutoAttackDamage(t1) > t1.Health)
                             Q.Cast(col.Last());
@@ -199,7 +199,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 10);
  
-                if (ObjectManager.Player.CountEnemiesInRange(700) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
+                if (ObjectManager.Player.CountEnemiesInRange(800) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
                 {
                     var tDis = Player.Distance(t.ServerPosition);
                     if (rDmg * 6 > t.Health && tDis < 800)
@@ -216,6 +216,8 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast(t, true, true);
                 }
                 else if (rDmg * 8 > t.Health && t.CountEnemiesInRange(300) > 2 && ObjectManager.Player.CountEnemiesInRange(700) == 0 )
+                    R.Cast(t, true, true);
+                else if (rDmg * 8 > t.Health && !Program.CanMove(t) && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                     R.Cast(t, true, true);
             }
 

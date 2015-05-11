@@ -198,12 +198,9 @@ namespace OneKeyToWin_AIO_Sebby
             WMANA = W.Instance.ManaCost;
 
             if (!R.IsReady())
-                RMANA = WMANA - ObjectManager.Player.Level * 2;
+                RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost; ;
-
-            if (Program.Farm)
-                RMANA = RMANA + ObjectManager.Player.CountEnemiesInRange(2500) * 20;
 
             if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
