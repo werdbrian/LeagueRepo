@@ -43,6 +43,13 @@ namespace OneKeyToWin_AIO_Sebby
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+        }
+
+        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
+        {
+            if (Config.Item("autoRinter").GetValue<bool>() && R.IsReady() && unit.IsValidTarget(R.Range))
+                R.Cast(unit);
         }
 
 
@@ -93,8 +100,11 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
+                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && target.IsEnemy && Program.ValidUlt(target)))
                 {
+                    if (Config.Item("autoRinter").GetValue<bool>() && target.IsChannelingImportantSpell())
+                        R.Cast(target);
+
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     var Rdmg = R.GetDamage(target);
                     if (target.CountEnemiesInRange(250) > 2 && Config.Item("autoRaoe").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -218,6 +228,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRaoe", "Auto R aoe").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRinter", "Auto R OnPossibleToInterrupt").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
         }
     }
