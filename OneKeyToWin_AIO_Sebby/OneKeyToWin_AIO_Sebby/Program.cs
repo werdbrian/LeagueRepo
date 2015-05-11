@@ -54,15 +54,16 @@ namespace OneKeyToWin_AIO_Sebby
         public static int tickNum = 4;
         public static int tickIndex = 0;
         public static bool tickSkip = true;
-        public static int RecallID = 0;
-        public static float RecallStart;
-        public static int RecallFinish = 0;
-        public static int RecallAbort = 0;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
         public static List<VisableInfo> VisableInfo = new List<VisableInfo>();
 
+
+        public static Items.Item WardS = new Items.Item(2043, 600f);
+        public static Items.Item WardN = new Items.Item(2044, 600f);
+        public static Items.Item TrinketN = new Items.Item(3340, 600f);
+        public static Items.Item SightStone = new Items.Item(2049, 600f);
         public static Items.Item Potion = new Items.Item(2003, 0);
         public static Items.Item ManaPotion = new Items.Item(2004, 0);
 
@@ -89,6 +90,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal " + EzrealVer));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw " + KogMawVer));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir " + SivirVer));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("8", "Ashe " ));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("9", "Miss Fortune "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("10", "Quinn "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
 
@@ -103,6 +107,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+
+            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
 
 
             Q = new Spell(SpellSlot.Q);
@@ -207,7 +213,8 @@ namespace OneKeyToWin_AIO_Sebby
                 tickSkip = Config.Item("pre").GetValue<bool>();
 
                 JunglerTimer();
-                AutoWard();
+                if(!Player.IsRecalling())
+                    AutoWard();
             }
         }
 
@@ -235,12 +242,44 @@ namespace OneKeyToWin_AIO_Sebby
                     if (need == null)
                         return;
 
-                    if (Player.ChampionName == "Quinn" && need.time + 5 > Game.Time && need.PredictedPos.Distance(Player.Position) < 1200 && Config.Item("autoW").GetValue<bool>())
+                    if (W.IsReady() && Player.ChampionName == "Quinn" && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
                     {
-     
                         W.Cast();
                     }
-
+                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "Ashe" && Config.Item("autoE").GetValue<bool>())
+                    {
+                        var eRange = 1750 + 750 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level;
+                        if (need.PredictedPos.Distance(Player.Position) < eRange)
+                        {
+                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, eRange));
+                        }
+                    }
+                    if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
+                    {
+                        if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
+                        {
+                            if (TrinketN.IsReady())
+                            {
+                                TrinketN.Cast(need.PredictedPos);
+                                need.time = Game.Time - 5;
+                            }
+                            else if (SightStone.IsReady())
+                            {
+                                SightStone.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                            }
+                            else if (WardS.IsReady())
+                            {
+                                WardS.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                            }
+                            else if (WardN.IsReady())
+                            {
+                                WardN.Cast(need.PredictedPos);
+                                need.time = Game.Time - 5;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -250,7 +289,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
             {
 
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && Config.Item("ro" + enemy.BaseSkinName).GetValue<bool>()))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid && Config.Item("ro" + enemy.BaseSkinName).GetValue<bool>()))
                     jungler = enemy;
                 
 
@@ -339,7 +378,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
-                target.IsStunned || target.HasBuff("Recall") || target.IsChannelingImportantSpell() 
+                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell() 
             )
                 return false;
             else
@@ -451,7 +490,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (unit == null || !unit.IsValid || unit.IsAlly)
             {
-                //return;
+                return;
             }
            
             var recall = Packet.S2C.Teleport.Decoded(unit, args);

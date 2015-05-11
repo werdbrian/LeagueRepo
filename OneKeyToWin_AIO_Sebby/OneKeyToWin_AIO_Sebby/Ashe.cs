@@ -23,9 +23,7 @@ namespace OneKeyToWin_AIO_Sebby
         public float WMANA;
         public float EMANA;
         public float RMANA;
-        public float WardTime = 0;
-        public Vector3 ShowPosition;
-        public Obj_AI_Hero ShowTarget;
+
         public Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
@@ -75,12 +73,10 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
 
-            if (Program.LagFree(0))
+            if (Program.LagFree(1))
             {
                 SetMana();
             }
-            if (Program.LagFree(1) && E.IsReady())
-                LogicE();
 
             if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
@@ -92,29 +88,6 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicR();
         }
 
-
-        private void LogicE()
-        {
-            if (!Config.Item("autoE").GetValue<bool>())
-                return;
-            E.Range = 1750 + 750 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level;
-
-            //Program.debug("" + ShowTarget);
-
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
-            {
-
-                ShowPosition = Prediction.GetPrediction(enemy, 1f).CastPosition;
-                ShowTarget = enemy;
-                WardTime = Game.Time;
-            }
-
-            if (Player.Distance(ShowPosition) < E.Range && !ShowTarget.IsValidTarget() && !ShowTarget.IsDead && Game.Time - WardTime < 4 && Game.Time - WardTime > 1)
-            {
-                E.Cast(ObjectManager.Player.Position.Extend(ShowPosition, E.Range));
-            }
-
-        }
         private void LogicR()
         {
             if (Config.Item("autoR").GetValue<bool>())

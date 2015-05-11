@@ -44,7 +44,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             LoadMenuOKTW();
             
-
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += Drawing_OnDraw;

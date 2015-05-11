@@ -243,6 +243,10 @@ namespace OneKeyToWin_AIO_Sebby
                         Program.CastSpell(E, ta);
                         debug("E slow");
                     }
+                    else if (ta.CountEnemiesInRange(250) > 1)
+                    {
+                        Program.CastSpell(E, ta);
+                    }
                     else
                     {
                         List<Vector2> waypoints = ta.GetWaypoints();

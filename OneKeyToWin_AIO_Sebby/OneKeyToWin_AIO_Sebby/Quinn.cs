@@ -113,12 +113,12 @@ namespace OneKeyToWin_AIO_Sebby
             if (Player.IsRecalling() && Player.IsDead)
                 return;
 
-            if (Program.LagFree(0))
+            if (Program.LagFree(1))
                 SetMana();
-            if (Program.LagFree(1) && Q.IsReady())
+            if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
 
-            if (Program.LagFree(2) && E.IsReady() )
+            if (Program.LagFree(3) && E.IsReady() )
             {
                 if (ActiveR)
                 LogicE();
@@ -126,8 +126,7 @@ namespace OneKeyToWin_AIO_Sebby
                     LogicE2();
             }
 
-            if (Program.LagFree(3) && W.IsReady())
-                LogicW();
+
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
         }
@@ -192,11 +191,6 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA && Program.Combo && t.IsDashing())
                     E.Cast(t);
             }
-        }
-
-        private void LogicW()
-        {
-
         }
 
         private bool ActiveR
