@@ -230,7 +230,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void AutoWard()
         {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
             {
                 if (enemy.IsVisible && enemy.IsValid && !enemy.IsDead && enemy != null)
                 {
@@ -246,7 +246,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     VisableInfo.RemoveAll(x => x.VisableID == enemy.NetworkId);
                 }
-                else
+                else if (!enemy.IsDead )
                 {
                     var need = VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
                     if (need == null || need.PredictedPos == null)

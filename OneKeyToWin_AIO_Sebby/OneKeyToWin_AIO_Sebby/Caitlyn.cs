@@ -91,7 +91,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (E.IsReady() && Target.IsValidTarget(E.Range) && ObjectManager.Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(500) < 3)
                     E.Cast(Target, true);
                 else if (W.IsReady() && Target.IsValidTarget(W.Range))
-                    W.Cast(ObjectManager.Player.ServerPosition, true);
+                    Program.CastSpell(W, Target);
                 return;
             }
             return;
