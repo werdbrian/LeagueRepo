@@ -224,16 +224,14 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("telE").GetValue<bool>())
                 {
-                    foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && E.IsReady() && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
+                    foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
                     {
                         E.Cast(Object.Position, true);
                     }
                 }
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !enemy.HasBuff("rocketgrab2") && E.IsReady()))
-                {
-                    if (!Program.CanMove(enemy))
-                        E.Cast(enemy, true);
-                }
+
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
+                    E.Cast(enemy, true);
 
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (ObjectManager.Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)

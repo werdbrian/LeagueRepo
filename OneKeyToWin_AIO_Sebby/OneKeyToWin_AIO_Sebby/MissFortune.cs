@@ -189,11 +189,9 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(E, t);
                 else if ((Program.Combo|| Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                     {
-                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                        if (!Program.CanMove(enemy))
                             E.Cast(enemy, true, true);
                     }
                 }
@@ -256,10 +254,6 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
             }
-
-        }
-        private void CastR(Obj_AI_Base target)
-        {
 
         }
 
