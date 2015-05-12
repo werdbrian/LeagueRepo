@@ -14,16 +14,11 @@ namespace OneKeyToWin_AIO_Sebby
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
 
-        public Spell E;
-        public Spell Q;
-        public Spell Q1;
-        public Spell R;
-        public Spell W;
+        private Spell E ,Q, Q1, R, W;
 
-        public float QMANA;
-        public float WMANA;
-        public float EMANA;
-        public float RMANA;
+        private float QMANA, WMANA, EMANA, RMANA;
+        private float RCastTime = 0;
+
         public bool attackNow = true;
         public Obj_AI_Hero Player
         {
@@ -45,11 +40,24 @@ namespace OneKeyToWin_AIO_Sebby
             LoadMenuOKTW();
             
             Game.OnUpdate += Game_OnGameUpdate;
+           
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += afterAttack;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
            // Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             //Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "MissFortuneBulletTime")
+            {
+                RCastTime = Game.Time;
+                Program.debug(args.SData.Name);
+                Orbwalking.Attack = false;
+                Orbwalking.Move = false;
+            }
         }
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
@@ -62,6 +70,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             attackNow = false;
+
 
             if (Player.IsChannelingImportantSpell())
             {
@@ -83,7 +92,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (Player.IsChannelingImportantSpell())
+
+            if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.5)
             {
                 Orbwalking.Attack = false;
                 Orbwalking.Move = false;
@@ -97,8 +107,12 @@ namespace OneKeyToWin_AIO_Sebby
                 if (R.IsReady() && Config.Item("useR").GetValue<KeyBind>().Active)
                 {
                     var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-                    if (t.IsValidTarget())
+                    if (t.IsValidTarget(R.Range))
+                    {
                         R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                        return;
+                    }
                 }
             }
 
@@ -203,32 +217,57 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     var tDis = Player.Distance(t.ServerPosition);
                     if (rDmg * 6 > t.Health && tDis < 800)
-                        R.Cast(t,true,true);
+                    {
+                        R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                    }
                     else if (rDmg * 5 > t.Health && tDis < 900)
+                    {
                         R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                    }
                     else if (rDmg * 4 > t.Health && tDis < 1000)
+                    {
                         R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                    }
                     else if (rDmg * 3 > t.Health && tDis < 1100)
+                    {
                         R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                    }
                     else if (rDmg * 2 > t.Health && tDis < 1200)
+                    {
                         R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                    }
                     else if (rDmg > t.Health && tDis < 1300)
+                    {
                         R.Cast(t, true, true);
+                        RCastTime = Game.Time;
+                    }
                     return;
                 }
                 else if (rDmg * 8 > t.Health && t.CountEnemiesInRange(300) > 2 && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                 {
                     R.Cast(t, true, true);
+                    RCastTime = Game.Time;
                     return;
                 }
                 else if (rDmg * 8 > t.Health && !Program.CanMove(t) && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                 {
                     R.Cast(t, true, true);
+                    RCastTime = Game.Time;
                     return;
                 }
             }
 
         }
+        private void CastR(Obj_AI_Base target)
+        {
+
+        }
+
         private void SetMana()
         {
             QMANA = Q.Instance.ManaCost;

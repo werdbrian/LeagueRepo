@@ -205,18 +205,6 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private static void OnUpdate(EventArgs args)
         {
-
-            if (Player.IsChannelingImportantSpell())
-            {
-                Orbwalking.Attack = false;
-                Orbwalking.Move = false;
-                return;
-            }
-            else
-            {
-                Orbwalking.Attack = true;
-                Orbwalking.Move = true;
-            }
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
@@ -418,7 +406,8 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
-                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell() 
+                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell() ||
+                !target.CanMove
             )
                 return false;
             else
@@ -436,15 +425,20 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
-
+            
             //HitChance 0 - 2
             // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-                
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") )
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+            {
+                QWER.Cast(poutput.CastPosition);
+                return;
+            }
+
+            if (QWER.Delay < 0.30f && poutput.Hitchance == HitChance.Dashing)
             {
                 QWER.Cast(poutput.CastPosition);
                 return;

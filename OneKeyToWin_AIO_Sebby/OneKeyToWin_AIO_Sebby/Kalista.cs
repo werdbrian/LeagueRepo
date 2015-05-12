@@ -108,15 +108,23 @@ namespace OneKeyToWin_AIO_Sebby
         {
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+
+
             if (t.IsValidTarget())
             {
+                bool back = false;
+                List<Vector2> waypoints = t.GetWaypoints();
+                if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(t.Position)) > 100)
+                {
+                    back = true;
+                }
                 var qDmg = Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t);
                 var eDmg = E.GetDamage(t);
                 if (qDmg > t.Health && eDmg < t.Health && ObjectManager.Player.Mana > QMANA + EMANA && Orbwalking.InAutoAttackRange(t))
                     Program.CastSpell(Q, t);
                 else if ((qDmg * 1.1) + eDmg > t.Health && eDmg < t.Health && ObjectManager.Player.Mana > QMANA + EMANA && Orbwalking.InAutoAttackRange(t))
                     Program.CastSpell(Q, t);
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && !Orbwalking.InAutoAttackRange(t))
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && !Orbwalking.InAutoAttackRange(t) && back)
                     Program.CastSpell(Q, t);
                 else if (Program.Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && !Orbwalking.InAutoAttackRange(t))
                     Program.CastSpell(Q, t);
@@ -138,7 +146,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(ally => ally.IsAlly && !ally.IsDead && !ally.IsMe && ally.HasBuff("kalistacoopstrikeally")))
                 {
-
                     AllyR = ally;
                     break;
                 }
