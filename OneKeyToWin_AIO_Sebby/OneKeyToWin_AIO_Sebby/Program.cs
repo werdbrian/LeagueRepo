@@ -264,7 +264,7 @@ namespace OneKeyToWin_AIO_Sebby
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, eRange));
                         }
                     }
-                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo && ObjectManager.Player.Mana > 150f)
+                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo && Player.Mana > 150f)
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 800)
                         {
@@ -276,6 +276,13 @@ namespace OneKeyToWin_AIO_Sebby
                         if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
                         {
                             W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
+                        }
+                    }
+                    if (W.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 3 && Player.ChampionName == "Caitlyn" && Player.Mana > 150f)
+                    {
+                        if (need.PredictedPos.Distance(Player.Position) < 800)
+                        {
+                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
                         }
                     }
                     if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>() )
