@@ -278,11 +278,11 @@ namespace OneKeyToWin_AIO_Sebby
                             W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
                         }
                     }
-                    if (W.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 3 && Player.ChampionName == "Caitlyn" && Player.Mana > 150f)
+                    if (W.IsReady() && Game.Time - need.time < 3 && Player.ChampionName == "Caitlyn" && Player.Mana > 150f && attackNow)
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 800)
                         {
-                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
+                            W.Cast(need.PredictedPos);
                         }
                     }
                     if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>() )
