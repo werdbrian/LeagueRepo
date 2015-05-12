@@ -603,8 +603,8 @@ namespace OneKeyToWin_AIO_Sebby
             {
 
 
-                float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
-                float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
+                float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
+                float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
                 float positionDraw = 0;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 {
