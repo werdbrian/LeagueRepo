@@ -200,9 +200,11 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast(enemy, true);
                     if (t.HasBuffOfType(BuffType.Slow))
                         Q.Cast(t, true);
+                    else if (Player.Mana >Player.MaxMana * 0.8 )
+                        Program.CastSpell(Q, t);
                 }
 
-                if ((Program.Combo || Program.Farm)  && Player.CountEnemiesInRange(bonusRange() + 100) == 0&& ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA)
+                if ((Program.Combo || Program.Farm)  && Player.CountEnemiesInRange(bonusRange() + 100) == 0&& Player.Mana > RMANA + EMANA + WMANA + QMANA)
                     Q.CastIfWillHit(t, 2, true);
             }
             else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
