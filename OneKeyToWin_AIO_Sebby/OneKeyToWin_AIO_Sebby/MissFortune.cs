@@ -19,7 +19,6 @@ namespace OneKeyToWin_AIO_Sebby
         private float QMANA, WMANA, EMANA, RMANA;
         private float RCastTime = 0;
 
-        public bool attackNow = true;
         public Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
@@ -64,30 +63,26 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (!unit.IsMe)
                 return;
-            attackNow = true;
-        }
 
-        private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-        {
-            attackNow = false;
-
-
-            if (Player.IsChannelingImportantSpell())
+            if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.5)
             {
                 Orbwalking.Attack = false;
                 Orbwalking.Move = false;
                 Program.debug("cast R");
                 return;
             }
-            if (W.IsReady())
+            if (target is Obj_AI_Hero && W.IsReady())
             {
-                var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && args.Target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA && Config.Item("autoW").GetValue<bool>())
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo&& ObjectManager.Player.Mana > RMANA + WMANA && Config.Item("autoW").GetValue<bool>())
                     W.Cast();
-                else if (args.Target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA && Config.Item("harasW").GetValue<bool>())
+                else if ( ObjectManager.Player.Mana > RMANA + WMANA + QMANA && Config.Item("harasW").GetValue<bool>())
                     W.Cast();
-                
             }
+        }
+
+        private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -124,10 +119,10 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(1) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
 
-            if (Program.LagFree(2) && attackNow && E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Program.LagFree(2) && Program.attackNow && E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
 
-            if (Program.LagFree(4) && attackNow && R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            if (Program.LagFree(4) && Program.attackNow && R.IsReady() && Config.Item("autoR").GetValue<bool>())
             {
                 LogicR();
             }
