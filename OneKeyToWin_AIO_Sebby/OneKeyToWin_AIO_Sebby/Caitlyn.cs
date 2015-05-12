@@ -193,9 +193,8 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + 10 && Player.CountEnemiesInRange(bonusRange() + 100 + t.BoundingRadius) == 0 && !Config.Item("autoQ").GetValue<bool>())
                     Program.CastSpell(Q, t);
-                if ( (Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA && Player.CountEnemiesInRange(bonusRange()) == 0 && Player.CountEnemiesInRange(bonusRange() + 60) == 0)
+                if ( (Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA && Player.CountEnemiesInRange(bonusRange()) == 0)
                 {
-                    
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
                     if (t.HasBuffOfType(BuffType.Slow))
