@@ -127,10 +127,7 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(R.Range)))
                         {
-                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                                    enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                                    enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Suppression) ||
-                                    enemy.IsStunned || enemy.HasBuff("Recall"))
+                            if (!Program.CanMove(enemy))
                                 R.Cast(enemy, true);
                             else
                                 R.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
@@ -215,9 +212,7 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                         {
-                            if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                             enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                             enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                            if (!Program.CanMove(enemy))
                             {
                                 E.Cast(enemy, true);
                             }

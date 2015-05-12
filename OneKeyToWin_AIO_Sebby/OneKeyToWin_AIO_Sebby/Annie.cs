@@ -97,12 +97,9 @@ namespace OneKeyToWin_AIO_Sebby
                         && Q.GetDamage(target) < target.Health
                         && (target.CountEnemiesInRange(400) > 1 || R.GetDamage(target) + Q.GetDamage(target) > target.Health))
                         R.Cast(target, true, true);
-                    else if (Program.Combo && Q.GetDamage(target) < target.Health)
-                        if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                                     target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Taunt))
-                        {
+                    else if (Program.Combo && Q.GetDamage(target) < target.Health && !Program.CanMove(target))
                             R.Cast(target, true, true);
-                        }
+                        
                 }
                 if (W.IsReady() && (Program.Farm || Program.Combo))
                 {

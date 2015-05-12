@@ -214,9 +214,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                     {
-                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                        if (!Program.CanMove(enemy))
                         {
                             Q.Cast(enemy, true);
                         }
@@ -257,9 +255,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
                     {
-                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
+                        if (!Program.CanMove(enemy))
                         {
                             W.Cast(enemy, true);
                         }
@@ -351,9 +347,7 @@ namespace OneKeyToWin_AIO_Sebby
                             R.Cast(target, true, true);
                             debug("R recall");
                         }
-                        else if ((target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                         target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) ||
-                         target.HasBuffOfType(BuffType.Taunt)) && Config.Item("Rcc").GetValue<bool>() &&
+                        else if (!Program.CanMove(target) && Config.Item("Rcc").GetValue<bool>() &&
                             target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg * 4 > predictedHealth)
                         {
                             R.CastIfWillHit(target, 2, true);
