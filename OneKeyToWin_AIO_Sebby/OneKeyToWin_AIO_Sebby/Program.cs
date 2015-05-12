@@ -106,8 +106,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
-            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
-
+            Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
             Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
             Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
 
@@ -600,8 +601,11 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (Config.Item("championInfo").GetValue<bool>())
             {
-                float positionDraw = 0.1f;
 
+
+                float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
+                float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
+                float positionDraw = 0;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 {
                     var kolor = System.Drawing.Color.GreenYellow;
@@ -610,9 +614,9 @@ namespace OneKeyToWin_AIO_Sebby
                     else if (!enemy.IsVisible)
                         kolor = System.Drawing.Color.OrangeRed;
 
-                    positionDraw += 0.015f;
-                    
-                    Drawing.DrawText(100, Drawing.Height * positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
+                    positionDraw += 15;
+
+                    Drawing.DrawText(posX - 100, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                     //Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent );
                     foreach (RecallInfo rerecall in RecallInfos)
                     {
@@ -621,16 +625,16 @@ namespace OneKeyToWin_AIO_Sebby
                            var time = (Game.Time - rerecall.RecallStart) * 10;
                            if (rerecall.RecallNum == 2)
                            {
-                               Drawing.DrawText(400, Drawing.Height * positionDraw, System.Drawing.Color.GreenYellow, "rerecall finish");
+                               Drawing.DrawText(posX + 200, posY + positionDraw, System.Drawing.Color.GreenYellow, "rerecall finish");
                            }
                            else if (rerecall.RecallNum == 1)
                            {
-                               Drawing.DrawText(400, Drawing.Height * positionDraw, System.Drawing.Color.Yellow, "rerecall stop");
+                               Drawing.DrawText(posX + 200, posY + positionDraw, System.Drawing.Color.Yellow, "rerecall stop");
                            }
                            else if (rerecall.RecallNum == 0)
                            {
-                               Drawing.DrawLine(400, Drawing.Height * positionDraw, 480 - time, Drawing.Height * positionDraw, 12, System.Drawing.Color.Red);
-                               Drawing.DrawLine(480 - time, Drawing.Height * positionDraw, 480, Drawing.Height * positionDraw, 12, System.Drawing.Color.Black);
+                               Drawing.DrawLine(posX + 200, posY + positionDraw, posX + 280 - time, posY + positionDraw, 12, System.Drawing.Color.Red);
+                               Drawing.DrawLine(posX + 280 - time, posY + positionDraw, posX + 280, posY + positionDraw, 12, System.Drawing.Color.Black);
                            }
                        }
                     }
@@ -642,10 +646,10 @@ namespace OneKeyToWin_AIO_Sebby
                     else if ((int)enemy.HealthPercent < 60)
                         kolorHP = System.Drawing.Color.Orange;
                     if ((int)enemy.HealthPercent > 0)
-                        Drawing.DrawLine(200, Drawing.Height * positionDraw, (200 + ((int)enemy.HealthPercent) / 2)+1, Drawing.Height * positionDraw, 12, kolorHP);
+                        Drawing.DrawLine(posX, posY + positionDraw, (posX + ((int)enemy.HealthPercent) / 2) + 1, posY + positionDraw, 12, kolorHP);
                     if ((int)enemy.HealthPercent<100)
-                        Drawing.DrawLine((200 + ((int)enemy.HealthPercent)/2), Drawing.Height * positionDraw, 200 + 50, Drawing.Height * positionDraw, 12, System.Drawing.Color.Black);
-                    Drawing.DrawText(260, Drawing.Height * positionDraw, kolor, enemy.ChampionName + " " + enemy.Level + "lvl");
+                        Drawing.DrawLine((posX + ((int)enemy.HealthPercent) / 2), posY + positionDraw, posX + 50, posY + positionDraw, 12, System.Drawing.Color.Black);
+                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName + " " + enemy.Level + "lvl");
                 }
             }
 
