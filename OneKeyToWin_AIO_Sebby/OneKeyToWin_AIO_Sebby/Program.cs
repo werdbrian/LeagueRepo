@@ -261,14 +261,14 @@ namespace OneKeyToWin_AIO_Sebby
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, eRange));
                         }
                     }
-                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo)
+                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo && ObjectManager.Player.Mana > 150f)
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 800)
                         {
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
                         }
                     }
-                    if (W.IsReady() && Game.Time - need.time > 3 && Game.Time - need.time < 4 && Player.ChampionName == "Kalista" && !Combo && Config.Item("autoW").GetValue<bool>())
+                    if (W.IsReady() && Game.Time - need.time > 3 && Game.Time - need.time < 4 && Player.ChampionName == "Kalista" && !Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
                     {
                         if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
                         {

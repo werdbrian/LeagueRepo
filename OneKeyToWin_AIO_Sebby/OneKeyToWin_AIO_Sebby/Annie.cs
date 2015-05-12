@@ -27,7 +27,7 @@ namespace OneKeyToWin_AIO_Sebby
         public GameObject Tibbers;
         public float TibbersTimer = 0;
 
-        public Obj_AI_Hero Player
+        private Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
         }
@@ -72,10 +72,10 @@ namespace OneKeyToWin_AIO_Sebby
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
 
-            if (Combo && !Config.Item("AACombo").GetValue<bool>())
+            if (Program.Combo && !Config.Item("AACombo").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA))
+                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA || !Program.CanMove(t)))
                     Orbwalking.Attack = true;
                 else
                     Orbwalking.Attack = false;
@@ -89,24 +89,24 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (!HaveTibers && R.IsReady())
                 {
-                    if (Combo && HaveStun && target.CountEnemiesInRange(400) > 1)
+                    if (Program.Combo && HaveStun && target.CountEnemiesInRange(400) > 1)
                         R.Cast(target, true, true);
                     else if (Config.Item("rCount").GetValue<Slider>().Value > 0 && Config.Item("rCount").GetValue<Slider>().Value <= target.CountEnemiesInRange(300))
                         R.Cast(target, true, true);
-                    else if (Combo && !W.IsReady() && !Q.IsReady()
+                    else if (Program.Combo && !W.IsReady() && !Q.IsReady()
                         && Q.GetDamage(target) < target.Health
                         && (target.CountEnemiesInRange(400) > 1 || R.GetDamage(target) + Q.GetDamage(target) > target.Health))
                         R.Cast(target, true, true);
-                    else if (Combo && Q.GetDamage(target) < target.Health)
+                    else if (Program.Combo && Q.GetDamage(target) < target.Health)
                         if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
                                      target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Taunt))
                         {
                             R.Cast(target, true, true);
                         }
                 }
-                if (W.IsReady() && (Program.Farm || Combo))
+                if (W.IsReady() && (Program.Farm || Program.Combo))
                 {
-                    if (Combo && HaveStun && target.CountEnemiesInRange(250) > 1)
+                    if (Program.Combo && HaveStun && target.CountEnemiesInRange(250) > 1)
                         W.Cast(target, true, true);
                     else if (!Q.IsReady())
                         W.Cast(target, true, true);
@@ -116,9 +116,9 @@ namespace OneKeyToWin_AIO_Sebby
                         W.Cast(target, true, true);
                     }
                 }
-                if (Q.IsReady() && (Program.Farm || Combo))
+                if (Q.IsReady() && (Program.Farm || Program.Combo))
                 {
-                    if (HaveStun && Combo && target.CountEnemiesInRange(400) > 1 && (W.IsReady() || R.IsReady()))
+                    if (HaveStun && Program.Combo && target.CountEnemiesInRange(400) > 1 && (W.IsReady() || R.IsReady()))
                     {
                         return;
                     }
@@ -175,12 +175,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
-        private bool Combo
-        {
-            get { return Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo; }
-        }
-
-        public void farmQ()
+        private void farmQ()
         {
             if ( !Config.Item("farmQ").GetValue<bool>())
                 return;
@@ -218,7 +213,7 @@ namespace OneKeyToWin_AIO_Sebby
             get { return ObjectManager.Player.HasBuff("infernalguardiantimer"); }
         }
 
-        public bool HaveStun
+        private bool HaveStun
         {
             get { 
                 var buffs = Player.Buffs.Where(buff => (buff.Name.ToLower() == "pyromania" || buff.Name.ToLower() == "pyromania_particle"));
