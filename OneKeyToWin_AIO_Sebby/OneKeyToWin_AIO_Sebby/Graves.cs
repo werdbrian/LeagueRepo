@@ -37,11 +37,8 @@ namespace OneKeyToWin_AIO_Sebby
             R1.SetSkillshot(0.26f, 120f, 2100f, false, SkillshotType.SkillshotLine);
             LoadMenuOKTW();
 
-
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
-            //Orbwalking.BeforeAttack += BeforeAttack;
-            //Orbwalking.AfterAttack += afterAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
         }
 
@@ -119,14 +116,12 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 SetMana();
             }
-            if (Program.LagFree(2) && W.IsReady() && Program.attackNow)
-                LogicW();
-
-            if (Program.LagFree(1) && Q.IsReady() && Program.attackNow)
-                LogicQ();
-
-            if (Program.LagFree(3) && E.IsReady() && Program.attackNow && Config.Item("autoE").GetValue<bool>())
+            if (Program.LagFree(1) && E.IsReady() && Program.attackNow && Config.Item("autoE").GetValue<bool>())
                 LogicE();
+            if (Program.LagFree(2) && Q.IsReady() && Program.attackNow)
+                LogicQ();
+            if (Program.LagFree(3) && W.IsReady() && Program.attackNow)
+                LogicW();
             if (Program.LagFree(4) && R.IsReady() && Program.attackNow && Config.Item("autoR").GetValue<bool>())
                 LogicR();
         }
@@ -163,7 +158,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetCircularFarmLocation(allMinionsQ, 200);
-                if (Qfarm.MinionsHit > 3 && Q.IsReady())
+                if (Qfarm.MinionsHit > 3)
                     Q.Cast(Qfarm.Position);
             }
         }

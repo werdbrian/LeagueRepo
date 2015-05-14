@@ -175,11 +175,11 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(W, enemy);
                 }
 
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                if (Program.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     Program.CastSpell(W, t);
                 }
-                else if (Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0)
+                else if (Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0)
                 {
                     Program.CastSpell(W, t);
                 }
