@@ -56,6 +56,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "auto E out AA stack").SetValue(new Slider(10, 30, 0)));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AutoR", "Auto R").SetValue(true));
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -143,7 +144,7 @@ namespace OneKeyToWin_AIO_Sebby
                 farm();
                 LogicE();
             }
-            if (Program.LagFree(4) && R.IsReady())
+            if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
         }
 
