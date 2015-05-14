@@ -181,6 +181,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
+
                 }
             }
         }
