@@ -143,7 +143,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Program.Combo && (Player.Mana > RMANA + QMANA || target.Health <  5 * Player.GetAutoAttackDamage(Player)))
                         Q.Cast();
-                    else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA || target.Health < 5 * Player.GetAutoAttackDamage(Player)))
+                    else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA))
                         Q.Cast();
                 }
             }
@@ -188,7 +188,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            QMANA = 7;
+            QMANA = Q.Instance.ManaCost; ;
             WMANA = W.Instance.ManaCost;
 
             if (!R.IsReady())

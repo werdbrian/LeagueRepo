@@ -229,9 +229,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void AutoWard()
         {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValidTarget() && enemy.IsValid))
             {
-                if (enemy.IsVisible && enemy.IsValid && !enemy.IsDead && enemy != null)
+                if (enemy.IsVisible && !enemy.IsDead && enemy != null)
                 {
                     
                     if (Prediction.GetPrediction(enemy, 0.4f).CastPosition != null)
@@ -620,12 +620,7 @@ namespace OneKeyToWin_AIO_Sebby
                         var Color = System.Drawing.Color.Azure;
                         var barPos = enemy.HPBarPosition;
 
-                        float damage = 0f;
-
-                        float QdmgDraw = 0;
-                        float WdmgDraw = 0;
-                        float EdmgDraw = 0;
-                        float RdmgDraw = 0;
+                        float QdmgDraw = 0, WdmgDraw = 0, EdmgDraw = 0, RdmgDraw = 0, damage = 0; ;
 
                         if (Q.IsReady())
                             damage = damage + Q.GetDamage(enemy);
@@ -652,11 +647,6 @@ namespace OneKeyToWin_AIO_Sebby
                         if (R.IsReady())
                             RdmgDraw = (R.GetDamage(enemy) / damage);
                         
-                        if (W.IsReady() && Player.ChampionName == "Kalista")
-                        {
-                            //WdmgDraw = 0;
-                           // damage = damage - W.GetDamage(enemy);
-                        }
                         var percentHealthAfterDamage = Math.Max(0, enemy.Health - damage) / enemy.MaxHealth;
 
                         var yPos = barPos.Y + YOffset;
