@@ -259,10 +259,10 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                     if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "Ashe" && Config.Item("autoE").GetValue<bool>())
                     {
-                        var eRange = 1750 + 750 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level;
+                        var eRange = 3000;
                         if (need.PredictedPos.Distance(Player.Position) < eRange)
                         {
-                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, eRange));
+                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
                         }
                     }
                     if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo && Player.Mana > 150f)

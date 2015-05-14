@@ -91,7 +91,7 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(3) && W.IsReady() )
+            if (Program.LagFree(3) && W.IsReady() && Program.attackNow )
                 LogicW();
 
             if (Program.LagFree(4) && R.IsReady())
@@ -154,7 +154,7 @@ namespace OneKeyToWin_AIO_Sebby
                     else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA || target.Health < 5 * Player.GetAutoAttackDamage(Player)))
                         Q.Cast();
                 }
-        }
+            }
 
         private int GetQStacks()
         {
