@@ -27,7 +27,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1180);
+            Q = new Spell(SpellSlot.Q, 1130);
             W = new Spell(SpellSlot.W, 5200);
             E = new Spell(SpellSlot.E, 1000);
             R = new Spell(SpellSlot.R, 1400f);
@@ -39,25 +39,8 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Orbwalking.AfterAttack += afterAttack;
            // Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
 
-        }
-
-        private void afterAttack(AttackableUnit unit, AttackableUnit t)
-        {
-           if (E.IsReady())
-            {
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
-                {
-                    var Edmg = E.GetDamage(target);
-                    if (0 < Edmg && count > 0)
-                    {
-                        E.Cast();
-                        return;
-                    }
-                }
-            }
         }
 
         private void LoadMenuOKTW()
@@ -243,7 +226,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 if (0 < Edmg && count > 0)
                 {
-                    //E.Cast();
+                    E.Cast();
                     return;
                 }
 
