@@ -294,8 +294,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            QMANA = 7;
+            QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
 
             if (!R.IsReady())
                 RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
