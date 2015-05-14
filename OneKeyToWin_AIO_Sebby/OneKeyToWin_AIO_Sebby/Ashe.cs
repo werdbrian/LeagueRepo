@@ -13,16 +13,8 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
-        public Spell E;
-        public Spell Q;
-        public Spell R;
-        public Spell W;
-
-        public float QMANA;
-        public float WMANA;
-        public float EMANA;
-        public float RMANA;
+        public Spell Q, W, E, R;
+        public float QMANA, WMANA, EMANA, RMANA;
 
         public Obj_AI_Hero Player
         {
@@ -187,13 +179,8 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(W, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + WMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
-                    {
-                        if (!Program.CanMove(enemy))
-                        {
-                            W.Cast(enemy, true);
-                        }
-                    }
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                        W.Cast(enemy, true);
                 }
             }
         }

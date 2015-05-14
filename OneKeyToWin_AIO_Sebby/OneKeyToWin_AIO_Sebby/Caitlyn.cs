@@ -13,11 +13,10 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
         private Spell E, Q, Qc, R, W;
-
         private float QMANA, WMANA, EMANA, RMANA;
-        private float RCastTime = 0, QCastTime = 0;
+
+        private float QCastTime = 0;
 
         public Obj_AI_Hero Player
         {

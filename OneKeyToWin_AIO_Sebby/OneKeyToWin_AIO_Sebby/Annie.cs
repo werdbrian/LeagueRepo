@@ -13,16 +13,8 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
-        public Spell E;
-        public Spell Q;
-        public Spell R;
-        public Spell W;
-
-        public float QMANA;
-        public float WMANA;
-        public float EMANA;
-        public float RMANA;
+        public Spell Q, W, E, R;
+        public float QMANA, WMANA, EMANA, RMANA;
 
         public GameObject Tibbers;
         public float TibbersTimer = 0;
@@ -52,11 +44,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
         {
-            if (obj.IsValid)
-            {
-                if (obj.Name == "Tibbers")
-                    Tibbers = obj;
-            }
+            if (obj.IsValid && obj.Name == "Tibbers" )
+                Tibbers = obj;
         }
 
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)

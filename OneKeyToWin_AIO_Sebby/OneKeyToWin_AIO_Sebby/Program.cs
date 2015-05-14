@@ -10,7 +10,6 @@ using System.Drawing;
 
 namespace OneKeyToWin_AIO_Sebby
 {
-
     class RecallInfo
     {
         public int RecallID{ get; set; }
@@ -40,25 +39,19 @@ namespace OneKeyToWin_AIO_Sebby
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
 
-        public static Spell Q;
-        public static Spell W;
-        public static Spell E;
-        public static Spell R;
+        public static Spell Q, W, E, R;
 
         public static string championMsg;
         public static float JungleTime;
         public static Obj_AI_Hero jungler = ObjectManager.Player;
-        public static int timer;
+        public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
-        public static int HitChanceNum= 4;
-        public static int tickNum = 4;
-        public static int tickIndex = 0;
+
         public static bool tickSkip = true, attackNow = true;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
         public static List<VisableInfo> VisableInfo = new List<VisableInfo>();
-
 
         public static Items.Item WardS = new Items.Item(2043, 600f);
         public static Items.Item WardN = new Items.Item(2044, 600f);
@@ -158,6 +151,9 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                     case "Caitlyn":
                         new Caitlyn().LoadOKTW();
+                        break;
+                    case "Graves":
+                        new Graves().LoadOKTW();
                         break;
                 }
                 

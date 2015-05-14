@@ -13,24 +13,8 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
-        public Spell E;
-        public Spell Q;
-        public Spell Qc;
-        public Spell R;
-        public Spell W;
-
-        public float QMANA;
-        public float WMANA;
-        public float EMANA;
-        public float RMANA;
-
-        public bool attackNow = true;
-        public double lag = 0;
-        public double WCastTime = 0;
-        public double QCastTime = 0;
-        public float DragonDmg = 0;
-        public double DragonTime = 0;
+        public Spell E, Q, Qc, W, R;
+        public float QMANA, WMANA, EMANA, RMANA;
 
         public Obj_AI_Hero Player
         {
@@ -76,15 +60,14 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (args.Target == null)
+            if (!E.IsReady() && args.Target == null && !sender.IsValid<Obj_AI_Hero>())
                 return;
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
             double HpPercentage = (dmg * 100) / ObjectManager.Player.Health;
-            if (sender.IsValid<Obj_AI_Hero>() && HpPercentage >= Config.Item("Edmg").GetValue<Slider>().Value && !sender.IsValid<Obj_AI_Turret>() && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() && E.IsReady())
+            if ( HpPercentage >= Config.Item("Edmg").GetValue<Slider>().Value && sender.IsEnemy && args.Target.IsMe && !args.SData.IsAutoAttack() && Config.Item("autoE").GetValue<bool>() )
             {
                 E.Cast();
-                //Game.PrintChat("" + HpPercentage);
             }
         }
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -97,7 +80,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             SetMana();
-            if (Program.LagFree(1) && Q.IsReady())
+            if (Program.LagFree(1) && Q.IsReady() && Program.attackNow)
             {
                 LogicQ();
             }
@@ -107,7 +90,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (W.IsReady())
                 {
-                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
+                    if (Program.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                         Utility.DelayAction.Add(250, () => W.Cast());
                     else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                         Utility.DelayAction.Add(250, () => W.Cast());
@@ -115,12 +98,12 @@ namespace OneKeyToWin_AIO_Sebby
                         Utility.DelayAction.Add(250, () => W.Cast());
                 }
             }
-            if (Program.LagFree(2) && R.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && Config.Item("autoR").GetValue<bool>())
+            if (Program.LagFree(2) && R.IsReady() && Program.Combo && Config.Item("autoR").GetValue<bool>())
             {
                 LogicR();
             }
         }
-        public bool farmW()
+        private bool farmW()
         {
             var allMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 1300, MinionTypes.All);
             int num = 0;
@@ -133,6 +116,7 @@ namespace OneKeyToWin_AIO_Sebby
             else
                 return false;
         }
+
         private void LogicQ()
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
@@ -143,7 +127,7 @@ namespace OneKeyToWin_AIO_Sebby
                     qDmg = qDmg + ObjectManager.Player.GetAutoAttackDamage(t) * 3;
                 if (qDmg > t.Health)
                     Q.Cast(t, true);
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
                 else if (Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
                     if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
@@ -154,13 +138,8 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.CastIfWillHit(t, 2, true);
                 if (ObjectManager.Player.Mana > RMANA + QMANA + WMANA && Q.IsReady())
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    {
-                        if (!Program.CanMove(enemy))
-                            Q.Cast(enemy, true);
-                        else
-                            Q.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
-                    }
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                        Q.Cast(enemy, true);
                 }
             }
             else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)

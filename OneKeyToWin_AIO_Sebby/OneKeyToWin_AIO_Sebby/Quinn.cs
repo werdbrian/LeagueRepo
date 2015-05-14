@@ -13,22 +13,8 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
-        public Spell E;
-        public Spell Q;
-        public Spell Q1;
-        public Spell R;
-        public Spell W;
-
-        public float QMANA;
-        public float WMANA;
-        public float EMANA;
-        public float RMANA;
-        public bool attackNow = true;
-        private int visableCount = 0;
-        public float WardTime = 0;
-        public Vector3 ShowPosition;
-        public Obj_AI_Hero ShowTarget;
+        private Spell Q, Q1, W, E, R;
+        private float QMANA, WMANA, EMANA, RMANA;
 
         public Obj_AI_Hero Player
         {
@@ -48,12 +34,10 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += afterAttack;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
-            //Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
-            //Drawing.OnDraw += Drawing_OnDraw;
+
         }
 
         private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
@@ -89,10 +73,10 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (args.Target == null)
+            if (args.Target == null && !Q.IsReady())
                 return;
             
-            if (sender.IsValid<Obj_AI_Hero>() && !sender.IsValid<Obj_AI_Turret>() && sender.IsEnemy && args.Target.IsMe && args.SData.IsAutoAttack() && Q.IsReady())
+            if (sender.IsValid<Obj_AI_Hero>() && sender.IsEnemy && args.Target.IsMe && args.SData.IsAutoAttack())
             {
                 var target2 = ObjectManager.Get<Obj_AI_Hero>().Find(x => x.NetworkId == sender.NetworkId);
                 if (ActiveR && target2.IsValidTarget(500))
@@ -119,7 +103,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(3) && E.IsReady() )
             {
                 if (ActiveR)
-                LogicE();
+                    LogicE();
                 else
                     LogicE2();
             }

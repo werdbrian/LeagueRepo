@@ -14,22 +14,11 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
+        public Spell Q, W, E, R;
+        public float QMANA, WMANA, EMANA, RMANA;
 
-        public Spell E;
-        public Spell Q;
-        public Spell R;
-        public Spell W;
-        
-        public float QMANA;
-        public float WMANA;
-        public float EMANA;
-        public float RMANA;
-
-        public double lag = 0;
-        public double WCastTime = 0;
-        public double QCastTime = 0;
+        public double lag = 0, WCastTime = 0, QCastTime = 0, DragonTime = 0;
         public float DragonDmg = 0;
-        public double DragonTime = 0;
 
         public Obj_AI_Hero Player
         {
@@ -130,29 +119,20 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(0))
             {
                 SetMana();
-                //debug("" + ObjectManager.Player.AttackRange);
-
             }
 
             if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
-            {
                 LogicE();
-            }
-
+            
             if (Program.LagFree(2) && Q.IsReady())
-            {
                 LogicQ();
-            }
-
-            if (Program.LagFree(3) && W.IsReady())
-            {
+           
+            if (Program.LagFree(3) && W.IsReady() && Program.attackNow)
                 LogicW();
-            }
-
+            
             if (Program.LagFree(4) && R.IsReady())
-            {
                 LogicR();
-            }
+            
         }
 
         private void LogicQ()
@@ -205,15 +185,9 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
-                    {
-                        if (enemy.HasBuffOfType(BuffType.Stun) || enemy.HasBuffOfType(BuffType.Snare) ||
-                         enemy.HasBuffOfType(BuffType.Charm) || enemy.HasBuffOfType(BuffType.Fear) ||
-                         enemy.HasBuffOfType(BuffType.Taunt) || enemy.HasBuffOfType(BuffType.Slow) || enemy.HasBuff("Recall"))
-                        {
-                            W.Cast(enemy, true);
-                        }
-                    }
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                        W.Cast(enemy, true);
+                        
                 }
             }
         }

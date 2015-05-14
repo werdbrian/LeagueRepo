@@ -212,13 +212,8 @@ namespace OneKeyToWin_AIO_Sebby
 
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    {
-                        if (!Program.CanMove(enemy))
-                        {
-                            Q.Cast(enemy, true);
-                        }
-                    }
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                        Q.Cast(enemy, true);
                 }
             }
             if (Farm && attackNow && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA * 3)
@@ -253,13 +248,8 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(W, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range)))
-                    {
-                        if (!Program.CanMove(enemy))
-                        {
-                            W.Cast(enemy, true);
-                        }
-                    }
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                        W.Cast(enemy, true);
                 }
             }
         }

@@ -13,10 +13,9 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
-        private Spell E ,Q, Q1, R, W;
-
+        private Spell E, Q, Q1, R, W;
         private float QMANA, WMANA, EMANA, RMANA;
+
         private float RCastTime = 0;
 
         public Obj_AI_Hero Player
@@ -116,16 +115,15 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(1) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(1) && Q.IsReady() && Program.attackNow && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
 
             if (Program.LagFree(2) && Program.attackNow && E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
 
             if (Program.LagFree(4) && Program.attackNow && R.IsReady() && Config.Item("autoR").GetValue<bool>())
-            {
                 LogicR();
-            }
+            
         }
         private void LogicQ()
         {
@@ -189,11 +187,9 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(E, t);
                 else if ((Program.Combo|| Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
-                    {
-                        if (!Program.CanMove(enemy))
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
                             E.Cast(enemy, true, true);
-                    }
+                    
                 }
             }
         }
