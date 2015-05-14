@@ -100,6 +100,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("HpBar", "Dmg BAR").SetValue(true));
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
             Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
@@ -604,6 +605,78 @@ namespace OneKeyToWin_AIO_Sebby
                 float positionDraw = 0;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 {
+                    
+                    if (Config.Item("HpBar").GetValue<bool>() && enemy.IsHPBarRendered)
+                    {
+                        int Width = 103;
+                        int Height = 8;
+                        int XOffset = 10;
+                        int YOffset = 20;
+
+                        var FillColor = System.Drawing.Color.GreenYellow;
+                        var Color = System.Drawing.Color.Azure;
+                        var barPos = enemy.HPBarPosition;
+
+                        float damage = 0f;
+
+                        float QdmgDraw = 0;
+                        float WdmgDraw = 0;
+                        float EdmgDraw = 0;
+                        float RdmgDraw = 0;
+
+                        if (Q.IsReady())
+                            damage = damage + Q.GetDamage(enemy);
+
+                        if (W.IsReady())
+                            damage = damage + W.GetDamage(enemy);
+
+                        if (E.IsReady())
+                            damage = damage + E.GetDamage(enemy);
+
+                        if (R.IsReady())
+                            damage = damage + R.GetDamage(enemy);
+
+
+                        if (Q.IsReady())
+                            QdmgDraw = (Q.GetDamage(enemy) / damage);
+
+                        if (W.IsReady())
+                            WdmgDraw = (W.GetDamage(enemy) / damage);
+                        
+                        if (E.IsReady())
+                            EdmgDraw = (E.GetDamage(enemy) / damage);
+                        
+                        if (R.IsReady())
+                            RdmgDraw = (R.GetDamage(enemy) / damage);
+                        
+                        var percentHealthAfterDamage = Math.Max(0, enemy.Health - damage) / enemy.MaxHealth;
+
+                        var yPos = barPos.Y + YOffset;
+                        var xPosDamage = barPos.X + XOffset + Width * percentHealthAfterDamage;
+                        var xPosCurrentHp = barPos.X + XOffset + Width * enemy.Health / enemy.MaxHealth;
+
+                        if (true)
+                        {
+                            float differenceInHP = xPosCurrentHp - xPosDamage;
+                            var pos1 = barPos.X + XOffset + (107 * percentHealthAfterDamage);
+
+
+                            
+                            for (int i = 0; i < differenceInHP; i++)
+                            {
+                                if (Q.IsReady() && i < QdmgDraw * differenceInHP)
+                                    Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Cyan);
+                                else if (W.IsReady() && i < (QdmgDraw + WdmgDraw) * differenceInHP)
+                                    Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Orange);
+                                else if (E.IsReady() && i < (QdmgDraw + WdmgDraw + EdmgDraw) * differenceInHP)
+                                    Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Yellow);
+                                else if (R.IsReady() && i < (QdmgDraw + WdmgDraw + EdmgDraw + RdmgDraw) * differenceInHP)
+                                    Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.YellowGreen);
+                            }
+                        }
+                    }
+
+
                     var kolor = System.Drawing.Color.GreenYellow;
                     if (enemy.IsDead)
                         kolor = System.Drawing.Color.Gray;
@@ -658,7 +731,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
             }
-
+            
             if (Config.Item("orb").GetValue<bool>())
             {
                 var orbT = Orbwalker.GetTarget();
@@ -673,6 +746,9 @@ namespace OneKeyToWin_AIO_Sebby
                         Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 5, 1);
                 }
             }
+
+
+            
         }
     }
 }
