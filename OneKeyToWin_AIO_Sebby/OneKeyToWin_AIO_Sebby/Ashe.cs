@@ -36,14 +36,20 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 2500);
             R = new Spell(SpellSlot.R, 3000f);
 
-            W.SetSkillshot(0.25f, 60f , 1700f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.5f, 70f , 1000f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 299f, 1400f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
             LoadMenuOKTW();
 
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Orbwalking.BeforeAttack += BeforeAttack;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+        }
+
+        private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            LogicQ();
         }
 
         private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
@@ -79,14 +85,11 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast(t, true, true);
                 }
             }
-
+            GetQStacks();
             if (Program.LagFree(1))
             {
                 SetMana();
             }
-
-            if (Program.LagFree(2) && Q.IsReady())
-                LogicQ();
 
             if (Program.LagFree(3) && W.IsReady() )
                 LogicW();
@@ -143,16 +146,26 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Orbwalker.GetTarget() == null)
                 return;
-                 var target = Orbwalker.GetTarget();
+                var target = Orbwalker.GetTarget();
+                if (GetQStacks() >= Config.Item("comboQ").GetValue<Slider>().Value && target.IsValid && target is Obj_AI_Hero)
+                {
+                    if (Program.Combo && (Player.Mana > RMANA + QMANA || target.Health <  5 * Player.GetAutoAttackDamage(Player)))
+                        Q.Cast();
+                    else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA || target.Health < 5 * Player.GetAutoAttackDamage(Player)))
+                        Q.Cast();
+                }
+        }
 
-                if (target == null)
-                    Program.debug("ss");
-                if (target.IsValid && !FrostShot && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > WMANA + QMANA && Config.Item("autoQ").GetValue<bool>())
-                    Q.Cast();
-                else if (target.IsValid && !FrostShot && Program.Farm && target is Obj_AI_Hero && ObjectManager.Player.Mana > WMANA + QMANA + EMANA + RMANA && Config.Item("autoQharas").GetValue<bool>())
-                    Q.Cast();
-                else if (FrostShot)
-                    Q.Cast();
+        private int GetQStacks()
+        {
+            foreach (var buff in Player.Buffs)
+            {
+                if (buff.Name == "asheqcastready")
+                    return buff.Count;
+                else if (buff.Name == "AsheQ")
+                    return buff.Count;
+            }
+            return 0;
         }
 
         private void LogicW()
@@ -185,11 +198,6 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
-        public bool FrostShot
-        {
-            get { return ObjectManager.Player.HasBuff("FrostShot"); }
-        }
-
         private void SetMana()
         {
             QMANA = 7;
@@ -214,8 +222,9 @@ namespace OneKeyToWin_AIO_Sebby
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Haras W").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQharas", "Auto Q haras").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("comboQ", "Q count").SetValue(new Slider(5, 5, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q").SetValue(true));
+
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
