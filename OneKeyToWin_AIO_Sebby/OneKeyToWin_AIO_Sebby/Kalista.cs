@@ -139,7 +139,7 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicQ();
             if (Program.LagFree(2) && E.IsReady())
                 JungleE();
-            if (Program.LagFree(3) && E.IsReady() && Program.attackNow)
+            if (Program.LagFree(3) && E.IsReady())
             {
                 farm();
                 LogicE();
