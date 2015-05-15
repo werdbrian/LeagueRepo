@@ -364,20 +364,11 @@ namespace OneKeyToWin_AIO_Sebby
                 return false;
         }
 
-        public static bool Farm
-        {
-            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
-        }
+        public static bool Farm{ get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }}
 
-        public static bool Combo
-        {
-            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); }
-        }
+        public static bool Combo {get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); }}
 
-        private static bool IsJungler(Obj_AI_Hero hero)
-        {
-            return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));
-        }
+        private static bool IsJungler(Obj_AI_Hero hero){ return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));}
 
         private static void PotionManagement()
         {
@@ -533,9 +524,7 @@ namespace OneKeyToWin_AIO_Sebby
             var unit = sender as Obj_AI_Hero;
 
             if (unit == null || !unit.IsValid || unit.IsAlly)
-            {
                 return;
-            }
 
             var recall = Packet.S2C.Teleport.Decoded(unit, args);
 
@@ -578,8 +567,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Console.WriteLine(msg);
         }
 
-
-
         private static void OnDraw(EventArgs args)
         {
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
@@ -612,7 +599,6 @@ namespace OneKeyToWin_AIO_Sebby
             float positionGang = 700;
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
-
                 if (HpBar && enemy.IsHPBarRendered)
                 {
                     int Width = 103;
@@ -723,6 +709,8 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Distance > 3500 && enemy.IsVisible)
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
+                    else
+                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
                     if (Distance < 3500 && enemy.IsVisible)
                         Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Distance - 900) / 30), kolorHP, 10, 1);
 
