@@ -728,7 +728,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
                             if (Player.Distance(enemy.Position) < 3500 && enemy.IsVisible)
-                                Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Player.Distance(enemy.Position) - 1100) / 30), kolorHP, 10, 1);
+                                Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Player.Distance(enemy.Position) - 900) / 30), kolorHP, 10, 1);
 
                         }
                         positionGang = positionGang + 50;
