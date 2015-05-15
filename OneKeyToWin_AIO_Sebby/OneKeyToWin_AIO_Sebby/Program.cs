@@ -726,9 +726,13 @@ namespace OneKeyToWin_AIO_Sebby
 
                         if (GankAlert && Player.Distance(enemy.Position) > 1100 && !enemy.IsDead)
                         {
-                            drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
+                            if (Player.Distance(enemy.Position) > 3500 && enemy.IsVisible)
+                                drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
                             if (Player.Distance(enemy.Position) < 3500 && enemy.IsVisible)
+                            {
+
                                 Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Player.Distance(enemy.Position) - 900) / 30), kolorHP, 10, 1);
+                            }
 
                         }
                         positionGang = positionGang + 50;
