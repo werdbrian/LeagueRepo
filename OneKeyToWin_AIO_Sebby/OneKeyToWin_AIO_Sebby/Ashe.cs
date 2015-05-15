@@ -143,7 +143,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Program.Combo && (Player.Mana > RMANA + QMANA || target.Health <  5 * Player.GetAutoAttackDamage(Player)))
                         Q.Cast();
-                    else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA))
+                    else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA) && Config.Item("harasQ").GetValue<bool>())
                         Q.Cast();
                 }
             }
