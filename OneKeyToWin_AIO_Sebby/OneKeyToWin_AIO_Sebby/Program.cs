@@ -100,6 +100,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
 
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("ShowKDA", "Show KDA").SetValue(true));
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("GankAlert", "Gank Alert").SetValue(true));
             
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
@@ -605,6 +606,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var HpBar = Config.Item("HpBar").GetValue<bool>() ;
                 var championInfo = Config.Item("championInfo").GetValue<bool>();
                 var GankAlert = Config.Item("GankAlert").GetValue<bool>();
+                var ShowKDA = Config.Item("ShowKDA").GetValue<bool>();
                 float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
                 float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
                 float positionDraw = 0;
@@ -686,15 +688,8 @@ namespace OneKeyToWin_AIO_Sebby
 
                         positionDraw += 15;
 
-                        if (GankAlert && Player.Distance(enemy.Position) > 1100 && !enemy.IsDead)
-                        {
-                            drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
-                            if (Player.Distance(enemy.Position) < 3500 && enemy.IsVisible)
-                                Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Player.Distance(enemy.Position) - 1100) / 30), System.Drawing.Color.Red, 10, 1);
-
-                        }
-                        positionGang = positionGang + 50;
-                        Drawing.DrawText(posX - 100, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
+                        if (ShowKDA)
+                            Drawing.DrawText(posX - 100, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                         //Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent );
                         foreach (RecallInfo rerecall in RecallInfos)
                         {
@@ -728,6 +723,15 @@ namespace OneKeyToWin_AIO_Sebby
                         if ((int)enemy.HealthPercent<100)
                             Drawing.DrawLine((posX + ((int)enemy.HealthPercent) / 2), posY + positionDraw, posX + 50, posY + positionDraw, 12, System.Drawing.Color.Black);
                         Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName + " " + enemy.Level + "lvl");
+
+                        if (GankAlert && Player.Distance(enemy.Position) > 1100 && !enemy.IsDead)
+                        {
+                            drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
+                            if (Player.Distance(enemy.Position) < 3500 && enemy.IsVisible)
+                                Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Player.Distance(enemy.Position) - 1100) / 30), kolorHP, 10, 1);
+
+                        }
+                        positionGang = positionGang + 50;
                 }
             }
 
