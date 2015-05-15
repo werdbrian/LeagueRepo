@@ -188,7 +188,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            QMANA = Q.Instance.ManaCost; ;
+            QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
 
             if (!R.IsReady())

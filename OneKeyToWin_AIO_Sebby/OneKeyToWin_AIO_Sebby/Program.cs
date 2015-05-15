@@ -564,9 +564,9 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
-        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
+        public static void drawText(string msg, Vector3 Hero, System.Drawing.Color color)
         {
-            var wts = Drawing.WorldToScreen(Hero.Position);
+            var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
         }
 
@@ -583,15 +583,15 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
-                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Cyan);
+                    drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.Cyan);
                 else if (jungler.IsVisible)
-                    drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.GreenYellow);
+                    drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.GreenYellow);
                 else
                 {
                     if (timer > 0)
-                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Orange);
+                        drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.Orange);
                     else
-                        drawText(" " + timer, ObjectManager.Player, System.Drawing.Color.Red);
+                        drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.Red);
                     if (Game.Time - JungleTime >= 1)
                     {
                         timer = timer - 1;
@@ -606,6 +606,7 @@ namespace OneKeyToWin_AIO_Sebby
                 float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
                 float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
                 float positionDraw = 0;
+                float positionGang= 700;
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 {
                     
@@ -683,6 +684,14 @@ namespace OneKeyToWin_AIO_Sebby
 
                         positionDraw += 15;
 
+                        if (Player.Distance(enemy.Position) > 1100 && !enemy.IsDead)
+                        {
+                            drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
+                            if (Player.Distance(enemy.Position) < 3500 && enemy.IsVisible)
+                                Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Player.Distance(enemy.Position) - 1100) / 30), System.Drawing.Color.Red, 10, 1);
+
+                        }
+                        positionGang = positionGang + 50;
                         Drawing.DrawText(posX - 100, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                         //Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent );
                         foreach (RecallInfo rerecall in RecallInfos)
