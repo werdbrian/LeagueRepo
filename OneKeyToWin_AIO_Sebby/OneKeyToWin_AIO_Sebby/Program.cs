@@ -231,7 +231,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void AutoWard()
         {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValidTarget() && enemy.IsValid))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
             {
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null)
                 {
@@ -705,7 +705,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 }
                 var Distance = Player.Distance(enemy.Position);
-                if (GankAlert && Distance > 1100 && !enemy.IsDead)
+                if (GankAlert && Distance > 1200 && !enemy.IsDead)
                 {
                     if (Distance > 3500 && enemy.IsVisible)
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
