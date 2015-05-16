@@ -107,7 +107,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
             Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
             Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
-
+            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
 
             Q = new Spell(SpellSlot.Q);
             E = new Spell(SpellSlot.E);
@@ -165,7 +165,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-                Config.SubMenu("Draw").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
+                
                 Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
@@ -174,6 +174,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Sen", "Aiming sensitivity 4").SetValue(new Slider(2, 5, 1)));
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -209,7 +210,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private static void OnUpdate(EventArgs args)
         {
-
+            
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
@@ -234,7 +235,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
             {
-                if (enemy.IsVisible && !enemy.IsDead && enemy != null)
+                if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
                 {
 
                     if (Prediction.GetPrediction(enemy, 0.4f).CastPosition != null)
@@ -254,36 +255,43 @@ namespace OneKeyToWin_AIO_Sebby
                     if (need == null || need.PredictedPos == null)
                         return;
 
-                    if (W.IsReady() && Player.ChampionName == "Quinn" && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
+                    if (Player.ChampionName == "Quinn" && W.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
                     {
                         W.Cast();
+                        return;
                     }
-                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "Ashe" && Config.Item("autoE").GetValue<bool>())
+                    if (Player.ChampionName == "Ashe" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Config.Item("autoE").GetValue<bool>())
                     {
-                        var eRange = 3000;
-                        if (need.PredictedPos.Distance(Player.Position) < eRange)
+                        if (need.PredictedPos.Distance(Player.Position) < 3000)
+                        {
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
+                            return;
+                        }
                         
                     }
-                    if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo && Player.Mana > 150f)
+                    if (Player.ChampionName == "MissFortune" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 2 && Combo && Player.Mana > 200f)
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 800)
                         {
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
+                            return;
                         }
                     }
-                    if (W.IsReady() && Game.Time - need.time > 3 && Game.Time - need.time < 4 && Player.ChampionName == "Kalista" && !Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
+                    if (Player.ChampionName == "Kalista" && W.IsReady() && Game.Time - need.time > 3 && Game.Time - need.time < 4 && !Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
                     {
                         if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
                         {
                             W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
+                            return;
                         }
+                        
                     }
-                    if (W.IsReady() && Game.Time - need.time < 3 && Player.ChampionName == "Caitlyn" && Player.Mana > 150f && attackNow && Config.Item("bushW").GetValue<bool>())
+                    if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.time < 2 && Player.Mana > 200f && attackNow && Config.Item("bushW").GetValue<bool>())
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 800)
                         {
                             W.Cast(need.PredictedPos);
+                            return;
                         }
                     }
                     if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
@@ -354,6 +362,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
+
         public static bool LagFree(int offset)
         {
             if (!tickSkip)
@@ -391,12 +400,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static bool ValidUlt(Obj_AI_Hero target)
         {
-            if (target.HasBuffOfType(BuffType.PhysicalImmunity)
-            || target.HasBuffOfType(BuffType.SpellImmunity)
-            || target.IsZombie
-            || target.HasBuffOfType(BuffType.Invulnerability)
-            || target.HasBuffOfType(BuffType.SpellShield)
-            )
+            if (target.HasBuffOfType(BuffType.PhysicalImmunity) || target.HasBuffOfType(BuffType.SpellImmunity)
+            || target.IsZombie || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellShield))
                 return false;
             else
                 return true;
@@ -408,14 +413,12 @@ namespace OneKeyToWin_AIO_Sebby
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
                 target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell()
-                || (target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra")
-                
+                || (!target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra")
             )
                 return false;
             else
                 return true;
         }
-
 
         public static float GetRealDmg(Spell QWER, Obj_AI_Hero target)
         {
@@ -427,14 +430,11 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Hero target)
         {
-
-            //HitChance 0 - 2
-            // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition && Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition))) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
@@ -474,7 +474,7 @@ namespace OneKeyToWin_AIO_Sebby
             else if (HitChanceNum == 3)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) - QWER.Width) * 6;
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
                     QWER.Cast(poutput.CastPosition);
@@ -497,14 +497,18 @@ namespace OneKeyToWin_AIO_Sebby
             else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) - QWER.Width) * 6;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * Config.Item("Hit").GetValue<Slider>().Value * 3 - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * Config.Item("Hit").GetValue<Slider>().Value;
 
                 if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
+                {
                     QWER.Cast(poutput.CastPosition);
+                    debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " two");
+                }
                 else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
                     || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
                 {
+                    debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
                     if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
@@ -517,6 +521,8 @@ namespace OneKeyToWin_AIO_Sebby
                         QWER.Cast(poutput.CastPosition);
                     }
                 }
+                else
+                    debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
             }
         }
 
