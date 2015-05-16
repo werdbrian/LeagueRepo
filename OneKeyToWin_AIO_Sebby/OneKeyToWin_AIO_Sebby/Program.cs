@@ -209,6 +209,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private static void OnUpdate(EventArgs args)
         {
+
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
@@ -261,9 +262,8 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         var eRange = 3000;
                         if (need.PredictedPos.Distance(Player.Position) < eRange)
-                        {
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
-                        }
+                        
                     }
                     if (E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Player.ChampionName == "MissFortune" && Combo && Player.Mana > 150f)
                     {
@@ -407,8 +407,9 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
-                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell() ||
-                !target.CanMove
+                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell()
+                || (target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra")
+                
             )
                 return false;
             else
@@ -709,13 +710,15 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Distance > 3500 && enemy.IsVisible)
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
+                    else if (!enemy.IsVisible)
+                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Orange);
                     else
-                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), kolor);
+                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
                     if (Distance < 3500 && enemy.IsVisible)
                         Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Distance - 900) / 30), kolorHP, 10, 1);
 
                 }
-                positionGang = positionGang + 50;
+                positionGang = positionGang + 70;
             }
 
             if (Config.Item("OrbDraw").GetValue<bool>())

@@ -20,10 +20,7 @@ namespace OneKeyToWin_AIO_Sebby
         public double lag = 0, WCastTime = 0, QCastTime = 0, DragonTime = 0;
         public float DragonDmg = 0;
 
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
         {
@@ -49,24 +46,21 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
             if (Q.IsReady() && FishBoneActive && t.IsValidTarget())
             {
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (ObjectManager.Player.Mana < RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 < t.Health))
+                if (Program.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (Player.Mana < RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
-                else if (Farm && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || ObjectManager.Player.Mana < RMANA + EMANA + WMANA + WMANA))
+                else if (Program.Farm && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
             }
-            if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && ObjectManager.Player.Mana < RMANA + EMANA + WMANA + 30)
+            if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && Player.Mana < RMANA + EMANA + WMANA + 30)
             {
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, bonusRange(), MinionTypes.All);
-                foreach (var minion in allMinionsQ)
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange(), MinionTypes.All);
+                foreach (var minion in allMinionsQ.Where(minion => Orbwalking.InAutoAttackRange(minion) && minion.Health < Player.GetAutoAttackDamage(minion) ))
                 {
-                    if (Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion))
+                    foreach (var minion2 in allMinionsQ)
                     {
-                        foreach (var minion2 in allMinionsQ)
+                        if (minion2.NetworkId != minion.NetworkId && minion2.Health < Player.GetAutoAttackDamage(minion2) && minion.ServerPosition.Distance(minion2.Position) < 150 )
                         {
-                            if (minion2.NetworkId != minion.NetworkId && minion2.Health < ObjectManager.Player.GetAutoAttackDamage(minion2) && minion.ServerPosition.Distance(minion2.Position) < 150 )
-                            {
-                                Q.Cast();
-                            }
+                            Q.Cast();
                         }
                     }
                 }
@@ -74,12 +68,12 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && ObjectManager.Player.Mana > RMANA + EMANA)
+            if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && Player.Mana > RMANA + EMANA)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
                 {
-                    E.Cast(ObjectManager.Player.ServerPosition, true);
+                    E.Cast(Player.ServerPosition, true);
                     debug("E agc");
                 }
                 return;
@@ -89,15 +83,14 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            if (Config.Item("opsE").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && ShouldUseE(args.SData.Name) && unit.IsValidTarget(E.Range))
+            if (Config.Item("opsE").GetValue<bool>() && unit.Team != Player.Team && ShouldUseE(args.SData.Name) && unit.IsValidTarget(E.Range))
             {
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
             }
             if (unit.IsMe && args.SData.Name == "JinxW")
-            {
                 WCastTime = Game.Time;
-            }
+            
         }
         private void Game_OnUpdate(EventArgs args)
         {
@@ -137,7 +130,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicQ()
         {
-            if (Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
+            if (Program.Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
             {
                 farmQ();
                 lag = Game.Time;
@@ -149,19 +142,19 @@ namespace OneKeyToWin_AIO_Sebby
                 var powPowRange = GetRealPowPowRange(t);
                 if (!FishBoneActive && !Orbwalking.InAutoAttackRange(t))
                 {
-                    if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && (ObjectManager.Player.Mana > RMANA + WMANA + 20 || ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health))
+                    if (Program.Combo && (Player.Mana > RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 > t.Health))
                         Q.Cast();
-                    else if (Farm  && Orbwalker.GetTarget() == null && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + ObjectManager.Player.BoundingRadius)
+                    else if (Program.Farm && Orbwalker.GetTarget() == null && Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + Player.BoundingRadius)
                         Q.Cast();
                 }
             }
-            else if (!FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 20 && ObjectManager.Player.CountEnemiesInRange(2000) > 0)
+            else if (!FishBoneActive && Program.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
                 Q.Cast();
-            else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana < RMANA + WMANA + 20)
+            else if (FishBoneActive && Program.Combo && Player.Mana < RMANA + WMANA + 20)
                 Q.Cast();
-            else if (FishBoneActive && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(2000) == 0)
+            else if (FishBoneActive && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
                 Q.Cast();
-            else if (FishBoneActive && Farm)
+            else if (FishBoneActive && Program.Farm)
                 Q.Cast();
         }
 
@@ -170,20 +163,21 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && ObjectManager.Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && W.GetDamage(enemy) > enemy.Health))
+                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && W.GetDamage(enemy) > enemy.Health))
                 {
                     Program.CastSpell(W, enemy);
+                    return;
                 }
 
-                if (Program.Combo && ObjectManager.Player.Mana > RMANA + WMANA + 10 && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     Program.CastSpell(W, t);
                 }
-                else if (Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.CountEnemiesInRange(bonusRange()) == 0)
+                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0)
                 {
                     Program.CastSpell(W, t);
                 }
-                else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
@@ -194,7 +188,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicE()
         {
-            if (ObjectManager.Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
+            if (Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
             {
                 if (Config.Item("telE").GetValue<bool>())
                 {
@@ -208,23 +202,19 @@ namespace OneKeyToWin_AIO_Sebby
                     E.Cast(enemy, true);
 
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (ObjectManager.Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
+                if (Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Program.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
                 {
-                    if (ta.HasBuffOfType(BuffType.Slow))
+                    if (ta.HasBuffOfType(BuffType.Slow) || ta.CountEnemiesInRange(250) > 1)
                     {
                         Program.CastSpell(E, ta);
                         debug("E slow");
                     }
-                    else if (ta.CountEnemiesInRange(250) > 1)
-                    {
-                        Program.CastSpell(E, ta);
-                    }
                     else
                     {
                         List<Vector2> waypoints = ta.GetWaypoints();
-                        if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(ta.Position)) > 100)
+                        if ((Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(ta.Position)) > 100)
                         {
-                            if (ta.Position.Distance(Game.CursorPos) < ta.Position.Distance(ObjectManager.Player.Position))
+                            if (ta.Position.Distance(Game.CursorPos) < ta.Position.Distance(Player.Position))
                             {
                                 Program.CastSpell(E, ta);
                                 debug("E run");
@@ -232,7 +222,7 @@ namespace OneKeyToWin_AIO_Sebby
                         }
                         else
                         {
-                            if (ta.Position.Distance(Game.CursorPos) > ta.Position.Distance(ObjectManager.Player.Position))
+                            if (ta.Position.Distance(Game.CursorPos) > ta.Position.Distance(Player.Position))
                             {
                                 Program.CastSpell(E, ta);
                                 debug("E escape");
@@ -277,7 +267,7 @@ namespace OneKeyToWin_AIO_Sebby
                                 cast = false;
                         }
 
-                        if (cast && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && ObjectManager.Player.CountEnemiesInRange(400) == 0)
+                        if (cast && GetRealDistance(target) > bonusRange() + 300 + target.BoundingRadius && target.CountAlliesInRange(600) == 0 && Player.CountEnemiesInRange(400) == 0)
                         {
                             castR(target);
                             debug("R normal High");
@@ -298,7 +288,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("hitchanceR").GetValue<bool>())
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(target.Position)) > 400)
+                if ((Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > 400)
                 {
                     R.Cast(target, true);
                 }
@@ -310,16 +300,11 @@ namespace OneKeyToWin_AIO_Sebby
         public void farmQ()
         {
             foreach (var minion in MinionManager.GetMinions(bonusRange() + 30).Where(
-                minion => !Orbwalking.InAutoAttackRange(minion) && minion.Health < ObjectManager.Player.GetAutoAttackDamage(minion) * 1.2 && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion)))
+                minion => !Orbwalking.InAutoAttackRange(minion) && minion.Health < Player.GetAutoAttackDamage(minion) * 1.2 && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion)))
                 {
                     Q.Cast();
                     return;
                 }
-        }
-
-        private bool Farm
-        {
-            get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }
         }
 
         private float bonusRange()
@@ -329,17 +314,17 @@ namespace OneKeyToWin_AIO_Sebby
 
         private bool FishBoneActive
         {
-            get { return ObjectManager.Player.AttackRange > 525f; }
+            get { return Player.AttackRange > 525f; }
         }
 
         private  float GetRealPowPowRange(GameObject target)
         {
-            return 630f + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
+            return 630f + Player.BoundingRadius + target.BoundingRadius;
         }
 
         private float GetRealDistance(Obj_AI_Base target)
         {
-            return ObjectManager.Player.ServerPosition.Distance(target.ServerPosition) + Player.BoundingRadius +
+            return Player.ServerPosition.Distance(target.ServerPosition) + Player.BoundingRadius +
                    target.BoundingRadius;
         }
 
@@ -372,7 +357,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void KsJungle()
         {
-            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
             foreach (var mob in mobs)
             {
                 //debug(mob.SkinName);
@@ -400,9 +385,9 @@ namespace OneKeyToWin_AIO_Sebby
                         //debug("DS  " + DmgSec);
                         if (DragonDmg - mob.Health > 0)
                         {
-                            var timeTravel = GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position);
-                            var timeR = (mob.Health - ObjectManager.Player.CalcDamage(mob, Damage.DamageType.Physical, (250 + (100 * R.Level)) + ObjectManager.Player.FlatPhysicalDamageMod + 300)) / (DmgSec / 4);
-                            //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + ((150 + (100 * R.Level + 200) + ObjectManager.Player.FlatPhysicalDamageMod)));
+                            var timeTravel = GetUltTravelTime(Player, R.Speed, R.Delay, mob.Position);
+                            var timeR = (mob.Health - Player.CalcDamage(mob, Damage.DamageType.Physical, (250 + (100 * R.Level)) + Player.FlatPhysicalDamageMod + 300)) / (DmgSec / 4);
+                            //debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + ((150 + (100 * R.Level + 200) + Player.FlatPhysicalDamageMod)));
                             if (timeTravel > timeR)
                                 R.Cast(mob.Position);
                         }
@@ -410,7 +395,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             DragonDmg = mob.Health;
                         }
-                        //debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
+                        //debug("" + GetUltTravelTime(Player, R.Speed, R.Delay, mob.Position));
                     }
                 }
             }
