@@ -413,10 +413,10 @@ namespace OneKeyToWin_AIO_Sebby
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
                 target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell()
-                || (!target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra")
+                || (!target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra" && target.ChampionName != "Thresh")
             )
             {
-                debug("!canMov");
+                debug("!canMov" + target.ChampionName);
                 return false;
                 
             }
