@@ -172,9 +172,9 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - normal + max range fix + waypionts analyzer"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Sen", "Aiming sensitivity 4").SetValue(new Slider(2, 5, 1)));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer + Aiming sensitivity"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Sen", "Aiming sensitivity (only Prediction 4)").SetValue(new Slider(4, 10, 1)));
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -415,7 +415,11 @@ namespace OneKeyToWin_AIO_Sebby
                 target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell()
                 || (!target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra")
             )
+            {
+                debug("!canMov");
                 return false;
+                
+            }
             else
                 return true;
         }
@@ -428,15 +432,19 @@ namespace OneKeyToWin_AIO_Sebby
                 return QWER.GetDamage(target);
         }
 
-        public static void CastSpell(Spell QWER, Obj_AI_Hero target)
+        public static void CastSpell(Spell QWER, Obj_AI_Base target)
         {
+            
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition && Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition))) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition ) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
             {
-                QWER.Cast(poutput.CastPosition);
+                if (HitChanceNum < 3 )
+                    QWER.Cast(poutput.CastPosition);
+                else if (Player.Distance(target.ServerPosition) < QWER.Range - (target.MoveSpeed * QWER.Delay))
+                    QWER.Cast(poutput.CastPosition);
                 return;
             }
 
@@ -471,7 +479,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-            else if (HitChanceNum == 3)
+            else if (HitChanceNum == 3 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
@@ -497,18 +505,19 @@ namespace OneKeyToWin_AIO_Sebby
             else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * Config.Item("Hit").GetValue<Slider>().Value * 3 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * Config.Item("Hit").GetValue<Slider>().Value;
 
-                if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
+                if ((int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) == 0)
+                    return;
+
+                float SiteToSite = (((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * Config.Item("Sen").GetValue<Slider>().Value) - QWER.Width;
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+
+                if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront)
+                    || Player.Distance(target.Position) < SiteToSite + target.BoundingRadius * 2
+                    || Player.Distance(waypoints.Last<Vector2>().To3D()) < BackToFront)
                 {
-                    QWER.Cast(poutput.CastPosition);
-                    debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " two");
-                }
-                else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
-                {
-                    debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
+                    //debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
                     if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
@@ -517,13 +526,15 @@ namespace OneKeyToWin_AIO_Sebby
                         }
                     }
                     else
-                    {
                         QWER.Cast(poutput.CastPosition);
-                    }
+
                 }
                 else
-                    debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
-            }
+                {
+                    //debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
+                }
+
+             }
         }
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)

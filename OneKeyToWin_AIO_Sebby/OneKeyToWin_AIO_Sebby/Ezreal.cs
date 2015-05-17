@@ -472,10 +472,7 @@ namespace OneKeyToWin_AIO_Sebby
             var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
             foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion)))
             {
-                if (minion.IsMoving)
-                    Q.Cast(minion);
-                else
-                    Q.Cast(minion.Position);
+                Program.CastSpell(Q, minion);
                 FarmId = minion.NetworkId;
             }
             if (Config.Item("LC").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && (ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || ObjectManager.Player.UnderTurret(false)))
@@ -484,10 +481,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (minion.Health < Q.GetDamage(minion) * 0.8 && minion.Health > minion.FlatPhysicalDamageMod)
                     {
-                        if (minion.IsMoving)
-                            Q.Cast(minion);
-                        else
-                            Q.Cast(minion.Position);
+                        Program.CastSpell(Q, minion);
                     }
 
                 }
@@ -495,10 +489,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && minion.Health > Q.GetDamage(minion) * 1.5 && Orbwalker.InAutoAttackRange(minion)))
                     {
-                        if (minion.IsMoving)
-                            Q.Cast(minion);
-                        else
-                            Q.Cast(minion.Position);
+                        Program.CastSpell(Q, minion);
                     }
                 }
             }

@@ -182,6 +182,8 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget(Q.Range))
             {
+                if (!Program.CanMove(t))
+                    Program.debug("" + !Program.CanMove(t));
                 float predictedHealth = t.Health + t.HPRegenRate * 2;
                 double Qdmg = Q.GetDamage(t);
 
@@ -196,14 +198,17 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
+                    
                     if (t.HasBuffOfType(BuffType.Slow))
-                        Q.Cast(t, true);
+                        Program.CastSpell(Q, t);
                     else if (Player.Mana >Player.MaxMana * 0.8 )
                         Program.CastSpell(Q, t);
                 }
 
-                if ((Program.Combo || Program.Farm)  && Player.CountEnemiesInRange(bonusRange() + 100) == 0&& Player.Mana > RMANA + EMANA + WMANA + QMANA)
+                if ((Program.Combo || Program.Farm) && Player.CountEnemiesInRange(bonusRange() + 100) == 0 && Player.Mana > RMANA + EMANA + WMANA + QMANA)
+                {
                     Q.CastIfWillHit(t, 2, true);
+                }
             }
             else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
             {
