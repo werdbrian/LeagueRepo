@@ -182,8 +182,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget(Q.Range))
             {
-                if (!Program.CanMove(t))
-                    Program.debug("" + !Program.CanMove(t));
+
                 float predictedHealth = t.Health + t.HPRegenRate * 2;
                 double Qdmg = Q.GetDamage(t);
 
