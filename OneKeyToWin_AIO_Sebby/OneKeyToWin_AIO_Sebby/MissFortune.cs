@@ -87,19 +87,17 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Q.Cast(t);
             }
-
-            if (W.IsReady())
-            {
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA && Config.Item("autoW").GetValue<bool>())
-                    W.Cast();
-                else if ( ObjectManager.Player.Mana > RMANA + WMANA + QMANA && Config.Item("harasW").GetValue<bool>())
-                    W.Cast();
-            }
         }
 
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            
+            if (W.IsReady())
+            {
+                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA && Config.Item("autoW").GetValue<bool>())
+                    W.Cast();
+                else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA && Config.Item("harasW").GetValue<bool>())
+                    W.Cast();
+            }
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -147,10 +145,16 @@ namespace OneKeyToWin_AIO_Sebby
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             var t1 = TargetSelector.GetTarget(Q1.Range, TargetSelector.DamageType.Physical);
-            if ( t.IsValidTarget(Q.Range))
+            if ( t.IsValidTarget(Q.Range) && Player.Distance(t.ServerPosition) > 500)
             {
                 if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) > t.Health)
                    Q.Cast(t);
+                else if (Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
+                    Q.Cast(t);
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                    Q.Cast(t);
+                else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
+                    Q.Cast(t);
             }
             else if (t1.IsValidTarget(Q1.Range) && Config.Item("harasQ").GetValue<bool>())
             {
