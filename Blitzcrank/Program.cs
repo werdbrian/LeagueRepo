@@ -227,14 +227,20 @@ namespace Blitzcrank
         }
         private static void CastSpell(Spell QWER, Obj_AI_Hero target, int HitChanceNum)
         {
-            //HitChance 0 - 2
-            // example CastSpell(Q, ts, 2);
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+            {
+                if (HitChanceNum < 3)
+                    QWER.Cast(poutput.CastPosition);
+                else if (Player.Distance(target.ServerPosition) < QWER.Range - (target.MoveSpeed * QWER.Delay))
+                    QWER.Cast(poutput.CastPosition);
+                return;
+            }
 
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall"))
+            if (QWER.Delay < 0.30f && poutput.Hitchance == HitChance.Dashing)
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
@@ -265,10 +271,10 @@ namespace Blitzcrank
                     }
                 }
             }
-            else if (HitChanceNum == 3)
+            else if (HitChanceNum == 3 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) - QWER.Width) * 6;
+                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
                     QWER.Cast(poutput.CastPosition);
@@ -291,14 +297,19 @@ namespace Blitzcrank
             else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) - QWER.Width) * 6;
+
+                if ((int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) == 0)
+                    return;
+
+                float SiteToSite = (((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 10 ) - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
 
-                if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
-                    QWER.Cast(poutput.CastPosition);
-                else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
+                if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront)
+                    || Player.Distance(target.Position) < SiteToSite + target.BoundingRadius * 2
+                    || Player.Distance(waypoints.Last<Vector2>().To3D()) < BackToFront)
                 {
+                    //debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
                     if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
@@ -307,10 +318,14 @@ namespace Blitzcrank
                         }
                     }
                     else
-                    {
                         QWER.Cast(poutput.CastPosition);
-                    }
+
                 }
+                else
+                {
+                    //debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
+                }
+
             }
         }
 
