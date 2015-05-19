@@ -168,45 +168,45 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget())
             {
-                if (W.GetDamage(t) > t.Health && !Orbwalking.InAutoAttackRange(t))
+                if (Program.GetRealDmg(W, t) > t.Health)
                 {
                     W.Cast(t, true, true);
-                    Program.debug("W ks");
-                    OverKill = Game.Time;
                     return;
                 }
-                else if (W.GetDamage(t) + Q.GetDamage(t) > t.Health && ObjectManager.Player.Mana > QMANA + EMANA + RMANA)
-                    W.Cast(t, true, true);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
-                    W.Cast(t, true, true);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + 5 && !Orbwalking.InAutoAttackRange(t))
-                    W.Cast(t, true, true);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(300) > 0)
-                    W.Cast(t, true, true);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + WMANA + EMANA && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.4)
-                    W.Cast(t, true, true);
-                else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+                else if (W.GetDamage(t) + Q.GetDamage(t) > t.Health && Player.Mana > QMANA + WMANA + RMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
-                        W.Cast(enemy,true,true);
+                    W.Cast(t, true, true);
+                }
+                else if (Program.Combo)
+                {
+                    if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + EMANA && !Orbwalking.InAutoAttackRange(t))
+                        W.Cast(t, true, true);
+                    else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA && ObjectManager.Player.CountEnemiesInRange(300) > 0)
+                        W.Cast(t, true, true);
+                    else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + WMANA && t.CountEnemiesInRange(250) > 1)
+                        W.Cast(t, true, true);
+                    else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + EMANA)
+                    {
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                            W.Cast(enemy, true, true);
+                    }
                 }
             }
         }
 
         private void LogicE()
         {
+            if (Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) > 2 && ObjectManager.Player.Mana < RMANA + EMANA)
+                return;
             var t = TargetSelector.GetTarget(E.Range + Q.Range, TargetSelector.DamageType.Physical);
             var t2 = TargetSelector.GetTarget(900f, TargetSelector.DamageType.Physical);
-            if (ObjectManager.Player.Mana > RMANA + EMANA
-                && ObjectManager.Player.CountEnemiesInRange(240) > 0
-                && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
+            if (ObjectManager.Player.CountEnemiesInRange(240) > 0
                 && t.Position.Distance(Game.CursorPos) > t.Position.Distance(ObjectManager.Player.Position))
                 E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
             else if (E.IsReady() && (Game.Time - OverKill > 0.4) && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3 && Orbwalker.ActiveMode.ToString() == "Combo" && ObjectManager.Player.Health > ObjectManager.Player.MaxHealth * 0.4 && !ObjectManager.Player.UnderTurret(true))
             {
                 if (t.IsValidTarget()
                 && Q.IsReady()
-                && ObjectManager.Player.Mana > RMANA + EMANA
                 && Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health
                 && t.Position.Distance(Game.CursorPos) + 200 < t.Position.Distance(ObjectManager.Player.Position)
                 && !Orbwalking.InAutoAttackRange(t)
@@ -216,7 +216,6 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.debug("E + aa + Q");
                 }
                 else if (t2.IsValidTarget()
-                 && ObjectManager.Player.Mana > QMANA + RMANA
                  && ObjectManager.Player.GetAutoAttackDamage(t2) * 2 > t2.Health
                  && !Orbwalking.InAutoAttackRange(t2)
                  && t2.Position.Distance(Game.CursorPos) + 200 < t2.Position.Distance(ObjectManager.Player.Position)

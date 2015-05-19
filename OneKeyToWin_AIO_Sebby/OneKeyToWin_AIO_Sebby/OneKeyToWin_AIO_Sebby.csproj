@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activator.cs" />
     <Compile Include="Annie.cs" />
     <Compile Include="Ashe.cs" />
     <Compile Include="Caitlyn.cs" />
@@ -62,11 +63,13 @@
     <Compile Include="Jinx.cs" />
     <Compile Include="Kalista.cs" />
     <Compile Include="KogMaw.cs" />
+    <Compile Include="LifeSaver.cs" />
     <Compile Include="MissFortune.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Quinn.cs" />
     <Compile Include="Sivir.cs" />
+    <Compile Include="Urgot.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

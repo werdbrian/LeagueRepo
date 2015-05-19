@@ -221,7 +221,7 @@ namespace OneKeyToWin_AIO_Sebby
                 farmQ();
                 lag = Game.Time;
             }
-            else if ( Config.Item("stack").GetValue<bool>() && !ObjectManager.Player.IsRecalling() && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
+            else if (Config.Item("stack").GetValue<bool>() && !Player.HasBuff("Recall") && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
             {
                 Q.Cast(ObjectManager.Player.ServerPosition);
             }
@@ -617,9 +617,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("watermark").GetValue<bool>())
-            {
                 Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
-            }
 
             if (Config.Item("qRange").GetValue<bool>())
             {

@@ -28,14 +28,9 @@ namespace OneKeyToWin_AIO_Sebby
     {
         public Obj_AI_Hero Player;
     }
+
     internal class Program
     {
-        public static string AnnieVer = "1.6.0.0";
-        public static string JinxVer = "3.1.3.0";
-        public static string EzrealVer = "2.7.3.0";
-        public static string KogMawVer = "1.3.0.0";
-        public static string SivirVer = "2.0.0.0";
-
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
 
@@ -78,14 +73,15 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Supported champions:"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "Annie " + AnnieVer));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("4", "Jinx " + JinxVer));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal " + EzrealVer));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw " + KogMawVer));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir " + SivirVer));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "Annie " ));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("4", "Jinx " ));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal " ));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw " ));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir " ));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("8", "Ashe "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("9", "Miss Fortune "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("10", "Quinn "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("11", "Graves "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
 
@@ -158,11 +154,13 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Graves":
                         new Graves().LoadOKTW();
                         break;
+                    case "Urgot":
+                        new Urgot().LoadOKTW();
+                        break;
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
-
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
                 
@@ -190,11 +188,18 @@ namespace OneKeyToWin_AIO_Sebby
                     jungler = enemy;
                 }
             }
+
+            new LifeSaver().LoadOKTW();
+            
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
+            
         }
+
+
+
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe)
@@ -412,9 +417,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
-                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell()
-                || (!target.CanMove && target.ChampionName != "Blitzcrank" && target.ChampionName != "Zyra" && target.ChampionName != "Thresh")
-            )
+                target.IsStunned || target.IsRecalling() || target.IsChannelingImportantSpell())
             {
                 debug("!canMov" + target.ChampionName);
                 return false;
@@ -614,7 +617,7 @@ namespace OneKeyToWin_AIO_Sebby
             float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
             float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
             float positionDraw = 0;
-            float positionGang = 700;
+            float positionGang = 500;
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
                 if (HpBar && enemy.IsHPBarRendered)
@@ -694,9 +697,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (championInfo)
                 {
                     positionDraw += 15;
-
-                    if (ShowKDA)
-                        Drawing.DrawText(posX - 100, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                     //Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent );
                     foreach (RecallInfo rerecall in RecallInfos)
                     {
@@ -714,28 +714,38 @@ namespace OneKeyToWin_AIO_Sebby
                             }
                         }
                     }
-                    
+                    /*
                     if ((int)enemy.HealthPercent > 0)
                         Drawing.DrawLine(posX, posY + positionDraw, (posX + ((int)enemy.HealthPercent) / 2) + 1, posY + positionDraw, 12, kolorHP);
                     if ((int)enemy.HealthPercent < 100)
                         Drawing.DrawLine((posX + ((int)enemy.HealthPercent) / 2), posY + positionDraw, posX + 50, posY + positionDraw, 12, System.Drawing.Color.Black);
+                    */
                     Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName + " " + enemy.Level + "lvl");
-
+                    
                 }
                 var Distance = Player.Distance(enemy.Position);
                 if (GankAlert && Distance > 1200 && !enemy.IsDead)
                 {
+
+                    var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
+
+                    wts[0] = wts[0] - (enemy.ChampionName.Count<char>()) * 5;
+                    wts[1] = wts[1] + 15;
+                    if ((int)enemy.HealthPercent > 0)
+                        Drawing.DrawLine(wts[0], wts[1] , (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
+                    if ((int)enemy.HealthPercent < 100)
+                        Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1] , wts[0] + 50, wts[1] , 12, System.Drawing.Color.Black);
                     if (Distance > 3500 && enemy.IsVisible)
-                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
-                    else if (!enemy.IsVisible)
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Orange);
+                    else if (!enemy.IsVisible)
+                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
                     else
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
                     if (Distance < 3500 && enemy.IsVisible)
-                        Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((Distance - 900) / 30), kolorHP, 10, 1);
+                        Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((3500 - Distance) / 30), System.Drawing.Color.Red, 10, 1);
 
                 }
-                positionGang = positionGang + 70;
+                positionGang = positionGang + 100;
             }
 
             if (Config.Item("OrbDraw").GetValue<bool>())

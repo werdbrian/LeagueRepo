@@ -81,16 +81,16 @@ namespace OneKeyToWin_AIO_Sebby
                         Player.IssueOrder(GameObjectOrder.MoveTo, t.ServerPosition);
                 }
             }
-            if (Program.LagFree(1) && E.IsReady())
+            if (Program.LagFree(1) && E.IsReady() && Program.attackNow)
                 LogicE();
 
-            if (Program.LagFree(2) && Q.IsReady())
+            if (Program.LagFree(2) && Q.IsReady() && Program.attackNow)
                 LogicQ();
 
-            if (Program.LagFree(3) && W.IsReady() )
+            if (Program.LagFree(3) && W.IsReady() && Program.attackNow)
                 LogicW();
 
-            if (Program.LagFree(4) && R.IsReady())
+            if (Program.LagFree(4) && R.IsReady() && Program.attackNow)
                 LogicR();
             
         }
@@ -226,7 +226,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (target.IsValidTarget() && Config.Item("AApriority").GetValue<bool>() && target is Obj_AI_Hero && !attackNow)
             {
-                Program.debug("spellDisable");
+                
                 return false;
             }
             else

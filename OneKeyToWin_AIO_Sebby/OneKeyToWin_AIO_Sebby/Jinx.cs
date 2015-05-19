@@ -88,7 +88,7 @@ namespace OneKeyToWin_AIO_Sebby
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
             }
-            if (unit.IsMe && args.SData.Name == "JinxW")
+            if (unit.IsMe && args.SData.Name == "JinxWMissile")
                 WCastTime = Game.Time;
             
         }
@@ -116,8 +116,8 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
                 LogicE();
-            
-            if (Program.LagFree(2) && Q.IsReady())
+
+            if (Program.LagFree(2) && Q.IsReady() && Program.attackNow)
                 LogicQ();
            
             if (Program.LagFree(3) && W.IsReady() && Program.attackNow)

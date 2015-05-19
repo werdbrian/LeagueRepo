@@ -139,19 +139,12 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if(Config.Item("tibers").GetValue<bool>() && HaveTibers)
                 {
-                    if (Game.Time - TibbersTimer > 2)
+                    var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
+                    if (BestEnemy.IsValidTarget(2000) && Game.Time - TibbersTimer > 2)
                     {
-                        var BestEnemy = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Magical);
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(2000)))
-                        {
-                            if (enemy.IsValidTarget(2000) && BestEnemy.IsValidTarget(2000) && enemy.IsEnemy && BestEnemy.Position.Distance(Tibbers.Position) > enemy.Position.Distance(Tibbers.Position))
-                                BestEnemy = enemy;
-                        }
-                        if (BestEnemy.IsValidTarget(2000))
-                        {
-                            Player.IssueOrder(GameObjectOrder.MovePet, BestEnemy.Position);
-                            R.CastOnUnit(BestEnemy);
-                        }
+                        Player.IssueOrder(GameObjectOrder.MovePet, BestEnemy.Position);
+                        R.CastOnUnit(BestEnemy);
+                        TibbersTimer = Game.Time;
                     }
                 }
                 else
@@ -266,7 +259,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("watermark").GetValue<bool>())
             {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " " + Program.AnnieVer + " by Sebby");
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
             }
             if (Config.Item("ComboInfo").GetValue<bool>())
             {

@@ -162,7 +162,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicE()
         {
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if ( t.IsValidTarget(E.Range))
+            if ( t.IsValidTarget(E.Range) && !t.HasBuff("QuinnW"))
             {
                 if (E.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t) * 3 > t.Health)
                     E.Cast(t);

@@ -230,10 +230,9 @@ namespace OneKeyToWin_AIO_Sebby
                     E.Cast();
                     return;
                 }
-
+                
                 if (GetRStacks(target) >= countE
                     && (Game.Time - GetPassiveTime(target) > -0.5 || Player.Distance(target.ServerPosition) > E.Range - 100 || Player.Health < Player.MaxHealth * 0.4)
-                    && Player.Distance(target.ServerPosition) > Player.Distance(target.Position)
                     && Player.Mana > RMANA + QMANA + EMANA + WMANA
                     && Player.CountEnemiesInRange(900) == 0)
                 {
