@@ -262,7 +262,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (qDmg > t.Health)
                     Program.CastSpell(Q, t);
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA - 10)
                     Program.CastSpell(Q, t);
                 else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                 {
