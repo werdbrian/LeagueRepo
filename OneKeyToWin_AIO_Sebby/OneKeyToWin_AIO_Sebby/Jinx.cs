@@ -211,21 +211,18 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                     else
                     {
-                        List<Vector2> waypoints = ta.GetWaypoints();
-                        if ((Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(ta.Position)) > 100)
+                        var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                        if (Program.Combo && t.IsValidTarget(W.Range) &&  E.GetPrediction(t).CastPosition.Distance(t.Position) > 200)
                         {
-                            if (ta.Position.Distance(Game.CursorPos) < ta.Position.Distance(Player.Position))
+                            if (ObjectManager.Player.Position.Distance(t.ServerPosition) > Player.Position.Distance(t.Position))
                             {
-                                Program.CastSpell(E, ta);
-                                debug("E run");
+                                if (t.Position.Distance(Player.ServerPosition) < t.Position.Distance(Player.Position))
+                                    Program.CastSpell(E, t);
                             }
-                        }
-                        else
-                        {
-                            if (ta.Position.Distance(Game.CursorPos) > ta.Position.Distance(Player.Position))
+                            else
                             {
-                                Program.CastSpell(E, ta);
-                                debug("E escape");
+                                if (t.Position.Distance(Player.ServerPosition) > t.Position.Distance(Player.Position))
+                                    Program.CastSpell(E, t);
                             }
                         }
                     }
