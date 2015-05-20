@@ -81,7 +81,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             SetMana();
-            if (Program.LagFree(1) && Q.IsReady() && Program.attackNow)
+            if (Program.LagFree(1) && Q.IsReady() && !Player.IsWindingUp)
             {
                 LogicQ();
             }

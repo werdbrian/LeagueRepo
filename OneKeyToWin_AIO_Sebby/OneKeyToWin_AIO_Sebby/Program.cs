@@ -42,7 +42,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
 
-        public static bool tickSkip = true, attackNow = true;
+        public static bool tickSkip = true;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
@@ -198,21 +198,6 @@ namespace OneKeyToWin_AIO_Sebby
             
         }
 
-
-
-        private void afterAttack(AttackableUnit unit, AttackableUnit target)
-        {
-            if (!unit.IsMe)
-                return;
-            attackNow = true;
-
-        }
-
-        private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-        {
-            attackNow = false;
-
-        }
         private static void OnUpdate(EventArgs args)
         {
             
@@ -221,9 +206,6 @@ namespace OneKeyToWin_AIO_Sebby
                 tickIndex = 0;
             if (LagFree(0))
             {
-                var target = Orbwalker.GetTarget();
-                if (!(target is Obj_AI_Hero))
-                    attackNow = true;
                 HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
                 if (Config.Item("pots").GetValue<bool>())
                     PotionManagement();
@@ -234,7 +216,6 @@ namespace OneKeyToWin_AIO_Sebby
                     AutoWard();
             }
         }
-
 
         public static void AutoWard()
         {
@@ -291,7 +272,7 @@ namespace OneKeyToWin_AIO_Sebby
                         }
                         
                     }
-                    if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.time < 2 && Player.Mana > 200f && attackNow && Config.Item("bushW").GetValue<bool>())
+                    if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.time < 2 && Player.Mana > 200f && !Player.IsWindingUp && Config.Item("bushW").GetValue<bool>())
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 800)
                         {
@@ -442,7 +423,7 @@ namespace OneKeyToWin_AIO_Sebby
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition ) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile || target.IsWindingUp)
             {
                 if (HitChanceNum < 3 )
                     QWER.Cast(poutput.CastPosition);
@@ -704,13 +685,13 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             var time = (Game.Time - rerecall.RecallStart) * 10;
                             if (rerecall.RecallNum == 2)
-                                Drawing.DrawText(posX + 200, posY + positionDraw, System.Drawing.Color.GreenYellow, "rerecall finish");
+                                Drawing.DrawText(posX + 150, posY + positionDraw, System.Drawing.Color.GreenYellow, "rerecall finish");
                             else if (rerecall.RecallNum == 1)
-                                Drawing.DrawText(posX + 200, posY + positionDraw, System.Drawing.Color.Yellow, "rerecall stop");
+                                Drawing.DrawText(posX + 150, posY + positionDraw, System.Drawing.Color.Yellow, "rerecall stop");
                             else if (rerecall.RecallNum == 0)
                             {
-                                Drawing.DrawLine(posX + 200, posY + positionDraw, posX + 280 - time, posY + positionDraw, 12, System.Drawing.Color.Red);
-                                Drawing.DrawLine(posX + 280 - time, posY + positionDraw, posX + 280, posY + positionDraw, 12, System.Drawing.Color.Black);
+                                Drawing.DrawLine(posX + 150, posY + positionDraw, posX + 230 - time, posY + positionDraw, 12, System.Drawing.Color.Red);
+                                Drawing.DrawLine(posX + 230 - time, posY + positionDraw, posX + 230, posY + positionDraw, 12, System.Drawing.Color.Black);
                             }
                         }
                     }
@@ -720,7 +701,11 @@ namespace OneKeyToWin_AIO_Sebby
                     if ((int)enemy.HealthPercent < 100)
                         Drawing.DrawLine((posX + ((int)enemy.HealthPercent) / 2), posY + positionDraw, posX + 50, posY + positionDraw, 12, System.Drawing.Color.Black);
                     */
-                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName + " " + enemy.Level + "lvl");
+                    if (ShowKDA)
+                        Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
+                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName );
+
+                    Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
                     
                 }
                 var Distance = Player.Distance(enemy.Position);

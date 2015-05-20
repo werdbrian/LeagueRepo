@@ -28,7 +28,7 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 2500);
             R = new Spell(SpellSlot.R, 3000f);
 
-            W.SetSkillshot(0.5f, 70f , 1000f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.5f, 50f , 1000f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 299f, 1400f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
             LoadMenuOKTW();
@@ -36,7 +36,21 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack += BeforeAttack;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+        }
+
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (R.IsReady() )
+            {
+                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                if (Config.Item("GapCloser" + Target.BaseSkinName).GetValue<bool>() && Target.IsValidTarget(800))
+                {
+                    R.Cast(Target, true);
+
+                }
+            }
         }
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -83,7 +97,7 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(3) && W.IsReady() && Program.attackNow )
+            if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp)
                 LogicW();
 
             if (Program.LagFree(4) && R.IsReady())
@@ -104,7 +118,7 @@ namespace OneKeyToWin_AIO_Sebby
                     var Rdmg = R.GetDamage(target);
                     if (target.CountEnemiesInRange(250) > 2 && Config.Item("autoRaoe").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                         Program.CastSpell(R, target);
-                    if (Rdmg > predictedHealth && target.CountAlliesInRange(600) == 0 && target.Distance(Player.Position) > 1200)
+                    if (Rdmg > predictedHealth && target.CountAlliesInRange(600) == 0 && target.Distance(Player.Position) > 1000)
                     {
                         cast = true;
                         PredictionOutput output = R.GetPrediction(target);
@@ -210,6 +224,9 @@ namespace OneKeyToWin_AIO_Sebby
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Haras W").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.BaseSkinName, enemy.BaseSkinName,true).SetValue(false));
+
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("comboQ", "Q count").SetValue(new Slider(5, 5, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q").SetValue(true));
 
@@ -222,6 +239,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRaoe", "Auto R aoe").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRinter", "Auto R OnPossibleToInterrupt").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.BaseSkinName, enemy.BaseSkinName, true).SetValue(false));
         }
     }
 }

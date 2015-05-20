@@ -15,10 +15,11 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             var heal = ObjectManager.Player.GetSpellSlot("summonerheal");
-            if (heal == SpellSlot.Unknown)
-                return;
+            
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnDamage +=Obj_AI_Base_OnDamage;
+            if (heal == SpellSlot.Unknown)
+                return;
         }
 
         private void Obj_AI_Base_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)

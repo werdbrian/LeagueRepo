@@ -135,7 +135,7 @@ namespace OneKeyToWin_AIO_Sebby
                 countE = Config.Item("countE").GetValue<Slider>().Value;
             }
 
-            if (Program.LagFree(1) && Q.IsReady() && Program.attackNow)
+            if (Program.LagFree(1) && Q.IsReady() && !Player.IsWindingUp)
                 LogicQ();
             if (Program.LagFree(2) && E.IsReady())
                 JungleE();

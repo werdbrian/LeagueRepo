@@ -81,16 +81,16 @@ namespace OneKeyToWin_AIO_Sebby
                         Player.IssueOrder(GameObjectOrder.MoveTo, t.ServerPosition);
                 }
             }
-            if (Program.LagFree(1) && E.IsReady() && Program.attackNow)
+            if (Program.LagFree(1) && E.IsReady() && !Player.IsWindingUp)
                 LogicE();
 
-            if (Program.LagFree(2) && Q.IsReady() && Program.attackNow)
+            if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp)
                 LogicQ();
 
-            if (Program.LagFree(3) && W.IsReady() && Program.attackNow)
+            if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp)
                 LogicW();
 
-            if (Program.LagFree(4) && R.IsReady() && Program.attackNow)
+            if (Program.LagFree(4) && R.IsReady() && !Player.IsWindingUp)
                 LogicR();
             
         }

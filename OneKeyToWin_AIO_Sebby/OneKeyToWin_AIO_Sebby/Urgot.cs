@@ -28,12 +28,12 @@ namespace OneKeyToWin_AIO_Sebby
             Q = new Spell(SpellSlot.Q, 980);
             Q2 = new Spell(SpellSlot.Q, 1200);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 1050);
+            E = new Spell(SpellSlot.E, 900);
             R = new Spell(SpellSlot.R, 850);
 
             Q.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
             Q2.SetSkillshot(0.25f, 60f, 1600f, false, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.25f, 300f, 1750f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.25f, 200f, 1750f, false, SkillshotType.SkillshotCircle);
             LoadMenuOKTW();
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -61,7 +61,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Rhp", "dont R if under % hp").SetValue(new Slider(50, 100, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("R option").SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.BaseSkinName, enemy.BaseSkinName, true).SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
@@ -85,6 +86,14 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
+            if (R.IsReady())
+            {
+                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                if (Config.Item("GapCloser" + Target.BaseSkinName).GetValue<bool>() && Target.IsValidTarget(R.Range))
+                {
+                    R.Cast(Target, true);
+                }
+            }
             if (Config.Item("AGC").GetValue<bool>() && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
@@ -141,16 +150,16 @@ namespace OneKeyToWin_AIO_Sebby
                 
             }
 
-            if (Program.LagFree(1) && Program.attackNow && E.IsReady() )
+            if (Program.LagFree(1) && !Player.IsWindingUp && E.IsReady())
                 LogicE();
 
-            if (Program.LagFree(2) && Program.attackNow && Q.IsReady() )
+            if (Program.LagFree(2) && !Player.IsWindingUp && Q.IsReady())
                 LogicQ();
-            
-            if (Program.LagFree(3) && Program.attackNow && Q.IsReady())
+
+            if (Program.LagFree(3) && !Player.IsWindingUp && Q.IsReady())
                 LogicQ2();
 
-            if (Program.LagFree(4) && Program.attackNow && R.IsReady() )
+            if (Program.LagFree(4) && !Player.IsWindingUp && R.IsReady())
                 LogicR();
         }
 

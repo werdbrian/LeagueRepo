@@ -131,13 +131,13 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(1) && Program.attackNow && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(1) && !Player.IsWindingUp && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
 
-            if (Program.LagFree(2) && Program.attackNow && E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Program.LagFree(2) && !Player.IsWindingUp && E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
 
-            if (Program.LagFree(4) && Program.attackNow && R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            if (Program.LagFree(4) && !Player.IsWindingUp && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
             
         }
