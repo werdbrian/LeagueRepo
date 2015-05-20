@@ -60,8 +60,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Target.IsValidTarget(W.Range))
                 {
-                    W.Cast(Target);
-                    Program.debug("AGC W");
+                    W.Cast(ObjectManager.Player.Position.Extend(Target.Position, 50), true);
                 }
             }
         }
