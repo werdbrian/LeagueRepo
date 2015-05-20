@@ -722,7 +722,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if ((int)enemy.HealthPercent > 0)
                         Drawing.DrawLine(wts[0], wts[1] , (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
                     if ((int)enemy.HealthPercent < 100)
-                        Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1] , wts[0] + 50, wts[1] , 12, System.Drawing.Color.Black);
+                        Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1] , wts[0] + 50, wts[1] , 12, System.Drawing.Color.White);
                     if (Distance > 3500 && enemy.IsVisible)
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Orange);
                     else if (!enemy.IsVisible)
