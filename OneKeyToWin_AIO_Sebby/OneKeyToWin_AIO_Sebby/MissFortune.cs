@@ -151,7 +151,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Q.Cast(t);
             }
-            else if (t1.IsValidTarget(Q1.Range) && Config.Item("harasQ").GetValue<bool>() && Player.Distance(t.ServerPosition) > Q.Range + 50)
+            else if (t1.IsValidTarget(Q1.Range) && Config.Item("harasQ").GetValue<bool>() && Player.Distance(t1.ServerPosition) > Q.Range + 50)
             {
                 var poutput = Q1.GetPrediction(t1);
                 var col = poutput.CollisionObjects;
