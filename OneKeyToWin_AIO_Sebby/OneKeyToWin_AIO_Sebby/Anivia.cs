@@ -163,16 +163,16 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicW()
         {
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && t.IsValidTarget(W.Range) && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && W.GetPrediction(t).CastPosition.Distance(t.Position) > 150)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && t.IsValidTarget(W.Range) && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && W.GetPrediction(t).CastPosition.Distance(t.Position) > 100)
             {
                 if (ObjectManager.Player.Position.Distance(t.ServerPosition) > ObjectManager.Player.Position.Distance(t.Position))
                 {
-                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) < t.Position.Distance(ObjectManager.Player.Position) && t.IsValidTarget(W.Range - 200))
+                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) < t.Position.Distance(ObjectManager.Player.Position))
                         Program.CastSpell(W, t);
                 }
                 else
                 {
-                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) > t.Position.Distance(ObjectManager.Player.Position) && t.IsValidTarget(E.Range) && t.HasBuffOfType(BuffType.Slow))
+                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) > t.Position.Distance(ObjectManager.Player.Position) )
                         Program.CastSpell(W, t);
                 }
             }
@@ -262,7 +262,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (qDmg > t.Health)
                     Program.CastSpell(Q, t);
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > EMANA + QMANA - 10)
+                else if (Program.Combo && ObjectManager.Player.Mana > EMANA + QMANA - 10)
                     Program.CastSpell(Q, t);
                 else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                 {
