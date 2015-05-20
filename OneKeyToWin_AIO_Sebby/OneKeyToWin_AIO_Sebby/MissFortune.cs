@@ -125,7 +125,7 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(1) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(1) && !Player.IsWindingUp && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
 
             if (Program.LagFree(2) && !Player.IsWindingUp && E.IsReady() && Config.Item("autoE").GetValue<bool>())
@@ -151,9 +151,8 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Q.Cast(t);
             }
-            else if (t1.IsValidTarget(Q1.Range) && Config.Item("harasQ").GetValue<bool>())
+            else if (t1.IsValidTarget(Q1.Range) && Config.Item("harasQ").GetValue<bool>() && Player.Distance(t.ServerPosition) > Q.Range + 50)
             {
-
                 var poutput = Q1.GetPrediction(t1);
                 var col = poutput.CollisionObjects;
                 if (col.Count() == 0)
@@ -180,14 +179,9 @@ namespace OneKeyToWin_AIO_Sebby
             if (t.IsValidTarget())
             {
                 if (Program.GetRealDmg(E, t) > t.Health)
-                {
                     E.Cast(t, true, true);
-                    return;
-                }
                 else if (E.GetDamage(t) + Q.GetDamage(t) > t.Health && Player.Mana > QMANA + EMANA + RMANA)
-                {
                     E.Cast(t, true, true);
-                }
                 else if (Program.Combo)
                 {
                     if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + EMANA && !Orbwalking.InAutoAttackRange(t))
@@ -204,9 +198,9 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }   
         }
+
         private void LogicR()
         {
-
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
             if (t.IsValidTarget(R.Range))
