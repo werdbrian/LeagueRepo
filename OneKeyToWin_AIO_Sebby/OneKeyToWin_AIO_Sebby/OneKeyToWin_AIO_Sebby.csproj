@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activator.cs" />
+    <Compile Include="Anivia.cs" />
     <Compile Include="Annie.cs" />
     <Compile Include="Ashe.cs" />
     <Compile Include="Caitlyn.cs" />

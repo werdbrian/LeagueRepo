@@ -157,6 +157,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Urgot":
                         new Urgot().LoadOKTW();
                         break;
+                    case "Anivia":
+                        new Anivia().LoadOKTW();
+                        break;
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));

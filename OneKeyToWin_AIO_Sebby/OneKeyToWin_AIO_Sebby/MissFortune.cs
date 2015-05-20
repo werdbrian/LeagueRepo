@@ -132,9 +132,8 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicE();
 
             if (Program.LagFree(4) && !Player.IsWindingUp && R.IsReady() && Config.Item("autoR").GetValue<bool>())
-            {
                 LogicR();
-            }
+            
         }
         private void LogicQ()
         {
