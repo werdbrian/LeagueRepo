@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0.1f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 80f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -83,11 +83,17 @@ namespace OneKeyToWin_AIO_Sebby
                     if (E.IsReady() && Player.Mana > RMANA + EMANA && ally.Distance(Player.Position) < E.Range)
                     {
                         if (ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
+                        {
                             E.CastOnUnit(ally);
+                        }
                         else if (!Program.CanMove(ally) && Config.Item("hadrCC").GetValue<bool>())
+                        {
                             E.CastOnUnit(ally);
+                        }
                         else if (ally.HasBuffOfType(BuffType.Poison) && Config.Item("poison").GetValue<bool>())
+                        {
                             E.CastOnUnit(ally);
+                        }
                     }
                     if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240 && ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
                         W.Cast();
