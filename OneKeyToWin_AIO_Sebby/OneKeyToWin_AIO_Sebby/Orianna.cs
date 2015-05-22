@@ -38,11 +38,8 @@ namespace OneKeyToWin_AIO_Sebby
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             QR.SetSkillshot(0.6f, 400f, 100f, false, SkillshotType.SkillshotCircle);
 
-
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("autoW", "Auto E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp").SetValue(new Slider(10, 100, 0)));
-
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 20)));
@@ -73,8 +70,22 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && (ally.HasBuff("orianaghostself") || (ally.HasBuff("orianaghost")))))
-                BallPos = ally.ServerPosition;
+            foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid))
+            {
+                if (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost"))
+                    BallPos = ally.ServerPosition;
+
+                if (Program.LagFree(2) && ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
+                {
+                    if (E.IsReady() && Player.Mana > RMANA + EMANA && ally.Distance(Player.Position) < E.Range)
+                        E.CastOnUnit(ally);
+                    if (W.IsReady() && Player.Mana > RMANA + WMANA && (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost")))
+                        W.Cast();
+                }
+            }
+
+
+            
             /*
             foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && ally.Distance(Player.Position) < 1000))
             {
@@ -262,9 +273,6 @@ namespace OneKeyToWin_AIO_Sebby
                         E.CastOnUnit(ally);
                 }
                 //Game.PrintChat("" + HpPercentage);
-                if (W.IsReady() && (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost")) && (HpLeft < ally.CountEnemiesInRange(600) * ally.Level * 20))
-                    W.Cast();
-                
             }   
         }
 
