@@ -79,7 +79,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (E.IsReady() && Player.Mana > RMANA + EMANA && ally.Distance(Player.Position) < E.Range)
                         E.CastOnUnit(ally);
-                    if (W.IsReady() && Player.Mana > RMANA + WMANA && (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost")))
+                    if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240)
                         W.Cast();
                 }
             }
