@@ -117,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Rsmart = false;
 
 
-            if (Program.LagFree(0) && Q.IsReady())
+            if (Program.LagFree(0))
             {
                 SetMana();
             }
