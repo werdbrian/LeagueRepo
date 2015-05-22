@@ -39,6 +39,8 @@ namespace OneKeyToWin_AIO_Sebby
             QR.SetSkillshot(0.6f, 400f, 100f, false, SkillshotType.SkillshotCircle);
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("autoW", "Auto E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("hadrCC", "Auto E hard CC").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("poison", "Auto E poison").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp").SetValue(new Slider(10, 100, 0)));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
@@ -76,11 +78,18 @@ namespace OneKeyToWin_AIO_Sebby
                 if (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost"))
                     BallPos = ally.ServerPosition;
 
-                if (Program.LagFree(2) && ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
+                if (Program.LagFree(2) )
                 {
                     if (E.IsReady() && Player.Mana > RMANA + EMANA && ally.Distance(Player.Position) < E.Range)
-                        E.CastOnUnit(ally);
-                    if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240)
+                    {
+                        if (ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
+                            E.CastOnUnit(ally);
+                        else if (!Program.CanMove(ally) && Config.Item("hadrCC").GetValue<bool>())
+                            E.CastOnUnit(ally);
+                        else if (ally.HasBuffOfType(BuffType.Poison) && Config.Item("poison").GetValue<bool>())
+                            E.CastOnUnit(ally);
+                    }
+                    if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240 && ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
                         W.Cast();
                 }
                 if (Program.LagFree(3) && ally.Health < best.Health && ally.Distance(Player.Position) < E.Range)
