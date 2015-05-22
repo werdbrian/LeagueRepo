@@ -117,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
                 LogicE();
 
-            if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp)
+            if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
 
             if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp)
