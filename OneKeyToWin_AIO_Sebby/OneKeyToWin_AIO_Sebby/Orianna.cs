@@ -26,13 +26,13 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 810);
+            Q = new Spell(SpellSlot.Q, 820);
             W = new Spell(SpellSlot.W, 210);
             E = new Spell(SpellSlot.E, 1095);
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0f, 110f, 1000f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.1f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 80f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -195,7 +195,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicR()
         {
-            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && t.Health < R.GetDamage(t)))
+            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && t.Health <Q.GetDamage(t) + R.GetDamage(t)))
                 R.Cast();
 
             if (CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay) >= Config.Item("rCount").GetValue<Slider>().Value)
@@ -233,15 +233,13 @@ namespace OneKeyToWin_AIO_Sebby
 
             var prepos = Prediction.GetPrediction(target, delay);
             
-            var CastPos = BallPos.Extend(prepos.CastPosition, BallPos.Distance(target.Position) + 50);
-            
+
             if ((int)prepos.Hitchance > Config.Item("Hit").GetValue<Slider>().Value)
             {
                 if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
                 {
                     Q.Cast(prepos.CastPosition);
-                    Render.Circle.DrawCircle(CastPos, 100, System.Drawing.Color.Orange, 1);
-                    Program.debug("" + delay + " " + distance);
+                    
                 }
             }
         }
