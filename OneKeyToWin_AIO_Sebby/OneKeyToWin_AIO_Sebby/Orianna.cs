@@ -26,13 +26,13 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 800);
+            Q = new Spell(SpellSlot.Q, 810);
             W = new Spell(SpellSlot.W, 210);
             E = new Spell(SpellSlot.E, 1095);
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0f, 120f, 1000f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0f, 110f, 1000f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 80f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -70,6 +70,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
+            Obj_AI_Hero best = Player;
             foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid))
             {
                 if (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost"))
@@ -82,6 +83,8 @@ namespace OneKeyToWin_AIO_Sebby
                     if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240)
                         W.Cast();
                 }
+                if (Program.LagFree(3) && ally.Health < best.Health && ally.Distance(Player.Position) < E.Range)
+                    best = ally;
             }
 
 
@@ -134,14 +137,11 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (Program.LagFree(4) && ta.IsValidTarget() && E.IsReady() && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && ObjectManager.Player.Mana > RMANA + EMANA)
             {
-                
-                Obj_AI_Hero best = Player;
-                foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && ally.Health < best.Health && ally.Distance(Player.Position) < E.Range))
-                    best = ally;
                 E.CastOnUnit(best);
                 Program.debug(best.ChampionName);
             }
         }
+
 
         private void LogicFarm()
         {
