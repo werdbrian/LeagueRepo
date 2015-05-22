@@ -160,6 +160,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Anivia":
                         new Anivia().LoadOKTW();
                         break;
+                    case "Orianna":
+                        new Orianna().LoadOKTW();
+                        break;
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
@@ -204,6 +207,7 @@ namespace OneKeyToWin_AIO_Sebby
         private static void OnUpdate(EventArgs args)
         {
             
+
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
@@ -426,7 +430,7 @@ namespace OneKeyToWin_AIO_Sebby
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile || target.IsWindingUp)
+            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition && !target.IsWindingUp) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
             {
                 if (HitChanceNum < 3 )
                     QWER.Cast(poutput.CastPosition);
@@ -574,6 +578,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
+            
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)

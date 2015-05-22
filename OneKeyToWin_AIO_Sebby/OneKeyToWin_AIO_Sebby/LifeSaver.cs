@@ -61,11 +61,11 @@ namespace OneKeyToWin_AIO_Sebby
 
              if (ObjectManager.Player.Health - dmg > ObjectManager.Player.Level * 20 && ObjectManager.Player.CountEnemiesInRange(800) > 0)
              {
-                 Program.debug("dmg " + dmg);
+                 
                  if (dmg > ObjectManager.Player.Health)
                  {
                      ObjectManager.Player.Spellbook.CastSpell(heal, ObjectManager.Player);
-                     Program.debug("HEL " + dmg);
+                     
                  }
              }
         }

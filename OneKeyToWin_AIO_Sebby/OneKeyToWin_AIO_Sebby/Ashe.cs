@@ -48,7 +48,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Config.Item("GapCloser" + Target.BaseSkinName).GetValue<bool>() && Target.IsValidTarget(800))
                 {
                     R.Cast(Target, true);
-
+                    Program.debug("AGC");
                 }
             }
         }

@@ -66,6 +66,7 @@
     <Compile Include="KogMaw.cs" />
     <Compile Include="LifeSaver.cs" />
     <Compile Include="MissFortune.cs" />
+    <Compile Include="Orianna.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Quinn.cs" />
