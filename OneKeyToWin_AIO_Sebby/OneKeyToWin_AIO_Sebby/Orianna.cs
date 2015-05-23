@@ -172,7 +172,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             var ta = TargetSelector.GetTarget(1300, TargetSelector.DamageType.Physical);
 
-            if (Program.LagFree(4) && ta.IsValidTarget() && E.IsReady() && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && Player.Mana > RMANA + EMANA)
+            if (Program.LagFree(4) && Program.Combo && ta.IsValidTarget() && E.IsReady() && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && Player.Mana > RMANA + EMANA)
             {
                 E.CastOnUnit(best);
                 Program.debug(best.ChampionName);
