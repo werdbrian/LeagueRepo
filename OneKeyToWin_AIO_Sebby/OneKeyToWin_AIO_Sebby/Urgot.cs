@@ -69,6 +69,7 @@ namespace OneKeyToWin_AIO_Sebby
 
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Waa", "Auto W befor AA").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserW").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "W dmg % hp").SetValue(new Slider(10, 100, 0)));
 
@@ -124,13 +125,15 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (FarmId != args.Target.NetworkId)
                 FarmId = args.Target.NetworkId;
+            if (W.IsReady() && Config.Item("Waa").GetValue<bool>() && args.Target.IsValid<Obj_AI_Hero>() && Player.Mana > WMANA + QMANA * 4)
+                W.Cast();
 
             if (Config.Item("mura").GetValue<bool>())
             {
                 int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
                 if (!Player.HasBuff("Muramana") && args.Target.IsEnemy && args.Target.IsValid<Obj_AI_Hero>() && Items.HasItem(Mur) && Items.CanUseItem(Mur) && Player.Mana > RMANA + EMANA + QMANA + WMANA)
                     Items.UseItem(Mur);
-                else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
+                else if (Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
                     Items.UseItem(Mur);
             }
         }
@@ -176,9 +179,13 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q2.Range) && enemy.HasBuff("urgotcorrosivedebuff")))
                 {
-                    Q2.Cast(enemy.ServerPosition);
-                    if ((ObjectManager.Player.Mana > EMANA + QMANA * 4 || Q.GetDamage(enemy) * 3 > enemy.Health) && !Orbwalking.InAutoAttackRange(enemy) && W.IsReady())
+                    if ((Player.Mana > WMANA + QMANA * 4 || Q.GetDamage(enemy) * 3 > enemy.Health) && W.IsReady())
+                    {
                         W.Cast();
+                        Program.debug("W");
+                    }
+                    Program.debug("E");
+                    Q2.Cast(enemy.ServerPosition);
                     return;
                 }
             }
