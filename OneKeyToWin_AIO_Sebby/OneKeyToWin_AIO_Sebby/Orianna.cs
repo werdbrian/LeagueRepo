@@ -230,7 +230,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicFarm()
         {
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
-            if (Program.Farm && Player.Mana > RMANA + QMANA + WMANA + EMANA)
+            if (Program.Farm && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA + EMANA)
             {
                 foreach (var minion in allMinions.Where(minion => minion.IsValidTarget(Q.Range) && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion) && minion.Health > minion.FlatPhysicalDamageMod))
                 {
