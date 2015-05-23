@@ -179,6 +179,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer + Aiming sensitivity"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Sen", "Aiming sensitivity (only Prediction 4)").SetValue(new Slider(4, 10, 1)));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Move", "Ignore non-moving targets").SetValue(false));
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -201,13 +202,10 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
-            
         }
 
         private static void OnUpdate(EventArgs args)
         {
-            
-
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
@@ -430,8 +428,14 @@ namespace OneKeyToWin_AIO_Sebby
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-            if ((target.Path.Count() == 0 && target.Position == target.ServerPosition && !target.IsWindingUp) || target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+
+            if (target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
+                QWER.Cast(poutput.CastPosition);
+
+            if (target.Path.Count() == 0 && target.Position == target.ServerPosition)
             {
+                if (Config.Item("Move").GetValue<bool>())
+                    return;
                 if (HitChanceNum < 3 )
                     QWER.Cast(poutput.CastPosition);
                 else if (Player.Distance(target.ServerPosition) < QWER.Range - (target.MoveSpeed * QWER.Delay))
@@ -609,6 +613,13 @@ namespace OneKeyToWin_AIO_Sebby
             float positionGang = 500;
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
+                /*
+                if (Config.Item("debug").GetValue<bool>())
+                {
+                    var prepos = Prediction.GetPrediction(enemy, 0.5f);
+                    drawText("" + (int)prepos.Hitchance, enemy.Position, System.Drawing.Color.GreenYellow);
+                }
+                */
                 if (HpBar && enemy.IsHPBarRendered)
                 {
                     int Width = 103;
