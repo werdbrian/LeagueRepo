@@ -61,7 +61,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!E.IsReady() && args.Target == null && !sender.IsValid<Obj_AI_Hero>())
+            if (!E.IsReady() && args.Target == null && !sender.IsValid<Obj_AI_Hero>() && args.SData.Name != "TormentedSoil")
                 return;
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
