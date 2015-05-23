@@ -18,10 +18,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public bool attackNow = true;
 
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
         {

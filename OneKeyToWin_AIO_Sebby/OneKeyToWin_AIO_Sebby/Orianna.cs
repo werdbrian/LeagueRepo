@@ -101,9 +101,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Program.LagFree(3) && ally.Health < best.Health && ally.Distance(Player.Position) < E.Range)
                     best = ally;
             }
-
-
-            
             /*
             foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && ally.Distance(Player.Position) < 1000))
             {
@@ -114,7 +111,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             }
             */
-
             if ((Config.Item("smartR").GetValue<KeyBind>().Active || Rsmart) && R.IsReady())
             {
                 Rsmart = true;
@@ -201,13 +197,9 @@ namespace OneKeyToWin_AIO_Sebby
                     foreach (var minion in allMinions.Where(minion => minion.Distance(BallPos) < W.Range && minion.Health < W.GetDamage(minion)))
                         W.Cast();
                 }
-
-                
             }
         }
-
        
-
         private void LogicR()
         {
             foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && t.Health <Q.GetDamage(t) + R.GetDamage(t)))
@@ -248,7 +240,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             var prepos = Prediction.GetPrediction(target, delay);
             
-
             if ((int)prepos.Hitchance > Config.Item("Hit").GetValue<Slider>().Value)
             {
                 if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
