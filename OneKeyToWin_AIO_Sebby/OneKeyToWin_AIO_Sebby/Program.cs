@@ -52,8 +52,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Items.Item WardN = new Items.Item(2044, 600f);
         public static Items.Item TrinketN = new Items.Item(3340, 600f);
         public static Items.Item SightStone = new Items.Item(2049, 600f);
-        public static Items.Item Potion = new Items.Item(2003, 0);
-        public static Items.Item ManaPotion = new Items.Item(2004, 0);
+        
 
         static void Main(string[] args)
         {
@@ -170,7 +169,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
                 
-                Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
@@ -197,6 +195,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             new LifeSaver().LoadOKTW();
+            new Activator().LoadOKTW();
             
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
@@ -212,8 +211,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (LagFree(0))
             {
                 HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
-                if (Config.Item("pots").GetValue<bool>())
-                    PotionManagement();
+                
                 tickSkip = Config.Item("pre").GetValue<bool>();
 
                 JunglerTimer();
@@ -369,25 +367,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static bool Combo {get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); }}
 
         private static bool IsJungler(Obj_AI_Hero hero){ return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));}
-
-        private static void PotionManagement()
-        {
-            if (!ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
-            {
-                if (Potion.IsReady() && !ObjectManager.Player.HasBuff("RegenerationPotion", true))
-                {
-                    if (ObjectManager.Player.CountEnemiesInRange(700) > 0 && ObjectManager.Player.Health + 200 < ObjectManager.Player.MaxHealth)
-                        Potion.Cast();
-                    else if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.6)
-                        Potion.Cast();
-                }
-                if (ManaPotion.IsReady() && !ObjectManager.Player.HasBuff("FlaskOfCrystalWater", true))
-                {
-                    if (ObjectManager.Player.CountEnemiesInRange(1200) > 0 && ObjectManager.Player.Mana < 200)
-                        ManaPotion.Cast();
-                }
-            }
-        }
 
         public static bool ValidUlt(Obj_AI_Hero target)
         {
