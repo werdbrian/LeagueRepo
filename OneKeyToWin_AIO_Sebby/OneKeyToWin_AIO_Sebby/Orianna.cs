@@ -123,7 +123,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             E.CastOnUnit(ally);
                         }
-                        else if (!Program.CanMove(ally) && hadrCC)
+                        else if (HardCC(ally) && hadrCC)
                         {
                             E.CastOnUnit(ally);
                         }
@@ -383,6 +383,19 @@ namespace OneKeyToWin_AIO_Sebby
            
         }
 
+        private bool HardCC(Obj_AI_Hero target)
+        {
+            if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
+                target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
+                target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
+                target.IsStunned )
+            {
+                return true;
+
+            }
+            else
+                return false;
+        }
         private void SetMana()
         {
             QMANA = Q.Instance.ManaCost;
