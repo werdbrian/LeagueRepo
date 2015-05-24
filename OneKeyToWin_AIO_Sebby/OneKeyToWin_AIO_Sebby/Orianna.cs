@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0.25f, 80f, 1300f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.15f, 80f, 1200f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 100f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -53,27 +53,37 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 20)));
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("W", "Auto W SpeedUp logic").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("rCount", "Auto R x enemies").SetValue(new Slider(3, 0, 5)));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("smartR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press)));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("OPTI", "OnPossibleToInterrupt R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Rturrent", "auto R under turrent").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Rks", "R ks").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Rlifesaver", "auto R life saver").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Rblock", "Block R if 0 hit ").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("W", "Auto W SpeedUp logic").SetValue(true));
             Game.OnUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
-            //Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
-            //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
-            //AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Drawing.OnDraw += Drawing_OnDraw;
         }
-
+        private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (Config.Item("Rblock").GetValue<bool>() && args.Slot == SpellSlot.R && CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay) == 0)
+                args.Process = false;
+        }
         private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
         {
             if (!Config.Item("OPTI").GetValue<bool>())
                 return;
             if (R.IsReady() && unit.Distance(BallPos) < R.Range)
+            {
                 R.Cast();
+                Program.debug("interupt");
+            }
             else if (Q.IsReady() && Player.Mana > RMANA + QMANA && unit.IsValidTarget(Q.Range))
                 Q.Cast(unit.ServerPosition);
         }
@@ -90,13 +100,22 @@ namespace OneKeyToWin_AIO_Sebby
             if (Player.HasBuff("Recall") || Player.IsDead)
                 return;
 
+            bool hadrCC = true, poison = true;
+            if (Program.LagFree(0))
+            {
+                SetMana();
+                hadrCC = Config.Item("hadrCC").GetValue<bool>();
+                poison = Config.Item("poison").GetValue<bool>();
+            }
+
             Obj_AI_Hero best = Player;
+
             foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && !ally.IsDead))
             {
                 if (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost"))
                     BallPos = ally.ServerPosition;
 
-                if (Program.LagFree(3) )
+                if (Program.LagFree(4) )
                 {
                     if (E.IsReady() && Player.Mana > RMANA + EMANA && ally.Distance(Player.Position) < E.Range)
                     {
@@ -104,20 +123,21 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             E.CastOnUnit(ally);
                         }
-                        else if (!Program.CanMove(ally) && Config.Item("hadrCC").GetValue<bool>())
+                        else if (!Program.CanMove(ally) && hadrCC)
                         {
                             E.CastOnUnit(ally);
                         }
-                        else if (ally.HasBuffOfType(BuffType.Poison) && Config.Item("poison").GetValue<bool>())
+                        else if (ally.HasBuffOfType(BuffType.Poison))
                         {
                             E.CastOnUnit(ally);
                         }
                     }
                     if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240 && ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
                         W.Cast();
+
+                    if (ally.Health < best.Health && ally.Distance(Player.Position) < E.Range)
+                        best = ally;
                 }
-                if ( ally.Health < best.Health && ally.Distance(Player.Position) < E.Range)
-                    best = ally;
             }
             /*
             foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && ally.Distance(Player.Position) < 1000))
@@ -148,31 +168,24 @@ namespace OneKeyToWin_AIO_Sebby
             else
                 Rsmart = false;
 
-
-            if (Program.LagFree(0))
+            if (Program.LagFree(1))
             {
-                SetMana();
-            }
-
-            if (Program.LagFree(1) )
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady() )
-                LogicW();
-            if (Program.LagFree(2) && R.IsReady())
-                LogicR();
-            if (Program.LagFree(4))
-            {
-                LogicE(best);
                 LogicFarm();
             }
-            
+            if (Program.LagFree(2) && R.IsReady())
+                LogicR();
+            if (Program.LagFree(3) && W.IsReady() )
+                LogicW();
+            if (Program.LagFree(4))
+                LogicE(best); 
         }
 
         private void LogicE(Obj_AI_Hero best)
         {
             var ta = TargetSelector.GetTarget(1300, TargetSelector.DamageType.Physical);
 
-            if (Program.LagFree(4) && Program.Combo && ta.IsValidTarget() && E.IsReady() && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && Player.Mana > RMANA + EMANA)
+            if ( Program.Combo && ta.IsValidTarget() && E.IsReady() && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && Player.Mana > RMANA + EMANA)
             {
                 E.CastOnUnit(best);
                 Program.debug(best.ChampionName);
@@ -180,11 +193,33 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LogicR()
         {
-            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && t.Health <Q.GetDamage(t) + R.GetDamage(t)))
+            var Rturrent = Config.Item("Rturrent").GetValue<bool>();
+            var Rks = Config.Item("Rks").GetValue<bool>();
+            var Rlifesaver = Config.Item("Rlifesaver").GetValue<bool>();
+            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && BallPos.Distance(t.ServerPosition) < R.Width))
+            {
+                if (Rks && t.Health < Q.GetDamage(t) + R.GetDamage(t))
+                {
+                    R.Cast();
+                    Program.debug("ks");
+                }
+                if (Rturrent && BallPos.UnderTurret(false) && !BallPos.UnderTurret(true))
+                {
+                    R.Cast();
+                    Program.debug("Rturrent");
+                }
+                if (Rlifesaver && Player.Health < Player.CountEnemiesInRange(800) * Player.Level * 20 && Player.Distance(BallPos) > t.Distance(Player.Position))
+                {
+                    R.Cast();
+                    Program.debug("ls");
+                }
+
+            }
+            int countEnemies=CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay);
+            if (countEnemies >= Config.Item("rCount").GetValue<Slider>().Value && BallPos.CountEnemiesInRange(R.Width) == countEnemies)
                 R.Cast();
 
-            if (CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay) >= Config.Item("rCount").GetValue<Slider>().Value)
-                R.Cast();
+            
         }
 
         private void LogicW()
@@ -275,6 +310,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void CastQ(Obj_AI_Hero target)
         {
+            
             float distance = Vector3.Distance(BallPos, target.ServerPosition);
 
             float delay = (distance / Q.Speed + Q.Delay);
@@ -285,6 +321,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
                 {
+                    
                     Q.Cast(prepos.CastPosition);
                     
                 }

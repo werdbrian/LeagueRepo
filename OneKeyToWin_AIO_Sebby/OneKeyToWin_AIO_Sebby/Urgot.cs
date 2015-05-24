@@ -218,11 +218,11 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicR()
         {
             R.Range = 400 + 150 * R.Level;
-            if ( ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value)
+            if (ObjectManager.Player.UnderTurret(false) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value && Config.Item("autoR").GetValue<bool>())
             {
                 foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
                 {
-                    if (ObjectManager.Player.UnderTurret(false) && !ObjectManager.Player.UnderTurret(true) && Config.Item("autoR").GetValue<bool>() && target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
+                    if ( target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
                     {
                         R.Cast(target);
                     }
