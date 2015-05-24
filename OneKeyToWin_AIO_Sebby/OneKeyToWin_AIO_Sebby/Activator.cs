@@ -27,8 +27,8 @@ namespace OneKeyToWin_AIO_Sebby
             Botrk = new Items.Item(3153, 450f),
             Cutlass = new Items.Item(3144, 450f),
             Youmuus = new Items.Item(3142, 650f),
-            Hydra = new Items.Item(3144, 450f),
-            Hydra2 = new Items.Item(3144, 450f);
+            Hydra = new Items.Item(3144, 440f),
+            Hydra2 = new Items.Item(3144, 440f);
 
         public void LoadOKTW()
         {
@@ -44,7 +44,14 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("Cutlass", "Cutlass").SetValue(true));
             Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassKS", "Cutlass KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(false));
+            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
+
+            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
+            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
+            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
+
+            Config.SubMenu("Items").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
+
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -71,7 +78,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Cutlass.IsReady() && Config.Item("Cutlass").GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Cutlass.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Cutlass.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
                 {
                     if (Config.Item("CutlassKS").GetValue<bool>() && Player.CalcDamage(t, Damage.DamageType.Magical, 100) > t.Health)
@@ -79,6 +86,27 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Config.Item("CutlassCombo").GetValue<bool>() && Program.Combo)
                         Cutlass.Cast(t);
                 }
+            }
+
+            if (Youmuus.IsReady() && Config.Item("Youmuus").GetValue<bool>())
+            {
+                var t = Orbwalker.GetTarget();
+
+                if (t.IsValidTarget() && t is Obj_AI_Hero)
+                {
+                    if (Config.Item("YoumuusKS").GetValue<bool>() && t.Health < Player.MaxHealth * 0.6)
+                        Youmuus.Cast();
+                    if (Config.Item("YoumuusCombo").GetValue<bool>() && Program.Combo)
+                        Youmuus.Cast();
+                } 
+            }
+
+            if (Config.Item("Hydra").GetValue<bool>())
+            {
+                if (Hydra.IsReady() && Player.CountEnemiesInRange(Hydra.Range) > 0)
+                    Hydra.Cast();
+                else if (Hydra2.IsReady() && Player.CountEnemiesInRange(Hydra2.Range) > 0)
+                    Hydra2.Cast();
             }
         }
         private void PotionManagement()
