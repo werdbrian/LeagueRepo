@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0.15f, 80f, 1200f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.05f, 80f, 1200f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 100f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -69,6 +69,13 @@ namespace OneKeyToWin_AIO_Sebby
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnNewPath +=Obj_AI_Base_OnNewPath;
+        }
+
+        private void Obj_AI_Base_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
+        {
+            
+            Program.debug(sender.SkinName);
         }
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
@@ -155,10 +162,10 @@ namespace OneKeyToWin_AIO_Sebby
                 var target = TargetSelector.GetTarget(Q.Range + 100, TargetSelector.DamageType.Physical);
                 if (target.IsValidTarget())
                 {
-                    if (Q.IsReady())
-                    {
+                    if (CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay) > 1)
+                        R.Cast();
+                    else if (Q.IsReady())
                         QR.Cast(target, true, true);
-                    }
                     else if (CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay) > 0)
                         R.Cast();
                 }
@@ -177,7 +184,7 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicR();
             if (Program.LagFree(3) && W.IsReady() )
                 LogicW();
-            if (Program.LagFree(4))
+            if (Program.LagFree(4) && E.IsReady())
                 LogicE(best); 
         }
 
@@ -185,7 +192,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             var ta = TargetSelector.GetTarget(1300, TargetSelector.DamageType.Physical);
 
-            if ( Program.Combo && ta.IsValidTarget() && E.IsReady() && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && Player.Mana > RMANA + EMANA)
+            if ( Program.Combo && ta.IsValidTarget()  && !W.IsReady() && CountEnemiesInRangeDeley(BallPos, 100, 0.1f) > 0 && Player.Mana > RMANA + EMANA)
             {
                 E.CastOnUnit(best);
                 Program.debug(best.ChampionName);
@@ -198,9 +205,15 @@ namespace OneKeyToWin_AIO_Sebby
             var Rlifesaver = Config.Item("Rlifesaver").GetValue<bool>();
             foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && BallPos.Distance(t.ServerPosition) < R.Width))
             {
-                if (Rks && t.Health < Q.GetDamage(t) + R.GetDamage(t))
+                if (Rks)
                 {
-                    R.Cast();
+                    var comboDmg = R.GetDamage(t);
+                    if (t.IsValidTarget(Q.Range))
+                        comboDmg += Q.GetDamage(t);
+                    if (W.IsReady())
+                        comboDmg += W.GetDamage(t);
+                    if (t.Health < comboDmg)
+                        R.Cast();
                     Program.debug("ks");
                 }
                 if (Rturrent && BallPos.UnderTurret(false) && !BallPos.UnderTurret(true))
@@ -217,9 +230,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             int countEnemies=CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay);
             if (countEnemies >= Config.Item("rCount").GetValue<Slider>().Value && BallPos.CountEnemiesInRange(R.Width) == countEnemies)
-                R.Cast();
-
-            
+                R.Cast(); 
         }
 
         private void LogicW()
