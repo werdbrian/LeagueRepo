@@ -47,6 +47,8 @@ namespace OneKeyToWin_AIO_Sebby
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
         public static List<VisableInfo> VisableInfo = new List<VisableInfo>();
+        public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
+        public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
         public static Items.Item WardS = new Items.Item(2043, 600f);
         public static Items.Item WardN = new Items.Item(2044, 600f);
@@ -175,9 +177,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - high + max range fix + waypionts analyzer + Aiming sensitivity"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Sen", "Aiming sensitivity (only Prediction 4)").SetValue(new Slider(4, 10, 1)));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Move", "Ignore non-moving targets").SetValue(false));
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -192,6 +191,10 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     jungler = enemy;
                 }
+                if (enemy.IsEnemy)
+                    Enemies.Add(enemy);
+                if (enemy.IsAlly)
+                    Allies.Add(enemy);
             }
 
             new LifeSaver().LoadOKTW();
@@ -201,6 +204,7 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
+            
         }
 
         private static void OnUpdate(EventArgs args)
@@ -222,7 +226,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void AutoWard()
         {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
+            foreach (var enemy in Enemies.Where(enemy => enemy.IsEnemy && enemy.IsValid))
             {
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
                 {
@@ -320,7 +324,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
             {
 
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy && enemy.IsValid))
+                foreach (var enemy in Enemies.Where(enemy => enemy.IsValid))
                 {
                     if (Config.Item("ro" + enemy.ChampionName) != null && Config.Item("ro" + enemy.ChampionName).GetValue<bool>())
                         jungler = enemy;
@@ -386,7 +390,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 debug("!canMov" + target.ChampionName);
                 return false;
-                
             }
             else
                 return true;
@@ -413,8 +416,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (target.Path.Count() == 0 && target.Position == target.ServerPosition)
             {
-                if (Config.Item("Move").GetValue<bool>())
-                    return;
                 if (HitChanceNum < 3 )
                     QWER.Cast(poutput.CastPosition);
                 else if (Player.Distance(target.ServerPosition) < QWER.Range - (target.MoveSpeed * QWER.Delay))
@@ -476,22 +477,26 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-            else if (HitChanceNum == 4 && (int)poutput.Hitchance > 4)
+            else if ( HitChanceNum == 4 && (int)poutput.Hitchance > 4  )
             {
-                List<Vector2> waypoints = target.GetWaypoints();
-
-                if ((int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) == 0)
+                if (target.IsWindingUp && (target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed) > 0.3)
                     return;
 
-                float SiteToSite = (((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * Config.Item("Sen").GetValue<Slider>().Value) - QWER.Width;
+                List<Vector2> waypoints = target.GetWaypoints();
+
+                if ((int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) == 0 )
+                    return;
+                
+                float SiteToSite = (((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 5) - QWER.Width;
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
 
                 if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
                     || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront)
                     || Player.Distance(target.Position) < SiteToSite + target.BoundingRadius * 2
-                    || Player.Distance(waypoints.Last<Vector2>().To3D()) < BackToFront)
+                    || Player.Distance(waypoints.Last<Vector2>().To3D()) < BackToFront
+                    || (int)poutput.Hitchance == 6)
                 {
-                    //debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
+                    debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
                     if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
@@ -501,11 +506,10 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                     else
                         QWER.Cast(poutput.CastPosition);
-
                 }
                 else
                 {
-                    //debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
+                    debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
                 }
 
              }
@@ -513,13 +517,14 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
         {
+            
             var unit = sender as Obj_AI_Hero;
 
             if (unit == null || !unit.IsValid || unit.IsAlly)
                 return;
 
             var recall = Packet.S2C.Teleport.Decoded(unit, args);
-
+            
             if (recall.Type == Packet.S2C.Teleport.Type.Recall)
             {
                 switch (recall.Status)
@@ -561,7 +566,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-            
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
@@ -590,7 +594,7 @@ namespace OneKeyToWin_AIO_Sebby
             float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
             float positionDraw = 0;
             float positionGang = 500;
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+            foreach (var enemy in Enemies)
             {
                 /*
                 if (Config.Item("debug").GetValue<bool>())

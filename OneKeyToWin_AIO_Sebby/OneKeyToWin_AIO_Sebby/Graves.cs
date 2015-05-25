@@ -150,7 +150,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q, t);
                 else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true, true);
                 }
             }
@@ -187,7 +187,7 @@ namespace OneKeyToWin_AIO_Sebby
                         W.Cast(t, true, true);
                     else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + EMANA)
                     {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                        foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                             W.Cast(enemy, true, true);
                     }
                 }
@@ -231,7 +231,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             bool cast = false;
             double secoundDmgR = 0.80;
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R1.Range) && Program.ValidUlt(target) ))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R1.Range) && Program.ValidUlt(target)))
             {
 
                 float predictedHealth = target.Health + target.HPRegenRate ;

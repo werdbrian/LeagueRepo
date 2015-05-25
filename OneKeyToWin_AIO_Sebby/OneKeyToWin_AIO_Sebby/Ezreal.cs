@@ -90,7 +90,7 @@ namespace OneKeyToWin_AIO_Sebby
                 FarmId = target.NetworkId;
             if (W.IsReady() && Config.Item("wPush").GetValue<bool>() && target.IsValid<Obj_AI_Turret>() && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA + WMANA + RMANA)
             {
-                foreach (var ally in ObjectManager.Get<Obj_AI_Hero>())
+                foreach (var ally in Program.Allies)
                 {
                     if (!ally.IsMe && ally.IsAlly && ally.Distance(ObjectManager.Player.Position) < 600)
                         W.Cast(ally);
@@ -204,7 +204,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q, t);
                 else if ((Farm && attackNow && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && Config.Item("haras" + enemy.BaseSkinName).GetValue<bool>()))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Config.Item("haras" + enemy.BaseSkinName).GetValue<bool>()))
                     {
                         Program.CastSpell(Q, enemy);
                     }
@@ -212,7 +212,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
                 }
             }
@@ -248,7 +248,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(W, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
                 }
             }
@@ -317,7 +317,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Config.Item("autoR").GetValue<bool>() && ObjectManager.Player.CountEnemiesInRange(800) == 0 && (Game.Time - OverKill > 0.6))
             {
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range)))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range)))
                 {
                     if (Program.ValidUlt(target))
                     {

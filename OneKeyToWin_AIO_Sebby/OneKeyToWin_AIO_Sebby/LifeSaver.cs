@@ -11,11 +11,10 @@ namespace OneKeyToWin_AIO_Sebby
 {
     class LifeSaver
     {
-        
+        private SpellSlot heal;
         public void LoadOKTW()
         {
-            
-            
+            heal = ObjectManager.Player.GetSpellSlot("summonerheal");
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnDamage +=Obj_AI_Base_OnDamage;
             Game.OnUpdate += Game_OnGameUpdate;
@@ -24,7 +23,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            var heal = ObjectManager.Player.GetSpellSlot("summonerheal");
             if (heal == SpellSlot.Unknown)
                 return;
             if (ObjectManager.Player.Health < ObjectManager.Player.CountEnemiesInRange(600) * ObjectManager.Player.Level * 20)

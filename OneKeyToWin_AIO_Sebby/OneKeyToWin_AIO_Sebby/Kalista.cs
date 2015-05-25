@@ -73,7 +73,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Drawing_OnDraw(EventArgs args)
         {
 
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(E.Range + 500) && target.IsEnemy ))
+            foreach (var enemy in Program.Enemies.Where(target => target.IsValidTarget(E.Range + 500) && target.IsEnemy ))
             {
                 float hp = enemy.Health - E.GetDamage(enemy);
                 int stack = GetRStacks(enemy);
@@ -188,7 +188,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
                     
                 }
@@ -201,7 +201,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (AllyR == null)
             {
-                foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(ally => ally.IsAlly && !ally.IsDead && !ally.IsMe && ally.HasBuff("kalistacoopstrikeally")))
+                foreach (var ally in Program.Allies.Where(ally => !ally.IsDead && !ally.IsMe && ally.HasBuff("kalistacoopstrikeally")))
                 {
                     AllyR = ally;
                     break;
@@ -217,7 +217,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LogicE()
         {
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
             {
                 var Edmg = E.GetDamage(target);
                 if (target.Health + target.HPRegenRate < Edmg)

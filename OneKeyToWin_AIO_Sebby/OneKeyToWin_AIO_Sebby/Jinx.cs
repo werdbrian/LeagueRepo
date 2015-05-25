@@ -163,7 +163,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && W.GetDamage(enemy) > enemy.Health))
+                foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && W.GetDamage(enemy) > enemy.Health))
                 {
                     Program.CastSpell(W, enemy);
                     return;
@@ -179,7 +179,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
                         
                 }
@@ -192,13 +192,13 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("telE").GetValue<bool>())
                 {
-                    foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
+                    foreach (var Object in Program.Enemies.Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
                     {
                         E.Cast(Object.Position, true);
                     }
                 }
 
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
                     E.Cast(enemy, true);
 
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
@@ -235,7 +235,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Game.Time - WCastTime > 0.9 && Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
                 {
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     var Rdmg = R.GetDamage(target,1);
@@ -246,7 +246,7 @@ namespace OneKeyToWin_AIO_Sebby
                         PredictionOutput output = R.GetPrediction(target);
                         Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
                         direction.Normalize();
-                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
+                        List<Obj_AI_Hero> enemies = Program.Enemies.Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
                         foreach (var enemy in enemies)
                         {
                             if (enemy.SkinName == target.SkinName || !cast)
@@ -442,7 +442,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void LoadMenuOKTW()
         {
             #region E
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("W Config").SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
             #endregion
             #region E
