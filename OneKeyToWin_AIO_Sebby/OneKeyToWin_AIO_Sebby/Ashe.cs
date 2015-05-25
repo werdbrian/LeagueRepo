@@ -182,20 +182,24 @@ namespace OneKeyToWin_AIO_Sebby
                 t = TargetSelector.GetTarget(700, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
+                var poutput = W.GetPrediction(t);
+                var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
+                if (t.IsDead || col > 0 || t.Path.Count() > 1 || (int)poutput.Hitchance < 5)
+                    return;
+
                 var wDmg = W.GetDamage(t);
                 if (wDmg > t.Health)
                 {
-                    Program.CastSpell(W, t);
+                    W.Cast(poutput.CastPosition);
                 }
                 else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA)
-                    Program.CastSpell(W, t);
+                    W.Cast(poutput.CastPosition);
                 else if (Program.Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + WMANA + QMANA + WMANA)
-                    Program.CastSpell(W, t);
+                    W.Cast(poutput.CastPosition);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + WMANA)
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
-
                 }
             }
         }

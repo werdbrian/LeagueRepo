@@ -101,12 +101,12 @@ namespace OneKeyToWin_AIO_Sebby
                 E.CastOnUnit(Player);
             return;
         }
-
+        
         private void Game_OnGameUpdate(EventArgs args)
         {
             if (Player.HasBuff("Recall") || Player.IsDead)
                 return;
-
+            
             bool hadrCC = true, poison = true;
             if (Program.LagFree(0))
             {
@@ -117,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Obj_AI_Hero best = Player;
 
-            foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && !ally.IsDead))
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead))
             {
                 if (ally.HasBuff("orianaghostself") || ally.HasBuff("orianaghost"))
                     BallPos = ally.ServerPosition;
@@ -235,7 +235,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
-            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(t.ServerPosition) < 250 && t.Health < W.GetDamage(t)))
+            foreach (var t in Program.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(t.ServerPosition) < 250 && t.Health < W.GetDamage(t)))
             {
                 W.Cast();
                 return;
@@ -283,7 +283,8 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.Cast(minion);
                 }
             }
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
+                && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || (Player.UnderTurret(false) && !Player.UnderTurret(true) && Player.ManaPercentage() > 20)))
             {
 
                 var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 800, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -355,7 +356,7 @@ namespace OneKeyToWin_AIO_Sebby
                 || args.Target.Position.Distance(Player.Position) > E.Range)
                 return;
 
-            foreach (var ally in HeroManager.Allies.Where(ally => ally.IsValid && ally.NetworkId == args.Target.NetworkId))
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && ally.NetworkId == args.Target.NetworkId))
             {
                 var dmg = sender.GetSpellDamage(ally, args.SData.Name);
                 double HpLeft = ally.Health - dmg;
@@ -377,7 +378,7 @@ namespace OneKeyToWin_AIO_Sebby
         private int CountEnemiesInRangeDeley(Vector3 position, float range, float delay)
         {
             int count = 0;
-            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget()))
+            foreach (var t in Program.Enemies.Where(t => t.IsValidTarget()))
             {
                 Vector3 prepos = Prediction.GetPrediction(t, delay).CastPosition;
                 if (position.Distance(prepos) < range)
@@ -391,7 +392,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 BallPos = obj.Position;
             }
-           
         }
 
         private bool HardCC(Obj_AI_Hero target)
@@ -457,7 +457,6 @@ namespace OneKeyToWin_AIO_Sebby
                     else
                         Utility.DrawCircle(BallPos, R.Range, System.Drawing.Color.Gray, 1, 1);
                 }
-
             }
 
             if (Config.Item("qRange").GetValue<bool>())
