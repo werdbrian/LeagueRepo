@@ -95,7 +95,7 @@ namespace OneKeyToWin_AIO_Sebby
                     R.Cast(Target, true);
                 }
             }
-            if (Config.Item("AGC").GetValue<bool>() && W.IsReady() && ObjectManager.Player.Mana > RMANA + WMANA)
+            if (Config.Item("AGC").GetValue<bool>() && W.IsReady() && Player.Mana > RMANA + WMANA)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
@@ -177,7 +177,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Program.Combo || Program.Farm)
             {
-                foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q2.Range) && enemy.HasBuff("urgotcorrosivedebuff")))
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q2.Range) && enemy.HasBuff("urgotcorrosivedebuff")))
                 {
                     if ((Player.Mana > WMANA + QMANA * 4 || Q.GetDamage(enemy) * 3 > enemy.Health) && W.IsReady())
                     {
@@ -200,16 +200,16 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (t.IsValidTarget(W.Range) && Q.GetDamage(t) + E.GetDamage(t) > t.Health)
                     Program.CastSpell(Q, t);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
-                else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
+                else if ((Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
                         Program.CastSpell(Q, enemy);
                 }
                 else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
                 }
             }
@@ -220,7 +220,7 @@ namespace OneKeyToWin_AIO_Sebby
             R.Range = 400 + 150 * R.Level;
             if (ObjectManager.Player.UnderTurret(false) && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.HealthPercentage() >= Config.Item("Rhp").GetValue<Slider>().Value && Config.Item("autoR").GetValue<bool>())
             {
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
                 {
                     if ( target.CountEnemiesInRange(700) < 2 + ObjectManager.Player.CountAlliesInRange(700))
                     {
@@ -251,7 +251,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(E, t);
                 else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
                         E.Cast(enemy, true, true);
                 }
             }

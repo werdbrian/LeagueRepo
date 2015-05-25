@@ -23,6 +23,8 @@ namespace OneKeyToWin_AIO_Sebby
             //REGEN
             Potion = new Items.Item(2003, 0),
             ManaPotion = new Items.Item(2004, 0),
+            Flask = new Items.Item(2041, 0),
+            Biscuit = new Items.Item(2010, 0),
             //attack
             Botrk = new Items.Item(3153, 450f),
             Cutlass = new Items.Item(3144, 450f),
@@ -35,7 +37,7 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             //Drawing.OnDraw += Drawing_OnDraw;
-            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Use pots").SetValue(true));
+            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Potion,ManaPotion,Flask,Biscuit").SetValue(true));
 
             Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
             Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkKS", "Botrk KS").SetValue(true));
@@ -113,18 +115,44 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (!Player.InFountain() && !Player.HasBuff("Recall"))
             {
-                if (Potion.IsReady() && !Player.HasBuff("RegenerationPotion"))
-                {
-                    if (Player.CountEnemiesInRange(700) > 0 && Player.Health + 200 < Player.MaxHealth)
-                        Potion.Cast();
-                    else if (Player.Health < Player.MaxHealth * 0.6)
-                        Potion.Cast();
-                }
+
                 if (ManaPotion.IsReady() && !Player.HasBuff("FlaskOfCrystalWater"))
                 {
                     if (Player.CountEnemiesInRange(1200) > 0 && Player.Mana < 200)
                         ManaPotion.Cast();
                 }
+                if (Player.HasBuff("RegenerationPotion") || Player.HasBuff("ItemMiniRegenPotion") || Player.HasBuff("ItemCrystalFlask"))
+                    return;
+
+                if (Flask.IsReady())
+                {
+                    if (Player.CountEnemiesInRange(700) > 0 && Player.Health + 200 < Player.MaxHealth)
+                        Flask.Cast();
+                    else if (Player.Health < Player.MaxHealth * 0.6)
+                        Flask.Cast();
+                    else if (Player.CountEnemiesInRange(1200) > 0 && Player.Mana < 200 && !Player.HasBuff("FlaskOfCrystalWater"))
+                        Flask.Cast();
+                    return;
+                }
+
+                if (Potion.IsReady())
+                {
+                    if (Player.CountEnemiesInRange(700) > 0 && Player.Health + 200 < Player.MaxHealth)
+                        Potion.Cast();
+                    else if (Player.Health < Player.MaxHealth * 0.6)
+                        Potion.Cast();
+                    return;
+                }
+
+                if (Biscuit.IsReady() )
+                {
+                    if (Player.CountEnemiesInRange(700) > 0 && Player.Health + 200 < Player.MaxHealth)
+                        Biscuit.Cast();
+                    else if (Player.Health < Player.MaxHealth * 0.6)
+                        Biscuit.Cast();
+                    return;
+                }
+                
             }
         }
     }

@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0.05f, 80f, 1200f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.0f, 70f, 1100f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 100f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -203,7 +203,7 @@ namespace OneKeyToWin_AIO_Sebby
             var Rturrent = Config.Item("Rturrent").GetValue<bool>();
             var Rks = Config.Item("Rks").GetValue<bool>();
             var Rlifesaver = Config.Item("Rlifesaver").GetValue<bool>();
-            foreach (var t in HeroManager.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && BallPos.Distance(t.ServerPosition) < R.Width))
+            foreach (var t in Program.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && BallPos.Distance(t.ServerPosition) < R.Width))
             {
                 if (Rks)
                 {
@@ -240,12 +240,12 @@ namespace OneKeyToWin_AIO_Sebby
                 W.Cast();
                 return;
             }
-            if (CountEnemiesInRangeDeley(BallPos, 220, 0f) > 0 && ObjectManager.Player.Mana > RMANA + WMANA)
+            if (CountEnemiesInRangeDeley(BallPos, W.Width, 0f) > 0 && Player.Mana > RMANA + WMANA)
             {
                 W.Cast();
                 return;
             }
-            if (Config.Item("W").GetValue<bool>() && !Program.Farm && !Program.Combo && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.95 && Player.HasBuff("orianaghostself"))
+            if (Config.Item("W").GetValue<bool>() && !Program.Farm && !Program.Combo && ObjectManager.Player.Mana > Player.MaxMana * 0.95 && Player.HasBuff("orianaghostself"))
                 W.Cast();
         }
 
@@ -292,7 +292,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     var mob = mobs[0];
                     if (Q.IsReady())
-                        Q.Cast(mob);
+                        Q.Cast(mob.Position);
                     if (W.IsReady() && BallPos.Distance(mob.Position) < W.Width)
                         W.Cast();
                     else if (E.IsReady())

@@ -486,6 +486,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if ((int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) == 0 )
                     return;
+
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 float SiteToSite = (BackToFront * 5) - QWER.Width;
                
