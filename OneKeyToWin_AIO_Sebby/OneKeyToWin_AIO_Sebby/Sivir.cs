@@ -50,7 +50,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (W.IsReady())
             {
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
+                if (Program.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast();
                 else if (Config.Item("harasW").GetValue<bool>() && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
