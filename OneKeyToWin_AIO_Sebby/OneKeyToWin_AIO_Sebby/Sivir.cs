@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             
-            Q = new Spell(SpellSlot.Q, 1240f);
+            Q = new Spell(SpellSlot.Q, 1220f);
             Qc = new Spell(SpellSlot.Q, 1200f);
             W = new Spell(SpellSlot.W, float.MaxValue);
             E = new Spell(SpellSlot.E, float.MaxValue);
@@ -61,7 +61,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!E.IsReady() && args.Target == null && !sender.IsValid<Obj_AI_Hero>() && args.SData.Name != "TormentedSoil")
+
+            if (!E.IsReady() || args.Target == null || !sender.IsEnemy || !args.Target.IsMe || !sender.IsValid<Obj_AI_Hero>() || args.SData.Name == "TormentedSoil")
                 return;
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             double HpLeft = ObjectManager.Player.Health - dmg;
@@ -131,12 +132,14 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
                 else if (Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>())
-                    if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
+                {
+                    if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA)
                         Program.CastSpell(Qc, t);
                     else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
                         Program.CastSpell(Q, t);
                     else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA)
                         Q.CastIfWillHit(t, 2, true);
+                }
                 if (ObjectManager.Player.Mana > RMANA + QMANA + WMANA && Q.IsReady())
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
