@@ -67,7 +67,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
 
-
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Waa", "Auto W befor AA").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserW").SetValue(true));

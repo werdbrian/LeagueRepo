@@ -20,15 +20,14 @@ namespace OneKeyToWin_AIO_Sebby
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnDamage +=Obj_AI_Base_OnDamage;
             Game.OnUpdate += Game_OnGameUpdate;
-
         }
 
         private void Game_OnGameUpdate(EventArgs args)
         {
             if (heal == SpellSlot.Unknown)
                 return;
-            if (Player.Health < ObjectManager.Player.CountEnemiesInRange(600) * Player.Level * 20)
-                Player.Spellbook.CastSpell(heal, ObjectManager.Player);
+            //if (Player.Health < ObjectManager.Player.CountEnemiesInRange(600) * Player.Level * 20)
+                //Player.Spellbook.CastSpell(heal, ObjectManager.Player);
         }
 
         private void Obj_AI_Base_OnDamage(AttackableUnit sender, AttackableUnitDamageEventArgs args)
@@ -73,7 +72,7 @@ namespace OneKeyToWin_AIO_Sebby
                  
                  if (dmg > ObjectManager.Player.Health)
                  {
-                     ObjectManager.Player.Spellbook.CastSpell(heal, ObjectManager.Player);
+                     //ObjectManager.Player.Spellbook.CastSpell(heal, ObjectManager.Player);
                      
                  }
              }

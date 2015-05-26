@@ -238,7 +238,7 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast(t, true, true);
                     E.Cast(t, true);
                 }
-                else if (t.HasBuff("chilled") && (Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && QMissile == null)
+                else if (t.HasBuff("chilled") && (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA) && !Player.UnderTurret(true) && QMissile == null)
                 {
                     if (RMissile == null && R.IsReady())
                         R.Cast(t, true, true);

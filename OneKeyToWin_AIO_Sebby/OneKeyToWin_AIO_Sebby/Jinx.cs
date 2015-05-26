@@ -70,7 +70,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("AGC").GetValue<bool>() && E.IsReady() && Player.Mana > RMANA + EMANA)
             {
-                var Target = (Obj_AI_Hero)gapcloser.Sender;
+                var Target = gapcloser.Sender;
                 if (Target.IsValidTarget(E.Range))
                 {
                     E.Cast(Player.ServerPosition, true);
@@ -180,8 +180,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
-                        W.Cast(enemy, true);
-                        
+                        W.Cast(enemy, true);  
                 }
             }
         }
