@@ -185,16 +185,16 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
 
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>())
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-                if (IsJungler(enemy) && enemy.IsEnemy)
+                if (IsJungler(hero) && hero.IsEnemy)
                 {
-                    jungler = enemy;
+                    jungler = hero;
                 }
-                if (enemy.IsEnemy)
-                    Enemies.Add(enemy);
-                if (enemy.IsAlly)
-                    Allies.Add(enemy);
+                if (hero.IsEnemy)
+                    Enemies.Add(hero);
+                if (hero.IsAlly)
+                    Allies.Add(hero);
             }
 
             new LifeSaver().LoadOKTW();
@@ -253,7 +253,7 @@ namespace OneKeyToWin_AIO_Sebby
                         W.Cast();
                         return;
                     }
-                    if (Player.ChampionName == "Ashe" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && Config.Item("autoE").GetValue<bool>())
+                    if (Player.ChampionName == "Ashe" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 1 && Config.Item("autoE").GetValue<bool>())
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 3000)
                         {

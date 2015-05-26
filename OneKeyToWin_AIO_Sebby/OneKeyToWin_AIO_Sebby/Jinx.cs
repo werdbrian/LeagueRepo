@@ -173,7 +173,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Program.CastSpell(W, t);
                 }
-                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0)
+                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0)
                 {
                     Program.CastSpell(W, t);
                 }
@@ -443,7 +443,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             #region E
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
-                Config.SubMenu(Player.ChampionName).SubMenu("W Config").SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("W Config").SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
             #endregion
             #region E
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E on CC").SetValue(true));

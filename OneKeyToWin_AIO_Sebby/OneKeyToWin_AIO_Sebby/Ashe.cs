@@ -21,6 +21,27 @@ namespace OneKeyToWin_AIO_Sebby
             get { return ObjectManager.Player; }
         }
 
+        private void LoadMenuOKTW()
+        {
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("Haras W").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("comboQ", "Q count").SetValue(new Slider(5, 5, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRaoe", "Auto R aoe").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRinter", "Auto R OnPossibleToInterrupt").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.ChampionName, enemy.ChampionName, true).SetValue(false));
+        }
+
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q);
@@ -44,11 +65,11 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (R.IsReady() )
             {
-                var Target = (Obj_AI_Hero)gapcloser.Sender;
-                if (Config.Item("GapCloser" + Target.BaseSkinName).GetValue<bool>() && Target.IsValidTarget(800))
+                var Target = gapcloser.Sender;
+                if (Target.IsValidTarget(800) && Config.Item("GapCloser" + Target.ChampionName).GetValue<bool>())
                 {
-                    R.Cast(Target, true);
-                    Program.debug("AGC");
+                    R.Cast(Target);
+                    Program.debug("AGC " + Target.ChampionName);
                 }
             }
         }
@@ -109,7 +130,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("autoR").GetValue<bool>())
             {
                 bool cast = false;
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && target.IsEnemy && Program.ValidUlt(target)))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
                 {
                     if (Config.Item("autoRinter").GetValue<bool>() && target.IsChannelingImportantSpell())
                         R.Cast(target);
@@ -124,7 +145,7 @@ namespace OneKeyToWin_AIO_Sebby
                         PredictionOutput output = R.GetPrediction(target);
                         Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
                         direction.Normalize();
-                        List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
+                        List<Obj_AI_Hero> enemies = Program.Enemies.Where(x => x.IsValidTarget()).ToList();
                         foreach (var enemy in enemies)
                         {
                             if (enemy.SkinName == target.SkinName || !cast)
@@ -194,11 +215,11 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast(poutput.CastPosition);
-                else if (Program.Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !Player.UnderTurret(true) && Player.Mana > RMANA + WMANA + QMANA + WMANA)
+                else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.Mana > RMANA + WMANA + QMANA + WMANA)
                     W.Cast(poutput.CastPosition);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
                 }
             }
@@ -214,7 +235,7 @@ namespace OneKeyToWin_AIO_Sebby
             else
                 RMANA = R.Instance.ManaCost; ;
 
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            if (Player.Health < Player.MaxHealth * 0.2)
             {
                 QMANA = 0;
                 WMANA = 0;
@@ -223,28 +244,6 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
-        private void LoadMenuOKTW()
-        {
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("Haras W").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
-
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.BaseSkinName, enemy.BaseSkinName,true).SetValue(false));
-
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("comboQ", "Q count").SetValue(new Slider(5, 5, 0)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q").SetValue(true));
-
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRaoe", "Auto R aoe").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRinter", "Auto R OnPossibleToInterrupt").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.BaseSkinName, enemy.BaseSkinName, true).SetValue(false));
-        }
+        
     }
 }

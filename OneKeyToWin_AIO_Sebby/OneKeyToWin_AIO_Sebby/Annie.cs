@@ -74,7 +74,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
-            if (target.IsValidTarget() && ( Program.Farm || Config.Item("stun" + target.BaseSkinName).GetValue<bool>() || !HaveStun))
+            if (target.IsValidTarget() && ( Program.Farm || Config.Item("stun" + target.ChampionName).GetValue<bool>() || !HaveStun))
             {
                 if (!HaveTibers && R.IsReady())
                 {
@@ -246,7 +246,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("Stun in combo").AddItem(new MenuItem("stun" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("Stun in combo").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
         }
 
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)

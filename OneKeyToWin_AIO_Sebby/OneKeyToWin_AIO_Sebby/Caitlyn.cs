@@ -129,8 +129,8 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicR()
         {
             bool cast = false;
-            
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target) && target.CountEnemiesInRange(500) == 1 && target.CountAlliesInRange(500) == 0))
+
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target) && target.CountEnemiesInRange(500) == 1 && target.CountAlliesInRange(500) == 0))
             {
                 float predictedHealth = target.Health + target.HPRegenRate * 2;
                 var Rdmg = R.GetDamage(target);
@@ -140,7 +140,7 @@ namespace OneKeyToWin_AIO_Sebby
                     PredictionOutput output = R.GetPrediction(target);
                     Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
                     direction.Normalize();
-                    List<Obj_AI_Hero> enemies = ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsEnemy && x.IsValidTarget()).ToList();
+                    List<Obj_AI_Hero> enemies = Program.Enemies.Where(x => x.IsValidTarget()).ToList();
                     foreach (var enemy in enemies)
                     {
                         if (enemy.SkinName == target.SkinName || !cast)
@@ -168,7 +168,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Player.Mana > RMANA + WMANA)
             {
                 if (Config.Item("autoW").GetValue<bool>())
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
                         W.Cast(enemy, true);
                 
                 if (Config.Item("telE").GetValue<bool>())
