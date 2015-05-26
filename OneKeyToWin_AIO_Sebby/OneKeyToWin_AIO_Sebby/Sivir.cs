@@ -52,9 +52,9 @@ namespace OneKeyToWin_AIO_Sebby
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
                     W.Cast();
-                else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
+                else if (Config.Item("harasW").GetValue<bool>() && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
+                else if (Config.Item("harasW").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
                     W.Cast();
             }
         }
@@ -130,7 +130,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.Cast(t, true);
                 else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
-                else if (Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
+                else if (Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>())
                     if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA && t.Path.Count() > 1)
                         Program.CastSpell(Qc, t);
                     else if (ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.9)
@@ -139,7 +139,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.CastIfWillHit(t, 2, true);
                 if (ObjectManager.Player.Mana > RMANA + QMANA + WMANA && Q.IsReady())
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
                 }
             }
@@ -220,9 +220,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
 
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("harasW", "Haras W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("forceW", "Force W (if dont work)").SetValue(false));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
