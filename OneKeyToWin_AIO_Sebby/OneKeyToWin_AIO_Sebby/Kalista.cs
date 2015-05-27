@@ -306,7 +306,5 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = 0;
             }
         }
-
-        
     }
 }
