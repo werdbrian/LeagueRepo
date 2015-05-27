@@ -197,7 +197,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Allies.Add(hero);
             }
 
-            new LifeSaver().LoadOKTW();
+            new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
             
             Config.AddToMainMenu();
