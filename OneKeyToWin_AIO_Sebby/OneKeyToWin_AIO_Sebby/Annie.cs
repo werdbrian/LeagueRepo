@@ -54,6 +54,15 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
             }
+
+            if (Program.Combo && !Config.Item("AACombo").GetValue<bool>())
+            {
+                var t = args.Target as Obj_AI_Hero;
+                args.Process = false;
+                if ((ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA || !Program.CanMove(t)))
+                    args.Process = true; 
+            }
+
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -61,16 +70,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
 
-            if (Program.Combo && !Config.Item("AACombo").GetValue<bool>())
-            {
-                var t = TargetSelector.GetTarget(ObjectManager.Player.AttackRange + 150, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget() && (ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA || !Program.CanMove(t)))
-                    Orbwalking.Attack = true;
-                else
-                    Orbwalking.Attack = false;
-            }
-            else
-                Orbwalking.Attack = true;
+            
 
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
