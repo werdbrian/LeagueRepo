@@ -37,7 +37,7 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             //Drawing.OnDraw += Drawing_OnDraw;
-            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Potion,ManaPotion,Flask,Biscuit").SetValue(true));
+            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
 
             Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
             Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkKS", "Botrk KS").SetValue(true));

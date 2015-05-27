@@ -42,7 +42,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (Program.LagFree(4) &&  Player.Spellbook.CanUseSpell(ignite) == SpellState.Ready && Config.Item("Ignite").GetValue<bool>())
+            if (Program.LagFree(4) && CanUse(ignite) && Config.Item("Ignite").GetValue<bool>())
             {
                 foreach(var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(600)))
                 {
@@ -109,10 +109,9 @@ namespace OneKeyToWin_AIO_Sebby
                             Player.Spellbook.CastSpell(heal, ally);
                     }
                 }
-                else
+                else if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15 && dmg > 0)
                 {
-                    if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15 && dmg > 0)
-                        Player.Spellbook.CastSpell(heal, Player);
+                    Player.Spellbook.CastSpell(heal, Player);
                 }
             }
         }
