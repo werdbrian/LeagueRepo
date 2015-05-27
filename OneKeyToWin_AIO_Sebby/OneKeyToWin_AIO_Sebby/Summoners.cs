@@ -93,9 +93,11 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             if (CanUse(barrier) && Config.Item("Barrier").GetValue<bool>() && Player.Health - dmg > Player.Level * 20 && Player.CountEnemiesInRange(800) > 0)
-            { 
+            {
 
-                Player.Spellbook.CastSpell(barrier, Player);
+                if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15)
+                    Player.Spellbook.CastSpell(barrier, Player);
+                
             }
 
             if (CanUse(heal) && Config.Item("Heal").GetValue<bool>())
