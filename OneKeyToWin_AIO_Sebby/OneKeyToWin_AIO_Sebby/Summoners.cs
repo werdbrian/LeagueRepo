@@ -47,7 +47,7 @@ namespace OneKeyToWin_AIO_Sebby
                 foreach(var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(600)))
                 {
                     var IgnDmg = Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-                    if (enemy.Health <= IgnDmg && Player.Distance(enemy.ServerPosition) > 550 && enemy.CountAlliesInRange(600) < 2)
+                    if (enemy.Health <= IgnDmg && Player.Distance(enemy.ServerPosition) > 500 && enemy.CountAlliesInRange(500) < 2)
                         Player.Spellbook.CastSpell(ignite, enemy);
 
                     if (enemy.Health <= 2 * IgnDmg )
