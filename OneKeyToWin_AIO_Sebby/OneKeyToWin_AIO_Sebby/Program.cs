@@ -83,6 +83,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("9", "Miss Fortune "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("10", "Quinn "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("11", "Graves "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("12", "Urgot "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("13", "Orianna "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Caitlyn "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Anivia "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
 
@@ -102,8 +106,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
-            Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
-            Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
+            
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
 
             Q = new Spell(SpellSlot.Q);
@@ -113,6 +116,10 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (!Config.Item("aio").GetValue<bool>())
             {
+                Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
+                Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
+
+
                 var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
                 TargetSelector.AddToMenu(targetSelectorMenu);
                 Config.AddSubMenu(targetSelectorMenu);
@@ -177,6 +184,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - VeryHigh + max range fix + waypionts analyzer"));
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -723,7 +731,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if ((int)enemy.HealthPercent < 100)
                         Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1] , wts[0] + 50, wts[1] , 12, System.Drawing.Color.White);
                     if (Distance > 3500 && enemy.IsVisible)
-                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Orange);
+                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
                     else if (!enemy.IsVisible)
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
                     else
