@@ -13,7 +13,7 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-        public Spell Q, W, E, R;
+        public Spell Q, Q2, W, E, R;
         public float QMANA, WMANA, EMANA, RMANA;
 
         private int count = 0 , countE = 0;
@@ -28,11 +28,13 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 1130);
+            Q2 = new Spell(SpellSlot.Q, 1130);
             W = new Spell(SpellSlot.W, 5200);
             E = new Spell(SpellSlot.E, 1000);
             R = new Spell(SpellSlot.R, 1400f);
 
             Q.SetSkillshot(0.25f, 30f, 1700f, true, SkillshotType.SkillshotLine);
+            Q2.SetSkillshot(0.25f, 30f, 1700f, false, SkillshotType.SkillshotLine);
 
             LoadMenuOKTW();
 
@@ -40,6 +42,19 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.OnDraw += Drawing_OnDraw;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
            // Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+        }
+
+
+        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe)
+            {
+                if (args.SData.Name == "KalistaExpungeWrapper")
+                {
+                    Orbwalking.ResetAutoAttackTimer();
+                }
+            }
         }
 
         private void LoadMenuOKTW()
@@ -53,7 +68,8 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras Q").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "auto E out AA stack").SetValue(new Slider(10, 30, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if stacks").SetValue(new Slider(10, 30, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
         }
@@ -128,6 +144,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
+
+
             if (Program.LagFree(0))
             {
                 SetMana();
@@ -138,7 +156,7 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicQ();
             if (Program.LagFree(2) && E.IsReady())
                 JungleE();
-            if (Program.LagFree(3) && E.IsReady())
+            if (Program.LagFree(3) && E.IsReady() && !Player.IsWindingUp)
             {
                 farm();
                 LogicE();
@@ -154,20 +172,30 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
 
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-            foreach (var mob in mobs)
+            if (mobs.Count > 0)
             {
+                var mob = mobs[0];
                 if (mob.Health < E.GetDamage(mob))
                     E.Cast();
-            } 
+            }
         }
         private void LogicQ()
         {
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-
+           
             if (t.IsValidTarget())
             {
+                var poutput = Q.GetPrediction(t);
+                var col = poutput.CollisionObjects;
+                bool cast = true;
+                foreach (var colobj in col)
+                {
+                    if (Q.GetDamage(colobj) < colobj.Health)
+                        cast = false;
+                }
+
                 bool back = false;
                 List<Vector2> waypoints = t.GetWaypoints();
                 if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(t.Position)) > 100)
@@ -178,21 +206,102 @@ namespace OneKeyToWin_AIO_Sebby
                 var eDmg = E.GetDamage(t);
 
                 if (qDmg > t.Health && eDmg < t.Health && ObjectManager.Player.Mana > QMANA + EMANA)
-                    Program.CastSpell(Q, t);
+                    castQ(cast, t);
                 else if ((qDmg * 1.1) + eDmg > t.Health && eDmg < t.Health && ObjectManager.Player.Mana > QMANA + EMANA && Orbwalking.InAutoAttackRange(t))
-                    Program.CastSpell(Q, t);
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && ((!Orbwalking.InAutoAttackRange(t) && back) || Player.CountEnemiesInRange(400) > 0))
-                    Program.CastSpell(Q, t);
+                    castQ(cast, t);
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && ((!Orbwalking.InAutoAttackRange(t) && back) || Player.CountEnemiesInRange(400) > 0))
+                    castQ(cast, t);
                 else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && !Orbwalking.InAutoAttackRange(t))
-                    Program.CastSpell(Q, t);
-                else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
+                    castQ(cast, t);
+                else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
                         Q.Cast(enemy, true);
+
+                } 
                     
-                }
             }
         }
+        private void castQ(bool cast, Obj_AI_Base t)
+        {
+            if (cast)
+                Program.CastSpell(Q2, t);
+            else
+                Program.CastSpell(Q, t);
+        }
+        private void LogicE()
+        {
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
+            {
+                var Edmg = E.GetDamage(target);
+                if (target.Health + target.HPRegenRate < Edmg)
+                {
+                    E.Cast();
+                    return;
+                }
+                if (0 < Edmg && count > 0)
+                {
+                    E.Cast();
+                    return;
+                }
+                
+                if (GetRStacks(target) >= countE
+                    && (GetPassiveTime(target) < 0.5 || Player.Distance(target.ServerPosition) > E.Range - 100 || Player.Health < Player.MaxHealth * 0.4)
+                    && Player.Mana > RMANA + QMANA + EMANA + WMANA
+                    && Player.CountEnemiesInRange(900) == 0)
+                {
+                    E.Cast();
+                    return;
+                }
+            }
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (count >= Config.Item("farmE").GetValue<Slider>().Value  || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
+            {
+                E.Cast();
+                return;
+            }
+        }
+
+        private float GetPassiveTime(Obj_AI_Base target)
+        {
+            return
+                target.Buffs.OrderByDescending(buff => buff.EndTime - Game.Time)
+                    .Where(buff => buff.Name == "kalistaexpungemarker")
+                    .Select(buff => buff.EndTime)
+                    .FirstOrDefault() - Game.Time;
+        }
+        private int GetRStacks(Obj_AI_Base target)
+        {
+            foreach (var buff in target.Buffs)
+            {
+                if (buff.Name == "kalistaexpungemarker")
+                    return buff.Count;
+            }
+            return 0;
+        }
+
+        private int farm()
+        {
+            count = 0;
+            int outRange = 0;
+            foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget(E.Range) && minion.IsEnemy))
+            {
+                if (minion.Health < E.GetDamage(minion) && GetPassiveTime(minion) > 0.25 && minion.GetAutoAttackDamage(minion) * 3 < E.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) * 2)
+                {
+                    count++;
+                    if (!Orbwalking.InAutoAttackRange(minion))
+                    {
+                        outRange++;
+                    }
+                }
+            }
+            if (Program.Farm && outRange > 0)
+            {
+                E.Cast();
+                return 0;
+            }
+            return count;
+        }
+
         private void LogicR()
         {
             if (Player.IsRecalling() || Player.InFountain())
@@ -214,79 +323,6 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
-        private void LogicE()
-        {
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
-            {
-                var Edmg = E.GetDamage(target);
-                if (target.Health + target.HPRegenRate < Edmg)
-                {
-                    E.Cast();
-                    return;
-                }
-                if (0 < Edmg && count > 0)
-                {
-                    E.Cast();
-                    return;
-                }
-                
-                if (GetRStacks(target) >= countE
-                    && (Game.Time - GetPassiveTime(target) > -0.5 || Player.Distance(target.ServerPosition) > E.Range - 100 || Player.Health < Player.MaxHealth * 0.4)
-                    && Player.Mana > RMANA + QMANA + EMANA + WMANA
-                    && Player.CountEnemiesInRange(900) == 0)
-                {
-                    E.Cast();
-                    return;
-                }
-            }
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (count > 1 || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
-            {
-                E.Cast();
-                return;
-            }
-        }
-
-        private float GetPassiveTime(Obj_AI_Base target)
-        {
-            return
-                target.Buffs.OrderByDescending(buff => buff.EndTime - Game.Time)
-                    .Where(buff => buff.Name == "kalistaexpungemarker")
-                    .Select(buff => buff.EndTime)
-                    .FirstOrDefault();
-        }
-        private int GetRStacks(Obj_AI_Base target)
-        {
-            foreach (var buff in target.Buffs)
-            {
-                if (buff.Name == "kalistaexpungemarker")
-                    return buff.Count;
-            }
-            return 0;
-        }
-
-        private int farm()
-        {
-            count = 0;
-            int outRange = 0;
-            foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget(E.Range) && minion.IsEnemy))
-            {
-                if (minion.Health < E.GetDamage(minion) && minion.GetAutoAttackDamage(minion) * 3 < E.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) * 2)
-                {
-                    count++;
-                    if (!Orbwalking.InAutoAttackRange(minion))
-                    {
-                        outRange++;
-                    }
-                }
-            }
-            if (Program.Farm && outRange > 0)
-            {
-                E.Cast();
-                return 0;
-            }
-            return count;
-        }
-
         private void SetMana()
         {
             QMANA = Q.Instance.ManaCost;
