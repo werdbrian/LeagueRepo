@@ -72,6 +72,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("balista", "Balista R").SetValue(true));
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -144,7 +145,11 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
-
+            if (Config.Item("balista").GetValue<bool>() && AllyR != null && AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range && AllyR.ChampionName == "Blitzcrank")
+            {
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.HasBuff("rocketgrab2"))) 
+                    R.Cast();
+            }
 
             if (Program.LagFree(0))
             {
@@ -163,6 +168,8 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
+
+
         }
 
         private void JungleE()
