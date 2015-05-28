@@ -171,6 +171,10 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Orianna":
                         new Orianna().LoadOKTW();
                         break;
+
+                    case "Ekko":
+                        new Ekko().LoadOKTW();
+                        break;
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
