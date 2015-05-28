@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 380);
             QR = new Spell(SpellSlot.Q, 825);
 
-            Q.SetSkillshot(0.05f, 60f, 1200f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.05f, 60f, 1150f, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.25f, 210f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E.SetSkillshot(0.25f, 100f, 1700f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -50,8 +50,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp").SetValue(new Slider(10, 100, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q out range aa minion").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 20)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("clearQ", "LaneClear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("clearW", "LaneClear W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("clearE", "LaneClear E").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("rCount", "Auto R x enemies").SetValue(new Slider(3, 0, 5)));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("smartR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press)));
@@ -138,8 +141,13 @@ namespace OneKeyToWin_AIO_Sebby
                     if (W.IsReady() && Player.Mana > RMANA + WMANA && BallPos.Distance(ally.ServerPosition) < 240 && ally.Health < ally.CountEnemiesInRange(600) * ally.Level * 20)
                         W.Cast();
 
-                    if (ally.Health < best.Health && ally.Distance(Player.Position) < E.Range)
+                    if ((ally.Health < best.Health || ally.CountEnemiesInRange(300) > 0) && ally.Distance(Player.Position) < E.Range && ally.CountEnemiesInRange(700) > 0)
                         best = ally;
+
+                    if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && ally.Distance(Player.Position) < E.Range && ally.CountEnemiesInRange(R.Width) >= Config.Item("rCount").GetValue<Slider>().Value)
+                    {
+                        E.CastOnUnit(ally);
+                    }
                 }
             }
             /*
@@ -226,7 +234,8 @@ namespace OneKeyToWin_AIO_Sebby
             }
             int countEnemies=CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay);
             if (countEnemies >= Config.Item("rCount").GetValue<Slider>().Value && BallPos.CountEnemiesInRange(R.Width) == countEnemies)
-                R.Cast(); 
+                R.Cast();
+            
         }
 
         private void LogicW()
@@ -292,31 +301,36 @@ namespace OneKeyToWin_AIO_Sebby
                         W.Cast();
                     else if (E.IsReady())
                         E.CastOnUnit(Player);
+                    return;
                 }
             }
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
                 && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || (Player.UnderTurret(false) && !Player.UnderTurret(true) && Player.ManaPercentage() > 20)))
             {
 
-                var Qfarm = Q.GetLineFarmLocation(allMinions, Q.Width);
+                var Qfarm = Q.GetCircularFarmLocation(allMinions, 100);
 
                 var QWfarm = Q.GetCircularFarmLocation(allMinions, W.Width);
                 if (Qfarm.MinionsHit + QWfarm.MinionsHit == 0)
                     return;
-
-                if (Qfarm.MinionsHit / 3 > QWfarm.MinionsHit && BallPos.Distance(Player.Position) < 50 && Qfarm.MinionsHit > 2)
+                if (Config.Item("clearQ").GetValue<bool>())
                 {
-                    if (Q.IsReady())
-                        Q.Cast(Qfarm.Position);
+                    if (Qfarm.MinionsHit > 2 && !W.IsReady() && Q.IsReady())
+                    {
+                            Q.Cast(Qfarm.Position);
+                    }
+                    else if (QWfarm.MinionsHit > 2 && Q.IsReady())
+                        Q.Cast(QWfarm.Position);
                 }
-                else if (QWfarm.MinionsHit > 2 && Q.IsReady())
-                    Q.Cast(QWfarm.Position);
 
-                if (W.IsReady())
+                foreach (var minion in allMinions)
                 {
-                    foreach (var minion in allMinions.Where(minion => minion.Distance(BallPos) < W.Range && minion.Health < W.GetDamage(minion)))
+                    if (W.IsReady() && minion.Distance(BallPos) < W.Range && minion.Health < W.GetDamage(minion) && Config.Item("clearW").GetValue<bool>())
                         W.Cast();
+                    if (!W.IsReady() && E.IsReady() && minion.Distance(BallPos) < E.Width && Config.Item("clearE").GetValue<bool>())
+                        E.CastOnUnit(Player);
                 }
+                
             }
         }
 
