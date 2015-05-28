@@ -30,7 +30,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Q.SetSkillshot(0.25f, 50f, 2000f, false, SkillshotType.SkillshotLine);
             Q1.SetSkillshot(0.5f, 150f, 1000f, false, SkillshotType.SkillshotCircle);
-            W.SetSkillshot(2,5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(2.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
 
