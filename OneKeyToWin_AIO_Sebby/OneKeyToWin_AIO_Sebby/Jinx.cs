@@ -191,7 +191,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("telE").GetValue<bool>())
                 {
-                    foreach (var Object in Program.Enemies.Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
+                    foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
                     {
                         E.Cast(Object.Position, true);
                     }
