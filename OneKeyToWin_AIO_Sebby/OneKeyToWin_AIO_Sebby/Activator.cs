@@ -26,8 +26,8 @@ namespace OneKeyToWin_AIO_Sebby
             Flask = new Items.Item(2041, 0),
             Biscuit = new Items.Item(2010, 0),
             //attack
-            Botrk = new Items.Item(3153, 450f),
-            Cutlass = new Items.Item(3144, 450f),
+            Botrk = new Items.Item(3153, 550f),
+            Cutlass = new Items.Item(3144, 550f),
             Youmuus = new Items.Item(3142, 650f),
             Hydra = new Items.Item(3144, 440f),
             Hydra2 = new Items.Item(3144, 440f);
