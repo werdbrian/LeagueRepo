@@ -157,7 +157,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
         {
-            if (obj.IsValid )
+            if (obj.IsValid && obj.IsAlly )
             {
                 if (obj.Name == "Ekko")
                     RMissile = obj;
