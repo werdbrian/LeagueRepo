@@ -65,11 +65,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            var t = args.Target as Obj_AI_Hero;
-            if (t.IsValidTarget() && W.GetDamage(t) + (float)Player.GetAutoAttackDamage(t, true) > t.Health)
-                return;
 
-            if (Config.Item("visibleR").GetValue<bool>() && Player.HasBuff("vaynetumblefade"))
+
+            if (Config.Item("visibleR").GetValue<bool>() && Player.HasBuff("vaynetumblefade") && Player.CountEnemiesInRange(800)>1)
                 args.Process = false;
 
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(800) && GetWStacks(target) > 0))
@@ -140,10 +138,12 @@ namespace OneKeyToWin_AIO_Sebby
         {
 
 
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("visibleR", "Unvisable block AA ").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoQR", "Auto Q when R active ").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("visibleR", "Unvisable block AA ").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoQR", "Auto Q when R active ").SetValue(true));
 
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("E config").SubMenu("Use E ").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
         }
 
@@ -152,17 +152,20 @@ namespace OneKeyToWin_AIO_Sebby
             //VHReborn Condemn Code
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.Path.Count() < 2))
             {
-                var poutput = E.GetPrediction(target);
-                if ((int)poutput.Hitchance < 5)
-                    return;
-
-                var pushDistance = 330 + target.BoundingRadius;
-                
-                var finalPosition = poutput.CastPosition.Extend(Player.ServerPosition, -pushDistance);
-
-                if (finalPosition.IsWall())
+                if (Config.Item("stun" + target.ChampionName).GetValue<bool>())
                 {
-                    E.Cast(target);
+                    var poutput = E.GetPrediction(target);
+                    if ((int)poutput.Hitchance < 5)
+                        return;
+
+                    var pushDistance = 330 + target.BoundingRadius;
+
+                    var finalPosition = poutput.CastPosition.Extend(Player.ServerPosition, -pushDistance);
+
+                    if (finalPosition.IsWall())
+                    {
+                        E.Cast(target);
+                    }
                 }
             }
         }
