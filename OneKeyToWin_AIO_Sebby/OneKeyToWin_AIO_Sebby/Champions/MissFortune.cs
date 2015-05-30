@@ -191,7 +191,7 @@ namespace OneKeyToWin_AIO_Sebby
                         E.Cast(t, true, true);
                     else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + EMANA)
                     {
-                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
+                        foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
                             E.Cast(enemy, true, true);
                     }
                 }
@@ -247,7 +247,7 @@ namespace OneKeyToWin_AIO_Sebby
                     RCastTime = Game.Time;
                     return;
                 }
-                else if (rDmg * 8 > t.Health && !Program.CanMove(t) && ObjectManager.Player.CountEnemiesInRange(700) == 0)
+                else if (rDmg * 8 > t.Health && !OktwCommon.CanMove(t) && ObjectManager.Player.CountEnemiesInRange(700) == 0)
                 {
                     R.Cast(t, true, true);
                     RCastTime = Game.Time;

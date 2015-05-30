@@ -382,6 +382,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static bool Combo {get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); }}
 
+        public static bool LaneClear { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear); } }
+
         private static bool IsJungler(Obj_AI_Hero hero){ return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));}
 
         public static bool ValidUlt(Obj_AI_Hero target)
@@ -389,20 +391,6 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.HasBuffOfType(BuffType.PhysicalImmunity) || target.HasBuffOfType(BuffType.SpellImmunity)
             || target.IsZombie || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellShield))
                 return false;
-            else
-                return true;
-        }
-
-        public static bool CanMove(Obj_AI_Hero target)
-        {
-            if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
-                target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
-                target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
-                target.IsStunned  || target.IsChannelingImportantSpell())
-            {
-                debug("!canMov" + target.ChampionName);
-                return false;
-            }
             else
                 return true;
         }
@@ -573,7 +561,9 @@ namespace OneKeyToWin_AIO_Sebby
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
+            {
                 Console.WriteLine(msg);
+            }
         }
 
         private static void OnDraw(EventArgs args)

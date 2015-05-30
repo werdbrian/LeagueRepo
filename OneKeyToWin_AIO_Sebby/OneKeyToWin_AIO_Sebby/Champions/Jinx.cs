@@ -78,8 +78,11 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
+            if (!Q.IsReady())
+                return;
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
-            if (Q.IsReady() && FishBoneActive && t.IsValidTarget())
+            
+            if (FishBoneActive && t.IsValidTarget())
             {
                 if (Program.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (Player.Mana < RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
@@ -87,19 +90,16 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.Cast();
             }
 
-            if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + 30)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + 30)
             {
                 bool Mana = false;
                 if (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
                     Mana = true;
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange(), MinionTypes.All);
-                Program.debug("minion2");
-                foreach (var minion in allMinionsQ.Where(minion => Orbwalking.InAutoAttackRange(minion)))
+                foreach (var minion in allMinionsQ.Where(minion => args.Target.NetworkId != minion.NetworkId && minion.Distance(args.Target.Position) < 200))
                 {
-                    foreach (var minion2 in allMinionsQ.Where(minion2 => minion2.NetworkId != minion.NetworkId && minion.ServerPosition.Distance(minion2.Position) < 200  ))
-                    {
-                        Program.debug("minion");
-                        if (minion.Health < Player.GetAutoAttackDamage(minion) * 1.1 || minion2.Health < Player.GetAutoAttackDamage(minion2) * 1.1)
+
+                        if (minion.Health < Player.GetAutoAttackDamage(minion) * 1.1 )
                         {
                             Q.Cast();
                         }
@@ -107,7 +107,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             Q.Cast();
                         }
-                    }
+                    
                 }
             }
         }
@@ -139,7 +139,6 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void Game_OnUpdate(EventArgs args)
         {
-
             if (R.IsReady())
             {
                 if (Config.Item("useR").GetValue<KeyBind>().Active)
@@ -159,7 +158,7 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
             }
 
-            if (Program.LagFree(1) && E.IsReady() && Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
+            if (Program.LagFree(1) && E.IsReady())
                 LogicE();
 
             if (Program.LagFree(2) && Q.IsReady())
@@ -175,7 +174,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicQ()
         {
-            if (Program.Farm && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
+            if (Program.Farm && !Player.IsWindingUp && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive )
             {
                 farmQ();
                 lag = Game.Time;
@@ -223,7 +222,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);  
                 }
             }
@@ -233,16 +232,19 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
             {
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
+                {
+                    E.Cast(enemy.Position, true);
+                    return;
+                }
+
                 if (Config.Item("telE").GetValue<bool>())
                 {
                     foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < E.Range && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
                     {
-                        E.Cast(Object.Position, true);
+                        E.Cast(Object.Position);
                     }
                 }
-
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !Program.CanMove(enemy)))
-                    E.Cast(enemy, true);
 
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Program.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
@@ -347,20 +349,11 @@ namespace OneKeyToWin_AIO_Sebby
                 }
         }
 
-        private float bonusRange()
-        {
-            return 670f + Player.BoundingRadius + 25 * Player.Spellbook.GetSpell(SpellSlot.Q).Level;
-        }
+        private float bonusRange() { return 670f + Player.BoundingRadius + 25 * Player.Spellbook.GetSpell(SpellSlot.Q).Level; }
 
-        private bool FishBoneActive
-        {
-            get { return Player.AttackRange > 525f; }
-        }
+        private bool FishBoneActive {get { return Player.AttackRange > 525f; }}
 
-        private  float GetRealPowPowRange(GameObject target)
-        {
-            return 630f + Player.BoundingRadius + target.BoundingRadius;
-        }
+        private  float GetRealPowPowRange(GameObject target) {return 630f + Player.BoundingRadius + target.BoundingRadius;}
 
         private float GetRealDistance(Obj_AI_Base target)
         {

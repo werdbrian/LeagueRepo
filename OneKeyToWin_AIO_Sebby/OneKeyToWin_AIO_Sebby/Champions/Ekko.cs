@@ -182,7 +182,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Program.CastSpell(Q, t);
                 if (Player.Mana > RMANA + QMANA + WMANA )
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true);
                 }
 
@@ -199,7 +199,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q1, t1);
                 if (Player.Mana > RMANA + QMANA + WMANA)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q1.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q1.Range) && !OktwCommon.CanMove(enemy)))
                         Q1.Cast(enemy, true);
                 }
             }
@@ -230,7 +230,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(W, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);
                 }
             }

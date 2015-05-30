@@ -212,7 +212,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true);
                 }
             }
@@ -248,7 +248,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(W, t);
                 else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);
                 }
             }
@@ -337,7 +337,7 @@ namespace OneKeyToWin_AIO_Sebby
                             R.Cast(target, true, true);
                             debug("R recall");
                         }
-                        else if (!Program.CanMove(target) && Config.Item("Rcc").GetValue<bool>() &&
+                        else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() &&
                             target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg * 4 > predictedHealth)
                         {
                             R.CastIfWillHit(target, 2, true);

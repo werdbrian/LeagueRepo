@@ -59,7 +59,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var t = args.Target as Obj_AI_Hero;
                 args.Process = false;
-                if ((ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA || !Program.CanMove(t)))
+                if ((ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA || !OktwCommon.CanMove(t)))
                     args.Process = true; 
             }
 
@@ -86,7 +86,7 @@ namespace OneKeyToWin_AIO_Sebby
                         && Q.GetDamage(target) < target.Health
                         && (target.CountEnemiesInRange(400) > 1 || R.GetDamage(target) + Q.GetDamage(target) > target.Health))
                         R.Cast(target, true, true);
-                    else if (Program.Combo && Q.GetDamage(target) < target.Health && !Program.CanMove(target))
+                    else if (Program.Combo && Q.GetDamage(target) < target.Health && !OktwCommon.CanMove(target))
                             R.Cast(target, true, true);
                         
                 }

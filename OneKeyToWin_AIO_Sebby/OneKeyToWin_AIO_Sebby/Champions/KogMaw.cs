@@ -116,7 +116,7 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(R.Range)))
                         {
-                            if (!Program.CanMove(enemy))
+                            if (!OktwCommon.CanMove(enemy))
                                 R.Cast(enemy, true);
                             else
                                 R.CastIfHitchanceEquals(enemy, HitChance.Immobile, true);
@@ -203,7 +203,7 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(E.Range)))
                         {
-                            if (!Program.CanMove(enemy))
+                            if (!OktwCommon.CanMove(enemy))
                             {
                                 E.Cast(enemy, true);
                             }

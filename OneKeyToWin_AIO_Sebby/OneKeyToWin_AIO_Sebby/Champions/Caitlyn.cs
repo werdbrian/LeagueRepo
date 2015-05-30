@@ -168,7 +168,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Player.Mana > RMANA + WMANA)
             {
                 if (Config.Item("autoW").GetValue<bool>())
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);
                 
                 if (Config.Item("telE").GetValue<bool>())
@@ -195,7 +195,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q, t);
                 if ( (Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA && Player.CountEnemiesInRange(bonusRange()) == 0)
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !Program.CanMove(enemy)))
+                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true);
                     
                     if (t.HasBuffOfType(BuffType.Slow))

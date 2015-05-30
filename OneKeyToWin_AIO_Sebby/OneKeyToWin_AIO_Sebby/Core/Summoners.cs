@@ -86,7 +86,7 @@ namespace OneKeyToWin_AIO_Sebby
             else if ( Player.Distance(args.End) <= 300f)
             {
                 Program.debug(args.SData.Name);
-                if (!Program.CanMove(ObjectManager.Player) || ObjectManager.Player.Distance(sender.Position) < 300f)
+                if (!OktwCommon.CanMove(ObjectManager.Player) || ObjectManager.Player.Distance(sender.Position) < 300f)
                     dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
                 else if (Player.Distance(args.End) < 100f)
                     dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
