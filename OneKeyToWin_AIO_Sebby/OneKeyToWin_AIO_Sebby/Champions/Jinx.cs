@@ -98,16 +98,10 @@ namespace OneKeyToWin_AIO_Sebby
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange(), MinionTypes.All);
                 foreach (var minion in allMinionsQ.Where(minion => args.Target.NetworkId != minion.NetworkId && minion.Distance(args.Target.Position) < 200))
                 {
-
-                        if (minion.Health < Player.GetAutoAttackDamage(minion) * 1.1 )
-                        {
-                            Q.Cast();
-                        }
-                        else if (Mana)
-                        {
-                            Q.Cast();
-                        }
-                    
+                    if (minion.Health < Player.GetAutoAttackDamage(minion) * 1.1 )
+                        Q.Cast();
+                    else if (Mana)
+                        Q.Cast();
                 }
             }
         }
@@ -247,9 +241,9 @@ namespace OneKeyToWin_AIO_Sebby
                 }
 
                 var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Program.Combo && E.IsReady() && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA && ta.Path.Count() == 1)
+                if (Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Program.Combo && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA)
                 {
-                    if (ta.HasBuffOfType(BuffType.Slow) || ta.CountEnemiesInRange(250) > 1)
+                    if (ta.HasBuffOfType(BuffType.Slow) || OktwCommon.CountEnemiesInRangeDeley(E.GetPrediction(ta).CastPosition, 250, E.Delay) > 1 )
                     {
                         Program.CastSpell(E, ta);
                         debug("E slow");

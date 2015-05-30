@@ -171,9 +171,11 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Orianna":
                         new Orianna().LoadOKTW();
                         break;
-
                     case "Ekko":
                         new Ekko().LoadOKTW();
+                        break;
+                    case "Vayne":
+                        new Vayne().LoadOKTW();
                         break;
                 }
 

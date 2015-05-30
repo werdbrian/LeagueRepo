@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return true;
         }
 
-        public int CountEnemiesInRangeDeley(Vector3 position, float range, float delay)
+        public static int CountEnemiesInRangeDeley(Vector3 position, float range, float delay)
         {
             int count = 0;
             foreach (var t in Program.Enemies.Where(t => t.IsValidTarget()))
@@ -45,7 +45,7 @@ namespace OneKeyToWin_AIO_Sebby
             return count;
         }
 
-        public int GetCollision(Obj_AI_Base target, Spell QWER, bool champion, bool minion)
+        public static int GetCollision(Obj_AI_Base target, Spell QWER, bool champion, bool minion)
         {
             var rDmg = QWER.GetDamage(target);
             int collision = 0;

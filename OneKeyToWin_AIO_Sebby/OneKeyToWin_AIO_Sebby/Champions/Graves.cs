@@ -18,10 +18,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public bool Esmart = false;
         public float OverKill = 0;
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; }}
 
         public void LoadOKTW()
         {
@@ -35,14 +32,13 @@ namespace OneKeyToWin_AIO_Sebby
             W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.26f, 120f, 2100f, false, SkillshotType.SkillshotLine);
+
             LoadMenuOKTW();
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
         }
-
-        
 
         private void LoadMenuOKTW()
         {

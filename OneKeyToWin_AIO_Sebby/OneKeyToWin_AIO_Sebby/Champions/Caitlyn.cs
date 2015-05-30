@@ -18,10 +18,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private float QCastTime = 0;
 
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; }}
+
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 1280f);
