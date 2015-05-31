@@ -213,7 +213,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
-            
+            new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
@@ -223,6 +223,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
+            
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
@@ -335,6 +336,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void JunglerTimer()
         {
+
+            
+
             if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
             {
 

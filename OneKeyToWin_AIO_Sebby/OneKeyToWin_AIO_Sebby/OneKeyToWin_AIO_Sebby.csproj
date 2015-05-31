@@ -66,6 +66,7 @@
     <Compile Include="Champions\Jinx.cs" />
     <Compile Include="Champions\Kalista.cs" />
     <Compile Include="Champions\KogMaw.cs" />
+    <Compile Include="Core\AfkMode.cs" />
     <Compile Include="Core\OktwCommon.cs" />
     <Compile Include="Core\Summoners.cs" />
     <Compile Include="Champions\MissFortune.cs" />
