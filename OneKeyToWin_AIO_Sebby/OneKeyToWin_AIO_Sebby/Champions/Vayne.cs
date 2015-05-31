@@ -105,7 +105,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.Path.Count() < 2 && Config.Item("stun" + target.ChampionName).GetValue<bool>()))
                 {
-                    if (CondemnCheck(Player.ServerPosition, target) )
+                    if (CondemnCheck(Player.Position, target) )
                         E.Cast(target);
                     else if (Q.IsReady() && !dashPosition.IsWall() && Config.Item("QE").GetValue<bool>() && CondemnCheck(dashPosition, target))
                     {
@@ -166,8 +166,8 @@ namespace OneKeyToWin_AIO_Sebby
             if ((int)poutput.Hitchance < 5)
                 return false;
             float pushDistance;
-            if (Player.ServerPosition == fromPosition )
-                pushDistance = 330 + target.BoundingRadius;
+            if (Player.Position == fromPosition )
+                pushDistance = 325 + target.BoundingRadius;
             else
                 pushDistance = 230 + target.BoundingRadius;
 
