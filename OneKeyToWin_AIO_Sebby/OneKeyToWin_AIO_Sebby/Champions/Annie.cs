@@ -229,22 +229,22 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LoadMenuOKTW()
         {
-            Config.SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "Combo Info", true).SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range", true).SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range", true).SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "Combo Info").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W", true).SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(60, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 30)));
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E stack stun", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("sup", "Support mode", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("tibers", "TibbersAutoPilot", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "AA in combo", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E stack stun").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("sup", "Support mode").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("tibers", "TibbersAutoPilot").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("rCount", "Auto R stun x enemies", true).SetValue(new Slider(3, 0, 5)));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("rCount", "Auto R stun x enemies").SetValue(new Slider(3, 0, 5)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Stun in combo").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
         }

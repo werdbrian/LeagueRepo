@@ -117,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (!Config.Item("aio").GetValue<bool>())
             {
                 Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
-                Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(false));
+                Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
 
 
                 var targetSelectorMenu = new Menu("Target Selector", "Target Selector");

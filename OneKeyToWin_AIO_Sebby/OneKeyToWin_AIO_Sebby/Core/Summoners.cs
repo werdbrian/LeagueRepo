@@ -23,17 +23,17 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (heal != SpellSlot.Unknown)
             {
-                Config.SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("Heal", "Heal", true).SetValue(true));
-                Config.SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("AllyHeal", "AllyHeal", true).SetValue(true));
+                Config.SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("Heal", "Heal").SetValue(true));
+                Config.SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("AllyHeal", "AllyHeal").SetValue(true));
             }
             if (barrier != SpellSlot.Unknown)
             {
-                Config.SubMenu("Summoners").SubMenu("Barrier").AddItem(new MenuItem("Barrier", "Barrier", true).SetValue(true));
+                Config.SubMenu("Summoners").SubMenu("Barrier").AddItem(new MenuItem("Barrier", "Barrier").SetValue(true));
 
             }
             if (ignite != SpellSlot.Unknown)
             {
-                Config.SubMenu("Summoners").SubMenu("Ignite").AddItem(new MenuItem("Ignite", "Ignite", true).SetValue(true));
+                Config.SubMenu("Summoners").SubMenu("Ignite").AddItem(new MenuItem("Ignite", "Ignite").SetValue(true));
             }
             
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;

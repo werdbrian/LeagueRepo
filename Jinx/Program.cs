@@ -52,13 +52,13 @@ namespace Jinx
         {
             Player = ObjectManager.Player;
             if (Player.BaseSkinName != ChampionName) return;
-
+            
             Q = new Spell(SpellSlot.Q, float.MaxValue);
             W = new Spell(SpellSlot.W, 1500f);
             E = new Spell(SpellSlot.E, 900f);
             R = new Spell(SpellSlot.R, 2500f);
             R1 = new Spell(SpellSlot.R, 2500f);
-
+            
             W.SetSkillshot(0.6f, 75f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.2f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
