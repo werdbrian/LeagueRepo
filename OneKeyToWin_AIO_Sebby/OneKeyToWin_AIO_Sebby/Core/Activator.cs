@@ -37,22 +37,22 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             //Drawing.OnDraw += Drawing_OnDraw;
-            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
+            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit", true).SetValue(true));
 
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkKS", "Botrk KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkLS", "Botrk LifeSaver").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkCombo", "Botrk always in combo").SetValue(false));
+            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkKS", "Botrk KS", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkLS", "Botrk LifeSaver", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkCombo", "Botrk always in combo", true).SetValue(false));
 
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("Cutlass", "Cutlass").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassKS", "Cutlass KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
+            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("Cutlass", "Cutlass", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassKS", "Cutlass KS", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo", true).SetValue(true));
 
-            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
+            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS", true).SetValue(true));
+            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo", true).SetValue(false));
 
-            Config.SubMenu("Items").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
+            Config.SubMenu("Items").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra", true).SetValue(true));
 
         }
 
@@ -71,7 +71,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Config.Item("BotrkKS").GetValue<bool>() && Player.CalcDamage(t, Damage.DamageType.Physical, t.MaxHealth * 0.1) > t.Health)
                         Botrk.Cast(t);
-                    if (Config.Item("BotrkLS").GetValue<bool>() && Player.Health < Player.CountEnemiesInRange(600) * Player.Level * 20)
+                    if (Config.Item("BotrkLS").GetValue<bool>() && Player.Health < Player.CountEnemiesInRange(600) * Player.Level * 25)
                         Botrk.Cast(t);
                     if (Config.Item("BotrkCombo").GetValue<bool>() && Program.Combo)
                         Botrk.Cast(t);
