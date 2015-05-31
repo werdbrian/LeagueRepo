@@ -71,7 +71,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Config.Item("BotrkKS").GetValue<bool>() && Player.CalcDamage(t, Damage.DamageType.Physical, t.MaxHealth * 0.1) > t.Health)
                         Botrk.Cast(t);
-                    if (Config.Item("BotrkLS").GetValue<bool>() && Player.Health < Player.CountEnemiesInRange(600) * Player.Level * 20)
+                    if (Config.Item("BotrkLS").GetValue<bool>() && Player.Health < Player.CountEnemiesInRange(600) * Player.Level * 30)
                         Botrk.Cast(t);
                     if (Config.Item("BotrkCombo").GetValue<bool>() && Program.Combo)
                         Botrk.Cast(t);
