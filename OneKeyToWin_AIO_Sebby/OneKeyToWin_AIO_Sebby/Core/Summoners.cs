@@ -79,13 +79,11 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (args.Target != null && args.Target.IsMe)
             {
-                Program.debug("targeted");
 
                 dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             }
             else if ( Player.Distance(args.End) <= 300f)
             {
-                Program.debug(args.SData.Name);
                 if (!OktwCommon.CanMove(ObjectManager.Player) || ObjectManager.Player.Distance(sender.Position) < 300f)
                     dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
                 else if (Player.Distance(args.End) < 100f)
