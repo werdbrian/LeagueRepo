@@ -138,7 +138,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Q.IsReady() && !dashPosition.IsWall())
                         Q.Cast(dashPosition, true);
-                    else if (E.IsReady() && Player.Health < Player.MaxHealth * 0.6)
+                    else if (E.IsReady() && Player.Health < Player.MaxHealth * 0.5)
                     {
                         E.Cast(target);
                         Program.debug("push");
@@ -148,11 +148,13 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(3) && R.IsReady() )
             {
-                if (Program.Combo && Config.Item("autoR").GetValue<bool>())
+                if ( Config.Item("autoR").GetValue<bool>())
                 {
                     if (Player.CountEnemiesInRange(700) > 2)
                         R.Cast();
-                    else if (Player.Health < Player.MaxHealth * 0.6 && Player.CountEnemiesInRange(400) > 0)
+                    else if (Program.Combo && Player.CountEnemiesInRange(600) > 1)
+                        R.Cast();
+                    else if (Player.Health < Player.MaxHealth * 0.5 && Player.CountEnemiesInRange(500) > 0)
                         R.Cast();
                 }
             }
@@ -163,8 +165,12 @@ namespace OneKeyToWin_AIO_Sebby
             var poutput = E.GetPrediction(target);
             if ((int)poutput.Hitchance < 5)
                 return false;
+            float pushDistance;
+            if (Player.ServerPosition == fromPosition )
+                pushDistance = 330 + target.BoundingRadius;
+            else
+                pushDistance = 230 + target.BoundingRadius;
 
-            var pushDistance = 330 + target.BoundingRadius;
             var finalPosition = poutput.CastPosition.Extend(fromPosition, -pushDistance);
                 
             if (finalPosition.IsWall())
