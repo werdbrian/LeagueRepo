@@ -33,6 +33,7 @@ namespace OneKeyToWin_AIO_Sebby
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
+            Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
             //Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
         private void LoadMenuOKTW()
@@ -57,7 +58,13 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu(Player.ChampionName).SubMenu("E config").SubMenu("Use E ").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
         }
-        
+
+        private void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
+        {
+            if (E.IsReady() && unit.IsValidTarget(E.Range))
+                E.Cast(unit);
+        }
+
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             var target = gapcloser.Sender;
