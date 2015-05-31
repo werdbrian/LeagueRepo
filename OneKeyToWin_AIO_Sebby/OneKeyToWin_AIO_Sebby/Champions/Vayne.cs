@@ -91,7 +91,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var dashPosition = Player.Position.Extend(Game.CursorPos, Q.Range);
 
-            if (Q.IsReady() && t.IsValidTarget() && GetWStacks(t) > 0 && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position))
+            if (Q.IsReady() && t.IsValidTarget() && GetWStacks(t) == 1 && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position))
             {
                 Q.Cast(dashPosition, true);
                 Program.debug("" + t.Name + GetWStacks(t));
@@ -148,11 +148,11 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(3) && R.IsReady() )
             {
-                if (Program.Combo && Config.Item("autoR").GetValue<bool>() && Player.CountEnemiesInRange(700) > 2)
+                if (Program.Combo && Config.Item("autoR").GetValue<bool>())
                 {
                     if (Player.CountEnemiesInRange(700) > 2)
                         R.Cast();
-                    else if (Player.Health < Player.MaxHealth * 0.6 && Player.CountEnemiesInRange(500) > 0)
+                    else if (Player.Health < Player.MaxHealth * 0.6 && Player.CountEnemiesInRange(400) > 0)
                         R.Cast();
                 }
             }
