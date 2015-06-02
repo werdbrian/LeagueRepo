@@ -213,7 +213,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
-            new AfkMode().LoadOKTW();
+            //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
