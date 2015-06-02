@@ -45,6 +45,20 @@ namespace OneKeyToWin_AIO_Sebby
             return count;
         }
 
+
+        private List<Vector3> CirclePoints(float CircleLineSegmentN, float radius, Vector3 position)
+        {
+            List<Vector3> points = new List<Vector3>();
+            var bestPoint = ObjectManager.Player.Position;
+            for (var i = 1; i <= CircleLineSegmentN; i++)
+            {
+                var angle = i * 2 * Math.PI / CircleLineSegmentN;
+                var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z);
+                points.Add(point);
+            }
+            return points;
+        }
+
         public static int GetCollision(Obj_AI_Base target, Spell QWER, bool champion, bool minion)
         {
             var rDmg = QWER.GetDamage(target);

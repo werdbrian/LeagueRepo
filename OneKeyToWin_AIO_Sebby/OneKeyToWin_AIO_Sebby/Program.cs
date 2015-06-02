@@ -191,6 +191,8 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - VeryHigh + max range fix + waypionts analyzer"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Prediction Debug").SetValue(true));
+                
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -416,7 +418,7 @@ namespace OneKeyToWin_AIO_Sebby
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
                 return;
-
+            
             if (target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
                 QWER.Cast(poutput.CastPosition);
 
@@ -445,7 +447,7 @@ namespace OneKeyToWin_AIO_Sebby
             else if (HitChanceNum == 2)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
-                if (waypoints.Last<Vector2>().To3D().Distance(poutput.CastPosition) > QWER.Width && (int)poutput.Hitchance == 5)
+                if (waypoints.Last<Vector2>().To3D().Distance(poutput.CastPosition) > QWER.Width && (int)poutput.Hitchance > 4)
                 {
                     if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
                     {
@@ -507,11 +509,15 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
                         {
-                            QWER.Cast(poutput.CastPosition);
+
+                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                         }
                     }
                     else
-                        QWER.Cast(poutput.CastPosition);
+                    {
+
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
                 }
                 else
                 {
@@ -595,6 +601,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             var HpBar = Config.Item("HpBar").GetValue<bool>();
+            var debugPred = Config.Item("debugPred").GetValue<bool>();
             var championInfo = Config.Item("championInfo").GetValue<bool>();
             var GankAlert = Config.Item("GankAlert").GetValue<bool>();
             var ShowKDA = Config.Item("ShowKDA").GetValue<bool>();
@@ -604,13 +611,18 @@ namespace OneKeyToWin_AIO_Sebby
             float positionGang = 500;
             foreach (var enemy in Enemies)
             {
-                /*
-                if (Config.Item("debug").GetValue<bool>())
+
+                if (debugPred)
                 {
                     var prepos = Prediction.GetPrediction(enemy, 0.5f);
                     drawText("" + (int)prepos.Hitchance, enemy.Position, System.Drawing.Color.GreenYellow);
+
+                    List<Vector2> waypoints = enemy.GetWaypoints();
+                    Utility.DrawCircle(waypoints.Last<Vector2>().To3D(), 30, System.Drawing.Color.Orange, 1, 1);
+
+
                 }
-                */
+                
                 if (HpBar && enemy.IsHPBarRendered)
                 {
                     int Width = 103;
