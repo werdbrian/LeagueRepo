@@ -191,7 +191,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - VeryHigh + max range fix + waypionts analyzer"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Prediction Debug").SetValue(true));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Prediction Debug").SetValue(false));
                 
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
@@ -619,8 +619,6 @@ namespace OneKeyToWin_AIO_Sebby
 
                     List<Vector2> waypoints = enemy.GetWaypoints();
                     Utility.DrawCircle(waypoints.Last<Vector2>().To3D(), 30, System.Drawing.Color.Orange, 1, 1);
-
-
                 }
                 
                 if (HpBar && enemy.IsHPBarRendered)
