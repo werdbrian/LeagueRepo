@@ -413,7 +413,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Base target)
         {
-            
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
             if (target.IsDead || col > 0 || target.Path.Count() > 1)
@@ -612,7 +611,7 @@ namespace OneKeyToWin_AIO_Sebby
             foreach (var enemy in Enemies)
             {
 
-                if (debugPred)
+                if (debugPred && enemy.IsValidTarget())
                 {
                     var prepos = Prediction.GetPrediction(enemy, 0.5f);
                     drawText("" + (int)prepos.Hitchance, enemy.Position, System.Drawing.Color.GreenYellow);
