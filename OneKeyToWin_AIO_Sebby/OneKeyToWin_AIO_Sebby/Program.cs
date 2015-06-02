@@ -304,7 +304,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                     if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
                     {
-                        if (Config.Item("AutoWardCombo").GetValue<bool>() && Combo)
+                        if (Config.Item("AutoWardCombo").GetValue<bool>() && !Combo)
                             return;
                         if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
                         {
