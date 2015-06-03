@@ -298,7 +298,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            if (t.IsValidTarget(R.Range))
+            if (Player.CountEnemiesInRange(400) == 0 && t.IsValidTarget(R.Range))
             {
                 var rDmg = R.GetDamage(t,1) * NumShots();
                 //Program.debug("" + rDmg);
