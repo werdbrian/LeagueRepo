@@ -305,17 +305,17 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Program.ValidUlt(t))
                 {
                     var tDis = Player.Distance(t.ServerPosition);
-                    if (rDmg * 0.6 > t.Health && tDis < 800 && !Q.IsReady())
+                    if (rDmg * 0.8 > t.Health && tDis < 800 && !Q.IsReady())
                         R.Cast(t, true, true);
-                    else if (rDmg * 0.5 > t.Health && tDis < 900)
+                    else if (rDmg * 0.7 > t.Health && tDis < 900)
                         R.Cast(t, true, true);
-                    else if (rDmg * 0.4 > t.Health && tDis < 1000)
+                    else if (rDmg * 0.6 > t.Health && tDis < 1000)
                         R.Cast(t, true, true);
-                    else if (rDmg * 0.3 > t.Health && tDis < 1100)
+                    else if (rDmg * 0.5 > t.Health && tDis < 1100)
                         R.Cast(t, true, true);
-                    else if (rDmg * 0.2 > t.Health && tDis < 1200)
+                    else if (rDmg * 0.4 > t.Health && tDis < 1200)
                         R.Cast(t, true, true);
-                    else if (rDmg * 0.1 > t.Health && tDis < 1300)
+                    else if (rDmg * 0.3 > t.Health && tDis < 1300)
                         R.Cast(t, true, true);
 
                     
