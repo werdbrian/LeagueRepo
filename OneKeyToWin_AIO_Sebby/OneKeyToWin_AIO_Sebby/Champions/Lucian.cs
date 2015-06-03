@@ -82,7 +82,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Target.IsValidTarget(E.Range))
                 {
                     E.Cast(ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range), true);
-
                 }
             }
             return;
@@ -200,7 +199,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (Program.LagFree(1) && Q.IsReady() && !passRdy && !SpellLock)
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady() && !passRdy && !SpellLock)
+            if (Program.LagFree(2) && W.IsReady() && !passRdy && !SpellLock && Config.Item("autoW").GetValue<bool>())
                 LogicW();
             if (Program.LagFree(3) && E.IsReady() )
                 LogicE();
