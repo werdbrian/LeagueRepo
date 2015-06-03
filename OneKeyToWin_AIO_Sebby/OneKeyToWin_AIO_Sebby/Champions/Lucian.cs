@@ -122,6 +122,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, Q1.Range, System.Drawing.Color.Cyan, 1, 1);
             }
+
             if (Config.Item("wRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
@@ -143,6 +144,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Orange, 1, 1);
             }
+
             if (Config.Item("rRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
@@ -297,11 +299,11 @@ namespace OneKeyToWin_AIO_Sebby
         {
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            if (Player.CountEnemiesInRange(400) == 0 && t.IsValidTarget(R.Range))
+            if (t.IsValidTarget(R.Range))
             {
                 var rDmg = R.GetDamage(t,1) * NumShots();
                 //Program.debug("" + rDmg);
-                if (Program.ValidUlt(t))
+                if (Program.ValidUlt(t) && t.CountAlliesInRange(400) == 0)
                 {
                     var tDis = Player.Distance(t.ServerPosition);
                     if (rDmg * 0.8 > t.Health && tDis < 800 && !Q.IsReady())
@@ -316,8 +318,6 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast(t, true, true);
                     else if (rDmg * 0.3 > t.Health && tDis < 1300)
                         R.Cast(t, true, true);
-
-                    
                     return;
                 }
                 else if (rDmg > t.Health && (t.CountEnemiesInRange(300) > 2 || !OktwCommon.CanMove(t)))
