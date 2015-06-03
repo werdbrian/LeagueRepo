@@ -19,7 +19,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         public void LoadOKTW()
         {
-
             Q = new Spell(SpellSlot.Q, 400);
             W = new Spell(SpellSlot.W, 145);
             E = new Spell(SpellSlot.E, 540);
@@ -37,8 +36,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LoadMenuOKTW()
         {
-            
-
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
@@ -67,7 +64,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (R.IsReady() && Config.Item("useR").GetValue<KeyBind>().Active)
             {
-                var targetR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                var targetR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.True);
                 if (targetR.IsValidTarget())
                     R.Cast(targetR, true);
             }
@@ -103,7 +100,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Player.CountEnemiesInRange(Q.Range) > 0)
             {
-                if (ObjectManager.Player.Mana > RMANA + QMANA && Program.Combo)
+                if (Player.Mana > RMANA + QMANA && Program.Combo)
                     Q.Cast();
                 else if (Program.Farm && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && Config.Item("haras").GetValue<bool>())
                     Q.Cast();
