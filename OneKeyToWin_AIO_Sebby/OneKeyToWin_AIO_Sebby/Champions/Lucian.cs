@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 1400f);
             R1 = new Spell(SpellSlot.R, 1400f);
 
-            Q1.SetSkillshot(0.3f, 20f, float.MaxValue, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.3f, 5f, float.MaxValue, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.25f, 1400f);
             W.SetSkillshot(0.30f, 80f, 1600f, true, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.1f, 110, 2800, true, SkillshotType.SkillshotLine);
