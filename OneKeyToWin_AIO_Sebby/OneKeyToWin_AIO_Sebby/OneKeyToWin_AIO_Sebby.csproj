@@ -71,6 +71,7 @@
     <Compile Include="Core\Summoners.cs" />
     <Compile Include="Champions\MissFortune.cs" />
     <Compile Include="Champions\Orianna.cs" />
+    <Compile Include="Champions\Lucian.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Champions\Quinn.cs" />
