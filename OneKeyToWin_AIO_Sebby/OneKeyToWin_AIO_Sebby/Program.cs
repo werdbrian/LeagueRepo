@@ -690,7 +690,6 @@ namespace OneKeyToWin_AIO_Sebby
                         else if (R.IsReady() && i < (QdmgDraw + WdmgDraw + EdmgDraw + RdmgDraw) * differenceInHP)
                             Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.YellowGreen);
                     }
-
                 }
 
                 var kolor = System.Drawing.Color.GreenYellow;
@@ -741,7 +740,7 @@ namespace OneKeyToWin_AIO_Sebby
                     
                 }
                 var Distance = Player.Distance(enemy.Position);
-                if (GankAlert && Distance > 1200 && !enemy.IsDead)
+                if (GankAlert && !enemy.IsDead && !Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
                 {
 
                     var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
