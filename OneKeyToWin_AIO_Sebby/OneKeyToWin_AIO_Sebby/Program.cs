@@ -740,7 +740,7 @@ namespace OneKeyToWin_AIO_Sebby
                     
                 }
                 var Distance = Player.Distance(enemy.Position);
-                if (GankAlert && !enemy.IsDead && !Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
+                if (GankAlert && !enemy.IsDead && Distance > 1200)
                 {
 
                     var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
@@ -757,7 +757,7 @@ namespace OneKeyToWin_AIO_Sebby
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
                     else
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
-                    if (Distance < 3500 && enemy.IsVisible)
+                    if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                     {
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
                         
