@@ -574,7 +574,13 @@ namespace OneKeyToWin_AIO_Sebby
             var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
         }
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
 
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
@@ -585,6 +591,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
+            
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
@@ -752,7 +759,10 @@ namespace OneKeyToWin_AIO_Sebby
                     else
                         drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
                     if (Distance < 3500 && enemy.IsVisible)
-                        Utility.DrawCircle(ObjectManager.Player.Position.Extend(enemy.Position, positionGang), (int)((3500 - Distance) / 30), System.Drawing.Color.Red, 10, 1);
+                    {
+                        drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
+                        
+                    }
 
                 }
                 positionGang = positionGang + 100;
