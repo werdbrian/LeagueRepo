@@ -20,10 +20,8 @@ namespace OneKeyToWin_AIO_Sebby
         private float QMANA, WMANA, EMANA, RMANA;
         private bool passRdy = false;
         private float castR = Game.Time;
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player {get { return ObjectManager.Player; }}
+
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 675f);
@@ -348,17 +346,15 @@ namespace OneKeyToWin_AIO_Sebby
                 if (target.Position.Distance(Game.CursorPos) > target.Position.Distance(Player.Position))
                     E.Cast(dashPosition, true);
             }
-
-            
         }
 
 
         public void farm()
         {
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
             {
                 var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-                if (mobs.Count > 0)
+                if (mobs.Count > 0 && Player.Mana > RMANA + WMANA + EMANA + QMANA)
                 {
                     var mob = mobs[0];
                     if (Q.IsReady() && Config.Item("farmQ").GetValue<bool>())
@@ -374,7 +370,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
 
-                if (!Orbwalking.CanAttack())
+                if (!Orbwalking.CanAttack() && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
                 {
                     var minions = MinionManager.GetMinions(Player.ServerPosition, Q1.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
                     if (Q.IsReady() && Config.Item("farmQ").GetValue<bool>())
