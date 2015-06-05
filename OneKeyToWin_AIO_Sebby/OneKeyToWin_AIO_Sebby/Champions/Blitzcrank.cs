@@ -22,16 +22,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1000);
+            Q = new Spell(SpellSlot.Q, 950);
             W = new Spell(SpellSlot.W, 200);
             E = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 600);
 
             Q.SetSkillshot(0.25f, 110f, 1800f, true, SkillshotType.SkillshotLine);
 
-            Config.AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
-            Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
@@ -102,7 +101,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicQ();
             if (Program.LagFree(2) && R.IsReady())
                 LogicR();
-            if (Program.LagFree(3) && W.IsReady())
+            if (Program.LagFree(3) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
                 LogicW();
         }
 
@@ -158,11 +157,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         }
         private void LogicW()
         {
-            if (Config.Item("autoW").GetValue<bool>())
-            {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && target.HasBuff("rocketgrab2")))
-                    W.Cast();
-            }
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && target.HasBuff("rocketgrab2")))
+                W.Cast();
         }
     }
 }
