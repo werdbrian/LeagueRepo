@@ -29,28 +29,25 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Q.SetSkillshot(0.25f, 110f, 1800f, true, SkillshotType.SkillshotLine);
 
-
-            Config.AddItem(new MenuItem("noti", "Show notification").SetValue(true));
-            Config.AddItem(new MenuItem("pots", "Use pots").SetValue(true));
             Config.AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
 
-            Config.SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
-            Config.SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
-            Config.SubMenu("Q option").AddItem(new MenuItem("ts2", "OFF - all grab-able targets"));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts2", "OFF - all grab-able targets"));
 
-            Config.SubMenu("Q option").AddItem(new MenuItem("qCC", "Auto Q cc & dash enemy").SetValue(true));
-            Config.SubMenu("Q option").AddItem(new MenuItem("minGrab", "Min range grab").SetValue(new Slider(250, 125, (int)Q.Range)));
-            Config.SubMenu("Q option").AddItem(new MenuItem("maxGrab", "Max range grab").SetValue(new Slider((int)Q.Range, 125, (int)Q.Range)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("qCC", "Auto Q cc & dash enemy").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("minGrab", "Min range grab").SetValue(new Slider(250, 125, (int)Q.Range)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("maxGrab", "Max range grab").SetValue(new Slider((int)Q.Range, 125, (int)Q.Range)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu("Q option").SubMenu("Grab").AddItem(new MenuItem("grab" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("Q option").SubMenu("Grab").AddItem(new MenuItem("grab" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
-            Config.SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
-            Config.SubMenu("R option").AddItem(new MenuItem("afterGrab", "Auto R after grab").SetValue(true));
-            Config.SubMenu("R option").AddItem(new MenuItem("rKs", "R ks").SetValue(false));
-            Config.SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt")).SetValue(true);
-            Config.SubMenu("R option").AddItem(new MenuItem("Gap", "OnEnemyGapcloser")).SetValue(true);
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("afterGrab", "Auto R after grab").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rKs", "R ks").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt")).SetValue(true);
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Gap", "OnEnemyGapcloser")).SetValue(true);
 
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
