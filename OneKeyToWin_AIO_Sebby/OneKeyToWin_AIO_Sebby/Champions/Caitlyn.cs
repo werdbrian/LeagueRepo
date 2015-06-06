@@ -22,7 +22,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1280f);
+            Q = new Spell(SpellSlot.Q, 1250f);
             Qc = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W, 800f);
             E = new Spell(SpellSlot.E, 980f);
@@ -117,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp)
                 LogicQ();
 
-            if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp)
+            if (Program.LagFree(3) && W.IsReady() )
                 LogicW();
 
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && Game.Time - QCastTime > 1)
