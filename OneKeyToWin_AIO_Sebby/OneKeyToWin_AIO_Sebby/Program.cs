@@ -598,15 +598,15 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
-                    drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.Cyan);
+                    drawText(" " + timer, Player.Position, System.Drawing.Color.Cyan);
                 else if (jungler.IsVisible)
-                    drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.GreenYellow);
+                    drawText(" " + timer, Player.Position, System.Drawing.Color.GreenYellow);
                 else
                 {
                     if (timer > 0)
-                        drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.Orange);
+                        drawText(" " + timer, Player.Position, System.Drawing.Color.Orange);
                     else
-                        drawText(" " + timer, ObjectManager.Player.Position, System.Drawing.Color.Red);
+                        drawText(" " + timer, Player.Position, System.Drawing.Color.Red);
                     if (Game.Time - JungleTime >= 1)
                     {
                         timer = timer - 1;
@@ -712,7 +712,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (championInfo)
                 {
                     positionDraw += 15;
-                    //Drawing.DrawText(Drawing.Width * 0.11f, Drawing.Height * positionDraw, kolor, (int)enemy.HealthPercent );
                     foreach (RecallInfo rerecall in RecallInfos)
                     {
                         if (rerecall.RecallID == enemy.NetworkId && Game.Time - rerecall.RecallStart < 8)
@@ -729,12 +728,7 @@ namespace OneKeyToWin_AIO_Sebby
                             }
                         }
                     }
-                    /*
-                    if ((int)enemy.HealthPercent > 0)
-                        Drawing.DrawLine(posX, posY + positionDraw, (posX + ((int)enemy.HealthPercent) / 2) + 1, posY + positionDraw, 12, kolorHP);
-                    if ((int)enemy.HealthPercent < 100)
-                        Drawing.DrawLine((posX + ((int)enemy.HealthPercent) / 2), posY + positionDraw, posX + 50, posY + positionDraw, 12, System.Drawing.Color.Black);
-                    */
+
                     if (ShowKDA)
                         Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                     Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName );
@@ -755,11 +749,11 @@ namespace OneKeyToWin_AIO_Sebby
                     if ((int)enemy.HealthPercent < 100)
                         Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1] , wts[0] + 50, wts[1] , 12, System.Drawing.Color.White);
                     if (Distance > 3500 && enemy.IsVisible)
-                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
+                        drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
                     else if (!enemy.IsVisible)
-                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
+                        drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
                     else
-                        drawText(enemy.ChampionName, ObjectManager.Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
+                        drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
                     if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                     {
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
