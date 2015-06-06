@@ -189,9 +189,9 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Q.GetDamage(t1) + Player.GetAutoAttackDamage(t1) > t1.Health)
                         Q.Cast(minionQ);
-                    else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + QMANA)
+                    else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA)
                         Q.Cast(minionQ);
-                    else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    else if (Program.Combo && Player.Mana > RMANA + QMANA + QMANA)
                         Q.Cast(minionQ);
                 }
             }
