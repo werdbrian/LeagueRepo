@@ -80,7 +80,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicE();
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
-
         }
 
         private void LogicE()
