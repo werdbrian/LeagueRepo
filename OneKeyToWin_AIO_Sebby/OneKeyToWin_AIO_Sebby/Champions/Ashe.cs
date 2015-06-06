@@ -45,11 +45,11 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W, 1200);
+            W = new Spell(SpellSlot.W, 1270);
             E = new Spell(SpellSlot.E, 2500);
             R = new Spell(SpellSlot.R, 3000f);
 
-            W.SetSkillshot(0.5f, 50f , 1000f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.4f, 50f , 900f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 299f, 1400f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
             LoadMenuOKTW();
@@ -199,7 +199,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
 
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (ObjectManager.Player.CountEnemiesInRange(700) > 0)
+            if (Player.CountEnemiesInRange(700) > 0)
                 t = TargetSelector.GetTarget(700, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
@@ -211,16 +211,16 @@ namespace OneKeyToWin_AIO_Sebby
                 var wDmg = W.GetDamage(t);
                 if (wDmg > t.Health)
                 {
-                    W.Cast(poutput.CastPosition);
+                    W.Cast(t,true);
                 }
-                else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA)
-                    W.Cast(poutput.CastPosition);
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + WMANA)
+                    Program.CastSpell(W, t);
                 else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.Mana > RMANA + WMANA + QMANA + WMANA)
-                    W.Cast(poutput.CastPosition);
-                else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
+                    Program.CastSpell(W, t);
+                else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
-                        W.Cast(enemy, true);
+                        W.Cast(t, true, true);
                 }
             }
         }
