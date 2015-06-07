@@ -18,8 +18,15 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
-        public static Items.Item 
+        public static Items.Item
 
+
+
+            //Cleans
+            Mikaels = new Items.Item(3222, 600f),
+            Quicksilver = new Items.Item(3140, 0),
+            Mercurial = new Items.Item(3139, 0),
+            Dervish = new Items.Item(3137, 0),
             //REGEN
             Potion = new Items.Item(2003, 0),
             ManaPotion = new Items.Item(2004, 0),
@@ -32,28 +39,42 @@ namespace OneKeyToWin_AIO_Sebby
             Hydra = new Items.Item(3144, 440f),
             Hydra2 = new Items.Item(3144, 440f);
 
+
+
         public void LoadOKTW()
         {
             Game.OnUpdate += Game_OnGameUpdate;
             //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             //Drawing.OnDraw += Drawing_OnDraw;
-            Config.SubMenu("Items").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
+            Config.SubMenu("Activator").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
 
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkKS", "Botrk KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkLS", "Botrk LifeSaver").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Botrk").AddItem(new MenuItem("BotrkCombo", "Botrk always in combo").SetValue(false));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("BotrkKS", "Botrk KS").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("BotrkLS", "Botrk LifeSaver").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("BotrkCombo", "Botrk always in combo").SetValue(false));
 
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("Cutlass", "Cutlass").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassKS", "Cutlass KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("Cutlass", "Cutlass").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("CutlassKS", "Cutlass KS").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
 
-            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
-            Config.SubMenu("Items").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
 
-            Config.SubMenu("Items").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
+            // CLEANSERS 
+            Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("CleanSpells", "ZedR FizzR MordekaiserR PoppyR VladimirR").SetValue(true));
 
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Stun", "Stun").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Snare", "Snare").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Knockup", "Knockup").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Knockback", "Knockback").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Charm", "Charm").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Fear", "Fear").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Suppression", "Suppression").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Taunt", "Taunt").SetValue(true));
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -64,6 +85,56 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("pots").GetValue<bool>())
                 PotionManagement();
 
+            Offensive();
+            Cleansers();
+            
+        }
+
+        private void Cleansers()
+        {
+            if (!Quicksilver.IsReady() && !Mikaels.IsReady() && !Mercurial.IsReady() && !Dervish.IsReady())
+                return;
+
+            if (Player.HealthPercent >= (float)Config.Item("cleanHP").GetValue<Slider>().Value || !Config.Item("Clean").GetValue<bool>())
+                return;
+
+            if (Player.HasBuff("zedulttargetmark") || Player.HasBuff("FizzMarinerDoom") || Player.HasBuff("MordekaiserChildrenOfTheGrave") || Player.HasBuff("PoppyDiplomaticImmunity") || Player.HasBuff("VladimirHemoplague"))
+                Clean();
+
+            if (Player.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Snare) && Config.Item("Snare").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Knockup) && Config.Item("Knockup").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Charm) && Config.Item("Charm").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Fear) && Config.Item("Fear").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Knockback) && Config.Item("Knockback").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Taunt) && Config.Item("Taunt").GetValue<bool>())
+                Clean();
+            if (Player.HasBuffOfType(BuffType.Suppression) && Config.Item("Suppression").GetValue<bool>())
+                Clean();
+        }
+
+        private void Clean()
+        {
+            if (Quicksilver.IsReady())
+                Quicksilver.Cast();
+            else if (Mikaels.IsReady())
+                Mikaels.Cast(Player);
+            else if (Mercurial.IsReady())
+                Mercurial.Cast();
+            else if (Dervish.IsReady())
+                Dervish.Cast(); 
+        }
+
+        private void Offensive()
+        {
             if (Botrk.IsReady() && Config.Item("Botrk").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(Botrk.Range, TargetSelector.DamageType.Physical);
@@ -100,7 +171,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Youmuus.Cast();
                     if (Config.Item("YoumuusCombo").GetValue<bool>() && Program.Combo)
                         Youmuus.Cast();
-                } 
+                }
             }
 
             if (Config.Item("Hydra").GetValue<bool>())
@@ -111,6 +182,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Hydra2.Cast();
             }
         }
+
         private void PotionManagement()
         {
             if (!Player.InFountain() && !Player.HasBuff("Recall"))

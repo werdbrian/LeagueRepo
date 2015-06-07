@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Champions\Blitzcrank.cs" />
+    <Compile Include="Champions\Corki.cs" />
     <Compile Include="Champions\Darius.cs" />
     <Compile Include="Champions\Vayne.cs" />
     <Compile Include="Core\Activator.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Champions\KogMaw.cs" />
     <Compile Include="Core\AfkMode.cs" />
     <Compile Include="Core\OktwCommon.cs" />
+    <Compile Include="Core\OKTWlab.cs" />
     <Compile Include="Core\Summoners.cs" />
     <Compile Include="Champions\MissFortune.cs" />
     <Compile Include="Champions\Orianna.cs" />

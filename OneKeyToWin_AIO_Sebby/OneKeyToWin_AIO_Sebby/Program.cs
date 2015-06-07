@@ -24,10 +24,7 @@ namespace OneKeyToWin_AIO_Sebby
         public Vector3 PredictedPos { get; set; }
     }
 
-    class champions
-    {
-        public Obj_AI_Hero Player;
-    }
+    class champions { public Obj_AI_Hero Player; }
 
     internal class Program
     {
@@ -186,6 +183,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Blitzcrank":
                         new Champions.Blitzcrank().LoadOKTW();
                         break;
+                    case "Corki":
+                        new Champions.Corki().LoadOKTW();
+                        break;
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
@@ -224,6 +224,12 @@ namespace OneKeyToWin_AIO_Sebby
 
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
+
+
+            if (Config.Item("debug").GetValue<bool>())
+            {
+                new Core.OKTWlab().LoadOKTW();
+            }
             //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
@@ -347,9 +353,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void JunglerTimer()
         {
-
-            
-
             if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
             {
 
@@ -358,7 +361,6 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Config.Item("ro" + enemy.ChampionName) != null && Config.Item("ro" + enemy.ChampionName).GetValue<bool>())
                         jungler = enemy;
                 }
-
 
                 if (jungler.IsDead)
                 {
