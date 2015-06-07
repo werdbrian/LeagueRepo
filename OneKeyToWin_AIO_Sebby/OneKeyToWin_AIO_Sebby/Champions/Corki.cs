@@ -241,9 +241,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     }
                     if (Q.IsReady() && Config.Item("farmQ").GetValue<bool>())
                     {
-                        
+                        var Rfarm = Q.GetCircularFarmLocation(minions, 100);
                         if (Wfarm.MinionsHit > 2)
-                            Q.Cast(Wfarm.Position);
+                            Q.Cast(Rfarm.Position);
                     }
                 }
             }
