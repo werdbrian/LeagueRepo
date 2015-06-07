@@ -30,7 +30,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 1400f);
             R1 = new Spell(SpellSlot.R, 1400f);
 
-            Q1.SetSkillshot(0.25f, 1f, float.MaxValue, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.35f, 1f, float.MaxValue, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.25f, 1400f);
             W.SetSkillshot(0.30f, 80f, 1600f, true, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.1f, 110, 2800, true, SkillshotType.SkillshotLine);
@@ -57,6 +57,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "LaneClear + jungle Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "LaneClear + jungle  W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear + jungle  Mana").SetValue(new Slider(80, 100, 30)));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
             
             Game.OnUpdate += Game_OnGameUpdate;
 
@@ -130,9 +132,9 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
                 
             }
-            if (Program.LagFree(1) && Q.IsReady() && !passRdy && !SpellLock)
+            if (Program.LagFree(1) && Q.IsReady() && !passRdy )
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady() && !passRdy && !SpellLock && Config.Item("autoW").GetValue<bool>())
+            if (Program.LagFree(2) && W.IsReady() && !passRdy && Config.Item("autoW").GetValue<bool>())
                 LogicW();
             if (Program.LagFree(3) && E.IsReady() )
                 LogicE();
@@ -167,33 +169,32 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.Cast(t);
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
                     Q.Cast(t);
-                else if (Program.Farm && Player.Mana > RMANA + QMANA + EMANA + WMANA)
+                else if (Program.Farm && Config.Item("harras" + t.ChampionName).GetValue<bool>() && Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Q.Cast(t);
             }
-            else if ( t1.IsValidTarget(Q1.Range) && Config.Item("harasQ").GetValue<bool>() && Player.Distance(t1.ServerPosition) > Q.Range + 50)
+            else if ((Program.Farm || Program.Combo) && Config.Item("harasQ").GetValue<bool>() && t1.IsValidTarget(Q1.Range) && Config.Item("harras" + t1.ChampionName).GetValue<bool>() && Player.Distance(t1.ServerPosition) > Q.Range + 50)
             {
+                if (Program.Combo && Player.Mana < RMANA + QMANA)
+                    return;
+                if (Program.Farm && Player.Mana > RMANA + QMANA + EMANA + WMANA)
+                    return;
+
                 var prepos = Prediction.GetPrediction(t1, Q1.Delay);
                 var poutput = Q1.GetPrediction(t1);
                 var col = poutput.CollisionObjects;
                 if (col.Count() == 0 || (int)prepos.Hitchance < 5)
                     return;
-                var minionQ = col.First();
-
-                foreach (var minion in col.Where(minion => minion.IsValidTarget(Q.Range)&& minion.Distance(Player.Position) > 400 && minion.Distance(Player.Position) > minionQ.Distance(Player.Position) && Orbwalker.InAutoAttackRange(minion)))
+                var distance = Player.Distance(poutput.CastPosition);
+                var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
-                    minionQ = minion;
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, 100, System.Drawing.Color.Aqua, 1);
+                    if (poutput.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 20)
+                    {
+                        Q.Cast(minion);
+                        return;
+                    }
                 }
 
-                if (minionQ.IsValidTarget(Q.Range) && minionQ.Distance(poutput.CastPosition) > 100)
-                {
-                    if (Q.GetDamage(t1) + Player.GetAutoAttackDamage(t1) > t1.Health)
-                        Q.Cast(minionQ);
-                    else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA)
-                        Q.Cast(minionQ);
-                    else if (Program.Combo && Player.Mana > RMANA + QMANA + QMANA)
-                        Q.Cast(minionQ);
-                }
             }
         }
         private void LogicW()
@@ -260,7 +261,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Game.CursorPos.Distance(Player.Position) > Player.AttackRange + Player.BoundingRadius * 2 && Program.Combo && Config.Item("nktdE").GetValue<bool>() && Player.Mana > RMANA + EMANA - 10)
             {
-                if (!passRdy && !SpellLock)
+                if (!passRdy)
                     E.Cast(Game.CursorPos);
                 else if (!Orbwalker.GetTarget().IsValidTarget())
                     E.Cast(Game.CursorPos);
