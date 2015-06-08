@@ -104,7 +104,8 @@ namespace OneKeyToWin_AIO_Sebby
                 if (args.SData.Name == "LucianW" || args.SData.Name == "LucianE" || args.SData.Name == "LucianQ")
                 {
                     passRdy = true;
-                    //Orbwalking.ResetAutoAttackTimer();
+                    if (args.SData.Name == "LucianQ")
+                        Orbwalking.ResetAutoAttackTimer();
                 }
                 else
                     passRdy = false;
@@ -132,9 +133,9 @@ namespace OneKeyToWin_AIO_Sebby
                 SetMana();
                 
             }
-            if (Program.LagFree(1) && Q.IsReady() && !passRdy )
+            if (Program.LagFree(1) && Q.IsReady() && !passRdy && !SpellLock )
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady() && !passRdy && Config.Item("autoW").GetValue<bool>())
+            if (Program.LagFree(2) && W.IsReady() && !passRdy && !SpellLock && Config.Item("autoW").GetValue<bool>())
                 LogicW();
             if (Program.LagFree(3) && E.IsReady() )
                 LogicE();
@@ -261,7 +262,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Game.CursorPos.Distance(Player.Position) > Player.AttackRange + Player.BoundingRadius * 2 && Program.Combo && Config.Item("nktdE").GetValue<bool>() && Player.Mana > RMANA + EMANA - 10)
             {
-                if (!passRdy)
+                if (!passRdy && !SpellLock)
                     E.Cast(Game.CursorPos);
                 else if (!Orbwalker.GetTarget().IsValidTarget())
                     E.Cast(Game.CursorPos);
