@@ -574,10 +574,10 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
-        public static void drawText(string msg, Vector3 Hero, System.Drawing.Color color)
+        public static void drawText(string msg, Vector3 Hero, System.Drawing.Color color, int weight = 0)
         {
             var wts = Drawing.WorldToScreen(Hero);
-            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] + weight, color, msg);
         }
         public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
         {
@@ -600,15 +600,15 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
-                    drawText(" " + timer, Player.Position, System.Drawing.Color.Cyan);
+                    drawText(" " + timer, Player.Position, System.Drawing.Color.Cyan , 100);
                 else if (jungler.IsVisible)
-                    drawText(" " + timer, Player.Position, System.Drawing.Color.GreenYellow);
+                    drawText(" " + timer, Player.Position, System.Drawing.Color.GreenYellow, 100);
                 else
                 {
                     if (timer > 0)
-                        drawText(" " + timer, Player.Position, System.Drawing.Color.Orange);
+                        drawText(" " + timer, Player.Position, System.Drawing.Color.Orange, 100);
                     else
-                        drawText(" " + timer, Player.Position, System.Drawing.Color.Red);
+                        drawText(" " + timer, Player.Position, System.Drawing.Color.Red, 100);
                     if (Game.Time - JungleTime >= 1)
                     {
                         timer = timer - 1;
@@ -626,6 +626,16 @@ namespace OneKeyToWin_AIO_Sebby
             float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
             float positionDraw = 0;
             float positionGang = 500;
+
+
+            int Width = 103;
+            int Height = 8;
+            int XOffset = 10;
+            int YOffset = 20;
+
+            var FillColor = System.Drawing.Color.GreenYellow;
+            var Color = System.Drawing.Color.Azure;
+
             foreach (var enemy in Enemies)
             {
 
@@ -637,16 +647,10 @@ namespace OneKeyToWin_AIO_Sebby
                     List<Vector2> waypoints = enemy.GetWaypoints();
                     Utility.DrawCircle(waypoints.Last<Vector2>().To3D(), 30, System.Drawing.Color.Orange, 1, 1);
                 }
-                
-                if (HpBar && enemy.IsHPBarRendered)
-                {
-                    int Width = 103;
-                    int Height = 8;
-                    int XOffset = 10;
-                    int YOffset = 20;
 
-                    var FillColor = System.Drawing.Color.GreenYellow;
-                    var Color = System.Drawing.Color.Azure;
+                if (HpBar && enemy.IsHPBarRendered && Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
+                {
+                    
                     var barPos = enemy.HPBarPosition;
 
                     float QdmgDraw = 0, WdmgDraw = 0, EdmgDraw = 0, RdmgDraw = 0, damage = 0; ;
