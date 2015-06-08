@@ -17,13 +17,11 @@ namespace OneKeyToWin_AIO_Sebby
         public float QMANA, WMANA, EMANA, RMANA;
 
         private int count = 0 , countE = 0;
+        private float grabTime = Game.Time;
 
         private static Obj_AI_Hero AllyR;
 
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
         {
@@ -46,14 +44,20 @@ namespace OneKeyToWin_AIO_Sebby
         }
 
 
-        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+
+
             if (sender.IsMe)
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
                 {
                     Orbwalking.ResetAutoAttackTimer();
                 }
+            }
+            if (R.IsReady() && sender.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(sender.Position) < R.Range && Player.Distance(sender.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
+            {
+                grabTime = Game.Time;
             }
         }
 
@@ -72,7 +76,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("balista", "Balista R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Balista Config").AddItem(new MenuItem("balista", "Balista R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Balista Config").AddItem(new MenuItem("rangeBalista", "Balista min range").SetValue(new Slider(3000, 1400, 0)));
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -83,59 +88,9 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Q.IsReady() && Target.IsValidTarget(Q.Range) )
                     Q.Cast(Target, true);
             }
-            
         }
 
-        private void Drawing_OnDraw(EventArgs args)
-        {
-
-            foreach (var enemy in Program.Enemies.Where(target => target.IsValidTarget(E.Range + 500) && target.IsEnemy ))
-            {
-                float hp = enemy.Health - E.GetDamage(enemy);
-                int stack = GetRStacks(enemy);
-                float dmg = (float)Player.GetAutoAttackDamage(enemy) * 2f;
-                if (stack > 0)
-                    dmg = (float)Player.GetAutoAttackDamage(enemy) + (E.GetDamage(enemy) / (float)stack);
-                
-                if (hp >0)
-                    drawText((int)((hp/dmg) + 1) + "hit", enemy, System.Drawing.Color.GreenYellow);
-                else
-                    drawText("KILL E", enemy, System.Drawing.Color.Red);
-            }
-
-            if (Config.Item("qRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (Q.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-            }
-            
-            if (Config.Item("eRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (E.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
-            }
-            if (Config.Item("rRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (R.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
-            }
-        }
-
+        
 
         public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
         {
@@ -145,15 +100,17 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
-            if ( Config.Item("balista").GetValue<bool>() && AllyR != null && AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range && AllyR.ChampionName == "Blitzcrank")
+            if (R.IsReady() && Config.Item("balista").GetValue<bool>() && AllyR != null && AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range && AllyR.ChampionName == "Blitzcrank" && Player.Distance(AllyR.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
             {
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget() && !enemy.IsDead && enemy.HasBuff("rocketgrab2")))
                 {
                     Program.debug("Activ");
                     R.Cast();
                 }
+                if (Game.Time - grabTime < 1)
+                    return;
             }
-
+            
             if (Program.LagFree(0))
             {
                 SetMana();
@@ -351,5 +308,55 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = 0;
             }
         }
+        private void Drawing_OnDraw(EventArgs args)
+        {
+
+            foreach (var enemy in Program.Enemies.Where(target => target.IsValidTarget(E.Range + 500) && target.IsEnemy))
+            {
+                float hp = enemy.Health - E.GetDamage(enemy);
+                int stack = GetRStacks(enemy);
+                float dmg = (float)Player.GetAutoAttackDamage(enemy) * 2f;
+                if (stack > 0)
+                    dmg = (float)Player.GetAutoAttackDamage(enemy) + (E.GetDamage(enemy) / (float)stack);
+
+                if (hp > 0)
+                    drawText((int)((hp / dmg) + 1) + "hit", enemy, System.Drawing.Color.GreenYellow);
+                else
+                    drawText("KILL E", enemy, System.Drawing.Color.Red);
+            }
+
+            if (Config.Item("qRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (Q.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+            }
+            if (Config.Item("rRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+            }
+        }
+
     }
 }
