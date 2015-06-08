@@ -27,8 +27,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q = new Spell(SpellSlot.Q, 825);
             W = new Spell(SpellSlot.W, 800);
             E = new Spell(SpellSlot.E, 800);
-            R2 = new Spell(SpellSlot.R, 1300);
-            R1 = new Spell(SpellSlot.R, 1500);
+            R2 = new Spell(SpellSlot.R, 1250);
+            R1 = new Spell(SpellSlot.R, 1400);
 
 
             Q.SetSkillshot(0.25f, 150f, 900f, false, SkillshotType.SkillshotCircle);
@@ -190,9 +190,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var rDmg = R1.GetDamage(t);
                 if (qDmg > t.Health)
                     Q.Cast(t);
-                else if (rDmg + qDmg > t.Health && ObjectManager.Player.Mana > RMANA + QMANA)
+                else if (rDmg + qDmg > t.Health && Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
-                else if (rDmg + 2 * qDmg > t.Health && ObjectManager.Player.Mana > QMANA + RMANA * 2)
+                else if (rDmg + 2 * qDmg > t.Health && Player.Mana > QMANA + RMANA * 2)
                     Program.CastSpell(Q, t);
                 else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
