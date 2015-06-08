@@ -30,7 +30,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R2 = new Spell(SpellSlot.R, 1250);
             R1 = new Spell(SpellSlot.R, 1400);
 
-
             Q.SetSkillshot(0.25f, 150f, 900f, false, SkillshotType.SkillshotCircle);
 
             R2.SetSkillshot(0.2f, 40f, 2000f, true, SkillshotType.SkillshotLine);

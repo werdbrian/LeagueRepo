@@ -627,7 +627,6 @@ namespace OneKeyToWin_AIO_Sebby
             float positionDraw = 0;
             float positionGang = 500;
 
-
             int Width = 103;
             int Height = 8;
             int XOffset = 10;
