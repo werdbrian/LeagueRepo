@@ -501,7 +501,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 List<Vector2> waypoints = target.GetWaypoints();
 
-                if (target.IsWindingUp && target.Distance(waypoints.Last<Vector2>().To3D()) < fixRange)
+                if (target.IsWindingUp || target.Distance(waypoints.Last<Vector2>().To3D()) < fixRange)
                 {
                     debug("return 1");
                     return;
