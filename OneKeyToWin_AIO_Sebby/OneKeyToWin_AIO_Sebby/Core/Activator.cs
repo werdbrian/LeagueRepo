@@ -17,10 +17,10 @@ namespace OneKeyToWin_AIO_Sebby
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+        public int Muramana = 3042;
+        public int Manamune = 3004;
 
         public static Items.Item
-
-
 
             //Cleans
             Mikaels = new Items.Item(3222, 600f),
@@ -39,13 +39,9 @@ namespace OneKeyToWin_AIO_Sebby
             Hydra = new Items.Item(3144, 440f),
             Hydra2 = new Items.Item(3144, 440f);
 
-
-
         public void LoadOKTW()
         {
-            Game.OnUpdate += Game_OnGameUpdate;
-            //Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
-            //Drawing.OnDraw += Drawing_OnDraw;
+
             Config.SubMenu("Activator").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
@@ -62,6 +58,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
+
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Muramana").AddItem(new MenuItem("Muramana", "Muramana").SetValue(true));
             // CLEANSERS 
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
@@ -75,6 +73,27 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Fear", "Fear").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Suppression", "Suppression").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Taunt", "Taunt").SetValue(true));
+
+            Game.OnUpdate += Game_OnGameUpdate;
+            Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+            //Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+
+
+            if (Config.Item("Muramana").GetValue<bool>())
+            {
+                int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
+                if (args.Target.IsEnemy && args.Target.IsValid<Obj_AI_Hero>() && Items.HasItem(Mur) && Items.CanUseItem(Mur) && Player.Mana > Player.MaxMana * 0.3)
+                {
+                    if (!ObjectManager.Player.HasBuff("Muramana"))
+                        Items.UseItem(Mur);
+                }
+                else if (ObjectManager.Player.HasBuff("Muramana") && Items.HasItem(Mur) && Items.CanUseItem(Mur))
+                    Items.UseItem(Mur);
+            }
         }
 
         private void Game_OnGameUpdate(EventArgs args)
