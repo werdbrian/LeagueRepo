@@ -18,6 +18,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private float QMANA, WMANA, EMANA, RMANA;
 
+        private int grab = 0 , grabS = 0;
+
+        private float grabW = 0;
+
         public Obj_AI_Hero Player {get { return ObjectManager.Player; }}
 
         public void LoadOKTW()
@@ -31,6 +35,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("showgrab", "Show statistics").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
@@ -57,10 +62,23 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+        }
+
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "RocketGrabMissile")
+            {
+                grab++;
+            }
         }
 
         private void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("showgrab").GetValue<bool>() && grab > 0)
+            {
+                Drawing.DrawText(Drawing.Width * 0f, Drawing.Height * 0.4f, System.Drawing.Color.YellowGreen, " grab: " + grab + " grab successful: " + grabS + " grab successful % : " + ((grabS / grab) * 100) + "%");
+            }
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
@@ -103,6 +121,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicR();
             if (Program.LagFree(3) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
                 LogicW();
+
+            if (!Q.IsReady() && Game.Time - grabW > 2)
+            {
+                foreach (var t in Program.Enemies.Where(t => t.HasBuff("rocketgrab2")))
+                {
+                    grabS++;
+                    grabW = Game.Time;
+                }
+            }
         }
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
