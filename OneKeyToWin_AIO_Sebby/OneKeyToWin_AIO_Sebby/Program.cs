@@ -429,9 +429,11 @@ namespace OneKeyToWin_AIO_Sebby
 
             var poutput = QWER.GetPrediction(target);
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
-            
+
             if (col > 0)
+            {
                 return;
+            }
 
             if (target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile)
             {
@@ -449,7 +451,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (target.Path.Count() == 0 && target.Position == target.ServerPosition)
             {
-                debug("notMove" + fixRange);
+                debug("notMove " + fixRange);
                 if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     QWER.Cast(poutput.CastPosition);
 
@@ -460,6 +462,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if ((int)poutput.Hitchance < 5)
                     return;
+
                 var LastWaypiont = target.GetWaypoints().Last().To3D();
 
                 if (LastWaypiont.Distance(Player.ServerPosition) + fixRange <= target.ServerPosition.Distance(Player.ServerPosition))
@@ -481,15 +484,53 @@ namespace OneKeyToWin_AIO_Sebby
                             debug("ignore 2" );
                     }
                     else
-                        debug("ignore 1");
+                        debug("fixed " + fixRange);
                 }
                 else
                 {
                     QWER.Cast(target, true);
-                    debug("good 1");
+                    debug("Run: " + target.BaseSkinName);
                 }
             }
+            else if (HitChanceNum == 3)
+            {
+                if ((int)poutput.Hitchance < 5)
+                    return;
 
+                List<Vector2> waypoints = target.GetWaypoints();
+
+                if ((int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) == 0)
+                    return;
+
+                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
+                float SiteToSite = (BackToFront * 5) - QWER.Width;
+
+                if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
+                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront)
+                    || Player.Distance(target.Position) < SiteToSite + target.BoundingRadius * 2
+                    || Player.Distance(waypoints.Last<Vector2>().To3D()) < BackToFront
+                    || (int)poutput.Hitchance == 6)
+                {
+                    //debug("STS " + (int)SiteToSite + " < " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront);
+                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
+                    {
+                        if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
+                        {
+
+                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        }
+                    }
+                    else
+                    {
+
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                    }
+                }
+                else
+                {
+                    //debug("STS " + (int)SiteToSite + " > " + (int)target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) + " BTF " + (int)Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) + " > " + (int)BackToFront + " ignore");
+                }
+            }
             else if (HitChanceNum == 0)
                 QWER.Cast(target, true);
             else if (HitChanceNum == 1)
@@ -515,31 +556,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-            else if (HitChanceNum == 3)
-            {
-                if ((int)poutput.Hitchance < 5)
-                    return;
-                List<Vector2> waypoints = target.GetWaypoints();
-                float SiteToSite = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed)) * 6 - QWER.Width;
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                if (Player.Distance(waypoints.Last<Vector2>().To3D()) < SiteToSite || Player.Distance(target.Position) < SiteToSite)
-                    QWER.Cast(poutput.CastPosition);
-                else if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront))
-                {
-                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
-                    {
-                        if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
-                        {
-                            QWER.Cast(poutput.CastPosition);
-                        }
-                    }
-                    else
-                    {
-                        QWER.Cast(poutput.CastPosition);
-                    }
-                }
-            }
+            
         }
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
