@@ -90,18 +90,13 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.Cast();
             }
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !FishBoneActive && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + 30)
+            if (Program.LaneClear && !FishBoneActive && Config.Item("farmQ").GetValue<bool>() && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Player.Mana > RMANA + EMANA + WMANA + 30)
             {
-                bool Mana = false;
-                if (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
-                    Mana = true;
+                Program.debug("mana "+ Player.ManaPercent);
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange(), MinionTypes.All);
                 foreach (var minion in allMinionsQ.Where(minion => args.Target.NetworkId != minion.NetworkId && minion.Distance(args.Target.Position) < 200))
                 {
-                    if (minion.Health < Player.GetAutoAttackDamage(minion) * 1.1 )
-                        Q.Cast();
-                    else if (Mana)
-                        Q.Cast();
+                    Q.Cast();
                 }
             }
         }
@@ -122,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            if (Config.Item("opsE").GetValue<bool>() && unit.Team != Player.Team && ShouldUseE(args.SData.Name) && unit.IsValidTarget(E.Range))
+            if (unit.IsEnemy && unit.IsValidTarget(E.Range) && Config.Item("opsE").GetValue<bool>() && ShouldUseE(args.SData.Name))
             {
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
@@ -338,6 +333,7 @@ namespace OneKeyToWin_AIO_Sebby
             foreach (var minion in MinionManager.GetMinions(bonusRange() + 30).Where(
                 minion => !Orbwalking.InAutoAttackRange(minion) && minion.Health < Player.GetAutoAttackDamage(minion) * 1.2 && GetRealPowPowRange(minion) < GetRealDistance(minion) && bonusRange() < GetRealDistance(minion)))
                 {
+                    Orbwalker.ForceTarget(minion);
                     Q.Cast();
                     return;
                 }
