@@ -21,8 +21,8 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             
-            Q = new Spell(SpellSlot.Q, 1220f);
-            Qc = new Spell(SpellSlot.Q, 1200f);
+            Q = new Spell(SpellSlot.Q, 1180f);
+            Qc = new Spell(SpellSlot.Q, 1180f);
             W = new Spell(SpellSlot.W, float.MaxValue);
             E = new Spell(SpellSlot.E, float.MaxValue);
             R = new Spell(SpellSlot.R, 25000f);
@@ -69,12 +69,20 @@ namespace OneKeyToWin_AIO_Sebby
                     W.Cast();
                 else if (Config.Item("farmW").GetValue<bool>() && Program.LaneClear && Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
                     W.Cast();
+                Program.debug("" + WMANA);
             }
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (!E.IsReady() || !sender.IsEnemy)
+                return;
 
+            if (args.SData.Name == "KalistaExpungeWrapper" && Player.HasBuff("kalistaexpungemarker"))
+            {
+                E.Cast();
+            }
+            
             if (!E.IsReady() || args.Target == null || !sender.IsEnemy || !args.Target.IsMe || !sender.IsValid<Obj_AI_Hero>() || args.SData.Name == "TormentedSoil")
                 return;
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
@@ -84,6 +92,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 E.Cast();
             }
+            
         }
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
@@ -137,6 +146,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
+                OktwCommon.WayPointAnalysis(t, Q);
                 var qDmg = Q.GetDamage(t) * 1.9;
                 if (Orbwalking.InAutoAttackRange(t))
                     qDmg = qDmg + Player.GetAutoAttackDamage(t) * 3;
@@ -159,7 +169,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast(enemy, true);
                 }
             }
-            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+            else if (Program.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
             {
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
