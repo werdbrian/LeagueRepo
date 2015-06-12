@@ -46,8 +46,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-
-
             if (sender.IsMe)
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
@@ -213,7 +211,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 
                 if (GetRStacks(target) >= countE
-                    && (GetPassiveTime(target) < 0.5 || Player.Distance(target.ServerPosition) > E.Range - 100 || Player.Health < Player.MaxHealth * 0.4)
+                    && (GetPassiveTime(target) < 0.5 || Player.ServerPosition.Distance(target.ServerPosition) > E.Range - 100 || Player.Health < Player.MaxHealth * 0.4)
                     && Player.Mana > RMANA + QMANA + EMANA + WMANA
                     && Player.CountEnemiesInRange(900) == 0)
                 {
@@ -221,7 +219,7 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
             }
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (count >= Config.Item("farmE").GetValue<Slider>().Value  || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
+            if (Program.LaneClear && (count >= Config.Item("farmE").GetValue<Slider>().Value  || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
             {
                 E.Cast();
                 return;
