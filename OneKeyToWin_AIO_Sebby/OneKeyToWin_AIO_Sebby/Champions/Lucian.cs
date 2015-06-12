@@ -30,7 +30,7 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 1400f);
             R1 = new Spell(SpellSlot.R, 1400f);
 
-            Q1.SetSkillshot(0.35f, 1f, float.MaxValue, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.40f, 10f, float.MaxValue, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.25f, 1400f);
             W.SetSkillshot(0.30f, 80f, 1600f, true, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.1f, 110, 2800, true, SkillshotType.SkillshotLine);
@@ -173,23 +173,23 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (Program.Farm && Config.Item("harras" + t.ChampionName).GetValue<bool>() && Player.Mana > RMANA + QMANA + EMANA + WMANA)
                     Q.Cast(t);
             }
-            else if ((Program.Farm || Program.Combo) && Config.Item("harasQ").GetValue<bool>() && t1.IsValidTarget(Q1.Range) && Config.Item("harras" + t1.ChampionName).GetValue<bool>() && Player.Distance(t1.ServerPosition) > Q.Range + 50)
+            else if ((Program.Farm || Program.Combo) && Config.Item("harasQ").GetValue<bool>() && t1.IsValidTarget(Q1.Range) && Config.Item("harras" + t1.ChampionName).GetValue<bool>() && Player.Distance(t1.ServerPosition) > Q.Range + 100)
             {
                 if (Program.Combo && Player.Mana < RMANA + QMANA)
                     return;
-                if (Program.Farm && Player.Mana > RMANA + QMANA + EMANA + WMANA)
+                if (Program.Farm && Player.Mana < RMANA + QMANA + EMANA + WMANA)
                     return;
-
-                var prepos = Prediction.GetPrediction(t1, Q1.Delay);
-                var poutput = Q1.GetPrediction(t1);
-                var col = poutput.CollisionObjects;
-                if (col.Count() == 0 || (int)prepos.Hitchance < 5)
+                Program.debug("enter");
+                var prepos = Prediction.GetPrediction(t1, Q1.Delay); 
+                if ((int)prepos.Hitchance < 5)
                     return;
-                var distance = Player.Distance(poutput.CastPosition);
+                var distance = Player.Distance(prepos.CastPosition);
                 var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                Render.Circle.DrawCircle(prepos.CastPosition, 100, System.Drawing.Color.Cyan, 10);
+
                 foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
-                    if (poutput.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 20)
+                    if (prepos.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 15)
                     {
                         Q.Cast(minion);
                         return;
@@ -299,7 +299,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
 
-                if (!Orbwalking.CanAttack() && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
+                if (Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value)
                 {
                     var minions = MinionManager.GetMinions(Player.ServerPosition, Q1.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
                     if (Q.IsReady() && Config.Item("farmQ").GetValue<bool>())
@@ -308,6 +308,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             var poutput = Q1.GetPrediction(minion);
                             var col = poutput.CollisionObjects;
+                            Program.debug("" + col.Count());
                             if (col.Count() > 2)
                             {
                                 var minionQ = col.First();
