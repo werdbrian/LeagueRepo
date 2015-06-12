@@ -24,13 +24,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 825);
+            Q = new Spell(SpellSlot.Q, 850);
             W = new Spell(SpellSlot.W, 800);
             E = new Spell(SpellSlot.E, 800);
             R2 = new Spell(SpellSlot.R, 1250);
             R1 = new Spell(SpellSlot.R, 1250);
 
-            Q.SetSkillshot(0f, 170f, 900f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0f, 170f, 1000f, false, SkillshotType.SkillshotCircle);
 
             R2.SetSkillshot(0.2f, 40f, 2000f, true, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.2f, 40f, 2000f, true, SkillshotType.SkillshotLine);

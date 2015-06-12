@@ -51,7 +51,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Items.Item WardN = new Items.Item(2044, 600f);
         public static Items.Item TrinketN = new Items.Item(3340, 600f);
         public static Items.Item SightStone = new Items.Item(2049, 600f);
-        
+
 
         static void Main(string[] args)
         {
@@ -71,11 +71,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Supported champions:"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "Annie " ));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("4", "Jinx " ));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal " ));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw " ));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir " ));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "Annie "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("4", "Jinx "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("8", "Ashe "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("9", "Miss Fortune "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("10", "Quinn "));
@@ -103,7 +103,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
-            
+
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
 
             Q = new Spell(SpellSlot.Q);
@@ -192,7 +192,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-                
+
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
@@ -201,7 +201,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - VeryHigh + max range fix + waypionts analyzer"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Prediction Debug").SetValue(false));
-                
+
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -235,19 +235,19 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
-            
+
         }
 
         private static void OnUpdate(EventArgs args)
         {
-            
+
             tickIndex++;
             if (tickIndex > 4)
                 tickIndex = 0;
             if (LagFree(0))
             {
                 HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
-                
+
                 tickSkip = Config.Item("pre").GetValue<bool>();
 
                 JunglerTimer();
@@ -292,7 +292,7 @@ namespace OneKeyToWin_AIO_Sebby
                             E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
                             return;
                         }
-                        
+
                     }
                     if (Player.ChampionName == "MissFortune" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 2 && Combo && Player.Mana > 200f)
                     {
@@ -309,7 +309,7 @@ namespace OneKeyToWin_AIO_Sebby
                             W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
                             return;
                         }
-                        
+
                     }
                     if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.time < 2 && Player.Mana > 200f && !Player.IsWindingUp && Config.Item("bushW").GetValue<bool>())
                     {
@@ -397,13 +397,13 @@ namespace OneKeyToWin_AIO_Sebby
                 return false;
         }
 
-        public static bool Farm{ get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); }}
+        public static bool Farm { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); } }
 
-        public static bool Combo {get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); }}
+        public static bool Combo { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); } }
 
         public static bool LaneClear { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear); } }
 
-        private static bool IsJungler(Obj_AI_Hero hero){ return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite"));}
+        private static bool IsJungler(Obj_AI_Hero hero) { return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite")); }
 
         public static bool ValidUlt(Obj_AI_Hero target)
         {
@@ -424,7 +424,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Base target)
         {
-            if (target.Path.Count() > 1)
+            if (target.Path.Count() > 1 || target.IsWindingUp)
                 return;
 
             var poutput = QWER.GetPrediction(target);
@@ -441,7 +441,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             }
 
-            if ( poutput.Hitchance == HitChance.Dashing && QWER.Delay < 0.30f)
+            if (poutput.Hitchance == HitChance.Dashing && QWER.Delay < 0.30f)
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
@@ -449,15 +449,17 @@ namespace OneKeyToWin_AIO_Sebby
 
             float fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) - (target.BoundingRadius * 2);
 
-            if (target.Path.Count() == 0 && target.Position == target.ServerPosition)
+            if (HitChanceNum == 4 || HitChanceNum == 3)
             {
-                debug("notMove " + fixRange);
-                if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                    QWER.Cast(poutput.CastPosition);
-
-                return; 
+                if (target.Path.Count() == 0 && target.Position == target.ServerPosition  && (int)poutput.Hitchance > 4)
+                {
+                    debug("notMove " + fixRange);
+                    return;
+                    if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
+                        QWER.Cast(target);
+                    
+                }
             }
-
             if (HitChanceNum == 4)
             {
                 if ((int)poutput.Hitchance < 5)
@@ -481,7 +483,7 @@ namespace OneKeyToWin_AIO_Sebby
                             debug("good 2");
                         }
                         else
-                            debug("ignore 2" );
+                            debug("ignore 2");
                     }
                     else
                         debug("fixed " + fixRange);
@@ -556,19 +558,19 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-            
+
         }
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
         {
-            
+
             var unit = sender as Obj_AI_Hero;
 
             if (unit == null || !unit.IsValid || unit.IsAlly)
                 return;
 
             var recall = Packet.S2C.Teleport.Decoded(unit, args);
-            
+
             if (recall.Type == Packet.S2C.Teleport.Type.Recall)
             {
                 switch (recall.Status)
@@ -618,11 +620,11 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-            
+
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
-                    drawText(" " + timer, Player.Position, System.Drawing.Color.Cyan , 100);
+                    drawText(" " + timer, Player.Position, System.Drawing.Color.Cyan, 100);
                 else if (jungler.IsVisible)
                     drawText(" " + timer, Player.Position, System.Drawing.Color.GreenYellow, 100);
                 else
@@ -669,7 +671,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (HpBar && enemy.IsHPBarRendered && Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
                 {
-                    
+
                     var barPos = enemy.HPBarPosition;
 
                     float QdmgDraw = 0, WdmgDraw = 0, EdmgDraw = 0, RdmgDraw = 0, damage = 0; ;
@@ -756,10 +758,10 @@ namespace OneKeyToWin_AIO_Sebby
 
                     if (ShowKDA)
                         Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
-                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName );
+                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName);
 
                     Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
-                    
+
                 }
                 var Distance = Player.Distance(enemy.Position);
                 if (GankAlert && !enemy.IsDead && Distance > 1200)
@@ -770,9 +772,9 @@ namespace OneKeyToWin_AIO_Sebby
                     wts[0] = wts[0] - (enemy.ChampionName.Count<char>()) * 5;
                     wts[1] = wts[1] + 15;
                     if ((int)enemy.HealthPercent > 0)
-                        Drawing.DrawLine(wts[0], wts[1] , (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
+                        Drawing.DrawLine(wts[0], wts[1], (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
                     if ((int)enemy.HealthPercent < 100)
-                        Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1] , wts[0] + 50, wts[1] , 12, System.Drawing.Color.White);
+                        Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 12, System.Drawing.Color.White);
                     if (Distance > 3500 && enemy.IsVisible)
                         drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
                     else if (!enemy.IsVisible)
@@ -782,7 +784,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                     {
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
-                        
+
                     }
 
                 }

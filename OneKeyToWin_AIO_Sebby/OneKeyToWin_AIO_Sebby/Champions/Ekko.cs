@@ -33,8 +33,6 @@ namespace OneKeyToWin_AIO_Sebby
             W.SetSkillshot(2.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.6f, 375f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-
-
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
@@ -91,7 +89,6 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (Program.LagFree(4) && R.IsReady() )
                 LogicR();
-
         }
 
         private void LogicR()

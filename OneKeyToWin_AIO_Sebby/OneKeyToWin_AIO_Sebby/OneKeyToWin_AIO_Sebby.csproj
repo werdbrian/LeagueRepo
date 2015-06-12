@@ -72,6 +72,7 @@
     <Compile Include="Core\AfkMode.cs" />
     <Compile Include="Core\OktwCommon.cs" />
     <Compile Include="Core\OKTWlab.cs" />
+    <Compile Include="Core\PredictionOktw.cs" />
     <Compile Include="Core\Summoners.cs" />
     <Compile Include="Champions\MissFortune.cs" />
     <Compile Include="Champions\Orianna.cs" />

@@ -103,5 +103,22 @@ namespace OneKeyToWin_AIO_Sebby
             }
             return collision;
         }
+        public static int WayPointAnalysis(Obj_AI_Base unit , Spell QWER)
+        {
+            int HC = 0;
+
+            if (QWER.Delay < 0.25f)
+                HC = 2;
+            else
+                HC = 1;
+
+            if (unit.Path.Count() == 1)
+                HC = 2;
+            
+
+
+            return HC;
+
+        }
     }
 }
