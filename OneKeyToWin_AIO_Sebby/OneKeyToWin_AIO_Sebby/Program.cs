@@ -502,22 +502,22 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (tryAA && target.IsWindingUp)
                 {
-                    debug("IsWinding: ");
+                    
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
                         if (FastMode)
                             QWER.Cast(poutput.CastPosition);
                         else
-                            QWER.Cast(target);
-
-                        return;
+                            QWER.Cast(target);                        
                     }
+                    debug("IsWinding: ");
+                    return;
                 }
 
 
                 if (target.Path.Count() == 0 && target.Position == target.ServerPosition )
                 {
-                    debug("notMove IsWinding: ");
+                    
 
                     if (IgnoreNoMove)
                         return;
@@ -528,9 +528,10 @@ namespace OneKeyToWin_AIO_Sebby
                             QWER.Cast(poutput.CastPosition);
                         else
                             QWER.Cast(target);
-
-                        return;
                     }
+                    
+                    debug("NotMove");
+                    return;
                 }
 
                 var LastWaypiont = target.GetWaypoints().Last().To3D();
@@ -542,7 +543,7 @@ namespace OneKeyToWin_AIO_Sebby
                     else
                         QWER.Cast(target);
 
-                    debug("Run: " + target.BaseSkinName);
+                    debug("Run" );
                 }
                 else if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                 {
