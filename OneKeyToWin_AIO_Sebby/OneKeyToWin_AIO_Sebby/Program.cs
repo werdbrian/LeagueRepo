@@ -448,7 +448,7 @@ namespace OneKeyToWin_AIO_Sebby
             var poutput = QWER.GetPrediction(target);
             if (ColFix  && HitChanceNum == 4)
             {
-                if (QWER.Collision && !OktwCommon.GetCollision(target, QWER, false, true))
+                if (QWER.Collision && OktwCommon.GetCollision(target, QWER, false, true))
                     return;
             }
             else
@@ -481,6 +481,8 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (HitChanceNum == 4)
             {
+
+                
                 if (NewWay && (int)poutput.Hitchance < 6)
                     return;
                 
@@ -494,9 +496,24 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     fixRange = 0;
 
-                if (target.Path.Count() == 0 && target.Position == target.ServerPosition)
+                if (target.IsWindingUp)
                 {
-                    debug("notMove " + fixRange);
+                    debug("IsWinding: ");
+                    if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
+                    {
+                        if (FastMode)
+                            QWER.Cast(poutput.CastPosition);
+                        else
+                            QWER.Cast(target);
+
+                        return;
+                    }
+                }
+
+
+                if (target.Path.Count() == 0 && target.Position == target.ServerPosition )
+                {
+                    debug("notMove IsWinding: ");
 
                     if (IgnoreNoMove)
                         return;

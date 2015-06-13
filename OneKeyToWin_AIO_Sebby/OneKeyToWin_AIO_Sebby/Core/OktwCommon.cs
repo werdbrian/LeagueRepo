@@ -80,7 +80,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Vector3 pb = ObjectManager.Player.ServerPosition + ((float)b * v);
                     float length = Vector3.Distance(predictedPosition, pb);
                     if (length < QWER.Width )
-                        return false;
+                        return true;
                 }
             }
             if (minion)
@@ -98,10 +98,10 @@ namespace OneKeyToWin_AIO_Sebby
                     Vector3 pb = ObjectManager.Player.ServerPosition + ((float)b * v);
                     float length = Vector3.Distance(predictedPosition, pb);
                     if (length < QWER.Width)
-                        return false;
+                        return true;
                 }
             }
-            return true;
+            return false;
         }
         public static int WayPointAnalysis(Obj_AI_Base unit , Spell QWER)
         {
