@@ -59,7 +59,7 @@ namespace OneKeyToWin_AIO_Sebby
             return points;
         }
 
-        public static int GetCollision(Obj_AI_Base target, Spell QWER, bool champion, bool minion)
+        public static bool GetCollision(Obj_AI_Base target, Spell QWER, bool champion, bool minion)
         {
             var rDmg = QWER.GetDamage(target);
             int collision = 0;
@@ -79,8 +79,8 @@ namespace OneKeyToWin_AIO_Sebby
                     double b = c1 / c2;
                     Vector3 pb = ObjectManager.Player.ServerPosition + ((float)b * v);
                     float length = Vector3.Distance(predictedPosition, pb);
-                    if (length < QWER.Width + enemy.BoundingRadius * 2)
-                        collision++;
+                    if (length < QWER.Width )
+                        return false;
                 }
             }
             if (minion)
@@ -97,11 +97,11 @@ namespace OneKeyToWin_AIO_Sebby
                     double b = c1 / c2;
                     Vector3 pb = ObjectManager.Player.ServerPosition + ((float)b * v);
                     float length = Vector3.Distance(predictedPosition, pb);
-                    if (length < QWER.Width + enemy.BoundingRadius * 2)
-                        collision++;
+                    if (length < QWER.Width)
+                        return false;
                 }
             }
-            return collision;
+            return true;
         }
         public static int WayPointAnalysis(Obj_AI_Base unit , Spell QWER)
         {
