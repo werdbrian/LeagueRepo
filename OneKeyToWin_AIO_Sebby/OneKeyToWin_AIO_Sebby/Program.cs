@@ -205,17 +205,17 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
 
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction").AddItem(new MenuItem("debugPred", "Show enemy clicks and HitChance num").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction").AddItem(new MenuItem("IgnoreNoMove", "Ignore Not-Moving targets").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction").AddItem(new MenuItem("RangeFix", "MaxRange Fix").SetValue(true));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction").AddItem(new MenuItem("FastMode", "Fast Cast Mode").SetValue(true));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction").AddItem(new MenuItem("ColFix", "Custome Collision(can drop fps)").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction").AddItem(new MenuItem("NewWay", "Cast only on new pathway").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "Show enemy clicks and HitChance num").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "Ignore Not-Moving targets").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "MaxRange Fix").SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "Fast Cast Mode").SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "Custome Collision(can drop fps)").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "Cast only on new pathway").SetValue(false));
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer "));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - Custome Prediction"));
 
 
