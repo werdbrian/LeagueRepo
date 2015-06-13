@@ -485,13 +485,11 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (HitChanceNum == 4)
             {
-
-                
-                if (NewWay && (int)poutput.Hitchance < 6)
-                    return;
-                
                 if ((int)poutput.Hitchance < 5)
                     return;
+
+                if (NewWay && (int)poutput.Hitchance < 6)
+                    return;             
 
                 float fixRange;
                 
@@ -536,7 +534,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 var LastWaypiont = target.GetWaypoints().Last().To3D();
 
-                if (target.ServerPosition.Distance(Player.ServerPosition) < LastWaypiont.Distance(Player.ServerPosition) - target.MoveSpeed)
+                if (target.ServerPosition.Distance(Player.ServerPosition) < LastWaypiont.Distance(Player.ServerPosition) - fixRange)
                 {
                     if (FastMode)
                         QWER.Cast(poutput.CastPosition);
