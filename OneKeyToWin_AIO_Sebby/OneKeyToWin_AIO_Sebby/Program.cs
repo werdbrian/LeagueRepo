@@ -45,6 +45,7 @@ namespace OneKeyToWin_AIO_Sebby
             FastMode = true,
             ColFix = true,
             NewWay = true,
+            tryAA = true,
             IgnoreNoMove = true;
 
 
@@ -211,6 +212,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "Fast Cast Mode").SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "Custome Collision(can drop fps)").SetValue(false));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "Cast only on new pathway").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "Cast if target autoattacking ").SetValue(true));
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
@@ -269,6 +271,8 @@ namespace OneKeyToWin_AIO_Sebby
                 FastMode = Config.Item("FastMode").GetValue<bool>();
                 ColFix = Config.Item("ColFix").GetValue<bool>();
                 NewWay = Config.Item("NewWay").GetValue<bool>();
+                tryAA = Config.Item("tryAA").GetValue<bool>();
+
                 JunglerTimer();
                 if (!Player.IsRecalling())
                     AutoWard();
@@ -496,7 +500,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     fixRange = 0;
 
-                if (target.IsWindingUp)
+                if (tryAA && target.IsWindingUp)
                 {
                     debug("IsWinding: ");
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
