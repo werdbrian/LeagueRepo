@@ -49,7 +49,7 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 2500);
             R = new Spell(SpellSlot.R, 3000f);
 
-            W.SetSkillshot(0.25f, 50f , 1100f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.25f, 50f , 1200f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 299f, 1400f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.25f, 130f, 1600f, false, SkillshotType.SkillshotLine);
             LoadMenuOKTW();
