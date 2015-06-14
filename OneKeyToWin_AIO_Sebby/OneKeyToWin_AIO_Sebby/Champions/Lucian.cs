@@ -189,7 +189,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
-                    if (prepos.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 20)
+                    if (prepos.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 25)
                     {
                         Q.Cast(minion);
                         return;
