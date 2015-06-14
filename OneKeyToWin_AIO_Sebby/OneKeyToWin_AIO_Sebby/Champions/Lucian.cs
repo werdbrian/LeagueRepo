@@ -179,17 +179,17 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 if (Program.Farm && Player.Mana < RMANA + QMANA + EMANA + WMANA)
                     return;
-                Program.debug("enter");
+                
                 var prepos = Prediction.GetPrediction(t1, Q1.Delay); 
                 if ((int)prepos.Hitchance < 5)
                     return;
                 var distance = Player.Distance(prepos.CastPosition);
                 var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-                Render.Circle.DrawCircle(prepos.CastPosition, 100, System.Drawing.Color.Cyan, 10);
+                
 
                 foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
-                    if (prepos.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 15)
+                    if (prepos.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 20)
                     {
                         Q.Cast(minion);
                         return;
