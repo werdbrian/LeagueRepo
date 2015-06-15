@@ -103,6 +103,17 @@ namespace OneKeyToWin_AIO_Sebby
             }
             return false;
         }
+
+        public static int GetBuffCount(Obj_AI_Base target, String buffName)
+        {
+            foreach (var buff in target.Buffs)
+            {
+                if (buff.Name == buffName)
+                    return buff.Count;
+            }
+            return 0;
+        }
+
         public static int WayPointAnalysis(Obj_AI_Base unit , Spell QWER)
         {
             int HC = 0;

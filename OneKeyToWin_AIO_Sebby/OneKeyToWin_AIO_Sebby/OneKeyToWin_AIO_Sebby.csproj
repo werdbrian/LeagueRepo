@@ -57,6 +57,7 @@
     <Compile Include="Champions\Blitzcrank.cs" />
     <Compile Include="Champions\Corki.cs" />
     <Compile Include="Champions\Darius.cs" />
+    <Compile Include="Champions\Varus.cs" />
     <Compile Include="Champions\Vayne.cs" />
     <Compile Include="Core\Activator.cs" />
     <Compile Include="Champions\Anivia.cs" />

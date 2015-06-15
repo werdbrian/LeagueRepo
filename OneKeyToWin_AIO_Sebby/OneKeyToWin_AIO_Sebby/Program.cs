@@ -93,12 +93,12 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("12", "Urgot "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("13", "Orianna "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Caitlyn "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Anivia "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("15", "Darius "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("16", "Corki "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("16", "Vayne "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("17", "Lucian "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("17", "Ekko "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("15", "Anivia "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("16", "Darius "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("17", "Corki "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("18", "Vayne "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("19", "Lucian "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("20", "Ekko "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
 
@@ -201,6 +201,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Corki":
                         new Champions.Corki().LoadOKTW();
                         break;
+                    case "Varus":
+                        new Champions.Varus().LoadOKTW();
+                        break;
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
@@ -211,13 +214,13 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
 
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "Show enemy clicks and HitChance num").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "Ignore Not-Moving targets").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "Show enemy clicks and HitChance num").SetValue(false));                
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "MaxRange Fix").SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "Fast Cast Mode").SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "Custome Collision(can drop fps)").SetValue(false));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "Cast only on new pathway").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "Cast if target autoattacking ").SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "Cast if target autoattacking").SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "Ignore Not-Moving targets").SetValue(false));
 
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
@@ -491,6 +494,7 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (HitChanceNum == 4)
             {
+                
                 if ((int)poutput.Hitchance < 5)
                     return;
 
@@ -500,15 +504,16 @@ namespace OneKeyToWin_AIO_Sebby
                 float fixRange;
                 
                 if (RangeFix)
-                    fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) - (target.BoundingRadius * 2);
+                    fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 3;
                 else
                     fixRange = 0;
 
                 if (target.IsWindingUp)
                 {
+                    
                     if (!tryAA)
                         return;
-
+                    debug("IsWinding: ");
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
                         if (FastMode)
@@ -516,16 +521,15 @@ namespace OneKeyToWin_AIO_Sebby
                         else
                             QWER.Cast(target);                        
                     }
-                    debug("IsWinding: ");
+                    
                     return;
                 }
-
-                if (target.Path.Count() == 0 && target.Position == target.ServerPosition )
+                else if (target.Path.Count() == 0 && target.Position == target.ServerPosition )
                 {
-
+                    
                     if (IgnoreNoMove)
                         return;
-
+                    debug("NotMove");
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
                         if (FastMode)
@@ -534,7 +538,7 @@ namespace OneKeyToWin_AIO_Sebby
                             QWER.Cast(target);
                     }
                     
-                    debug("NotMove");
+                    
                     return;
                 }
 
