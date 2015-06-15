@@ -219,6 +219,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "Cast only on new pathway").SetValue(false));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "Cast if target autoattacking ").SetValue(true));
 
+
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
@@ -503,9 +504,11 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     fixRange = 0;
 
-                if (tryAA && target.IsWindingUp)
+                if (target.IsWindingUp)
                 {
-                    
+                    if (!tryAA)
+                        return;
+
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
                         if (FastMode)
@@ -517,10 +520,8 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
 
-
                 if (target.Path.Count() == 0 && target.Position == target.ServerPosition )
                 {
-                    
 
                     if (IgnoreNoMove)
                         return;
