@@ -68,7 +68,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var Target = gapcloser.Sender;
                 if (Target.IsValidTarget(800) && Config.Item("GapCloser" + Target.ChampionName).GetValue<bool>())
                 {
-                    R.CastOnUnit(Target);
+                    R.Cast(Target.ServerPosition, true);
                     Program.debug("AGC " + Target.ChampionName);
                 }
             }
