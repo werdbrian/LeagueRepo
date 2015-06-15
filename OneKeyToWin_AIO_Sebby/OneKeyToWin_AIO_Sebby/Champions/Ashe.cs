@@ -107,7 +107,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("useR").GetValue<KeyBind>().Active)
                 {
-                    var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                    var t = TargetSelector.GetTarget(2000, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
                         R.Cast(t, true, true);
                 }
