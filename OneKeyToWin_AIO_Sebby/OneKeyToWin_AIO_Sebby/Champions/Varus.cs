@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q.SetSkillshot(0.25f, 70, 1900, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.35f, 100, 1500, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120, 1950, true, SkillshotType.SkillshotLine);
-            Q.SetCharged("VarusQ", "VarusQ", 0, 1600, 1.2f);
+            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 1.5f);
 
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
@@ -81,7 +81,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            Program.debug("" + gapcloser.Sender.ChampionName + " " + gapcloser.Sender.NetworkId);
             if (R.IsReady() && Config.Item("GapCloser" + gapcloser.Sender.ChampionName).GetValue<bool>())
             {
                 var Target = gapcloser.Sender;
@@ -114,7 +113,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
-                        R.Cast(t, true, true);
+                        R.Cast(t, true);
                 }
             }
             if (Program.LagFree(0))
@@ -140,9 +139,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
             }
 
-            if (Program.LagFree(1) && E.IsReady()  )
+            if (Program.LagFree(1) && E.IsReady())
                 LogicE();
-            if (Program.LagFree(2) && Q.IsReady() )
+            if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
 
             if (Program.LagFree(4) && R.IsReady())
