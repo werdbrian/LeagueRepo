@@ -94,6 +94,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("13", "Orianna "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Caitlyn "));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Anivia "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("15", "Darius "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("16", "Corki "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("16", "Vayne "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("17", "Lucian "));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("17", "Ekko "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
 
@@ -695,18 +700,19 @@ namespace OneKeyToWin_AIO_Sebby
         private static void OnDraw(EventArgs args)
         {
 
+
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler.IsDead)
-                    drawText(" " + timer, Player.Position, System.Drawing.Color.Cyan, 100);
+                    drawText("Jungler dead " + timer, Player.Position, System.Drawing.Color.Cyan, 100);
                 else if (jungler.IsVisible)
-                    drawText(" " + timer, Player.Position, System.Drawing.Color.GreenYellow, 100);
+                    drawText("Jungler visable " + timer, Player.Position, System.Drawing.Color.GreenYellow, 100);
                 else
                 {
                     if (timer > 0)
-                        drawText(" " + timer, Player.Position, System.Drawing.Color.Orange, 100);
+                        drawText("Jungler in jungle " + timer, Player.Position, System.Drawing.Color.Orange, 100);
                     else
-                        drawText(" " + timer, Player.Position, System.Drawing.Color.Red, 100);
+                        drawText("Be careful " + timer, Player.Position, System.Drawing.Color.Red, 100);
                     if (Game.Time - JungleTime >= 1)
                     {
                         timer = timer - 1;
