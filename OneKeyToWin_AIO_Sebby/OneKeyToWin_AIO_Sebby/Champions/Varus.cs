@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q.SetSkillshot(0.25f, 70, 1900, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.35f, 120, 1500, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120, 1950, true, SkillshotType.SkillshotLine);
-            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 1.5f);
+            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 1.6f);
 
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
@@ -207,7 +207,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) ))
             {
 
-                if (enemy.CountEnemiesInRange(400) >= Config.Item("rCount").GetValue<Slider>().Value && Config.Item("rCount").GetValue<Slider>().Value > 0)
+                if (enemy.CountEnemiesInRange(400) >= Config.Item("rCount").GetValue<Slider>().Value && Config.Item("rCount").GetValue<Slider>().Value > 0 )
                 {
                     R.Cast(enemy, true, true);
                     Program.debug("R AOE");
@@ -255,7 +255,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                 if ((OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && CanCast && !E.IsReady()) || !Orbwalking.InAutoAttackRange(t))
                 {
-                    if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    if ((Program.Combo || (OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && Program.Farm)) && Player.Mana > RMANA + QMANA)
                     {
                         CastQ(t);
                     }
