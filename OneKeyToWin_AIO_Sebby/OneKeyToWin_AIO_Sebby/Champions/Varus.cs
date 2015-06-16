@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q.SetSkillshot(0.25f, 70, 1900, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.35f, 120, 1500, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120, 1950, true, SkillshotType.SkillshotLine);
-            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 2.2f);
+            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 2.0f);
 
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
@@ -316,7 +316,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (!Q.IsCharging)
             {
-                if (target.IsValidTarget(Q.Range - 200))
+                if (target.IsValidTarget(Q.Range - 300))
                     Q.StartCharging();
             }
             else
