@@ -212,15 +212,15 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
 
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©").SetValue(new Slider(4, 4, 0)));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
 
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "Show enemy clicks and HitChance num").SetValue(false));                
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "MaxRange Fix").SetValue(true));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "Fast Cast Mode").SetValue(true));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "Custome Collision(can drop fps)").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "Cast only on new pathway").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "Cast if target autoattacking").SetValue(true));
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "Ignore Not-Moving targets").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "0 Show enemy clicks and HitChance num").SetValue(false));                
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix",true).SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "3 Custome Collision(can drop fps)", true).SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "4 Cast only on new pathway", true).SetValue(false));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "5 Cast if target autoattacking", true).SetValue(true));
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "6 Ignore Not-Moving targets", true).SetValue(false));
 
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
@@ -273,14 +273,14 @@ namespace OneKeyToWin_AIO_Sebby
                 tickIndex = 0;
             if (LagFree(0))
             {
-                HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
-                IgnoreNoMove = Config.Item("IgnoreNoMove").GetValue<bool>();
                 tickSkip = Config.Item("pre").GetValue<bool>();
-                RangeFix = Config.Item("RangeFix").GetValue<bool>();
-                FastMode = Config.Item("FastMode").GetValue<bool>();
-                ColFix = Config.Item("ColFix").GetValue<bool>();
-                NewWay = Config.Item("NewWay").GetValue<bool>();
-                tryAA = Config.Item("tryAA").GetValue<bool>();
+                HitChanceNum = Config.Item("Hit", true).GetValue<Slider>().Value;
+                IgnoreNoMove = Config.Item("IgnoreNoMove", true).GetValue<bool>();
+                RangeFix = Config.Item("RangeFix", true).GetValue<bool>();
+                FastMode = Config.Item("FastMode", true).GetValue<bool>();
+                ColFix = Config.Item("ColFix", true).GetValue<bool>();
+                NewWay = Config.Item("NewWay", true).GetValue<bool>();
+                tryAA = Config.Item("tryAA", true).GetValue<bool>();
 
                 JunglerTimer();
                 if (!Player.IsRecalling())
