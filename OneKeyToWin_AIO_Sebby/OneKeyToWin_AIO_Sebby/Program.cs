@@ -120,6 +120,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
+            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
 
             Q = new Spell(SpellSlot.Q);
             E = new Spell(SpellSlot.E);
@@ -745,6 +746,7 @@ namespace OneKeyToWin_AIO_Sebby
             var championInfo = Config.Item("championInfo").GetValue<bool>();
             var GankAlert = Config.Item("GankAlert").GetValue<bool>();
             var ShowKDA = Config.Item("ShowKDA").GetValue<bool>();
+            var ShowClicks = Config.Item("ShowClicks").GetValue<bool>();
             float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
             float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
             float positionDraw = 0;
@@ -760,13 +762,19 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var enemy in Enemies)
             {
-                if (debugPred && enemy.IsValidTarget())
+                if (enemy.IsValidTarget())
                 {
-                    var prepos = Prediction.GetPrediction(enemy, 0.5f);
-                    drawText("" + (int)prepos.Hitchance, enemy.Position, System.Drawing.Color.GreenYellow);
-
-                    List<Vector2> waypoints = enemy.GetWaypoints();
-                    Utility.DrawCircle(waypoints.Last<Vector2>().To3D(), 30, System.Drawing.Color.Orange, 1, 1);
+                    if (debugPred)
+                    {
+                        var prepos = Prediction.GetPrediction(enemy, 0.5f);
+                        drawText("" + (int)prepos.Hitchance, enemy.Position, System.Drawing.Color.Aqua);
+                    }
+                    if (ShowClicks)
+                    {
+                        List<Vector2> waypoints = enemy.GetWaypoints();
+                        drawLine(enemy.Position, waypoints.Last<Vector2>().To3D(), 1, System.Drawing.Color.Red);
+                        Utility.DrawCircle(waypoints.Last<Vector2>().To3D(), 20, System.Drawing.Color.Yellow, 1, 1);
+                    }
                 }
 
                 if (HpBar && enemy.IsHPBarRendered && Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
