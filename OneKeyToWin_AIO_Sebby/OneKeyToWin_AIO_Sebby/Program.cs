@@ -583,7 +583,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if ((int)poutput.Hitchance < 5)
                     return;
 
-                if (QWER.Delay < 0.3 && QWER.Speed > 1200 && target.Position == target.ServerPosition)
+                if (QWER.Delay < 0.3 && QWER.Speed > 1200 && (target.Position == target.ServerPosition || target.IsWindingUp))
                 {
                     if (Player.Distance(target.ServerPosition) < QWER.Range - 50)
                     {
