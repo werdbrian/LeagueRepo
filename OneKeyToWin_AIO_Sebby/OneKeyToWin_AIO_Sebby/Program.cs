@@ -48,9 +48,6 @@ namespace OneKeyToWin_AIO_Sebby
             tryAA = true,
             IgnoreNoMove = true;
 
-
-
-
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
 
         public static List<VisableInfo> VisableInfo = new List<VisableInfo>();
@@ -62,16 +59,9 @@ namespace OneKeyToWin_AIO_Sebby
         public static Items.Item TrinketN = new Items.Item(3340, 600f);
         public static Items.Item SightStone = new Items.Item(2049, 600f);
 
+        static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
 
-        static void Main(string[] args)
-        {
-            CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;
-        }
-
-        private static Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         private static void GameOnOnGameLoad(EventArgs args)
         {
@@ -101,12 +91,13 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("20", "Ekko "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
-
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
             {
                 Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
             }
+
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
@@ -131,7 +122,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
                 Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
-
 
                 var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
                 TargetSelector.AddToMenu(targetSelectorMenu);
@@ -212,7 +202,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
-
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
 
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "0 Show enemy clicks and HitChance num").SetValue(false));                
@@ -223,13 +212,11 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "5 Cast if target autoattacking", true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "6 Ignore Not-Moving targets", true).SetValue(false));
 
-
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer "));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - Custome Prediction"));
-
 
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
                 Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
@@ -295,7 +282,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
                 {
-
                     if (Prediction.GetPrediction(enemy, 0.4f).CastPosition != null)
                     {
                         var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
@@ -388,7 +374,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("timer").GetValue<bool>() && jungler != null && jungler.IsValid)
             {
-
                 foreach (var enemy in Enemies.Where(enemy => enemy.IsValid))
                 {
                     if (Config.Item("ro" + enemy.ChampionName) != null && Config.Item("ro" + enemy.ChampionName).GetValue<bool>())
@@ -403,8 +388,8 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (jungler.IsVisible && jungler.IsValid)
                 {
                     float Way = 0;
-                    var JunglerPath = ObjectManager.Player.GetPath(ObjectManager.Player.Position, jungler.Position);
-                    var PointStart = ObjectManager.Player.Position;
+                    var JunglerPath = Player.GetPath(Player.Position, jungler.Position);
+                    var PointStart = Player.Position;
                     if (JunglerPath == null)
                         return;
                     foreach (var point in JunglerPath)
@@ -473,7 +458,6 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
             }
-              
 
             if ((int)poutput.Hitchance > 4 && target.HasBuffOfType(BuffType.Slow))
             {
@@ -576,7 +560,6 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else
                     debug("fixed " + fixRange);
-                
             }
 
             else if (HitChanceNum == 3)
@@ -618,13 +601,11 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition)))
                         {
-
                             QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                         }
                     }
                     else
                     {
-
                         QWER.CastIfHitchanceEquals(target, HitChance.High, true);
                     }
                 }
