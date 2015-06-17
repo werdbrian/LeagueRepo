@@ -96,7 +96,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (t.IsValidTarget())
             {
                 
-                if (Program.Combo && Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                if (Program.Combo && Player.Mana > WMANA + EMANA )
                     Program.CastSpell(W, t);
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
                 {
@@ -128,7 +128,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && enemy.HasBuff("twitchdeadlyvenom")))
             {
-                if (Config.Item("Eks").GetValue<bool>() && E.IsKillable(enemy))
+                if (Config.Item("Eks").GetValue<bool>() && E.GetDamage(enemy) + passiveDmg(enemy) > enemy.Health)
                     E.Cast();
 
                 if (Config.Item("5e").GetValue<bool>() && OktwCommon.GetBuffCount(enemy, "twitchdeadlyvenom") == 6)
@@ -151,7 +151,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Player.Level < 5)
                 dmg = 2;
             float buffTime = OktwCommon.GetPassiveTime(target, "twitchdeadlyvenom");
-            Program.debug("" + buffTime);
             return (dmg * OktwCommon.GetBuffCount(target, "twitchdeadlyvenom") * buffTime) - target.HPRegenRate * buffTime;
         }
 
