@@ -112,7 +112,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Config.Item("countQ").GetValue<Slider>().Value == 0)
                 return;
             var count = 0;
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(2000) && enemy.HasBuff("twitchdeadlyvenom")))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(3000)))
             {
                 List<Vector2> waypoints = enemy.GetWaypoints();
 
