@@ -72,6 +72,7 @@
     <Compile Include="Champions\Kalista.cs" />
     <Compile Include="Champions\KogMaw.cs" />
     <Compile Include="Core\AfkMode.cs" />
+    <Compile Include="Core\AutoLvlUp.cs" />
     <Compile Include="Core\OktwCommon.cs" />
     <Compile Include="Core\OKTWlab.cs" />
     <Compile Include="Core\PredictionOktw.cs" />

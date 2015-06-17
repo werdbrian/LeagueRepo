@@ -243,7 +243,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
-
+            new Core.AutoLvlUp().LoadOKTW();
 
             if (Config.Item("debug").GetValue<bool>())
             {
