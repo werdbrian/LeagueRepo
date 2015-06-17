@@ -15,7 +15,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public void LoadOKTW()
         {
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("AutoLvl", "ENABLE").SetValue(true));
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("1", "1",true).SetValue(new StringList(new[] { "Q", "W", "E","R" }, 4)));
+            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("1", "1",true).SetValue(new StringList(new[] { "Q", "W", "E","R" }, 3)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("2", "2", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("3", "3", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("4", "4", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
