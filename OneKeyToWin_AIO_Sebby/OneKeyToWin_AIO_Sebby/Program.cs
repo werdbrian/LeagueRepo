@@ -195,6 +195,10 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Varus":
                         new Champions.Varus().LoadOKTW();
                         break;
+                    case "Twitch":
+                        new Champions.Twitch().LoadOKTW();
+                        break;
+                       
                 }
 
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
