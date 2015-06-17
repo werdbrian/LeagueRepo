@@ -343,7 +343,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var prepos = Prediction.GetPrediction(target, delay);
             
-            if ((int)prepos.Hitchance > Config.Item("Hit").GetValue<Slider>().Value)
+            if ((int)prepos.Hitchance > Config.Item("Hit",true).GetValue<Slider>().Value)
             {
                 if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
                 {
