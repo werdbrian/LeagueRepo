@@ -39,7 +39,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (Program.LagFree(0))
             {
-                HitChanceNum = Config.Item("Hit").GetValue<Slider>().Value;
+                HitChanceNum = Config.Item("Hit", true).GetValue<Slider>().Value;
             }
         }
 
