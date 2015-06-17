@@ -29,7 +29,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (Config.Item("AutoLvl").GetValue<bool>())
             {
-
                 var lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
                 var lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
                 var lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
@@ -48,7 +47,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
         {
-            if (!sender.IsMe || !Config.Item("AutoLvl").GetValue<bool>() || ObjectManager.Player.Level <= Config.Item("LvlStart", true).GetValue<Slider>().Value)
+            if (!sender.IsMe || !Config.Item("AutoLvl").GetValue<bool>() || ObjectManager.Player.Level < Config.Item("LvlStart", true).GetValue<Slider>().Value)
                 return;
             var lvl1 = Config.Item("1", true).GetValue<StringList>().SelectedIndex;
             var lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
