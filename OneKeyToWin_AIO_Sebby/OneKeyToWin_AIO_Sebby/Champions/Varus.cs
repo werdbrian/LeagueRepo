@@ -143,7 +143,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
-                        R.Cast(t, true);
+                        R.Cast(t);
                 }
             }
             if (Program.LagFree(0))
