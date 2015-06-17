@@ -54,25 +54,32 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
             var lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
 
-            if (lvl1 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
-            if (lvl1 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
-            if (lvl1 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
-            if (lvl1 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
+                if (lvl1 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (lvl1 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (lvl1 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+                if (lvl1 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
 
-            if (lvl2 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
-            if (lvl2 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
-            if (lvl2 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
-            if (lvl2 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
 
-            if (lvl3 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
-            if (lvl3 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
-            if (lvl3 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
-            if (lvl3 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
+                if (ObjectManager.Player.Level > 3 || ObjectManager.Player.Level == 1)
+            {
+                if (lvl2 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (lvl2 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (lvl2 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+                if (lvl2 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
+            }
+                if (ObjectManager.Player.Level > 3 || ObjectManager.Player.Level == 2)
+            {
+                if (lvl3 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (lvl3 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (lvl3 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+                if (lvl3 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
+            }
 
             if (lvl4 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
             if (lvl4 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
             if (lvl4 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
             if (lvl4 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
+            
         }
 
     }
