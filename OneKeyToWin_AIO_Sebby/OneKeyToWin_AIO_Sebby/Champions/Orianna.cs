@@ -336,14 +336,14 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void CastQ(Obj_AI_Hero target)
         {
-            
+
             float distance = Vector3.Distance(BallPos, target.ServerPosition);
 
             float delay = (distance / Q.Speed + Q.Delay);
 
             var prepos = Prediction.GetPrediction(target, delay);
             
-            if ((int)prepos.Hitchance > Config.Item("Hit",true).GetValue<Slider>().Value)
+            if ((int)prepos.Hitchance > 4)
             {
                 if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
                 {
