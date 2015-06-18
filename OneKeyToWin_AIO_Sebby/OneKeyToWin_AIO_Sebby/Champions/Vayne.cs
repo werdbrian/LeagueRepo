@@ -44,6 +44,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("QE", "try Q + E ").SetValue(true));
 
+
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapQ", "Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapE", "E").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
@@ -169,21 +170,29 @@ namespace OneKeyToWin_AIO_Sebby
 
         private bool CondemnCheck(Vector3 fromPosition, Obj_AI_Hero target)
         {
-            var poutput = E.GetPrediction(target);
-            if ((int)poutput.Hitchance < 5)
-                return false;
-            float pushDistance;
-            if (Player.Position == fromPosition )
-                pushDistance = 315 + target.BoundingRadius;
-            else
-                pushDistance = 230 + target.BoundingRadius;
 
-            var finalPosition = poutput.CastPosition.Extend(fromPosition, -pushDistance);
-                
-            if (finalPosition.IsWall())
-                return true;
-            else
+            var prepos = E.GetPrediction(target);
+
+            if ((int)prepos.Hitchance < 5)
                 return false;
+
+            float pushDistance;
+            if (Player.Position == fromPosition)
+                pushDistance = 460;
+            else
+                pushDistance = 400 ;
+
+            var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
+
+
+            var points = CirclePoint(8, 50, finalPosition);
+
+            bool cast = true;
+            
+            foreach (var point in points.Where(point => !point.IsWall()))
+                cast = false;
+
+            return cast;
         }
 
         private int GetWStacks(Obj_AI_Base target)
@@ -196,8 +205,22 @@ namespace OneKeyToWin_AIO_Sebby
             return 0;
         }
 
+        private List<Vector3> CirclePoint(float CircleLineSegmentN, float radius, Vector3 position)
+        {
+            List<Vector3> points = new List<Vector3>();
+            var bestPoint = ObjectManager.Player.Position;
+            for (var i = 1; i <= CircleLineSegmentN; i++)
+            {
+                var angle = i * 2 * Math.PI / CircleLineSegmentN;
+                var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z);
+                points.Add(point);
+            }
+            return points;
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
+
             if (Config.Item("watermark").GetValue<bool>())
                 Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
 
@@ -218,13 +241,13 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     var poutput = E.GetPrediction(target);
 
-                    var pushDistance = 350 + target.BoundingRadius;
+                    var pushDistance = 460;
 
                     var finalPosition = poutput.CastPosition.Extend(Player.ServerPosition, -pushDistance);
                     if (finalPosition.IsWall())
-                        Render.Circle.DrawCircle(finalPosition, 50, System.Drawing.Color.Red);
+                        Render.Circle.DrawCircle(finalPosition, 40, System.Drawing.Color.Red);
                     else
-                        Render.Circle.DrawCircle(finalPosition, 50, System.Drawing.Color.YellowGreen);
+                        Render.Circle.DrawCircle(finalPosition, 40, System.Drawing.Color.YellowGreen);
 
 
                 }
