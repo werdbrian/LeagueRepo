@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Q.SetSkillshot(0.25f, 70, 1900, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.35f, 120, 1500, false, SkillshotType.SkillshotCircle);
-            R.SetSkillshot(0.25f, 120, 1950, true, SkillshotType.SkillshotLine);
+            R.SetSkillshot(0.25f, 120, 1950, false, SkillshotType.SkillshotLine);
             Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 2.0f);
 
 
