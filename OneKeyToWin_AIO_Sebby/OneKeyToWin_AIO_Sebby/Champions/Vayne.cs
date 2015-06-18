@@ -15,7 +15,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Spell E, Q, R, W;
         private float QMANA, WMANA, EMANA, RMANA;
-
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()

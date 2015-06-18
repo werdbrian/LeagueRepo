@@ -15,11 +15,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell Q, W, E, R;
         public float QMANA, WMANA, EMANA, RMANA;
-
-        public Obj_AI_Hero Player
-        {
-            get { return ObjectManager.Player; }
-        }
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; }}
 
         private void LoadMenuOKTW()
         {
@@ -173,15 +169,15 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Orbwalker.GetTarget() == null)
                 return;
-                var target = Orbwalker.GetTarget();
-                if (GetQStacks() >= Config.Item("comboQ").GetValue<Slider>().Value && target.IsValid && target is Obj_AI_Hero)
-                {
-                    if (Program.Combo && (Player.Mana > RMANA + QMANA || target.Health <  5 * Player.GetAutoAttackDamage(Player)))
-                        Q.Cast();
-                    else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA) && Config.Item("harasQ").GetValue<bool>())
-                        Q.Cast();
-                }
+            var target = Orbwalker.GetTarget();
+            if (GetQStacks() >= Config.Item("comboQ").GetValue<Slider>().Value && target.IsValid && target is Obj_AI_Hero)
+            {
+                if (Program.Combo && (Player.Mana > RMANA + QMANA || target.Health <  5 * Player.GetAutoAttackDamage(Player)))
+                    Q.Cast();
+                else if (Program.Farm && (Player.Mana > RMANA + QMANA + WMANA) && Config.Item("harasQ").GetValue<bool>())
+                    Q.Cast();
             }
+        }
 
         private int GetQStacks()
         {

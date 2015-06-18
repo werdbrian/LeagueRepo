@@ -15,13 +15,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell Q, W, E, R;
         public float QMANA, WMANA, EMANA, RMANA;
+        public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         private int count = 0, countE = 0;
         private float grabTime = Game.Time;
-
-        private static Obj_AI_Hero AllyR;
-
-        public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
         {

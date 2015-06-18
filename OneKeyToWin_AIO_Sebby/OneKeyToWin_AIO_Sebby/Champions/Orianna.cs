@@ -13,16 +13,14 @@ namespace OneKeyToWin_AIO_Sebby
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
         private Spell E, Q, R, W, QR;
-
         private float QMANA, WMANA, EMANA, RMANA;
+        private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
         private float RCastTime = 0;
         private Vector3 BallPos;
         private int FarmId;
         private bool Rsmart = false;
-
-        private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
         {

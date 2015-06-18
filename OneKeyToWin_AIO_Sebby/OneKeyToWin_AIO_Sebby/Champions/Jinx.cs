@@ -34,13 +34,14 @@ namespace OneKeyToWin_AIO_Sebby
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
 
             LoadMenuOKTW();
-
             Game.OnUpdate += Game_OnUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
         }
+
+
 
         private void LoadMenuOKTW()
         {

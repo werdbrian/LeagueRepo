@@ -13,14 +13,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
         private Spell Q, W, E, R;
-        float CastTime = Game.Time;
-
-        bool CanCast = true;
         private float QMANA, WMANA, EMANA, RMANA;
-
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+
+        float CastTime = Game.Time;
+        bool CanCast = true;
 
         public void LoadOKTW()
         {
