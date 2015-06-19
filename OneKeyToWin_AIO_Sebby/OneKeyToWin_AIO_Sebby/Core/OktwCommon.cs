@@ -27,7 +27,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static bool ValidUlt(Obj_AI_Hero target)
         {
             if (target.HasBuffOfType(BuffType.PhysicalImmunity) || target.HasBuffOfType(BuffType.SpellImmunity)
-            || target.IsZombie || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellShield))
+            || target.IsZombie || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellShield) || !target.HasBuff("deathdefiedbuff"))
                 return false;
             else
                 return true;
@@ -135,8 +135,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (unit.Path.Count() == 1)
                 HC = 2;
-            
-
 
             return HC;
 
