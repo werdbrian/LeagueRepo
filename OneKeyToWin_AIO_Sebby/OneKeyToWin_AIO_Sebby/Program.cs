@@ -68,27 +68,33 @@ namespace OneKeyToWin_AIO_Sebby
             Config = new Menu("OneKeyToWin AIO", "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
+            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
+            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
+            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
+            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "Supported champions:"));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("3", "Annie "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("4", "Jinx "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("5", "Ezreal "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("6", "KogMaw "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("7", "Sivir "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("8", "Ashe "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("9", "Miss Fortune "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("10", "Quinn "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("11", "Graves "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("12", "Urgot "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("13", "Orianna "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("14", "Caitlyn "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("15", "Anivia "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("16", "Darius "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("17", "Corki "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("18", "Vayne "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("19", "Lucian "));
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("20", "Ekko "));
+
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("3", "Annie "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("4", "Jinx "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("5", "Ezreal "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("6", "KogMaw "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("7", "Sivir "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("8", "Ashe "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("9", "Miss Fortune "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("10", "Quinn "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("11", "Graves "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("12", "Urgot "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("13", "Orianna "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("14", "Caitlyn "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("15", "Anivia "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("16", "Darius "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("17", "Corki "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("18", "Vayne "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("19", "Lucian "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("20", "Ekko "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("21", "Twitch "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("22", "Tristana "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
@@ -198,6 +204,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Twitch":
                         new Champions.Twitch().LoadOKTW();
                         break;
+                    case "Tristana":
+                        new Champions.Tristana().LoadMenuOKTW();
+                        break;
                        
                 }
 
@@ -221,11 +230,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer "));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - Custome Prediction"));
-
-                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
-                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
-                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
-                Config.SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
             }
 
 
