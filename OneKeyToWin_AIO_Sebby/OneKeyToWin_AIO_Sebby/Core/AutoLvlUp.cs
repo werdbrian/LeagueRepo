@@ -45,7 +45,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if ((lvl2 == lvl3 || lvl2 == lvl4 || lvl3 == lvl4) && (int)Game.Time % 2 == 0)
                 {
-                    drawText("PLEASE SET ABILITY SEQENCE", ObjectManager.Player.Position, System.Drawing.Color.OrangeRed, -200);
+                    drawText("AutoLvlUp: PLEASE SET ABILITY SEQENCE", ObjectManager.Player.Position, System.Drawing.Color.OrangeRed, -200);
                 }
             }
         }
