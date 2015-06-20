@@ -46,13 +46,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("Rdmg", "R dmg % hp").SetValue(new Slider(20, 100, 0)));
 
-            //LoadMenuOKTW();
-
             Game.OnUpdate += Game_OnGameUpdate;
-
-            //Drawing.OnDraw += Drawing_OnDraw;
-            //Orbwalking.AfterAttack += afterAttack;
-           // Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Drawing.OnDraw += Drawing_OnDraw;
         }

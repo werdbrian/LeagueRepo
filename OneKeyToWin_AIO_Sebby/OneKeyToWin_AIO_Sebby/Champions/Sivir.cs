@@ -69,7 +69,7 @@ namespace OneKeyToWin_AIO_Sebby
                     W.Cast();
                 else if (Config.Item("farmW").GetValue<bool>() && Program.LaneClear && Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
                     W.Cast();
-                Program.debug("" + WMANA);
+                
             }
         }
 
