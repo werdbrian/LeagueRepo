@@ -12,6 +12,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
     class AutoLvlUp
     {
         private Menu Config = Program.Config;
+        int lvl1, lvl2, lvl3, lvl4;
         public void LoadOKTW()
         {
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("AutoLvl", "ENABLE").SetValue(true));
@@ -20,18 +21,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("3", "3", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("4", "4", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("LvlStart", "Auto LVL start", true).SetValue(new Slider(2, 6, 1)));
-
-           Obj_AI_Base.OnLevelUp +=Obj_AI_Base_OnLevelUp;
-           Drawing.OnDraw += Drawing_OnDraw;
+            
+            lvl1 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
+            lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
+            lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
+            lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
+            
+            Obj_AI_Base.OnLevelUp +=Obj_AI_Base_OnLevelUp;
+            Drawing.OnDraw += Drawing_OnDraw;
         }
 
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("AutoLvl").GetValue<bool>())
             {
-                var lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
-                var lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
-                var lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
                 if ((lvl2 == lvl3 || lvl2 == lvl4 || lvl3 == lvl4) && (int)Game.Time % 2 == 0)
                 {
                     drawText("PLEASE SET ABILITY SEQENCE", ObjectManager.Player.Position, System.Drawing.Color.OrangeRed, -200);
@@ -49,10 +52,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!sender.IsMe || !Config.Item("AutoLvl").GetValue<bool>() || ObjectManager.Player.Level < Config.Item("LvlStart", true).GetValue<Slider>().Value)
                 return;
-            var lvl1 = Config.Item("1", true).GetValue<StringList>().SelectedIndex;
-            var lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
-            var lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
-            var lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
+            if (lvl2 == lvl3 || lvl2 == lvl4 || lvl3 == lvl4)
+                return;
+            lvl1 = Config.Item("1", true).GetValue<StringList>().SelectedIndex;
+            lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
+            lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
+            lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
 
             if (lvl1 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
             if (lvl1 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
