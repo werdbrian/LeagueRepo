@@ -32,8 +32,14 @@ namespace OneKeyToWin_AIO_Sebby
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Orbwalking.BeforeAttack += BeforeAttack;
             Orbwalking.AfterAttack += afterAttack;
-            Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
+            Interrupter2.OnInterruptableTarget +=Interrupter2_OnInterruptableTarget;
             //Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (E.IsReady() && sender.IsValidTarget(E.Range))
+                E.Cast(sender);
         }
         private void LoadMenuOKTW()
         {
@@ -42,7 +48,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange2", "E push position").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("QE", "try Q + E ").SetValue(true));
-
 
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapQ", "Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapE", "E").SetValue(true));
@@ -57,12 +62,6 @@ namespace OneKeyToWin_AIO_Sebby
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("E config").SubMenu("Use E ").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
-        }
-
-        private void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
-        {
-            if (E.IsReady() && unit.IsValidTarget(E.Range))
-                E.Cast(unit);
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)

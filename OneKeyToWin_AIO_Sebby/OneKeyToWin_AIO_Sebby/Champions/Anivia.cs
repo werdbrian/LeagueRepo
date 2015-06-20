@@ -39,10 +39,16 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
-            Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (Config.Item("inter").GetValue<bool>() && W.IsReady() && sender.IsValidTarget(W.Range))
+                W.Cast(sender);
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -86,12 +92,6 @@ namespace OneKeyToWin_AIO_Sebby
 
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
-        }
-
-        private void OnInterruptableSpell(Obj_AI_Base unit, InterruptableSpell spell)
-        {
-            if (Config.Item("inter").GetValue<bool>() && W.IsReady() && unit.IsValidTarget(W.Range))
-                W.Cast(unit);
         }
 
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)

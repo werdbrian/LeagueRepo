@@ -36,14 +36,14 @@ namespace OneKeyToWin_AIO_Sebby
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += afterAttack;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
 
         }
 
-        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (E.IsReady() && unit.IsValidTarget(E.Range) )
-                E.CastOnUnit(unit);
+            if (E.IsReady() && sender.IsValidTarget(E.Range))
+                E.CastOnUnit(sender);
         }
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
