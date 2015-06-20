@@ -60,9 +60,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (R.IsReady() && Config.Item("inter").GetValue<bool>() && sender.IsValidTarget(R.Range))
+                R.Cast();
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -99,12 +105,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 else
                     Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
             }
-        }
-
-        private void OnInterruptableSpell(Obj_AI_Hero unit, InterruptableSpell spell)
-        {
-            if (R.IsReady() && Config.Item("inter").GetValue<bool>() && unit.IsValidTarget(R.Range))
-                R.Cast();
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
