@@ -81,8 +81,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-
-
             if (Config.Item("Muramana").GetValue<bool>())
             {
                 int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
@@ -98,6 +96,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
+            Cleansers();
+            
             if (!Program.LagFree(0))
                 return;
 
@@ -105,8 +105,6 @@ namespace OneKeyToWin_AIO_Sebby
                 PotionManagement();
 
             Offensive();
-            Cleansers();
-            
         }
 
         private void Cleansers()
