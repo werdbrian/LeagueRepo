@@ -32,10 +32,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!Program.LagFree(0))
                 return;
-            lvl1 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
+            lvl1 = Config.Item("1", true).GetValue<StringList>().SelectedIndex;
             lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
             lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
             lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
+
         }
 
         private void Drawing_OnDraw(EventArgs args)
@@ -87,7 +88,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (lvl4 == 2) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
             if (lvl4 == 3) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
             
-            }
+        }
 
     }
 }
