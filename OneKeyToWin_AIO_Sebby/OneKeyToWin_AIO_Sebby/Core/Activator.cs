@@ -54,6 +54,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusR", "R: Lucian, Twitch").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
 
@@ -76,7 +77,17 @@ namespace OneKeyToWin_AIO_Sebby
 
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             //Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.R && Youmuus.IsReady() && Config.Item("YoumuusR").GetValue<bool>()
+                && (Player.ChampionName == "Twitch" || Player.ChampionName == "Lucian"))
+            {
+                Youmuus.Cast();
+            }
         }
 
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
