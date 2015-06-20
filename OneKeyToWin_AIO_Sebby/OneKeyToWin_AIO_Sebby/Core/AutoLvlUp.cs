@@ -22,13 +22,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("4", "4", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("LvlStart", "Auto LVL start", true).SetValue(new Slider(2, 6, 1)));
             
+            
+            Game.OnUpdate += Game_OnGameUpdate;
+            Obj_AI_Base.OnLevelUp +=Obj_AI_Base_OnLevelUp;
+            Drawing.OnDraw += Drawing_OnDraw;
+        }
+
+        private void Game_OnGameUpdate(EventArgs args)
+        {
+            if (!Program.LagFree(0))
+                return;
             lvl1 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
             lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
             lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
             lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
-            
-            Obj_AI_Base.OnLevelUp +=Obj_AI_Base_OnLevelUp;
-            Drawing.OnDraw += Drawing_OnDraw;
         }
 
         private void Drawing_OnDraw(EventArgs args)
@@ -54,10 +61,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 return;
             if (lvl2 == lvl3 || lvl2 == lvl4 || lvl3 == lvl4)
                 return;
-            lvl1 = Config.Item("1", true).GetValue<StringList>().SelectedIndex;
-            lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
-            lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
-            lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
 
             if (lvl1 == 0) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
             if (lvl1 == 1) ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
