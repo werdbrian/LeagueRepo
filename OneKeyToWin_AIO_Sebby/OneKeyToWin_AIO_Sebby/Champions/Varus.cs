@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Spell Q, W, E, R;
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
-
+        public float AArange = ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2;
         float CastTime = Game.Time;
         bool CanCast = true;
 
@@ -238,7 +238,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 return;
             }
 
-            if (Config.Item("maxQ").GetValue<bool>() && Q.Range < 1600)
+            if (Config.Item("maxQ").GetValue<bool>() && (Q.Range < 1600) && Player.CountEnemiesInRange(AArange) == 0)
                 return;
 
             var t = Orbwalker.GetTarget() as Obj_AI_Hero;
