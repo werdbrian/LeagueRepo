@@ -14,7 +14,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Spell Q, W, E, R;
-        private float QMANA, WMANA, EMANA, RMANA;
+        private float QMANA, WMANA, EMANA, RMANA; 
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public float AArange = ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2;
         float CastTime = Game.Time;
@@ -31,7 +31,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q.SetSkillshot(0.25f, 70, 1900, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.35f, 120, 1500, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120, 1950, false, SkillshotType.SkillshotLine);
-            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 2.0f);
+            Q.SetCharged("VarusQ", "VarusQ", 925, 1600, 1.5f);
 
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
@@ -42,6 +42,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("maxQ", "Cast Q only max range").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("fastQ", "Fast cast Q").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("rCount", "Auto R if enemies in range (combo mode)").SetValue(new Slider(3, 0, 5)));
@@ -238,7 +239,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 return;
             }
 
-            if (Config.Item("maxQ").GetValue<bool>() && (Q.Range < 1600) && Player.CountEnemiesInRange(AArange) == 0)
+            if (Config.Item("maxQ").GetValue<bool>() && (Q.Range < 1500) && Player.CountEnemiesInRange(AArange) == 0)
                 return;
 
             var t = Orbwalker.GetTarget() as Obj_AI_Hero;
@@ -249,7 +250,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (Q.IsCharging)
                 {
-                    if (GetQEndTime() > 1)
+                    if (Config.Item("fastQ").GetValue<bool>())
+                        Q.Cast(Q.GetPrediction(t).CastPosition);
+
+                    if (GetQEndTime() > 2)
                         Program.CastSpell(Q, t);
                     else
                         Q.Cast(Q.GetPrediction(t).CastPosition);
