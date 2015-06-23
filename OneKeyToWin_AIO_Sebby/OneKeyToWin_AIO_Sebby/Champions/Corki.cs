@@ -233,10 +233,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
                     var Wfarm = Q.GetCircularFarmLocation(minions, 200);
+                    var rfarm = R1.GetCircularFarmLocation(minions, 100);
                     if (R1.IsReady() && Config.Item("farmR").GetValue<bool>() && Player.Spellbook.GetSpell(SpellSlot.R).Ammo > 1)
                     {
-                        if (Wfarm.MinionsHit > 1)
-                            R1.Cast(Wfarm.Position);
+                        if (rfarm.MinionsHit > 1)
+                            R1.Cast(rfarm.Position);
                     }
                     if (Q.IsReady() && Config.Item("farmQ").GetValue<bool>())
                     {
