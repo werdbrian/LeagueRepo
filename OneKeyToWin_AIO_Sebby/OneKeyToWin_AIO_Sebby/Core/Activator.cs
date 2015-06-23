@@ -84,7 +84,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (!Youmuus.IsReady() || Config.Item("YoumuusR").GetValue<bool>())
+            if (!Youmuus.IsReady() || !Config.Item("YoumuusR").GetValue<bool>())
+                return;
             if (args.Slot == SpellSlot.R && (Player.ChampionName == "Twitch" || Player.ChampionName == "Lucian"))
             {
                 Youmuus.Cast();
