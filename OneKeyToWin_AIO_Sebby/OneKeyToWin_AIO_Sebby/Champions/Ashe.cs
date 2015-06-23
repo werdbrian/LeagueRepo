@@ -84,6 +84,10 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("debug").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Height * 0.5f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, "ManaCost: Q " + QMANA + " W " + WMANA + " E " + 0 + " R " + RMANA);
+            }
             if (Config.Item("wRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
@@ -161,6 +165,14 @@ namespace OneKeyToWin_AIO_Sebby
                         if (cast)
                             Program.CastSpell(R, target);
                     }
+                }
+            }
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && !OktwCommon.ValidUlt(enemy)))
+            {
+                if (Player.Health < Player.MaxHealth * 0.4 && enemy.IsValidTarget(270) && enemy.IsMeele && Config.Item("GapCloser" + enemy.ChampionName).GetValue<bool>())
+                {
+                    R.Cast(enemy);
+                    Program.debug("R Meele");
                 }
             }
         }

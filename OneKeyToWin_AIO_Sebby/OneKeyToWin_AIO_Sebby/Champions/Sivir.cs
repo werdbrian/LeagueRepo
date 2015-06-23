@@ -195,7 +195,7 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
-
+            //Program.debug("ManaCost: Q " + QMANA + " W " + WMANA + " E " + EMANA + " R " + RMANA );
             if (Player.Health < Player.MaxHealth * 0.2)
             {
                 QMANA = 0;
@@ -207,6 +207,10 @@ namespace OneKeyToWin_AIO_Sebby
         private void Drawing_OnDraw(EventArgs args)
         {
 
+            if (Config.Item("debug").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Height * 0.5f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, "ManaCost: Q " + QMANA + " W " + WMANA + " E " + 0 + " R " + RMANA);
+            }
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
