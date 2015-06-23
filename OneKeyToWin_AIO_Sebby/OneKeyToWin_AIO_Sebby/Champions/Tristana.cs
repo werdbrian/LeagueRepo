@@ -82,6 +82,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Program.CastSpell(W, enemy);
                 }
             }
+
+
             if (Program.Combo && Config.Item("nktdE").GetValue<bool>())
             {
                 var dashPosition = Player.Position.Extend(Game.CursorPos, W.Range);
@@ -115,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && !OktwCommon.ValidUlt(enemy)))
             {
-                if (R.GetDamage(enemy) + GetEDmg(enemy) > enemy.Health && Config.Item("autoR").GetValue<bool>())
+                if (R.GetDamage(enemy) + GetEDmg(enemy) > enemy.Health + enemy.Level && Config.Item("autoR").GetValue<bool>())
                 {
                     R.Cast(enemy);
                     Program.debug("R ks");
