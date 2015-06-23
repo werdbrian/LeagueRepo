@@ -54,13 +54,14 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
-            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusR", "R: Lucian, Twitch").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusR", "LucianR, TwitchR, AsheQ").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Muramana").AddItem(new MenuItem("Muramana", "Muramana").SetValue(true));
+            
             // CLEANSERS 
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
@@ -83,8 +84,12 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && Youmuus.IsReady() && Config.Item("YoumuusR").GetValue<bool>()
-                && (Player.ChampionName == "Twitch" || Player.ChampionName == "Lucian"))
+            if (!Youmuus.IsReady() || Config.Item("YoumuusR").GetValue<bool>())
+            if (args.Slot == SpellSlot.R && (Player.ChampionName == "Twitch" || Player.ChampionName == "Lucian"))
+            {
+                Youmuus.Cast();
+            }
+            if (args.Slot == SpellSlot.Q && (Player.ChampionName == "Ashe" ))
             {
                 Youmuus.Cast();
             }
