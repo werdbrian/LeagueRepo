@@ -312,7 +312,7 @@ namespace OneKeyToWin_AIO_Sebby
                         W.Cast();
                         return;
                     }
-                    if (Player.ChampionName == "Ashe" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 1 && Config.Item("autoE").GetValue<bool>())
+                    if (Player.ChampionName == "Ashe" && E.IsReady() && Player.CountEnemiesInRange(800) == 0 && Game.Time - need.time > 3 && Game.Time - need.time < 1 && Config.Item("autoE").GetValue<bool>())
                     {
                         if (need.PredictedPos.Distance(Player.Position) < 3000)
                         {
