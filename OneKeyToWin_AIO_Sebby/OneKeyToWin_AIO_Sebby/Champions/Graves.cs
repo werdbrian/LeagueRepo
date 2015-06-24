@@ -38,6 +38,7 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnGameUpdate;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Orbwalking.AfterAttack += Orbwalker_AfterAttack;
         }
 
         private void LoadMenuOKTW()
@@ -50,6 +51,8 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
+            
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("Qafter", "Q only after AA").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("fastR", "Fast R ks Combo").SetValue(false));
@@ -63,6 +66,24 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+        }
+
+        public void Orbwalker_AfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (!unit.IsMe)
+                return;
+
+            if (Q.IsReady() && Config.Item("Qafter").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget(Q.Range))
+                {
+                    if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                        Program.CastSpell(Q, t);
+                    else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
+                        Program.CastSpell(Q, t);
+                }
+            }
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -133,6 +154,7 @@ namespace OneKeyToWin_AIO_Sebby
                     OverKill = Game.Time;
                     Program.debug("Q ks");
                 }
+
                 else if (Program.GetRealDmg(Q, t) + Program.GetRealDmg(R, t) > t.Health && R.IsReady())
                 {
                     Program.CastSpell(Q, t);
@@ -140,11 +162,16 @@ namespace OneKeyToWin_AIO_Sebby
                         Program.CastSpell(R, t);
                     Program.debug("Q + R ks");
                 }
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
-                    Program.CastSpell(Q, t);
-                else if (((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
-                    Program.CastSpell(Q, t);
-                else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA )
+
+                else if (!Config.Item("Qafter").GetValue<bool>())
+                {
+                    if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                        Program.CastSpell(Q, t);
+                    else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
+                        Program.CastSpell(Q, t);
+                }
+
+                if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true, true);
