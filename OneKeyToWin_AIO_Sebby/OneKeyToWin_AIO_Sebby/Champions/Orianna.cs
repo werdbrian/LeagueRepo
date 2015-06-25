@@ -70,9 +70,7 @@ namespace OneKeyToWin_AIO_Sebby
             Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Drawing.OnDraw += Drawing_OnDraw;
-            
         }
-
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
