@@ -54,10 +54,11 @@ namespace OneKeyToWin_AIO_Sebby
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
         public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
-        public static Items.Item WardS = new Items.Item(2043, 600f);
-        public static Items.Item WardN = new Items.Item(2044, 600f);
-        public static Items.Item TrinketN = new Items.Item(3340, 600f);
-        public static Items.Item SightStone = new Items.Item(2049, 600f);
+        public static Items.Item 
+            WardS = new Items.Item(2043, 600f),
+            WardN = new Items.Item(2044, 600f),
+            TrinketN = new Items.Item(3340, 600f),
+            SightStone = new Items.Item(2049, 600f);
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
 
@@ -136,6 +137,8 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
+                Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
+                
                 switch (Player.ChampionName)
                 {
                     case "Jinx":
@@ -642,17 +645,16 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-
         }
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
         {
-
+            
             var unit = sender as Obj_AI_Hero;
 
             if (unit == null || !unit.IsValid || unit.IsAlly)
                 return;
-
+            
             var recall = Packet.S2C.Teleport.Decoded(unit, args);
 
             if (recall.Type == Packet.S2C.Teleport.Type.Recall)
@@ -704,7 +706,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-
+            if (Config.Item("disableDraws").GetValue<bool>())
+                return;
 
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
