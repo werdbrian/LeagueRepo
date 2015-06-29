@@ -63,6 +63,9 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Orbwalking.Attack = false;
                 Orbwalking.Move = false;
+               
+               
+
                 Program.debug("cast R");
                 return;
             }
@@ -92,11 +95,18 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-
             if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.5)
             {
+                if (Config.Item("forceBlockMove").GetValue<bool>())
+                {
+                    OktwCommon.blockMove = true;
+                    OktwCommon.blockAttack = true;
+                    OktwCommon.blockSpells = true;
+                }
+
                 Orbwalking.Attack = false;
                 Orbwalking.Move = false;
+               
                 Program.debug("cast R");
                 return;
             }
@@ -104,6 +114,12 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Orbwalking.Attack = true;
                 Orbwalking.Move = true;
+                if (Config.Item("forceBlockMove").GetValue<bool>())
+                {
+                    OktwCommon.blockAttack = false;
+                    OktwCommon.blockMove = false;
+                    OktwCommon.blockSpells = false;
+                }
                 if (R.IsReady() && Config.Item("useR").GetValue<KeyBind>().Active)
                 {
                     var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
@@ -287,6 +303,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harasW", "Haras W").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("forceBlockMove", "Force block player").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
