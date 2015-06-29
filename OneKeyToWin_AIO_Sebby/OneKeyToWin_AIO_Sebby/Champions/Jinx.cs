@@ -450,13 +450,13 @@ namespace OneKeyToWin_AIO_Sebby
         private void SetMana()
         {
             QMANA = 10;
-            WMANA = W.Instance.ManaCost;
-            EMANA = E.Instance.ManaCost;
+            WMANA = W.Level * 10 + 40;
+            EMANA = 50;
 
             if (!R.IsReady())
-                RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
+                RMANA = WMANA - Player.PARRegenRate * 6;
             else
-                RMANA = R.Instance.ManaCost; 
+                RMANA = 100; 
 
             if (Player.Health < Player.MaxHealth * 0.2)
             {
