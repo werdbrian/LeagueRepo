@@ -17,7 +17,7 @@ namespace OneKeyToWin_AIO_Sebby
         public Spell Q, W, E, R;
         public float QMANA, WMANA, EMANA, RMANA;
 
-        public double lag = 0, WCastTime = 0, QCastTime = 0, DragonTime = 0;
+        public double lag = 0, WCastTime = 0, QCastTime = 0, DragonTime = 0, grabTime = 0;
         public float DragonDmg = 0;
 
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
@@ -125,6 +125,10 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (unit.IsMe && args.SData.Name == "JinxWMissile")
                 WCastTime = Game.Time;
+            if (E.IsReady() && unit.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(unit.Position) < E.Range )
+            {
+                grabTime = Game.Time;
+            }
             
         }
         private void Game_OnUpdate(EventArgs args)
