@@ -54,10 +54,11 @@ namespace OneKeyToWin_AIO_Sebby
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
         public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
-        public static Items.Item WardS = new Items.Item(2043, 600f);
-        public static Items.Item WardN = new Items.Item(2044, 600f);
-        public static Items.Item TrinketN = new Items.Item(3340, 600f);
-        public static Items.Item SightStone = new Items.Item(2049, 600f);
+        public static Items.Item 
+            WardS = new Items.Item(2043, 600f),
+            WardN = new Items.Item(2044, 600f),
+            TrinketN = new Items.Item(3340, 600f),
+            SightStone = new Items.Item(2049, 600f);
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
 
@@ -136,6 +137,8 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
+                Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
+                
                 switch (Player.ChampionName)
                 {
                     case "Jinx":
@@ -496,7 +499,7 @@ namespace OneKeyToWin_AIO_Sebby
                 float fixRange;
                 
                 if (RangeFix)
-                    fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 3;
+                    fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 2;
                 else
                     fixRange = 0;
 
@@ -567,21 +570,19 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     debug("fixed " + fixRange);
             }
-
             else if (HitChanceNum == 3)
             {
                 if ((int)poutput.Hitchance < 5)
                     return;
 
-                var fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 3;
-                if (QWER.Delay < 0.3 && (QWER.Speed > 1500 || QWER.Type == SkillshotType.SkillshotCircle) && target.IsWindingUp)
+                var fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 2;
+                if (QWER.Delay < 0.3 && (QWER.Speed > 1500 || QWER.Type == SkillshotType.SkillshotCircle) && (target.IsWindingUp || (int)poutput.Hitchance == 6))
                 {
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
-
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                        return;
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true); 
                     }
+                    return;
                 }
 
                 if (target.Path.Count() == 0 && target.Position == target.ServerPosition && !target.IsWindingUp)
@@ -589,23 +590,23 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
 
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
-                        return;
+                        QWER.CastIfHitchanceEquals(target, HitChance.High, true); 
                     }
+                    return;
                 }
-                List<Vector2> waypoints = target.GetWaypoints();
+                var waypoints = target.GetWaypoints().Last<Vector2>().To3D();
 
                 float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
                 float SiteToSite = (BackToFront * 2) - QWER.Width;
 
-                if ((target.ServerPosition.Distance(waypoints.Last<Vector2>().To3D()) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > BackToFront)
+                if ((target.ServerPosition.Distance(waypoints) > SiteToSite
+                    || Math.Abs(Player.Distance(waypoints) - Player.Distance(target.Position)) > BackToFront)
                     || Player.Distance(target.Position) < SiteToSite + target.BoundingRadius * 2
-                    || Player.Distance(waypoints.Last<Vector2>().To3D()) < BackToFront
-                    || (int)poutput.Hitchance == 6)
+                    || Player.Distance(waypoints) < BackToFront
+                    )
                 {
                     
-                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position))
+                    if (waypoints.Distance(Player.Position) <= target.Distance(Player.Position))
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                         {
@@ -644,17 +645,16 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
-
         }
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
         {
-
+            
             var unit = sender as Obj_AI_Hero;
 
             if (unit == null || !unit.IsValid || unit.IsAlly)
                 return;
-
+            
             var recall = Packet.S2C.Teleport.Decoded(unit, args);
 
             if (recall.Type == Packet.S2C.Teleport.Type.Recall)
@@ -706,7 +706,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-
+            if (Config.Item("disableDraws").GetValue<bool>())
+                return;
 
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {

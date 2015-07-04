@@ -67,10 +67,22 @@ namespace OneKeyToWin_AIO_Sebby
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget +=Interrupter2_OnInterruptableTarget;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Drawing.OnDraw += Drawing_OnDraw;
-            
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (!Config.Item("OPTI").GetValue<bool>())
+                return;
+            if (R.IsReady() && sender.Distance(BallPos) < R.Range)
+            {
+                R.Cast();
+                Program.debug("interupt");
+            }
+            else if (Q.IsReady() && Player.Mana > RMANA + QMANA && sender.IsValidTarget(Q.Range))
+                Q.Cast(sender.ServerPosition);
         }
 
 
@@ -79,18 +91,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("Rblock").GetValue<bool>() && args.Slot == SpellSlot.R && CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay) == 0)
                 args.Process = false;
         }
-        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
-        {
-            if (!Config.Item("OPTI").GetValue<bool>())
-                return;
-            if (R.IsReady() && unit.Distance(BallPos) < R.Range)
-            {
-                R.Cast();
-                Program.debug("interupt");
-            }
-            else if (Q.IsReady() && Player.Mana > RMANA + QMANA && unit.IsValidTarget(Q.Range))
-                Q.Cast(unit.ServerPosition);
-        }
+
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             var Target = (Obj_AI_Hero)gapcloser.Sender;

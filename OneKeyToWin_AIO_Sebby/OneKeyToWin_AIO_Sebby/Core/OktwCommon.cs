@@ -10,6 +10,39 @@ namespace OneKeyToWin_AIO_Sebby
 {
     class OktwCommon
     {
+        public static bool 
+            blockMove = false,
+            blockAttack = false,
+            blockSpells = false;
+
+        public void LoadOKTW()
+        {
+            Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
+            Spellbook.OnCastSpell +=Spellbook_OnCastSpell;
+        }
+
+        private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (blockSpells)
+            {
+                args.Process = false;
+            }
+        }
+
+        private void Obj_AI_Base_OnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
+        {
+            if (!sender.IsMe)
+                return;
+
+            if (blockMove  && !args.IsAttackMove)
+            {
+                args.Process = false;
+            } 
+            if (blockAttack && args.IsAttackMove)
+            {
+                args.Process = false;
+            }
+        }
         public static bool CanMove(Obj_AI_Hero target)
         {
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||

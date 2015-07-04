@@ -20,7 +20,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-            
             Q = new Spell(SpellSlot.Q, 1180f);
             Qc = new Spell(SpellSlot.Q, 1180f);
             W = new Spell(SpellSlot.W, float.MaxValue);
@@ -108,28 +107,29 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 LogicQ();
             }
+
+            if (Program.LagFree(2) && R.IsReady() && Program.Combo && Config.Item("autoR").GetValue<bool>())
+            {
+                LogicR();
+            }
             if (Program.LagFree(3) && Config.Item("forceW").GetValue<bool>() && W.IsReady())
             {
                 var target = Orbwalker.GetTarget();
                 var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
                 if (W.IsReady())
                 {
-                    if (Program.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
+                    if (Program.Combo && target is Obj_AI_Hero && Player.Mana > RMANA + WMANA)
                         Utility.DelayAction.Add(250, () => W.Cast());
-                    else if (target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA + QMANA)
+                    else if (target is Obj_AI_Hero && Player.Mana > RMANA + WMANA + QMANA)
                         Utility.DelayAction.Add(250, () => W.Cast());
                     else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
                         Utility.DelayAction.Add(250, () => W.Cast());
                 }
             }
-            if (Program.LagFree(2) && R.IsReady() && Program.Combo && Config.Item("autoR").GetValue<bool>())
-            {
-                LogicR();
-            }
         }
         private bool farmW()
         {
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 1300, MinionTypes.All);
+            var allMinions = MinionManager.GetMinions(Player.ServerPosition, 1300, MinionTypes.All);
             int num = 0;
             foreach (var minion in allMinions)
             {
@@ -169,9 +169,9 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast(enemy, true);
                 }
             }
-            else if (Program.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+            else if (Program.LaneClear && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
             {
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
                 if (Qfarm.MinionsHit > 5 && Q.IsReady())
                     Q.Cast(Qfarm.Position);
@@ -188,13 +188,13 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            QMANA = Q.Instance.ManaCost;
-            WMANA = W.Instance.ManaCost;
-            EMANA = E.Instance.ManaCost;
+            QMANA = 10 * Q.Level + 60;
+            WMANA = 60;
+            EMANA = 0;
             if (!R.IsReady())
-                RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
+                RMANA = QMANA - Player.PARRegenRate * 8;
             else
-                RMANA = R.Instance.ManaCost;
+                RMANA = 100;
             //Program.debug("ManaCost: Q " + QMANA + " W " + WMANA + " E " + EMANA + " R " + RMANA );
             if (Player.Health < Player.MaxHealth * 0.2)
             {
@@ -232,7 +232,6 @@ namespace OneKeyToWin_AIO_Sebby
                         Render.Circle.DrawCircle(target.ServerPosition, 200, System.Drawing.Color.Red);
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.4f, System.Drawing.Color.Red, "Q kill: " + target.ChampionName + " have: " + target.Health + "hp");
                     }
-
                 }
             }
         }
