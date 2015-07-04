@@ -226,7 +226,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Player.Mana > RMANA + EMANA && Config.Item("autoE").GetValue<bool>())
             {
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy) && Game.Time-grabTime > 1))
                 {
                     E.Cast(enemy.Position, true);
                     return;
