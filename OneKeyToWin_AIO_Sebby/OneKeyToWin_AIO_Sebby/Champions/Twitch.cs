@@ -28,8 +28,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R, 975);
 
             W.SetSkillshot(0.25f, 100f, 1410f, false, SkillshotType.SkillshotCircle);
-
-
+            Config.SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
@@ -188,9 +187,30 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var wts = Drawing.WorldToScreen(Hero.Position);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
         }
+
+        public static void drawText(string msg, Vector3 Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
+        }
+        public static void drawText2(string msg, Vector3 Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
+        }
         private void Drawing_OnDraw(EventArgs args)
         {
 
+            if (Config.Item("notif").GetValue<bool>())
+            {
+                if (Player.HasBuff("TwitchHideInShadows"))
+                    drawText2("Q:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "TwitchHideInShadows")), Player.Position, System.Drawing.Color.Yellow);
+                if (Player.HasBuff("twitchhideinshadowsbuff"))
+                    drawText2("Q AS buff:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "twitchhideinshadowsbuff")), Player.Position, System.Drawing.Color.YellowGreen);
+                if (Player.HasBuff("TwitchFullAutomatic"))
+                    drawText2("R ACTIVE:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "TwitchFullAutomatic")), Player.Position, System.Drawing.Color.OrangeRed);
+
+            }
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(2000) && enemy.HasBuff("twitchdeadlyvenom")))
             {
                 if (passiveDmg(enemy) > enemy.Health)
