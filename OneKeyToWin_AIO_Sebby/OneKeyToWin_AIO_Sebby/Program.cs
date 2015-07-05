@@ -711,7 +711,9 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
-                if (jungler.IsDead)
+                if (jungler == Player)
+                    drawText("Jungler not detected", Player.Position, System.Drawing.Color.Yellow, 100);
+                else if (jungler.IsDead)
                     drawText("Jungler dead " + timer, Player.Position, System.Drawing.Color.Cyan, 100);
                 else if (jungler.IsVisible)
                     drawText("Jungler visable " + timer, Player.Position, System.Drawing.Color.GreenYellow, 100);
@@ -881,7 +883,6 @@ namespace OneKeyToWin_AIO_Sebby
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
 
                     }
-
                 }
                 positionGang = positionGang + 100;
             }
