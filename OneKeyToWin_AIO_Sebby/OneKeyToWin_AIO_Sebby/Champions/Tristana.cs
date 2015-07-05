@@ -41,6 +41,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R KS (E+R calculation)").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("turrentR", "Try R under turrent").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("OnInterruptableSpell", "OnInterruptableSpell").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "OneKeyToCast R closest person").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser & anti-meele").AddItem(new MenuItem("GapCloser" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -115,13 +116,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         }
         private void LogicR()
         {
+            Obj_AI_Hero bestEnemy = null;
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && !OktwCommon.ValidUlt(enemy)))
             {
+                if (bestEnemy == null)
+                    bestEnemy = enemy;
+                else if (Player.Distance(enemy.Position) < Player.Distance(bestEnemy.Position))
+                    bestEnemy = enemy;
+
                 if (R.GetDamage(enemy) + GetEDmg(enemy) > enemy.Health + enemy.Level && Config.Item("autoR").GetValue<bool>())
                 {
                     R.Cast(enemy);
                     Program.debug("R ks");
-                    
+
                 }
                 if (Config.Item("turrentR").GetValue<bool>())
                 {
@@ -139,6 +146,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     R.Cast(enemy);
                     Program.debug("R Meele");
                 }
+
+            }
+            if (Config.Item("useR").GetValue<KeyBind>().Active && bestEnemy!=null)
+            {
+                R.Cast(bestEnemy);
             }
         }
         private void Jungle()
