@@ -92,7 +92,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (t.IsValidTarget())
             {
                 
-                if (Program.Combo && Player.Mana > WMANA + EMANA )
+                if (Program.Combo && Player.Mana > WMANA + RMANA )
                     Program.CastSpell(W, t);
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
                 {
@@ -105,7 +105,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicQ()
         {
 
-            if (Config.Item("countQ").GetValue<Slider>().Value == 0)
+            if (Config.Item("countQ").GetValue<Slider>().Value == 0 || Player.Mana < RMANA + QMANA)
                 return;
             var count = 0;
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(3000)))
@@ -126,11 +126,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (Config.Item("Eks").GetValue<bool>() && E.GetDamage(enemy) + passiveDmg(enemy) > enemy.Health)
                     E.Cast();
-
-                if (Config.Item("5e").GetValue<bool>() && OktwCommon.GetBuffCount(enemy, "twitchdeadlyvenom") == 6)
-                     E.Cast();
-                if (!Orbwalking.InAutoAttackRange(enemy)&& 0 < Config.Item("countE").GetValue<Slider>().Value && OktwCommon.GetBuffCount(enemy, "twitchdeadlyvenom") >= Config.Item("countE").GetValue<Slider>().Value)
-                    E.Cast();
+                if (Player.Mana > RMANA + EMANA)
+                {
+                    int buffsNum = OktwCommon.GetBuffCount(enemy, "twitchdeadlyvenom");
+                    if (Config.Item("5e").GetValue<bool>() && buffsNum == 6 )
+                         E.Cast();
+                    if (!Orbwalking.InAutoAttackRange(enemy) && 0 < Config.Item("countE").GetValue<Slider>().Value && buffsNum >= Config.Item("countE").GetValue<Slider>().Value)
+                        E.Cast();
+                }
             }
             JungleE();
         }
@@ -152,7 +155,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void JungleE()
         {
-            if (!Config.Item("jungleE").GetValue<bool>())
+            if (!Config.Item("jungleE").GetValue<bool>() || Player.Mana < RMANA + EMANA)
                 return;
 
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
