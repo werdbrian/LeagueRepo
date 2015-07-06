@@ -70,10 +70,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if ((Program.Combo || Program.Farm) && CanCast)
+            if ((Program.Combo || Program.Farm) && CanCast )
             {
                 var t = target as Obj_AI_Base;
-                if (t.IsValidTarget() && (OktwCommon.GetBuffCount(t, "varuswdebuff") >= 2 ))
+                if (t.IsValidTarget() && target is Obj_AI_Base && (OktwCommon.GetBuffCount(t, "varuswdebuff") >= 2))
                 {
                     Program.debug("CAST");
                     if (E.IsReady() && Player.Mana > RMANA + EMANA)
