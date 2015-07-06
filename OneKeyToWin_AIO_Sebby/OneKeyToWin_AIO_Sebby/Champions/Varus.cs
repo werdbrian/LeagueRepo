@@ -76,7 +76,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (t.IsValidTarget() && (OktwCommon.GetBuffCount(t, "varuswdebuff") >= 2 ))
                 {
                     Program.debug("CAST");
-                    if (E.IsReady() && Player.Mana > RMANA + QMANA)
+                    if (E.IsReady() && Player.Mana > RMANA + EMANA)
                     {
                         Program.CastSpell(E, t);
                         Program.debug("CAST 1 ");
