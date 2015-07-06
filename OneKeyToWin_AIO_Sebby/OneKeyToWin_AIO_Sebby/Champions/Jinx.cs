@@ -95,7 +95,8 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Program.debug("mana "+ Player.ManaPercent);
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange(), MinionTypes.All);
-                foreach (var minion in allMinionsQ.Where(minion => args.Target.NetworkId != minion.NetworkId && minion.Distance(args.Target.Position) < 200))
+                foreach (var minion in allMinionsQ.Where(
+                    minion => args.Target.NetworkId != minion.NetworkId && minion.Distance(args.Target.Position) < 200 && (6 - Q.Level) * Player.GetAutoAttackDamage(minion) > args.Target.Health && (6 - Q.Level) * Player.GetAutoAttackDamage(minion) > minion.Health))
                 {
                     Q.Cast();
                 }
