@@ -70,19 +70,21 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if ((Program.Combo || Program.Farm) && CanCast )
+            if ((Program.Combo || Program.Farm) && CanCast)
             {
                 var t = target as Obj_AI_Base;
                 if (t.IsValidTarget() && (OktwCommon.GetBuffCount(t, "varuswdebuff") >= 2 ))
                 {
                     Program.debug("CAST");
-                    if (E.IsReady() && Program.Combo && Player.Mana > RMANA + QMANA)
+                    if (E.IsReady() && Player.Mana > RMANA + QMANA)
                     {
                         Program.CastSpell(E, t);
+                        Program.debug("CAST 1 ");
                     }
                     else if (Q.IsReady() && !E.IsReady() && Player.Mana > RMANA + QMANA)
                     {
                         CastQ(t);
+                        Program.debug("CAST 2 ");
                     }
                 }
             }
@@ -280,7 +282,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     return;
                 }
 
-                if ( !E.IsReady() && !Orbwalking.InAutoAttackRange(t))
+                if (!E.IsReady() && !Orbwalking.InAutoAttackRange(t) && CanCast)
                 {
                     if ((Program.Combo || (OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && Program.Farm)) && Player.Mana > RMANA + QMANA)
                     {
@@ -290,7 +292,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         CastQ(t);
                     }
-                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
+                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA)
                     {
                         foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                             CastQ(enemy);
