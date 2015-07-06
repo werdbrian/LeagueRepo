@@ -61,11 +61,31 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Drawing.OnDraw += Drawing_OnDraw;
             //Orbwalking.BeforeAttack += BeforeAttack;
-            //Orbwalking.AfterAttack += afterAttack;
+            Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             //Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
 
+        }
+
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if ((Program.Combo || Program.Farm) && CanCast )
+            {
+                var t = target as Obj_AI_Base;
+                if (t.IsValidTarget() && (OktwCommon.GetBuffCount(t, "varuswdebuff") >= 2 ))
+                {
+                    Program.debug("CAST");
+                    if (E.IsReady() && Program.Combo && Player.Mana > RMANA + QMANA)
+                    {
+                        Program.CastSpell(E, t);
+                    }
+                    else if (Q.IsReady() && !E.IsReady() && Player.Mana > RMANA + QMANA)
+                    {
+                        CastQ(t);
+                    }
+                }
+            }
         }
 
         private void Drawing_OnDraw(EventArgs args)
@@ -260,7 +280,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     return;
                 }
 
-                if ((OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && CanCast && !E.IsReady()) || !Orbwalking.InAutoAttackRange(t))
+                if ( !E.IsReady() && !Orbwalking.InAutoAttackRange(t))
                 {
                     if ((Program.Combo || (OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && Program.Farm)) && Player.Mana > RMANA + QMANA)
                     {
@@ -290,16 +310,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                if ((OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && CanCast) || !Orbwalking.InAutoAttackRange(t))
+                if (!Orbwalking.InAutoAttackRange(t))
                 {
                     if (Program.Combo && Player.Mana > RMANA + QMANA)
                     {
                         Program.CastSpell(E, t);
-                    }
-                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
-                    {
-                        foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
-                            E.Cast(enemy);
                     }
                 }
             }
