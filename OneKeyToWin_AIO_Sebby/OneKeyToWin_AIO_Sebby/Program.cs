@@ -883,6 +883,16 @@ namespace OneKeyToWin_AIO_Sebby
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
 
                     }
+                    else if (Distance < 3500 && !enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
+                    {
+                        var need=VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
+                        if (need != null && Game.Time - need.time < 5)
+                        {
+                            drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.Gray);
+                        }
+                    }
+                    
+                    
                 }
                 positionGang = positionGang + 100;
             }
