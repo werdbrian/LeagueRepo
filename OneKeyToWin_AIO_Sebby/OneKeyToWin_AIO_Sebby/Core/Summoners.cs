@@ -12,14 +12,26 @@ namespace OneKeyToWin_AIO_Sebby
     class Summoners
     {
         private Menu Config = Program.Config;
-        private SpellSlot heal, barrier, ignite;
+        private SpellSlot heal, barrier, ignite, smite;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; }}
+        private int smiteHero = 0;
 
         public void LoadOKTW()
         {
             heal = Player.GetSpellSlot("summonerheal");
             barrier = Player.GetSpellSlot("summonerbarrier");
             ignite = Player.GetSpellSlot("summonerdot");
+            var spells = Player.Spellbook.GetSpell(SpellSlot.Summoner1);
+            foreach (var spell in Player.Spellbook.Spells.Where(spell => spell.Name.ToLower().Contains("smite")))
+            {
+                smite = Player.GetSpellSlot(spell.Name);
+                //red
+                if (spell.Name == "s5_summonersmiteduel" )
+                    smiteHero = 1;
+                //blue
+                if (spell.Name == "s5_summonersmiteplayerganker")
+                    smiteHero = 2;
+            }
 
             if (heal != SpellSlot.Unknown)
             {
@@ -28,20 +40,50 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (barrier != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Barrier").AddItem(new MenuItem("Barrier", "Barrier").SetValue(true));
+                Config.SubMenu("Activator").SubMenu("Summoners").AddItem(new MenuItem("Barrier", "Barrier").SetValue(true));
 
             }
             if (ignite != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Ignite").AddItem(new MenuItem("Ignite", "Ignite").SetValue(true));
+                Config.SubMenu("Activator").SubMenu("Summoners").AddItem(new MenuItem("Ignite", "Ignite").SetValue(true));
             }
-            
+            if (smite != SpellSlot.Unknown)
+            {
+                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("Smite", "Smite").SetValue(true));
+                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlue", "BlueSmite KS").SetValue(true));
+                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteRed", "RedSmite Combo").SetValue(true));
+            }
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Game.OnUpdate += Game_OnGameUpdate;
         }
 
         private void Game_OnGameUpdate(EventArgs args)
         {
+            if ( CanUse(smite) && Config.Item("Smite").GetValue<bool>())
+            {
+                if (smiteHero == 2 && Config.Item("SmiteBlue").GetValue<bool>())
+                {
+                    Program.debug("2");
+                    var t = TargetSelector.GetTarget(760, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget())
+                    {
+                        var smaitDmg = Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Smite);
+                        if (t.Health <= smaitDmg )
+                            Player.Spellbook.CastSpell(smite, t);
+                    }
+                }
+                else if (smiteHero == 1 && Program.Combo && Config.Item("SmiteRed").GetValue<bool>())
+                {
+                    
+                    var t = TargetSelector.GetTarget(760, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget())
+                    {
+                        Program.debug("1");
+                        Player.Spellbook.CastSpell(smite, t);
+                    }
+                }
+            }
+
             if (Program.LagFree(4) && CanUse(ignite) && Config.Item("Ignite").GetValue<bool>())
             {
                 foreach(var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(600)))
