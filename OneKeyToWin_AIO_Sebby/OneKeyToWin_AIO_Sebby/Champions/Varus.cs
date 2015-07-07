@@ -14,7 +14,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Spell Q, W, E, R;
-        private float QMANA, WMANA, EMANA, RMANA; 
+        private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public float AArange = ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2;
         float CastTime = Game.Time;
@@ -47,10 +47,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("rCount", "Auto R if enemies in range (combo mode)").SetValue(new Slider(3, 0, 5)));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
-            
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
@@ -61,33 +61,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Drawing.OnDraw += Drawing_OnDraw;
             //Orbwalking.BeforeAttack += BeforeAttack;
-            Orbwalking.AfterAttack += afterAttack;
+            //Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             //Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
 
-        }
-
-        private void afterAttack(AttackableUnit unit, AttackableUnit target)
-        {
-            if ((Program.Combo || Program.Farm) && CanCast )
-            {
-                var t = target as Obj_AI_Base;
-                if (t.IsValidTarget() && target is Obj_AI_Base && (OktwCommon.GetBuffCount(t, "varuswdebuff") >= 2))
-                {
-                    Program.debug("CAST");
-                    if (E.IsReady() && Player.Mana > RMANA + EMANA)
-                    {
-                        Program.CastSpell(E, t);
-                        Program.debug("CAST 1 ");
-                    }
-                    else if (Q.IsReady() && !E.IsReady() && Player.Mana > RMANA + QMANA)
-                    {
-                        CastQ(t);
-                        Program.debug("CAST 2 ");
-                    }
-                }
-            }
         }
 
         private void Drawing_OnDraw(EventArgs args)
@@ -137,7 +115,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var Target = gapcloser.Sender;
                 if (Target.IsValidTarget(R.Range))
                 {
-                    R.Cast(Target.ServerPosition,true);
+                    R.Cast(Target.ServerPosition, true);
                     //Program.debug("AGC " );
                 }
             }
@@ -210,7 +188,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     E.Cast(mobs[0]);
                     return;
                 }
-                
+
                 if (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
                 {
                     var allMinionsE = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All);
@@ -226,10 +204,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) ))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range)))
             {
 
-                if (enemy.CountEnemiesInRange(400) >= Config.Item("rCount").GetValue<Slider>().Value && Config.Item("rCount").GetValue<Slider>().Value > 0 )
+                if (enemy.CountEnemiesInRange(400) >= Config.Item("rCount").GetValue<Slider>().Value && Config.Item("rCount").GetValue<Slider>().Value > 0)
                 {
                     R.Cast(enemy, true, true);
                     Program.debug("R AOE");
@@ -253,7 +231,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-            
+
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(1600) && Q.GetDamage(enemy) + GetWDmg(enemy) > enemy.Health))
             {
                 if (enemy.IsValidTarget(R.Range))
@@ -282,7 +260,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     return;
                 }
 
-                if (!E.IsReady() && !Orbwalking.InAutoAttackRange(t) && CanCast)
+                if ((OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && CanCast && !E.IsReady()) || !Orbwalking.InAutoAttackRange(t))
                 {
                     if ((Program.Combo || (OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && Program.Farm)) && Player.Mana > RMANA + QMANA)
                     {
@@ -292,7 +270,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         CastQ(t);
                     }
-                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA)
+                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
                     {
                         foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                             CastQ(enemy);
@@ -312,11 +290,16 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                if (!Orbwalking.InAutoAttackRange(t))
+                if ((OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && CanCast) || !Orbwalking.InAutoAttackRange(t))
                 {
                     if (Program.Combo && Player.Mana > RMANA + QMANA)
                     {
                         Program.CastSpell(E, t);
+                    }
+                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
+                    {
+                        foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
+                            E.Cast(enemy);
                     }
                 }
             }
@@ -333,7 +316,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private float GetWDmg(Obj_AI_Base target)
         {
-            return (OktwCommon.GetBuffCount(target, "varuswdebuff") *  W.GetDamage(target, 1));
+            return (OktwCommon.GetBuffCount(target, "varuswdebuff") * W.GetDamage(target, 1));
         }
 
         private void CastQ(Obj_AI_Base target)
