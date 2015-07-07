@@ -31,14 +31,14 @@ namespace OneKeyToWin_AIO_Sebby
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
 
-        public static Spell Q, W, E, R;
+        public static Spell Q, W, E, R, DrawSpell;
 
         public static string championMsg;
-        public static float JungleTime;
+        public static float JungleTime, DrawSpellTime=0;
         public static Obj_AI_Hero jungler = ObjectManager.Player;
         public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
-
+        public static PredictionOutput DrawSpellPos;
         public static bool 
             tickSkip = true,
             RangeFix = true,
@@ -220,7 +220,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
 
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "0 Show enemy clicks and HitChance num").SetValue(false));                
+                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "Draw Aiming").SetValue(false));                
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix",true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "3 Custome Collision(can drop fps)", true).SetValue(false));
@@ -456,6 +456,13 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.Path.Count() > 1)
                 return;
             var poutput = QWER.GetPrediction(target);
+            if (Game.Time - DrawSpellTime > 0.5)
+            {
+                DrawSpell = QWER;
+                DrawSpellTime = Game.Time;
+                
+            }
+            DrawSpellPos = poutput;
             if (ColFix  && HitChanceNum == 4)
             {
                 if (QWER.Collision && OktwCommon.GetCollision(target, QWER, false, true))
@@ -708,6 +715,16 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
+            var debugPred = Config.Item("debugPred").GetValue<bool>();
+            if (debugPred && Game.Time - DrawSpellTime < 0.5)
+            {
+                if (DrawSpell.Type == SkillshotType.SkillshotLine)
+                    OktwCommon.DrawLineRectangle(DrawSpellPos.CastPosition, Player.Position, (int)DrawSpell.Width, 1, System.Drawing.Color.DimGray);
+                if (DrawSpell.Type == SkillshotType.SkillshotCircle)
+                    Utility.DrawCircle(DrawSpellPos.CastPosition, DrawSpell.Width, System.Drawing.Color.DimGray, 4, 1);
+
+                drawText("Aiming " + DrawSpellPos.Hitchance, Player.Position.Extend(DrawSpellPos.CastPosition, 400), System.Drawing.Color.Gray);
+            }
 
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
@@ -731,7 +748,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
             var HpBar = Config.Item("HpBar").GetValue<bool>();
-            var debugPred = Config.Item("debugPred").GetValue<bool>();
+
             var championInfo = Config.Item("championInfo").GetValue<bool>();
             var GankAlert = Config.Item("GankAlert").GetValue<bool>();
             var ShowKDA = Config.Item("ShowKDA").GetValue<bool>();
@@ -753,16 +770,12 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (enemy.IsValidTarget())
                 {
-                    if (debugPred)
-                    {
-                        var prepos = Prediction.GetPrediction(enemy, 0.5f);
-                        drawText("" + (int)prepos.Hitchance, enemy.Position, System.Drawing.Color.Aqua);
-                    }
+                    
                     if (ShowClicks)
                     {
                         List<Vector2> waypoints = enemy.GetWaypoints();
                         drawLine(enemy.Position, waypoints.Last<Vector2>().To3D(), 1, System.Drawing.Color.Red);
-                        Utility.DrawCircle(waypoints.Last<Vector2>().To3D(), 20, System.Drawing.Color.Yellow, 1, 1);
+
                     }
                 }
 
