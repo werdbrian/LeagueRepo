@@ -15,7 +15,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell E, Q, Qc, W, R;
         public float QMANA, WMANA, EMANA, RMANA;
-
+        private static GameObject QMissile = null;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
@@ -28,8 +28,9 @@ namespace OneKeyToWin_AIO_Sebby
 
             Q.SetSkillshot(0.25f, 90f, 1350f, false, SkillshotType.SkillshotLine);
             Qc.SetSkillshot(0.25f, 90f, 1350f, true, SkillshotType.SkillshotLine);
-
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show KS notification").SetValue(true));
+            Config.SubMenu("Draw").AddItem(new MenuItem("Qhelp", "Show Q helper").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
@@ -52,6 +53,35 @@ namespace OneKeyToWin_AIO_Sebby
             Orbwalking.AfterAttack += Orbwalker_AfterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+
+            Obj_SpellMissile.OnCreate += SpellMissile_OnCreateOld;
+            Obj_SpellMissile.OnDelete += Obj_SpellMissile_OnDelete;
+        }
+
+        private void Obj_SpellMissile_OnDelete(GameObject sender, EventArgs args)
+        {
+            if (!sender.IsValid<MissileClient>())
+                return;
+            MissileClient missile = (MissileClient)sender;
+
+            if (missile.IsValid && missile.IsAlly && missile.SData.Name != null && (missile.SData.Name == "SivirQMissile" || missile.SData.Name == "SivirQMissileReturn"))
+            {
+                Program.debug("Cipka " + missile.SData.Name);
+                QMissile = null;
+            }
+        }
+
+        private void SpellMissile_OnCreateOld(GameObject sender, EventArgs args)
+        {
+            if (!sender.IsValid<MissileClient>())
+                return;
+            MissileClient missile = (MissileClient)sender;
+
+            if (missile.IsValid && missile.IsAlly && missile.SData.Name != null && (missile.SData.Name == "SivirQMissile" || missile.SData.Name == "SivirQMissileReturn"))
+            {
+                Program.debug("Dupka " + missile.SData.Name);
+               QMissile = sender;
+            }
         }
 
         public void Orbwalker_AfterAttack(AttackableUnit unit, AttackableUnit target)
@@ -204,8 +234,46 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = 0;
             }
         }
+
+        public static void drawText2(string msg, Vector3 Hero, int high, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - high, color, msg);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
+            if (QMissile != null && Config.Item("Qhelp").GetValue<bool>())
+                OktwCommon.DrawLineRectangle(QMissile.Position, Player.Position, (int)Q.Width, 1, System.Drawing.Color.White);
+
+
+            if (Config.Item("notif").GetValue<bool>())
+            {
+                if (Player.HasBuff("sivirwmarker"))
+                {
+                    var color = System.Drawing.Color.Yellow;
+                    var buffTime = OktwCommon.GetPassiveTime(Player, "sivirwmarker");
+                    if (buffTime<1)
+                        color = System.Drawing.Color.Red;
+                    drawText2("W:  " + String.Format("{0:0.0}", buffTime), Player.Position, 175, color);
+                }
+                if (Player.HasBuff("SivirE"))
+                {
+                    var color = System.Drawing.Color.Aqua;
+                    var buffTime = OktwCommon.GetPassiveTime(Player, "SivirE");
+                    if (buffTime < 1)
+                        color = System.Drawing.Color.Red;
+                    drawText2("E:  " + String.Format("{0:0.0}", buffTime), Player.Position, 200, color);
+                }
+                if (Player.HasBuff("SivirR"))
+                {
+                    var color = System.Drawing.Color.GreenYellow;
+                    var buffTime = OktwCommon.GetPassiveTime(Player, "SivirR");
+                    if (buffTime < 1)
+                        color = System.Drawing.Color.Red;
+                    drawText2("R:  " + String.Format("{0:0.0}", buffTime), Player.Position, 225, color);
+                }
+            }
 
             if (Config.Item("debug").GetValue<bool>())
             {
