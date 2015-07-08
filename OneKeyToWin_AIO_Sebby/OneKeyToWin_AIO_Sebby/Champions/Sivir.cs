@@ -155,20 +155,6 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
-        private bool farmW()
-        {
-            var allMinions = MinionManager.GetMinions(Player.ServerPosition, 1300, MinionTypes.All);
-            int num = 0;
-            foreach (var minion in allMinions)
-            {
-                num++;
-            }
-            if (num > 4 )
-                return true;
-            else
-                return false;
-        }
-
         private void LogicQ()
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
@@ -189,7 +175,11 @@ namespace OneKeyToWin_AIO_Sebby
                      else if (ObjectManager.Player.Mana > RMANA + WMANA + QMANA + QMANA)
                         Program.CastSpell(Qc, t);
                      else if (Player.Mana > RMANA + WMANA + QMANA + QMANA)
-                        Q.CastIfWillHit(t, 2, true);
+                     {
+                         Q.CastIfWillHit(t, 2, true);
+                         if(Program.LaneClear)
+                             Program.CastSpell(Q, t);
+                     }
                 }
                 if (Player.Mana > RMANA + QMANA + WMANA && Q.IsReady())
                 {
@@ -234,6 +224,20 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                 }
             }
+        }
+
+        private bool farmW()
+        {
+            var allMinions = MinionManager.GetMinions(Player.ServerPosition, 1300, MinionTypes.All);
+            int num = 0;
+            foreach (var minion in allMinions)
+            {
+                num++;
+            }
+            if (num > 4)
+                return true;
+            else
+                return false;
         }
 
         private void SetMana()
