@@ -28,6 +28,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Q.SetSkillshot(0.25f, 90f, 1350f, false, SkillshotType.SkillshotLine);
             Qc.SetSkillshot(0.25f, 90f, 1350f, true, SkillshotType.SkillshotLine);
+
             Config.SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show KS notification").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("Qhelp", "Show Q helper").SetValue(true));
@@ -48,7 +49,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("Edmg", "E dmg % hp").SetValue(new Slider(0, 100, 0)));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("jungle", "Jungle Farm").SetValue(true));
 
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
