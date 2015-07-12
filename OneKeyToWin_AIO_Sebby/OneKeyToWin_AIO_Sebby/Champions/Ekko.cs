@@ -43,6 +43,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Rdmg", "R dmg % hp").SetValue(new Slider(20, 100, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
@@ -167,6 +168,24 @@ namespace OneKeyToWin_AIO_Sebby
                 E.Cast(Player.Position.Extend(t.Position, E.Range), true);
             }
         }
+
+        private void Jungle()
+        {
+            if (Player.Mana > RMANA + WMANA + RMANA &&  Config.Item("jungleQ").GetValue<bool>())
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 500, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+
+                    if (Q.IsReady() )
+                    {
+                        Q.Cast(mob);
+                        return;
+                    }
+                }
+            }
+        }
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
         {
             if (obj.IsValid  )
@@ -226,11 +245,14 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
             {
+
                 var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q1.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
                 if (Qfarm.MinionsHit > 5 && Q1.IsReady())
                     Q.Cast(Qfarm.Position);
+                Jungle();
             }
+            
         }
 
 
