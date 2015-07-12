@@ -53,7 +53,27 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             Orbwalking.BeforeAttack += BeforeAttack;
+            Orbwalking.AfterAttack += afterAttack;
             Interrupter2.OnInterruptableTarget +=Interrupter2_OnInterruptableTarget;
+        }
+
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (Orbwalker.GetTarget() == null)
+                return;
+            var ORBtarget = Orbwalker.GetTarget();
+            if (ORBtarget.IsValid && ORBtarget is Obj_AI_Hero)
+            {
+                if (Program.Combo)
+                    Q.Cast();
+                else if (Program.Farm && Config.Item("harasQ").GetValue<bool>())
+                    Q.Cast();
+            }
+        }
+
+        private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -188,20 +208,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     R.Cast(Target);
                 }
-            }
-        }
-
-        private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-        {
-            if (Orbwalker.GetTarget() == null)
-                return;
-            var target = Orbwalker.GetTarget();
-            if (target.IsValid && target is Obj_AI_Hero)
-            {
-                if (Program.Combo)
-                    Q.Cast();
-                else if (Program.Farm && Config.Item("harasQ").GetValue<bool>())
-                    Q.Cast();
             }
         }
 
