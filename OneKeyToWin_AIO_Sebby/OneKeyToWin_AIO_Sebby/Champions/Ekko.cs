@@ -262,6 +262,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
+                W.CastIfWillHit(t, 2, true);
                 if (t.HasBuffOfType(BuffType.Slow) || t.CountEnemiesInRange(250) > 1)
                 {
                     Program.CastSpell(W, t);
