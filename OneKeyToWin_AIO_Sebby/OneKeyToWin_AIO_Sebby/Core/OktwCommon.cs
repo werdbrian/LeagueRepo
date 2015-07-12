@@ -32,6 +32,8 @@ namespace OneKeyToWin_AIO_Sebby
             if (!Program.Farm)
                 return true;
             minions = MinionManager.GetMinions(Player.Position, Player.AttackRange+200, MinionTypes.All);
+            if (minions == null)
+                return true;
 
             var minion = minions.First(minion2 => minion2.IsValidTarget());
 
