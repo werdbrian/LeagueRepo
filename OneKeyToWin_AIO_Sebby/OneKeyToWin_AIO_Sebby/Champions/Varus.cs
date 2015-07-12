@@ -266,7 +266,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         CastQ(t);
                     }
-                    else if (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + QMANA && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true))
+                    else if (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + QMANA && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                     {
                         CastQ(t);
                     }

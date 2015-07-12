@@ -177,9 +177,10 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Program.Combo && Player.Mana < RMANA + QMANA)
                     return;
-                if (Program.Farm && Player.Mana < RMANA + QMANA + EMANA + WMANA)
+                if (Program.Farm && Player.Mana < RMANA + QMANA + EMANA + WMANA )
                     return;
-                
+                if (!OktwCommon.CanHarras())
+                    return;
                 var prepos = Prediction.GetPrediction(t1, Q1.Delay); 
                 if ((int)prepos.Hitchance < 5)
                     return;

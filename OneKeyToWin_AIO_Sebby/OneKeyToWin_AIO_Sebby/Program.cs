@@ -69,10 +69,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config = new Menu("OneKeyToWin AIO", "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
-            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
-            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
-            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
-            Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
+            //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
+            //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
+            //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
+           // Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
 
@@ -137,7 +137,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
 
-                Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
+               
                 
                 switch (Player.ChampionName)
                 {
@@ -212,7 +212,7 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                        
                 }
-
+                Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
@@ -251,7 +251,7 @@ namespace OneKeyToWin_AIO_Sebby
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
             new Core.AutoLvlUp().LoadOKTW();
-
+            //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
             {
                 new Core.OKTWlab().LoadOKTW();
@@ -272,7 +272,7 @@ namespace OneKeyToWin_AIO_Sebby
                 tickIndex = 0;
             if (LagFree(0))
             {
-                tickSkip = Config.Item("pre").GetValue<bool>();
+                //tickSkip = Config.Item("pre").GetValue<bool>();
                 HitChanceNum = Config.Item("Hit", true).GetValue<Slider>().Value;
                 IgnoreNoMove = Config.Item("IgnoreNoMove", true).GetValue<bool>();
                 RangeFix = Config.Item("RangeFix", true).GetValue<bool>();
@@ -418,8 +418,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static bool LagFree(int offset)
         {
-            if (!tickSkip)
-                return true;
+            //if (!tickSkip)
+               // return true;
             if (tickIndex == offset)
                 return true;
             else

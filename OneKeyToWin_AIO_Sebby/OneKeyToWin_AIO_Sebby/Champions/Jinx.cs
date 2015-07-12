@@ -211,7 +211,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Program.CastSpell(W, t);
                 }
-                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0)
+                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0 && OktwCommon.CanHarras())
                 {
                     Program.CastSpell(W, t);
                 }

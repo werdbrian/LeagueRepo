@@ -15,10 +15,31 @@ namespace OneKeyToWin_AIO_Sebby
             blockAttack = false,
             blockSpells = false;
 
+        public static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+        public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
+        private static List<Obj_AI_Base> minions;
         public void LoadOKTW()
         {
             Obj_AI_Base.OnIssueOrder += Obj_AI_Base_OnIssueOrder;
             Spellbook.OnCastSpell +=Spellbook_OnCastSpell;
+            
+        }
+
+        public static bool CanHarras()
+        {
+            if ( Player.IsWindingUp)
+                return false;
+            if (!Program.Farm)
+                return true;
+            minions = MinionManager.GetMinions(Player.Position, Player.AttackRange+200, MinionTypes.All);
+
+            var minion = minions.First(minion2 => minion2.IsValidTarget());
+
+            if (minion.Health < Player.GetAutoAttackDamage(minion) + 3 * minion.GetAutoAttackDamage(minion))
+                return false;
+            else
+                return true;
+            
         }
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)

@@ -104,6 +104,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
             return;
+            
         }
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
@@ -136,7 +137,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 SetMana();
             }
-
             var tr = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
             if (Config.Item("useR").GetValue<KeyBind>().Active && tr.IsValidTarget())
@@ -215,7 +215,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
-                else if ((Farm && attackNow && Player.Mana > RMANA + EMANA + QMANA + WMANA) && !Player.UnderTurret(true))
+                else if ((Farm && attackNow && Player.Mana > RMANA + EMANA + QMANA + WMANA) && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
                     {
@@ -257,7 +257,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.debug("W noob mode");
                 else if (Program.Combo && Player.Mana > RMANA + WMANA + EMANA + QMANA)
                     Program.CastSpell(W, t);
-                else if (Farm && Config.Item("harrasW").GetValue<bool>() && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
+                else if (Farm && Config.Item("harrasW").GetValue<bool>() && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA && OktwCommon.CanHarras())
                     Program.CastSpell(W, t);
                 else if ((Program.Combo || Farm) && Player.Mana > RMANA + WMANA + EMANA)
                 {

@@ -46,6 +46,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 //obj = sender;
                 //Program.debug(sender.Name);
+                //Program.debug(""+);
                 //Program.debug("cast time" +(time - Game.Time));
             }
         }
