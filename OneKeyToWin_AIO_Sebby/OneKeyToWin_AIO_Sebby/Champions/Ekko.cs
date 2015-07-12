@@ -103,7 +103,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(1) && Q.IsReady() )
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady())
+            if (Program.LagFree(2) && W.IsReady() && Player.Mana > RMANA + WMANA + EMANA + QMANA)
                 LogicW();
             if (Program.LagFree(3) && E.IsReady() )
                 LogicE();
@@ -236,24 +236,21 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
+            
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && t.IsMoving)
+            if (t.IsValidTarget() )
             {
-                var qDmg = GetQdmg(t);
                 if (t.HasBuffOfType(BuffType.Slow) || t.CountEnemiesInRange(250) > 1)
                 {
-                    Program.CastSpell(E, t);
-
-                }
-                if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA)
                     Program.CastSpell(W, t);
-                else if (Program.Farm && Config.Item("haras" + t.BaseSkinName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > ObjectManager.Player.MaxMana * 0.8  && ObjectManager.Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA)
-                    Program.CastSpell(W, t);
-                else if ((Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + WMANA + EMANA)
-                {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
-                        W.Cast(enemy, true);
                 }
+                if (Program.Combo  && W.GetPrediction(t).CastPosition.Distance(t.Position) > 200)
+                    Program.CastSpell(W, t);
+            }
+            if ((Program.Combo || Program.Farm))
+            {
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
+                    W.Cast(enemy, true);
             }
         }
         private void SetMana()
