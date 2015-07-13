@@ -82,7 +82,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("visibleR").GetValue<bool>() && Player.HasBuff("vaynetumblefade") && Player.CountEnemiesInRange(800)>1)
                 args.Process = false;
 
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(800) && GetWStacks(target) > 0))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(800) && GetWStacks(target) >= 0))
             {
                 if (Orbwalking.InAutoAttackRange(target))
                     Orbwalker.ForceTarget(target);
@@ -200,7 +200,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (buff.Name == "vaynesilvereddebuff")
                     return buff.Count;
             }
-            return 0;
+            return -1;
         }
 
         private List<Vector3> CirclePoint(float CircleLineSegmentN, float radius, Vector3 position)
