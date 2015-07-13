@@ -46,8 +46,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("Rks", "R KS out range AA").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("countR", "Auto R if x enemies (combo)").SetValue(new Slider(3, 5, 1)));
            
-
-
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             //AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -60,7 +58,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Program.LagFree(0))
             {
                 SetMana();
-                
             }
             if (Program.LagFree(1) && E.IsReady() )
                 LogicE();
@@ -74,7 +71,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
@@ -105,7 +101,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-
             if (Config.Item("countQ").GetValue<Slider>().Value == 0 || Player.Mana < RMANA + QMANA)
                 return;
             var count = 0;
@@ -115,7 +110,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                 if (Player.Distance( waypoints.Last<Vector2>().To3D()) < 600)
                     count++;
-
             }
             if (count >= Config.Item("countQ").GetValue<Slider>().Value)
                 Q.Cast();
@@ -204,7 +198,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         }
         private void Drawing_OnDraw(EventArgs args)
         {
-
             if (Config.Item("notif").GetValue<bool>())
             {
                 if (Player.HasBuff("TwitchHideInShadows"))
@@ -242,6 +235,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
             }
+
             if (Config.Item("rRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
