@@ -149,11 +149,11 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
                     {
-                        if (ally.Health - dmg < ally.CountEnemiesInRange(600) * ally.Level * 15)
+                        if (ally.Health - dmg < ally.CountEnemiesInRange(600) * ally.Level * 20)
                             Player.Spellbook.CastSpell(heal, ally);
                     }
                 }
-                else if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15 && dmg > 0)
+                if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 20 && dmg > 0)
                 {
                     Player.Spellbook.CastSpell(heal, Player);
                 }
