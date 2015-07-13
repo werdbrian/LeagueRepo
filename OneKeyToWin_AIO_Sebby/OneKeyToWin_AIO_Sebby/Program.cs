@@ -210,6 +210,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Tristana":
                         new Champions.Tristana().LoadMenuOKTW();
                         break;
+                    case "Xerath":
+                        new Champions.Xerath().LoadOKTW();
+                        break;
                        
                 }
                 Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
