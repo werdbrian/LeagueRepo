@@ -74,10 +74,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
+            
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-                if (!Orbwalking.InAutoAttackRange(t) && Player.GetAutoAttackDamage(t) * 4 > t.Health)
+                if (!Orbwalking.InAutoAttackRange(t) && Config.Item("Rks").GetValue<bool>() && Player.GetAutoAttackDamage(t) * 4 > t.Health)
                     R.Cast();
 
                 if (t.CountEnemiesInRange(450) >= Config.Item("countR").GetValue<Slider>().Value)
