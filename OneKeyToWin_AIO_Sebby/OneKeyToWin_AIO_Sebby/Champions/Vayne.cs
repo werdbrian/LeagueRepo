@@ -183,7 +183,7 @@ namespace OneKeyToWin_AIO_Sebby
             var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
 
 
-            var points = CirclePoint(8, 50, finalPosition);
+            var points = CirclePoint(8, 60, finalPosition);
 
             bool cast = true;
             
