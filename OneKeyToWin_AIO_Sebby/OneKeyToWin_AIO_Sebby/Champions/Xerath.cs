@@ -34,6 +34,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
 
