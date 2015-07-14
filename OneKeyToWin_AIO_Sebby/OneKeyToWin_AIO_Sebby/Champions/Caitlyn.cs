@@ -48,7 +48,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LoadMenuOKTW()
         {
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
@@ -289,6 +289,14 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = R.Instance.ManaCost;
         }
 
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("watermark").GetValue<bool>())
@@ -344,7 +352,10 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     var rDamage = R.GetDamage(t);
                     if (rDamage > t.Health)
+                    {
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
                 }
 
                 var tw = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
