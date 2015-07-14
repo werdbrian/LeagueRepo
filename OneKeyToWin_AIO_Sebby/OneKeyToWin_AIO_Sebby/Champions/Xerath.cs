@@ -103,9 +103,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
-            if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
+            if (Program.LagFree(2) && W.IsReady() && !Player.IsWindingUp && Config.Item("autoW").GetValue<bool>())
                 LogicW();
-            if (Program.LagFree(3) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(3) && Q.IsReady() && !Player.IsWindingUp && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
