@@ -31,6 +31,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Q.SetCharged("XerathArcanopulseChargeUp", "XerathArcanopulseChargeUp", 800, 1550, 1.5f);
 
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
@@ -61,20 +62,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
-        }
-
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            if (Config.Item("qRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (Q.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-            }
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -114,11 +101,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 Jungle();
             }
 
-            if (E.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
             if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
                 LogicW();
-            if (Program.LagFree(3) && Q.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Program.LagFree(3) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
@@ -126,13 +113,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            R.Range = 1850 + R.Level * 1050;
+            R.Range = 1550 + R.Level * 1050;
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
-            if (Player.CountEnemiesInRange(900) == 0 && t.IsValidTarget() && !t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0)
+            if (t.IsValidTarget() )
             {
-                if (R.GetDamage(t) * 2 > t.Health)
+                if (Config.Item("useR").GetValue<KeyBind>().Active)
                 {
                     Program.CastSpell(R, t);
+                }
+                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(900) == 0)
+                {
+                    if (R.GetDamage(t) * 2 > t.Health)
+                    {
+                        Program.CastSpell(R, t);
+                    }
                 }
             }
         }
@@ -283,6 +277,75 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+            }
+        }
+
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            if (Config.Item("qRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (Q.IsReady())
+                        Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+            }
+
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+            }
+
+            if (Config.Item("noti").GetValue<bool>() && R.IsReady())
+            {
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+
+                if (t.IsValidTarget())
+                {
+                    var rDamage = R.GetDamage(t);
+                    if (rDamage * 3 > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "3 x Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+                    else if (rDamage * 2 > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "2 x Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+                    else if (rDamage > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "1 x Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+                }
             }
         }
     }
