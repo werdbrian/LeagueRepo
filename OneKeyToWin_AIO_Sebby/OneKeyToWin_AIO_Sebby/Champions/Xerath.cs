@@ -66,7 +66,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Player.Distance(gapcloser.Sender.Position) < E.Range)
+            if (Player.Distance(gapcloser.Sender.ServerPosition) < E.Range)
             {
                 E.Cast(gapcloser.Sender);
             }
@@ -74,7 +74,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (Player.Distance(sender.Position) < E.Range)
+            if (Player.Distance(sender.ServerPosition) < E.Range)
             {
                 E.Cast(sender);
             }
