@@ -240,7 +240,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Jungle()
         {
-            if (Player.Mana > RMANA + WMANA + RMANA + WMANA)
+            if (Program.LaneClear && Player.Mana > RMANA + WMANA + RMANA + WMANA)
             {
                 var mobs = MinionManager.GetMinions(Player.ServerPosition, 600, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                 if (mobs.Count > 0)
