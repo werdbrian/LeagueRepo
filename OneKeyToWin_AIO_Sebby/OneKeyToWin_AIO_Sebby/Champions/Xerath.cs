@@ -122,7 +122,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     Program.CastSpell(R, t);
                 }
-                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(900) == 0)
+                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1300) == 0)
                 {
                     if (R.GetDamage(t) * 2 > t.Health)
                     {
@@ -198,11 +198,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     }
                 }
             }
-            if (!t2.IsValidTarget() && Q.Range > 1500 && Program.LaneClear && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA))
+            else if (Q.Range > 1400 && Program.LaneClear && (Q.IsCharging ||(Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)))
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
-                if (Qfarm.MinionsHit > 0)
+                if (Qfarm.MinionsHit > 2)
                     Q.Cast(Qfarm.Position);
             }
         }
