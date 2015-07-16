@@ -55,6 +55,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (sender.IsAlly && sender is Obj_AI_Hero && sender.Distance(Player.Position) < 800)
+            {
+                Program.debug(args.SData.Name);
+            }
             if (sender.IsEnemy && sender is Obj_AI_Hero && sender.Distance(Player.Position) < 800)
             {
 
@@ -79,6 +83,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         CastVisionWards(sender.ServerPosition);
                         break;
                     case "RengarR":
+                        CastVisionWards(sender.ServerPosition);
+                        break;
+                    case "TwitchHideInShadows":
                         CastVisionWards(sender.ServerPosition);
                         break;
                 }
