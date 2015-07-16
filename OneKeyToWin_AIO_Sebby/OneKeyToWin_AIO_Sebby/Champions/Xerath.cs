@@ -194,7 +194,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else if (wDmg + qDmg > t.Health && Player.Mana > WMANA  + QMANA)
                     Program.CastSpell(W, t);
-                else if (Program.Combo && Player.Mana > RMANA + EMANA + QMANA)
+                else if (Program.Combo && Player.Mana > RMANA + EMANA )
                     Program.CastSpell(W, t);
                 else if (Program.Farm && Config.Item("harrasW").GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA && OktwCommon.CanHarras())
                     Program.CastSpell(W, t);
@@ -234,7 +234,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         Q.StartCharging();
                     }
-                    else if (t.IsValidTarget(W.Range) && Program.Farm && Player.Mana > RMANA + EMANA + QMANA + QMANA && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && OktwCommon.CanHarras())
+                    else if (t.IsValidTarget(1200) && Program.Farm && Player.Mana > RMANA + EMANA + QMANA + QMANA && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                     {
                         Q.StartCharging();
                     }
@@ -308,7 +308,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void SetMana()
         {
-            QMANA = Q.Instance.ManaCost;
+            QMANA = Q.Instance.ManaCost - (30 + Player.Level * 3 + Player.Level);
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
 
