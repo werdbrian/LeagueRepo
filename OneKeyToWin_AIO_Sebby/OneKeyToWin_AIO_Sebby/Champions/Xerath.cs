@@ -128,24 +128,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (Config.Item("useR").GetValue<KeyBind>().Active)
                 {
-                    Program.CastSpell(R, t);
-                }
-                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
-                {
-                    if (R.GetDamage(t) * 2 > t.Health)
-                    {
-                        Program.CastSpell(R, t);
-                    }
-                }
-                if (IsCastingR)
-                {
-                    Program.CastSpell(R, t);
-                    if (Player.Level < 9)
-                    {
-
-                    }
-                    Rtarget = R.GetPrediction(t).CastPosition;
-
                     if (Config.Item("trinkiet").GetValue<bool>())
                     {
                         if (FarsightOrb.IsReady())
@@ -159,6 +141,38 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                             ScryingOrb.Cast(Rtarget);
                         }
                     }
+                    Program.CastSpell(R, t);
+                }
+                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
+                {
+                    if (R.GetDamage(t) * 2 > t.Health)
+                    {
+                        if (Config.Item("trinkiet").GetValue<bool>())
+                        {
+                            if (FarsightOrb.IsReady())
+                                FarsightOrb.Cast(Rtarget);
+                            else if (ScryingOrb.IsReady())
+                            {
+                                if (Player.Level < 9)
+                                    ScryingOrb.Range = 2500;
+                                else
+                                    ScryingOrb.Range = 3500;
+                                ScryingOrb.Cast(Rtarget);
+                            }
+                        }
+                        Program.CastSpell(R, t);
+                    }
+                }
+                if (IsCastingR)
+                {
+                    Program.CastSpell(R, t);
+                    if (Player.Level < 9)
+                    {
+
+                    }
+                    Rtarget = R.GetPrediction(t).CastPosition;
+
+                    
                 }
             }
             else if (IsCastingR)
