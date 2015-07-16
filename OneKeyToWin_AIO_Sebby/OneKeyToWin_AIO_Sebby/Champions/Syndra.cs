@@ -40,6 +40,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var mob = mobs[0];
                 if (W.IsReady() )
                 {
+                    Program.debug("dupa");
+                    W.Cast(mob);
                     W.Cast(mob,true);
                     W.CastOnUnit(mob,true);
                     Player.Spellbook.CastSpell(W.Slot, mob);
