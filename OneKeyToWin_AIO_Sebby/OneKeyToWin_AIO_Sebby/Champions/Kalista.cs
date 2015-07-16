@@ -161,32 +161,26 @@ namespace OneKeyToWin_AIO_Sebby
                         cast = false;
                 }
 
-                bool back = false;
-                List<Vector2> waypoints = t.GetWaypoints();
-                if ((ObjectManager.Player.Distance(waypoints.Last<Vector2>().To3D()) - ObjectManager.Player.Distance(t.Position)) > 100)
-                {
-                    back = true;
-                }
-                var qDmg = Q.GetDamage(t) + ObjectManager.Player.GetAutoAttackDamage(t);
+
+                var qDmg = Q.GetDamage(t) + Player.GetAutoAttackDamage(t);
                 var eDmg = E.GetDamage(t);
 
-                if (qDmg > t.Health && eDmg < t.Health && ObjectManager.Player.Mana > QMANA + EMANA)
+                if (qDmg > t.Health && eDmg < t.Health && Player.Mana > QMANA + EMANA)
                     castQ(cast, t);
-                else if ((qDmg * 1.1) + eDmg > t.Health && eDmg < t.Health && ObjectManager.Player.Mana > QMANA + EMANA && Orbwalking.InAutoAttackRange(t))
+                else if ((qDmg * 1.1) + eDmg > t.Health && eDmg < t.Health && Player.Mana > QMANA + EMANA && Orbwalking.InAutoAttackRange(t))
                     castQ(cast, t);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && ((!Orbwalking.InAutoAttackRange(t) && back) || Player.CountEnemiesInRange(400) > 0))
+                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && (!Orbwalking.InAutoAttackRange(t) || Player.CountEnemiesInRange(400) > 0))
                     castQ(cast, t);
-                else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA + WMANA && !Orbwalking.InAutoAttackRange(t))
+                else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.Mana > RMANA + QMANA + EMANA + WMANA && !Orbwalking.InAutoAttackRange(t))
                     castQ(cast, t);
-                else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA + EMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true);
-
-                } 
-                    
+                }   
             }
         }
+
         private void castQ(bool cast, Obj_AI_Base t)
         {
             if (cast)
