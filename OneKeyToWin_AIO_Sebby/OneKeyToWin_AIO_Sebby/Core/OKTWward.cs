@@ -87,10 +87,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void CastVisionWards(Vector3 position)
         {
-            if (OracleLens.IsReady())
-                OracleLens.Cast(Player.Position.Extend(position, OracleLens.Range));
-            else if (VisionWard.IsReady())
-                VisionWard.Cast(Player.Position.Extend(position, VisionWard.Range));
+            if (Config.Item("AutoWardPink").GetValue<bool>())
+            {
+                if (OracleLens.IsReady())
+                    OracleLens.Cast(Player.Position.Extend(position, OracleLens.Range));
+                else if (VisionWard.IsReady())
+                    VisionWard.Cast(Player.Position.Extend(position, VisionWard.Range));
+            }
         }
     }
 }
