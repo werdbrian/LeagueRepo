@@ -17,6 +17,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private Vector3 Rtarget;
+
+        private Items.Item
+            FarsightOrb = new Items.Item(3342, 4000f),
+            ScryingOrb = new Items.Item(3363, 3500f);
+
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 1550);
@@ -48,8 +53,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("rCount", "Auto R if enemies in range (combo mode)").SetValue(new Slider(3, 0, 5)));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("trinkiet", "Auto blue trinkiet").SetValue(true));
+
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -134,8 +140,26 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (IsCastingR)
                 {
                     Program.CastSpell(R, t);
+                    if (Player.Level < 9)
+                    {
+
+                    }
+                    Rtarget = R.GetPrediction(t).CastPosition;
+
+                    if (Config.Item("trinkiet").GetValue<bool>())
+                    {
+                        if (FarsightOrb.IsReady())
+                            FarsightOrb.Cast(Rtarget);
+                        else if (ScryingOrb.IsReady())
+                        {
+                            if (Player.Level < 9)
+                                ScryingOrb.Range = 2500;
+                            else
+                                ScryingOrb.Range = 3500;
+                            ScryingOrb.Cast(Rtarget);
+                        }
+                    }
                 }
-                Rtarget = R.GetPrediction(t).CastPosition;
             }
             else if (IsCastingR)
             {
