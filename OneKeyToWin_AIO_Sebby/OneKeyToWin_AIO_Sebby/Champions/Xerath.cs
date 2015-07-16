@@ -194,11 +194,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else if (wDmg + qDmg > t.Health && Player.Mana > WMANA  + QMANA)
                     Program.CastSpell(W, t);
-                else if (Program.Combo && Player.Mana > RMANA + EMANA )
+                else if (Program.Combo && Player.Mana > RMANA + WMANA )
                     Program.CastSpell(W, t);
                 else if (Program.Farm && Config.Item("harrasW").GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA && OktwCommon.CanHarras())
                     Program.CastSpell(W, t);
-                else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
+                else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);
@@ -308,7 +308,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void SetMana()
         {
-            QMANA = Q.Instance.ManaCost - (30 + Player.Level * 3 + Player.Level);
+            QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
 
@@ -316,6 +316,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
+
+            RMANA = RMANA - (30 + Player.Level * 3 + Player.Level);
 
             if (Player.Health < Player.MaxHealth * 0.2 || Q.IsCharging)
             {
