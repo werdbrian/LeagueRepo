@@ -89,7 +89,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (t.IsValidTarget())
             {
                 
-                if (Program.Combo && Player.Mana > WMANA + EMANA )
+                if (Program.Combo && Player.Mana > WMANA + RMANA )
                     Program.CastSpell(W, t);
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
                 {
