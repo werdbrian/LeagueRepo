@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Spell Q, W, E, R;
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
-
+        private Vector3 Rtarget;
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 1550);
@@ -63,6 +63,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
+            
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -122,14 +123,23 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     Program.CastSpell(R, t);
                 }
-                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1300) == 0)
+                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
                 {
                     if (R.GetDamage(t) * 2 > t.Health)
                     {
                         Program.CastSpell(R, t);
                     }
                 }
+                if (IsCastingR)
+                {
+                    Program.CastSpell(R, t);
+                }
+                Rtarget = R.GetPrediction(t).CastPosition;
             }
+            else if (IsCastingR)
+            {
+                R.Cast(Rtarget);
+            } 
         }
 
         private void LogicW()
@@ -145,7 +155,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else if (wDmg + qDmg > t.Health && Player.Mana > WMANA  + QMANA)
                     Program.CastSpell(W, t);
-                else if (Program.Combo && Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                else if (Program.Combo && Player.Mana > RMANA + EMANA + QMANA)
                     Program.CastSpell(W, t);
                 else if (Program.Farm && Config.Item("harrasW").GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA && OktwCommon.CanHarras())
                     Program.CastSpell(W, t);
@@ -159,26 +169,24 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var allMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
                 var farmPos = W.GetCircularFarmLocation(allMinions, W.Width);
-                if (farmPos.MinionsHit > 3)
+                if (farmPos.MinionsHit > 2)
                     W.Cast(farmPos.Position);
             }
         }
 
         private void LogicQ()
         {
-
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            var t2 = TargetSelector.GetTarget(1550, TargetSelector.DamageType.Physical);
-            
             if (t.IsValidTarget())
             {
                 if (Q.IsCharging)
                 {
-                    if (OktwCommon.GetPassiveTime(Player, "XerathArcanopulseChargeUp") > 2)
-                        Program.CastSpell(Q, t);
-                    else
+                    if (OktwCommon.GetPassiveTime(Player, "XerathArcanopulseChargeUp") < 2 || t.IsValidTarget(W.Range))
                         Q.Cast(Q.GetPrediction(t).CastPosition);
+                        
+                    else
+                        Program.CastSpell(Q, t);
                     return;
                 }
                 else if (t.IsValidTarget(Q.Range - 300))
@@ -187,7 +195,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         Q.StartCharging();
                     }
-                    else if (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + QMANA && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && OktwCommon.CanHarras())
+                    else if (t.IsValidTarget(W.Range) && Program.Farm && Player.Mana > RMANA + EMANA + QMANA + QMANA && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                     {
                         Q.StartCharging();
                     }
@@ -198,11 +206,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     }
                 }
             }
-            else if (Q.Range > 1400 && Program.LaneClear && (Q.IsCharging ||(Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)))
+            else if (Q.Range > 1000 && Player.CountEnemiesInRange(1450) == 0 && Program.LaneClear && (Q.IsCharging || (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)))
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
-                if (Qfarm.MinionsHit > 2)
+                if (Qfarm.MinionsHit > 3 || (Q.IsCharging && Qfarm.MinionsHit > 0))
                     Q.Cast(Qfarm.Position);
             }
         }
