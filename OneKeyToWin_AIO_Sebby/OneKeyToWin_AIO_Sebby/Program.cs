@@ -136,8 +136,6 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-
-               
                 
                 switch (Player.ChampionName)
                 {
@@ -212,6 +210,9 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                     case "Xerath":
                         new Champions.Xerath().LoadOKTW();
+                        break;
+                    case "Syndra":
+                        new Champions.Syndra().LoadOKTW();
                         break;
                        
                 }
@@ -465,6 +466,7 @@ namespace OneKeyToWin_AIO_Sebby
                 DrawSpellTime = Game.Time;
                 
             }
+            
             DrawSpellPos = poutput;
             if (ColFix  && HitChanceNum == 4)
             {
