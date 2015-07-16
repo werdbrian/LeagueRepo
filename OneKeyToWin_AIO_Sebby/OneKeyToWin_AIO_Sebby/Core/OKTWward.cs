@@ -18,7 +18,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private Items.Item
             VisionWard = new Items.Item(2043, 550f),
-            OracleLens = new Items.Item(3340, 550f);
+            OracleLens = new Items.Item(3364, 550f);
 
         public void LoadOKTW()
         {
