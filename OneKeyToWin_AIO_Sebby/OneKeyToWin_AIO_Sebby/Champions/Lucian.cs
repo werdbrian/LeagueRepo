@@ -378,15 +378,6 @@ namespace OneKeyToWin_AIO_Sebby
             var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
         }
-
-        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
-        {
-            var wts1 = Drawing.WorldToScreen(pos1);
-            var wts2 = Drawing.WorldToScreen(pos2);
-
-            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
-        }
-
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("watermark").GetValue<bool>())
