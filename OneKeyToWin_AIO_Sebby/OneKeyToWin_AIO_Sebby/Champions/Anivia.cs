@@ -263,7 +263,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q, t);
                 else if (Program.Combo && ObjectManager.Player.Mana > EMANA + QMANA - 10)
                     Program.CastSpell(Q, t);
-                else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true))
+                else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA) && !ObjectManager.Player.UnderTurret(true) && OktwCommon.CanHarras())
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && Config.Item("haras" + enemy.BaseSkinName).GetValue<bool>()))
                         Program.CastSpell(Q, enemy);
