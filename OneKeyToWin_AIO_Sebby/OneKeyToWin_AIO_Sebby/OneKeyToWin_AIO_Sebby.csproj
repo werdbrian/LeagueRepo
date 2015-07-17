@@ -61,6 +61,7 @@
     <Compile Include="Champions\Blitzcrank.cs" />
     <Compile Include="Champions\Corki.cs" />
     <Compile Include="Champions\Darius.cs" />
+    <Compile Include="Champions\Kayle.cs" />
     <Compile Include="Champions\Syndra.cs" />
     <Compile Include="Champions\Tristana.cs" />
     <Compile Include="Champions\Twitch.cs" />

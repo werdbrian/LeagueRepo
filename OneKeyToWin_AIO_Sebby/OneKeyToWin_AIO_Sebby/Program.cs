@@ -214,6 +214,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Syndra":
                         new Champions.Syndra().LoadOKTW();
                         break;
+                    case "Kayle":
+                        new Champions.Kayle().LoadOKTW();
+                        break;
                        
                 }
                 Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
