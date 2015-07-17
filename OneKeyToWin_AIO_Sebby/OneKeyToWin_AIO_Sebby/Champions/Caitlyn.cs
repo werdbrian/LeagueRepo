@@ -110,16 +110,13 @@ namespace OneKeyToWin_AIO_Sebby
                 R.Range = (500 * R.Level) + 1500;
                 //debug("" + ObjectManager.Player.AttackRange);
             }
-
+            
             if (Program.LagFree(1) && E.IsReady() && !Player.IsWindingUp)
                 LogicE();
-
-            if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp)
-                LogicQ();
-
-            if (Program.LagFree(3) && W.IsReady() )
+            if (Program.LagFree(2) && W.IsReady())
                 LogicW();
-
+            if (Program.LagFree(3) && Q.IsReady() && !Player.IsWindingUp)
+                LogicQ();
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>() && !ObjectManager.Player.UnderTurret(true) && Game.Time - QCastTime > 1)
                 LogicR();
         }
@@ -167,7 +164,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("autoW").GetValue<bool>())
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
-                        W.Cast(enemy, true);
+                        W.Cast(enemy.Position, true);
                 
                 if (Config.Item("telE").GetValue<bool>())
                     foreach (var Object in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.Distance(Player.ServerPosition) < W.Range  && Obj.Team != Player.Team && (Obj.HasBuff("teleport_target", true) || Obj.HasBuff("Pantheon_GrandSkyfall_Jump", true))))
