@@ -108,10 +108,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (Program.LagFree(2) && W.IsReady() && !Player.IsWindingUp && Config.Item("autoW").GetValue<bool>())
                 LogicW();
-            if (Program.LagFree(3) && Q.IsReady() && !Player.IsWindingUp && Config.Item("autoQ").GetValue<bool>())
-                LogicQ();
-            if (Program.LagFree(4) && E.IsReady() && Config.Item("autoE").GetValue<bool>())
+            
+            if (Program.LagFree(3) && E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
+            if (Program.LagFree(4) && Q.IsReady() && !Player.IsWindingUp && Config.Item("autoQ").GetValue<bool>())
+                LogicQ();
         }
 
         private void LogicQ()
@@ -122,7 +123,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (Q.GetDamage(t) > t.Health)
                     Q.Cast(t);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && ObjectManager.Player.Mana > WMANA + QMANA)
                     Q.Cast(t);
                 else if (Program.Farm && Config.Item("harras" + t.ChampionName).GetValue<bool>() && Player.Mana > RMANA + WMANA + QMANA + QMANA)
                     Q.Cast(t);
