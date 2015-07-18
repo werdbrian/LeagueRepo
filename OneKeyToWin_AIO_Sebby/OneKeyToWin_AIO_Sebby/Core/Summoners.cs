@@ -142,7 +142,7 @@ namespace OneKeyToWin_AIO_Sebby
                 
             }
 
-            if (CanUse(heal) && Config.Item("Heal").GetValue<bool>())
+            if (CanUse(heal) && Config.Item("Heal").GetValue<bool>() && dmg > 0)
             {
                 bool AllyHeal = Config.Item("AllyHeal").GetValue<bool>();
                 if (AllyHeal)
@@ -151,12 +151,16 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         if (ally.Health - dmg < ally.CountEnemiesInRange(600) * ally.Level * 20)
                             Player.Spellbook.CastSpell(heal, ally);
+                        else if (ally.Health - dmg <  ally.Level * 10)
+                            Player.Spellbook.CastSpell(heal, ally);
                     }
                 }
-                if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 20 && dmg > 0)
-                {
+
+                if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 20)
                     Player.Spellbook.CastSpell(heal, Player);
-                }
+                else if (Player.Health - dmg < Player.Level * 10)
+                    Player.Spellbook.CastSpell(heal, Player);
+                
             }
         }
         private bool CanUse(SpellSlot sum)
