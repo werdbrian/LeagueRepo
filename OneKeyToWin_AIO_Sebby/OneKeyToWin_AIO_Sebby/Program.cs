@@ -55,7 +55,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
         public static Items.Item 
-            WardS = new Items.Item(2043, 600f),
             WardN = new Items.Item(2044, 600f),
             TrinketN = new Items.Item(3340, 600f),
             SightStone = new Items.Item(2049, 600f);
@@ -371,11 +370,6 @@ namespace OneKeyToWin_AIO_Sebby
                             else if (SightStone.IsReady())
                             {
                                 SightStone.Cast(need.PredictedPos);
-                                need.time = Game.Time - 5;
-                            }
-                            else if (WardS.IsReady())
-                            {
-                                WardS.Cast(need.PredictedPos);
                                 need.time = Game.Time - 5;
                             }
                             else if (WardN.IsReady())
