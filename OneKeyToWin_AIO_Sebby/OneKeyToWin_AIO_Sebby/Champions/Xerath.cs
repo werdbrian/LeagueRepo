@@ -26,7 +26,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             Q = new Spell(SpellSlot.Q, 1550);
             W = new Spell(SpellSlot.W, 1000);
-            E = new Spell(SpellSlot.E, 1150);
+            E = new Spell(SpellSlot.E, 1050);
             R = new Spell(SpellSlot.R, 675);
 
             Q.SetSkillshot(0.6f, 100f, float.MaxValue, false, SkillshotType.SkillshotLine);
@@ -65,12 +65,22 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion").SetValue(true));
 
             Game.OnUpdate += Game_OnGameUpdate;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
-            
+            Orbwalking.BeforeAttack +=Orbwalking_BeforeAttack;
+        }
+
+        private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (args.Target.IsValid<Obj_AI_Minion>() && !Player.HasBuff("xerathascended2onhit") && Program.Combo)
+            {
+                args.Process = false;
+                
+            }
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -108,6 +118,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 SetMana();
                 Jungle();
+                if (Program.Combo && Config.Item("force").GetValue<bool>() && Player.HasBuff("xerathascended2onhit") && !Orbwalker.GetTarget().IsValidTarget())
+                {
+                    var allMinions = MinionManager.GetMinions(Player.ServerPosition, Player.AttackRange + Player.BoundingRadius * 2, MinionTypes.All);
+                    foreach (var minion in allMinions)
+                    {
+                        Orbwalker.ForceTarget(minion);
+                    }
+                   
+                }
             }
 
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
