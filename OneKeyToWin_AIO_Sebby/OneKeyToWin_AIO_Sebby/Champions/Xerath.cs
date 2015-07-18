@@ -49,13 +49,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harrasW", "Harras W").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harrasE", "Harras E").SetValue(true));
-
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasE", "Harras E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("trinkiet", "Auto blue trinkiet").SetValue(true));
-
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -63,6 +61,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E").SetValue(true));
+
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion").SetValue(true));
@@ -72,6 +72,30 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack +=Orbwalking_BeforeAttack;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+        }
+
+        private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.R && !IsCastingR && FarsightOrb.IsReady())
+            {
+                if (Config.Item("trinkiet").GetValue<bool>())
+                {
+                    
+                    if (Player.Level < 9)
+                        ScryingOrb.Range = 2500;
+                    else
+                        ScryingOrb.Range = 3500;
+
+                    ScryingOrb.Cast(Rtarget);
+                    
+                }
+            }
+        }
+
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+
         }
 
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -147,51 +171,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (Config.Item("useR").GetValue<KeyBind>().Active)
                 {
-                    if (Config.Item("trinkiet").GetValue<bool>())
-                    {
-                        if (FarsightOrb.IsReady())
-                            FarsightOrb.Cast(Rtarget);
-                        else if (ScryingOrb.IsReady())
-                        {
-                            if (Player.Level < 9)
-                                ScryingOrb.Range = 2500;
-                            else
-                                ScryingOrb.Range = 3500;
-                            ScryingOrb.Cast(Rtarget);
-                        }
-                    }
                     Program.CastSpell(R, t);
                 }
                 if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
                 {
                     if (R.GetDamage(t) * 2 > t.Health)
                     {
-                        if (Config.Item("trinkiet").GetValue<bool>())
-                        {
-                            if (FarsightOrb.IsReady())
-                                FarsightOrb.Cast(Rtarget);
-                            else if (ScryingOrb.IsReady())
-                            {
-                                if (Player.Level < 9)
-                                    ScryingOrb.Range = 2500;
-                                else
-                                    ScryingOrb.Range = 3500;
-                                ScryingOrb.Cast(Rtarget);
-                            }
-                        }
+                        
                         Program.CastSpell(R, t);
                     }
                 }
                 if (IsCastingR)
                 {
                     Program.CastSpell(R, t);
-                    if (Player.Level < 9)
-                    {
-
-                    }
-                    Rtarget = R.GetPrediction(t).CastPosition;
-
-                    
+                    Rtarget = R.GetPrediction(t).CastPosition; 
                 }
             }
             else if (IsCastingR)
@@ -311,14 +304,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (mobs.Count > 0)
                 {
                     var mob = mobs[0];
+                    if (E.IsReady() && Config.Item("jungleE").GetValue<bool>())
+                    {
+                        E.Cast(mob.ServerPosition);
+                        return;
+                    }
                     if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
                     {
-                        W.Cast(mob);
+                        W.Cast(mob.ServerPosition);
                         return;
                     }
                     if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>())
                     {
-                        Q.Cast(mob);
+                        Q.Cast(mob.ServerPosition);
                         return;
                     }
                 }
