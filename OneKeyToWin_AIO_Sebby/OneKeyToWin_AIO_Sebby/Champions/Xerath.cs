@@ -17,6 +17,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private Vector3 Rtarget;
+        private float lastR = 0;
 
         private Items.Item
             FarsightOrb = new Items.Item(3342, 4000f),
@@ -34,7 +35,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E.SetSkillshot(0.25f, 60f, 1400f, true, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.7f, 120f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
-            Q.SetCharged("XerathArcanopulseChargeUp", "XerathArcanopulseChargeUp", 800, 1550, 1.5f);
+            Q.SetCharged("XerathArcanopulseChargeUp", "XerathArcanopulseChargeUp", 700, 1550, 1.5f);
 
             Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line").SetValue(true));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
@@ -54,7 +55,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("trinkiet", "Auto blue trinkiet").SetValue(true));
-
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("delayR", "custome R delay ms (1000ms = 1 sec)").SetValue(new Slider(0, 3000, 0)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
@@ -73,13 +74,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack +=Orbwalking_BeforeAttack;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.R && !IsCastingR && FarsightOrb.IsReady())
+            if (args.Slot == SpellSlot.R )
             {
-                if (Config.Item("trinkiet").GetValue<bool>())
+               
+                if (Config.Item("trinkiet").GetValue<bool>() && !IsCastingR)
                 {
                     
                     if (Player.Level < 9)
@@ -87,15 +90,23 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     else
                         ScryingOrb.Range = 3500;
 
-                    ScryingOrb.Cast(Rtarget);
-                    
+                    if (ScryingOrb.IsReady())
+                        ScryingOrb.Cast(Rtarget);
+                    if(FarsightOrb.IsReady())
+                        FarsightOrb.Cast(Rtarget);                  
                 }
             }
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-
+            if (sender.IsMe)
+            {
+                if (args.SData.Name == "xerathlocuspulse")
+                {
+                    lastR = Game.Time;
+                }
+            }
         }
 
         private void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -126,7 +137,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void Game_OnGameUpdate(EventArgs args)
         {
             //Program.debug(""+OktwCommon.GetPassiveTime(Player, "XerathArcanopulseChargeUp"));
-
             if (IsCastingR)
             {
                 OktwCommon.blockAttack = true;
@@ -181,13 +191,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Program.CastSpell(R, t);
                     }
                 }
-                if (IsCastingR)
+                if (Game.Time - lastR > 0.001 * (float)Config.Item("delayR").GetValue<Slider>().Value && IsCastingR)
                 {
                     Program.CastSpell(R, t);
-                    Rtarget = R.GetPrediction(t).CastPosition; 
+                     
                 }
+                Rtarget = R.GetPrediction(t).CastPosition;
             }
-            else if (IsCastingR)
+            else if (Game.Time - lastR > 0.001 * (float)Config.Item("delayR").GetValue<Slider>().Value && IsCastingR)
             {
                 R.Cast(Rtarget);
             } 
@@ -210,7 +221,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     Program.CastSpell(W, t);
                 else if (Program.Farm && Config.Item("harrasW").GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA && OktwCommon.CanHarras())
                     Program.CastSpell(W, t);
-                else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
+                else if ((Program.Combo || Program.Farm))
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);
