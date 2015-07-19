@@ -88,8 +88,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                
-                if (Program.Combo && Player.Mana > WMANA + RMANA )
+
+                if (Program.Combo && Player.Mana > WMANA + RMANA + 10 && (Player.GetAutoAttackDamage(t) * 2 > t.Health || !Orbwalking.InAutoAttackRange(t)))
                     Program.CastSpell(W, t);
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
                 {
