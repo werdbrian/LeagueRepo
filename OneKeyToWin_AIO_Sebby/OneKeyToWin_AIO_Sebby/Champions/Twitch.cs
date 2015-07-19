@@ -61,7 +61,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             if (Program.LagFree(1) && E.IsReady() )
                 LogicE();
-            if (Program.LagFree(2) && Q.IsReady())
+            if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp)
                 LogicQ();
             if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp)
                 LogicW();
@@ -89,7 +89,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (t.IsValidTarget())
             {
 
-                if (Program.Combo && Player.Mana > WMANA + RMANA + 10 && (Player.GetAutoAttackDamage(t) * 2 < t.Health || !Orbwalking.InAutoAttackRange(t)))
+                if (Program.Combo && Player.Mana > WMANA + RMANA + EMANA && (Player.GetAutoAttackDamage(t) * 2 < t.Health || !Orbwalking.InAutoAttackRange(t)))
                     Program.CastSpell(W, t);
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
                 {
