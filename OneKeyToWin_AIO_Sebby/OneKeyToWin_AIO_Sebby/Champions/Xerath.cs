@@ -26,7 +26,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 1550);
-            W = new Spell(SpellSlot.W, 1000);
+            W = new Spell(SpellSlot.W, 1100);
             E = new Spell(SpellSlot.E, 1050);
             R = new Spell(SpellSlot.R, 675);
 
@@ -56,6 +56,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("trinkiet", "Auto blue trinkiet").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("delayR", "custome R delay ms (1000ms = 1 sec)").SetValue(new Slider(0, 3000, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("MaxRangeR", "Max R range").SetValue(new Slider(5600, 5600, 0)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
@@ -81,10 +82,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (args.Slot == SpellSlot.R )
             {
-               
                 if (Config.Item("trinkiet").GetValue<bool>() && !IsCastingR)
                 {
-                    
                     if (Player.Level < 9)
                         ScryingOrb.Range = 2500;
                     else
@@ -159,7 +158,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         Orbwalker.ForceTarget(minion);
                     }
-                   
                 }
             }
 
@@ -175,20 +173,22 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            R.Range = 1550 + R.Level * 1050;
+            R.Range = 2000 + R.Level * 1200;
+            if (R.Range > Config.Item("MaxRangeR").GetValue<Slider>().Value)
+                R.Range = Config.Item("MaxRangeR").GetValue<Slider>().Value;
+            
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-                if (Config.Item("useR").GetValue<KeyBind>().Active)
+                if (Config.Item("useR").GetValue<KeyBind>().Active && !IsCastingR)
                 {
-                    Program.CastSpell(R, t);
+                    R.Cast();
                 }
-                if (!t.IsValidTarget(W.Range) && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
+                if (!t.IsValidTarget(W.Range) && !IsCastingR && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
                 {
                     if (R.GetDamage(t) * 2 > t.Health)
                     {
-                        
-                        Program.CastSpell(R, t);
+                        R.Cast();
                     }
                 }
                 if (Game.Time - lastR > 0.001 * (float)Config.Item("delayR").GetValue<Slider>().Value && IsCastingR)
@@ -231,7 +231,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var allMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
                 var farmPos = W.GetCircularFarmLocation(allMinions, W.Width);
-                if (farmPos.MinionsHit > 2)
+                if (farmPos.MinionsHit > 1)
                     W.Cast(farmPos.Position);
             }
         }
