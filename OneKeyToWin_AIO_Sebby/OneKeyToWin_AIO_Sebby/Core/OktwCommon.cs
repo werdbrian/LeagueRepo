@@ -37,7 +37,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var minion = minions.First(minion2 => minion2.IsValidTarget());
 
-            if (minion.Health < Player.GetAutoAttackDamage(minion) + 3 * minion.GetAutoAttackDamage(minion))
+            if (minion.Health < Player.GetAutoAttackDamage(minion) + 4 * minion.GetAutoAttackDamage(minion))
                 return false;
             else
                 return true;
