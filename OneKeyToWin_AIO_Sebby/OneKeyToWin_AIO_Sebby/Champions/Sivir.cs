@@ -105,11 +105,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (!E.IsReady() || !sender.IsEnemy)
                 return;
-
-            if (args.SData.Name == "KalistaExpungeWrapper" && Player.HasBuff("kalistaexpungemarker"))
-            {
-                E.Cast();
-            }
             
             if (!E.IsReady() || args.Target == null || !sender.IsEnemy || !args.Target.IsMe || !sender.IsValid<Obj_AI_Hero>() || args.SData.Name == "TormentedSoil")
                 return;
