@@ -7,8 +7,6 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-
-
 namespace OneKeyToWin_AIO_Sebby.Core
 {
     class OKTWward
@@ -70,7 +68,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsEnemy && sender is Obj_AI_Hero && sender.Distance(Player.Position) < 800)
+            if (sender.IsEnemy && !sender.IsMinion && sender is Obj_AI_Hero && sender.Distance(Player.Position) < 800)
             {
                 switch (args.SData.Name)
                 {
