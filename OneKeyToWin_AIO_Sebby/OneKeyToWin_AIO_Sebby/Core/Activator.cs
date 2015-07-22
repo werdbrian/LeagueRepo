@@ -37,10 +37,14 @@ namespace OneKeyToWin_AIO_Sebby
             Cutlass = new Items.Item(3144, 550f),
             Youmuus = new Items.Item(3142, 650f),
             Hydra = new Items.Item(3144, 440f),
-            Hydra2 = new Items.Item(3144, 440f);
-
+            Hydra2 = new Items.Item(3144, 440f),
+            Hextech = new Items.Item(3146, 700f),
+            //def
+            Randuin = new Items.Item(3143, 500f);
+        
         public void LoadOKTW()
         {
+            
             Config.SubMenu("Activator").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
@@ -52,6 +56,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("CutlassKS", "Cutlass KS").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("CutlassCombo", "Cutlass always in combo").SetValue(true));
 
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("Hextech", "Hextech").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("HextechKS", "Hextech KS").SetValue(true));
+            Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Cutlass").AddItem(new MenuItem("HextechCombo", "Hextech always in combo").SetValue(true));
+
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("Youmuus", "Youmuus").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusR", "LucianR, TwitchR, AsheQ").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusKS", "Youmuus KS").SetValue(true));
@@ -60,7 +68,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Muramana").AddItem(new MenuItem("Muramana", "Muramana").SetValue(true));
-            
+
+            // DEF
+            Config.SubMenu("Activator").SubMenu("Defensives").AddItem(new MenuItem("Randuin", "Randuin").SetValue(true));
+
             // CLEANSERS 
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
@@ -166,6 +177,14 @@ namespace OneKeyToWin_AIO_Sebby
                 Dervish.Cast(); 
         }
 
+        private void Defensive()
+        {
+            if (Config.Item("Randuin").GetValue<bool>())
+            {
+                if (Randuin.IsReady() && Player.CountEnemiesInRange(Randuin.Range) > 0)
+                    Randuin.Cast();
+            }
+        }
         private void Offensive()
         {
             if (Botrk.IsReady() && Config.Item("Botrk").GetValue<bool>())
@@ -179,6 +198,18 @@ namespace OneKeyToWin_AIO_Sebby
                         Botrk.Cast(t);
                     if (Config.Item("BotrkCombo").GetValue<bool>() && Program.Combo)
                         Botrk.Cast(t);
+                }
+            }
+
+            if (Hextech.IsReady() && Config.Item("Hextech").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(Hextech.Range, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget())
+                {
+                    if (Config.Item("HextechKS").GetValue<bool>() && Player.CalcDamage(t, Damage.DamageType.Magical, 150 + Player.FlatMagicDamageMod * 0.4) > t.Health)
+                        Cutlass.Cast(t);
+                    if (Config.Item("HextechCombo").GetValue<bool>() && Program.Combo)
+                        Cutlass.Cast(t);
                 }
             }
 
