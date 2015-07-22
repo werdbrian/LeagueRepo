@@ -35,6 +35,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q").SetValue(true));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("focusE", "Focus target with E").SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                Config.SubMenu(Player.ChampionName).SubMenu("E Config").SubMenu("Harras E").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                Config.SubMenu(Player.ChampionName).SubMenu("E Config").SubMenu("Use E on").AddItem(new MenuItem("useEon" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
+
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("nktdE", "NoKeyToDash").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wks", "W KS logic (W+E+R calculation)").SetValue(true));
 
@@ -46,8 +53,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser & anti-meele").AddItem(new MenuItem("GapCloser" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
-                Config.SubMenu(Player.ChampionName).SubMenu("Harras E").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+           
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("jungle", "Jungle Farm").SetValue(true));
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -73,7 +79,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            
+            if (Config.Item("focusE").GetValue<bool>())
+            {
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(900) && target.HasBuff("tristanaechargesound")))
+                {
+                    if (Orbwalking.InAutoAttackRange(target))
+                        Orbwalker.ForceTarget(target);
+                }
+            }
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -125,11 +138,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     E.Cast(t);
                 else if (E.GetDamage(t) + R.GetDamage(t) > t.Health && Player.Mana > RMANA + EMANA)
                     E.Cast(t);
-                else if (Program.Combo && Player.Mana > RMANA + EMANA)
+                else if (Program.Combo && Player.Mana > RMANA + EMANA && Config.Item("useEon" + t.ChampionName).GetValue<bool>())
                     E.Cast(t);
                 else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + RMANA)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Config.Item("harras" + enemy.ChampionName).GetValue<bool>()))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && Config.Item("harras" + enemy.ChampionName).GetValue<bool>()))
                         E.Cast(t);
                 }
             } 
