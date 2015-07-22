@@ -109,6 +109,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (!CanUse(barrier) && !CanUse(heal))
+                return;
+
             if (!sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1000))
                 return;
 
@@ -121,7 +124,6 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (args.Target != null && args.Target.IsMe)
             {
-
                 dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
             }
             else if ( Player.Distance(args.End) <= 300f)
@@ -160,7 +162,6 @@ namespace OneKeyToWin_AIO_Sebby
                     Player.Spellbook.CastSpell(heal, Player);
                 else if (Player.Health - dmg < Player.Level * 10)
                     Player.Spellbook.CastSpell(heal, Player);
-                
             }
         }
         private bool CanUse(SpellSlot sum)
