@@ -245,7 +245,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (t.IsValidTarget(R.Range))
             {
-                var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 10);
+                var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 12);
 
                 if (Player.CountEnemiesInRange(800) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
                 {
