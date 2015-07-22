@@ -47,7 +47,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange2", "E push position").SetValue(false));
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("QE", "try Q + E ").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Q farm helper").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("QE", "try Q + E ").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapQ", "Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapE", "E").SetValue(true));
@@ -101,12 +102,23 @@ namespace OneKeyToWin_AIO_Sebby
                 Q.Cast(dashPosition, true);
                 Program.debug("" + t.Name + GetWStacks(t));
             }
-
-            if (Program.Farm)
+            else if (Q.IsReady() && Program.Farm && Config.Item("farmQ").GetValue<bool>())
             {
+                var minions = MinionManager.GetMinions(dashPosition, Player.AttackRange, MinionTypes.All);
+                
+                if (minions == null || minions.Count == 0)
+                    return;
+                
+                int countMinions = 0;
+                
+                foreach (var minion in minions.Where(minion => minion.Health < Player.GetAutoAttackDamage(minion)))
+                {
+                    countMinions++;
+                }
 
+                if (countMinions > 1)
+                    Q.Cast(dashPosition, true);
             }
-          
         }
 
         private void Game_OnGameUpdate(EventArgs args)
