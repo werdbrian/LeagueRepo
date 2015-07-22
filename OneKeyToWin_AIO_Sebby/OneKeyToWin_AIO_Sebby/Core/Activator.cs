@@ -44,7 +44,6 @@ namespace OneKeyToWin_AIO_Sebby
         
         public void LoadOKTW()
         {
-            
             Config.SubMenu("Activator").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
@@ -76,7 +75,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("CleanSpells", "ZedR FizzR MordekaiserR PoppyR VladimirR").SetValue(true));
-
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Stun", "Stun").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Snare", "Snare").SetValue(true));
             Config.SubMenu("Activator").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Knockup", "Knockup").SetValue(true));
@@ -207,9 +205,9 @@ namespace OneKeyToWin_AIO_Sebby
                 if (t.IsValidTarget())
                 {
                     if (Config.Item("HextechKS").GetValue<bool>() && Player.CalcDamage(t, Damage.DamageType.Magical, 150 + Player.FlatMagicDamageMod * 0.4) > t.Health)
-                        Cutlass.Cast(t);
+                        Hextech.Cast(t);
                     if (Config.Item("HextechCombo").GetValue<bool>() && Program.Combo)
-                        Cutlass.Cast(t);
+                        Hextech.Cast(t);
                 }
             }
 
@@ -251,7 +249,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (!Player.InFountain() && !Player.HasBuff("Recall"))
             {
-
                 if (ManaPotion.IsReady() && !Player.HasBuff("FlaskOfCrystalWater"))
                 {
                     if (Player.CountEnemiesInRange(1200) > 0 && Player.Mana < 200)
@@ -288,7 +285,6 @@ namespace OneKeyToWin_AIO_Sebby
                         Biscuit.Cast();
                     return;
                 }
-                
             }
         }
     }
