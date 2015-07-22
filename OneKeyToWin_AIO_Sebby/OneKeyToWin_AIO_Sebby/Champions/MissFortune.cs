@@ -25,9 +25,9 @@ namespace OneKeyToWin_AIO_Sebby
             Q1 = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W);
             E = new Spell(SpellSlot.E, 800f);
-            R = new Spell(SpellSlot.R, 1200f);
+            R = new Spell(SpellSlot.R, 1350f);
 
-            Q1.SetSkillshot(0.25f, 100f, 2000f, true, SkillshotType.SkillshotLine);
+            Q1.SetSkillshot(0.25f, 50f, 2000f, true, SkillshotType.SkillshotLine);
             Q.SetTargetted(0.25f, 1400f);
             E.SetSkillshot(0.5f, 200f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 200f, 2000f, false, SkillshotType.SkillshotCircle);
@@ -48,6 +48,12 @@ namespace OneKeyToWin_AIO_Sebby
                 Program.debug(args.SData.Name);
                 Orbwalking.Attack = false;
                 Orbwalking.Move = false;
+                if (Config.Item("forceBlockMove").GetValue<bool>())
+                {
+                    OktwCommon.blockMove = true;
+                    OktwCommon.blockAttack = true;
+                    OktwCommon.blockSpells = true;
+                }
             }
         }
 
@@ -86,6 +92,32 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+        private void Jungle()
+        {
+            if (Program.LaneClear && Player.Mana > RMANA + WMANA + QMANA )
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 600, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>() && Q.GetDamage(mob) > mob.Health)
+                    {
+                        Q.Cast(mob);
+                        return;
+                    }
+                    if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
+                    {
+                        W.Cast();
+                        return;
+                    }
+                    if (E.IsReady() && Config.Item("jungleE").GetValue<bool>())
+                    {
+                        E.Cast(mob.ServerPosition);
+                        return;
+                    }
+                }
+            }
+        }
 
         private void Game_OnGameUpdate(EventArgs args)
         {
@@ -129,6 +161,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(0))
             {
                 SetMana();
+                Jungle();
             }
 
             if (Program.LagFree(1) && !Player.IsWindingUp && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
@@ -166,7 +199,9 @@ namespace OneKeyToWin_AIO_Sebby
                 var minionQ = col.Last();
                 if (minionQ.IsValidTarget(Q.Range))
                 {
-                    if (minionQ.Distance(poutput.CastPosition) < 380 && minionQ.Distance(t1.Position) < 380 && minionQ.Distance(poutput.CastPosition) > 100)
+                    if (Config.Item("killQ").GetValue<bool>() && Q.GetDamage(minionQ) < minionQ.Health)
+                        return;
+                    if (minionQ.Distance(Player.Position) > 400 && minionQ.Distance(poutput.CastPosition) < 380 && minionQ.Distance(t1.Position) < 380 && minionQ.Distance(poutput.CastPosition) > 150)
                     {
                         if (Q.GetDamage(t1) + Player.GetAutoAttackDamage(t1) > t1.Health)
                             Q.Cast(col.Last());
@@ -215,27 +250,27 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Player.CountEnemiesInRange(800) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
                 {
                     var tDis = Player.Distance(t.ServerPosition);
-                    if (rDmg * 6 > t.Health && tDis < 800)
+                    if (rDmg * 7 > t.Health && tDis < 800)
                     {
                         R.Cast(t, true, true);
                         RCastTime = Game.Time;
                     }
-                    else if (rDmg * 5 > t.Health && tDis < 900)
+                    else if (rDmg * 6 > t.Health && tDis < 900)
                     {
                         R.Cast(t, true, true);
                         RCastTime = Game.Time;
                     }
-                    else if (rDmg * 4 > t.Health && tDis < 1000)
+                    else if (rDmg * 5 > t.Health && tDis < 1000)
                     {
                         R.Cast(t, true, true);
                         RCastTime = Game.Time;
                     }
-                    else if (rDmg * 3 > t.Health && tDis < 1100)
+                    else if (rDmg * 4 > t.Health && tDis < 1100)
                     {
                         R.Cast(t, true, true);
                         RCastTime = Game.Time;
                     }
-                    else if (rDmg * 2 > t.Health && tDis < 1200)
+                    else if (rDmg * 3 > t.Health && tDis < 1200)
                     {
                         R.Cast(t, true, true);
                         RCastTime = Game.Time;
@@ -292,6 +327,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Use Q on minion").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("killQ", "Use Q only if can kill minion").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harasW", "Haras W").SetValue(true));
@@ -301,6 +337,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle Q ks").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
         }
 
         private void Drawing_OnDraw(EventArgs args)
