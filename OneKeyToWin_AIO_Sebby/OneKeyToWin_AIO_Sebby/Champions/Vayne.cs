@@ -20,7 +20,7 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 300);
-            E = new Spell(SpellSlot.E, 680);
+            E = new Spell(SpellSlot.E, 670);
             R = new Spell(SpellSlot.R, 3000);
 
             E.SetTargetted(0f, 3500f);
@@ -53,7 +53,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapE", "E").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").SubMenu("Use on").AddItem(new MenuItem("gap" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
-
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("visibleR", "Unvisable block AA ").SetValue(true));
@@ -102,6 +101,12 @@ namespace OneKeyToWin_AIO_Sebby
                 Q.Cast(dashPosition, true);
                 Program.debug("" + t.Name + GetWStacks(t));
             }
+
+            if (Program.Farm)
+            {
+
+            }
+          
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -176,12 +181,11 @@ namespace OneKeyToWin_AIO_Sebby
 
             float pushDistance;
             if (Player.Position == fromPosition)
-                pushDistance = 450;
+                pushDistance = 470;
             else
                 pushDistance = 400 ;
 
             var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
-
 
             var points = CirclePoint(8, 70, finalPosition);
 
