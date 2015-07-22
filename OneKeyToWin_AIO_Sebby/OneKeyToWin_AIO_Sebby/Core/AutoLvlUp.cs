@@ -22,7 +22,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("4", "4", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
             Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("LvlStart", "Auto LVL start", true).SetValue(new Slider(2, 6, 1)));
             
-            
             Game.OnUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnLevelUp +=Obj_AI_Base_OnLevelUp;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -36,7 +35,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             lvl2 = Config.Item("2", true).GetValue<StringList>().SelectedIndex;
             lvl3 = Config.Item("3", true).GetValue<StringList>().SelectedIndex;
             lvl4 = Config.Item("4", true).GetValue<StringList>().SelectedIndex;
-
         }
 
         private void Drawing_OnDraw(EventArgs args)
