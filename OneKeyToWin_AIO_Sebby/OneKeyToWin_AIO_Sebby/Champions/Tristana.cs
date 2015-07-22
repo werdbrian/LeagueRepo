@@ -27,7 +27,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             W.SetSkillshot(0.25f, 100, 1225, false, SkillshotType.SkillshotCircle);
 
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
@@ -53,7 +52,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("GapCloser & anti-meele").AddItem(new MenuItem("GapCloser" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
-           
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("jungle", "Jungle Farm").SetValue(true));
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -299,16 +297,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     drawText2("dash: OFF ", Player.Position, System.Drawing.Color.GreenYellow);
             }
 
-            if (Config.Item("qRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (Q.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-            }
             if (Config.Item("wRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
