@@ -111,7 +111,7 @@ namespace OneKeyToWin_AIO_Sebby
                 
                 int countMinions = 0;
                 
-                foreach (var minion in minions.Where(minion => minion.Health < Player.GetAutoAttackDamage(minion)))
+                foreach (var minion in minions.Where(minion => minion.Health < Player.GetAutoAttackDamage(minion) + Q.GetDamage(minion)))
                 {
                     countMinions++;
                 }
