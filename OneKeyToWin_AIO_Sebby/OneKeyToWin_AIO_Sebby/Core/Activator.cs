@@ -41,7 +41,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-
             Config.SubMenu("Activator").AddItem(new MenuItem("pots", "Potion, ManaPotion, Flask, Biscuit").SetValue(true));
 
             Config.SubMenu("Activator").SubMenu("Offensives").SubMenu("Botrk").AddItem(new MenuItem("Botrk", "Botrk").SetValue(true));
@@ -101,7 +100,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("Muramana").GetValue<bool>())
             {
                 int Mur = Items.HasItem(Muramana) ? 3042 : 3043;
-                if (args.Target.IsEnemy && args.Target.IsValid<Obj_AI_Hero>() && Items.HasItem(Mur) && Items.CanUseItem(Mur) && Player.Mana > Player.MaxMana * 0.3)
+                if (Items.HasItem(Mur) && args.Target.IsEnemy && args.Target.IsValid<Obj_AI_Hero>() && Items.CanUseItem(Mur) && Player.Mana > Player.MaxMana * 0.3)
                 {
                     if (!ObjectManager.Player.HasBuff("Muramana"))
                         Items.UseItem(Mur);
