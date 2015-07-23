@@ -84,7 +84,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(800) && GetWStacks(target) >= 0))
             {
-                if (Orbwalking.InAutoAttackRange(target))
+                if (Orbwalking.InAutoAttackRange(target) && args.Target.Health > 3 * Player.GetAutoAttackDamage(target))
                     Orbwalker.ForceTarget(target);
             }
         }
