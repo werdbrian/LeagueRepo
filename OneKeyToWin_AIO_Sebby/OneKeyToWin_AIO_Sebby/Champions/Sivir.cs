@@ -91,13 +91,33 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (W.IsReady())
             {
-                var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-                if (Program.Combo && target is Obj_AI_Hero && ObjectManager.Player.Mana > RMANA + WMANA)
+                var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
+                if (Program.Combo && target is Obj_AI_Hero && Player.Mana > RMANA + WMANA)
                     W.Cast();
                 else if (Config.Item("harasW").GetValue<bool>() && (target is Obj_AI_Hero || t.IsValidTarget()) && Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Config.Item("farmW").GetValue<bool>() && Program.LaneClear && Player.Mana > RMANA + WMANA + QMANA && (farmW() || t.IsValidTarget()))
-                    W.Cast();
+                else if (Config.Item("farmW").GetValue<bool>() && Program.Farm && Player.Mana > RMANA + WMANA + QMANA)
+                {
+                    if (farmW() && Program.LaneClear)
+                        W.Cast();
+                    else if (Program.Farm)
+                    {
+                        var minions = MinionManager.GetMinions(Player.Position, Player.AttackRange, MinionTypes.All);
+
+                        if (minions == null || minions.Count == 0)
+                            return;
+
+                        int countMinions = 0;
+
+                        foreach (var minion in minions.Where(minion => minion.Health < Player.GetAutoAttackDamage(minion) + W.GetDamage(minion)))
+                        {
+                            countMinions++;
+                        }
+
+                        if (countMinions > 1)
+                            W.Cast();
+                    }
+                }
             }
         }
 
