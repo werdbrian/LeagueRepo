@@ -210,11 +210,13 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Program.CastSpell(W, t);
                 }
+
                 else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0 && OktwCommon.CanHarras())
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
                         Program.CastSpell(W, enemy);
                 }
+
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
@@ -254,7 +256,7 @@ namespace OneKeyToWin_AIO_Sebby
                         {
                             if (E.GetPrediction(t).CastPosition.Distance(t.Position) > 200)
                             {
-                                if (ObjectManager.Player.Position.Distance(t.ServerPosition) > Player.Position.Distance(t.Position))
+                                if (Player.Position.Distance(t.ServerPosition) > Player.Position.Distance(t.Position))
                                 {
                                     if (t.Position.Distance(Player.ServerPosition) < t.Position.Distance(Player.Position))
                                         Program.CastSpell(E, t);
