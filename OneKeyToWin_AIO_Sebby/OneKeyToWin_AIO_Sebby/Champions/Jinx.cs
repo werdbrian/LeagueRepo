@@ -29,7 +29,7 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 900f);
             R = new Spell(SpellSlot.R, 2500f);
             
-            W.SetSkillshot(0.6f, 75f, 3300f, true, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.2f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.7f, 140f, 1500f, false, SkillshotType.SkillshotLine);
 
@@ -169,7 +169,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicQ()
         {
-            if (Program.Farm && !Player.IsWindingUp && Config.Item("farmQ").GetValue<bool>() && (Game.Time - lag > 0.1) && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive )
+            if ((Game.Time - lag > 0.1) && Program.Farm && !Player.IsWindingUp && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
             {
                 farmQ();
                 lag = Game.Time;
@@ -211,9 +211,10 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Program.CastSpell(W, t);
                 }
-                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0 && OktwCommon.CanHarras())
+                else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0 && OktwCommon.CanHarras())
                 {
-                    Program.CastSpell(W, t);
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
+                        Program.CastSpell(W, enemy);
                 }
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
@@ -359,28 +360,31 @@ namespace OneKeyToWin_AIO_Sebby
 
         public bool ShouldUseE(string SpellName)
         {
-            if (SpellName == "ThreshQ")
-                return true;
-            if (SpellName == "KatarinaR")
-                return true;
-            if (SpellName == "AlZaharNetherGrasp")
-                return true;
-            if (SpellName == "GalioIdolOfDurand")
-                return true;
-            if (SpellName == "LuxMaliceCannon")
-                return true;
-            if (SpellName == "MissFortuneBulletTime")
-                return true;
-            if (SpellName == "RocketGrabMissile")
-                return true;
-            if (SpellName == "CaitlynPiltoverPeacemaker")
-                return true;
-            if (SpellName == "EzrealTrueshotBarrage")
-                return true;
-            if (SpellName == "InfiniteDuress")
-                return true;
-            if (SpellName == "VelkozR")
-                return true;
+            switch (SpellName)
+            {
+                case "ThreshQ":
+                    return true;
+                case "KatarinaR":
+                    return true;
+                case "AlZaharNetherGrasp":
+                    return true;
+                case "GalioIdolOfDurand":
+                    return true;
+                case "LuxMaliceCannon":
+                    return true;
+                case "MissFortuneBulletTime":
+                    return true;
+                case "RocketGrabMissile":
+                    return true;
+                case "CaitlynPiltoverPeacemaker":
+                    return true;
+                case "EzrealTrueshotBarrage":
+                    return true;
+                case "InfiniteDuress":
+                    return true;
+                case "VelkozR":
+                    return true;
+            }
             return false;
         }
 
@@ -475,10 +479,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("debug").GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Height * 0.5f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, "ManaCost: Q " + QMANA + " W " + WMANA + " E " + EMANA + " R " + RMANA);
-            }
 
             if (Config.Item("watermark").GetValue<bool>())
             {
