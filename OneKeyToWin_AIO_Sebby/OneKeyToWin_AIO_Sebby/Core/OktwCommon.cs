@@ -66,6 +66,15 @@ namespace OneKeyToWin_AIO_Sebby
                 args.Process = false;
             }
         }
+        public static bool IsFaced(Obj_AI_Hero target)
+        {
+            Vector2 LastWaypoint = target.GetWaypoints().Last();
+            if (LastWaypoint.Distance(Player.Position) < target.Distance(Player.Position))
+                return true;
+
+            return false;
+        }
+
         public static bool CanMove(Obj_AI_Hero target)
         {
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
