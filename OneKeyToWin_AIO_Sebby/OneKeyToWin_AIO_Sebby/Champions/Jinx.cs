@@ -119,7 +119,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            if (unit.IsEnemy && unit.IsValidTarget(E.Range) && Config.Item("opsE").GetValue<bool>() && ShouldUseE(args.SData.Name))
+            if (Config.Item("opsE").GetValue<bool>() && unit.IsEnemy && unit.IsValidTarget(E.Range) && ShouldUseE(args.SData.Name))
             {
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
@@ -164,7 +164,6 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
-            
         }
 
         private void LogicQ()
@@ -241,29 +240,30 @@ namespace OneKeyToWin_AIO_Sebby
                         E.Cast(Object.Position);
                     }
                 }
-
-                var ta = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (Player.IsMoving && ta.IsValidTarget(E.Range) && E.GetPrediction(ta).CastPosition.Distance(ta.Position) > 200 && (int)E.GetPrediction(ta).Hitchance == 5 && Program.Combo && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA)
+                if (Program.Combo && Player.IsMoving && Config.Item("comboE").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA)
                 {
-                    if (ta.HasBuffOfType(BuffType.Slow) || OktwCommon.CountEnemiesInRangeDeley(E.GetPrediction(ta).CastPosition, 250, E.Delay) > 1 )
+                    var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget(E.Range) && E.GetPrediction(t).CastPosition.Distance(t.Position) > 200 && (int)E.GetPrediction(t).Hitchance == 5 )
                     {
-                        Program.CastSpell(E, ta);
-                        debug("E slow");
-                    }
-                    else
-                    {
-                        var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                        if (Program.Combo && t.IsValidTarget(W.Range) &&  E.GetPrediction(t).CastPosition.Distance(t.Position) > 200)
+                        if (t.HasBuffOfType(BuffType.Slow) || OktwCommon.CountEnemiesInRangeDeley(E.GetPrediction(t).CastPosition, 250, E.Delay) > 1 )
                         {
-                            if (ObjectManager.Player.Position.Distance(t.ServerPosition) > Player.Position.Distance(t.Position))
+                            Program.CastSpell(E, t);
+                            debug("E slow");
+                        }
+                        else
+                        {
+                            if (E.GetPrediction(t).CastPosition.Distance(t.Position) > 200)
                             {
-                                if (t.Position.Distance(Player.ServerPosition) < t.Position.Distance(Player.Position))
-                                    Program.CastSpell(E, t);
-                            }
-                            else
-                            {
-                                if (t.Position.Distance(Player.ServerPosition) > t.Position.Distance(Player.Position))
-                                    Program.CastSpell(E, t);
+                                if (ObjectManager.Player.Position.Distance(t.ServerPosition) > Player.Position.Distance(t.Position))
+                                {
+                                    if (t.Position.Distance(Player.ServerPosition) < t.Position.Distance(Player.Position))
+                                        Program.CastSpell(E, t);
+                                }
+                                else
+                                {
+                                    if (t.Position.Distance(Player.ServerPosition) > t.Position.Distance(Player.Position))
+                                        Program.CastSpell(E, t);
+                                }
                             }
                         }
                     }
