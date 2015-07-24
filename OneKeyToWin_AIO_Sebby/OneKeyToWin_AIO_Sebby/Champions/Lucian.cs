@@ -105,8 +105,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (args.SData.Name == "LucianW" || args.SData.Name == "LucianE" || args.SData.Name == "LucianQ")
                 {
                     passRdy = true;
-                    if (args.SData.Name == "LucianQ")
-                        Orbwalking.ResetAutoAttackTimer();
+                    Utility.DelayAction.Add((int)(Math.Ceiling(Game.Ping / 2f) + 500),Orbwalking.ResetAutoAttackTimer);
                 }
                 else
                     passRdy = false;
@@ -115,7 +114,6 @@ namespace OneKeyToWin_AIO_Sebby
                     castR = Game.Time;
                 Program.debug(args.SData.Name);
             }
-
         }
 
         private void Game_OnGameUpdate(EventArgs args)
