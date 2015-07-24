@@ -8,11 +8,17 @@ using LeagueSharp.Common;
 using SharpDX;
 namespace OneKeyToWin_AIO_Sebby.Core
 {
+    class PredictionHP
+    {
+        public Obj_AI_Hero Target { get; set; }
+        public double PredHP { get; set; }
+        
+    }
     class PredictionOktw
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
+        public static List<PredictionHP> PredictionHpList = new List<PredictionHP>();
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         int HitChanceNum = 4;
@@ -26,9 +32,35 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer"));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - VeryHigh + max range fix + waypionts analyzer"));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Prediction Debug").SetValue(false));
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (hero.IsEnemy)
+                {
+                    PredictionHpList.Add(new PredictionHP() { Target = hero, PredHP = hero.MaxHealth });
+                }
+            }
+
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            
         }
+
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (args.Target == null || !sender.IsAlly || !args.Target.IsEnemy )
+                return;
+
+            double dmg = sender.GetSpellDamage(Player, args.SData.Name);
+            double HpLeft = Player.Health - dmg;
+
+            var obj = PredictionHpList.FirstOrDefault(x => x.Target.NetworkId == args.Target.NetworkId);
+            if (obj != null && HpLeft < obj.Target.Health)
+            {
+                obj.PredHP = HpLeft;
+            }
+        }
+
 
         private void Drawing_OnDraw(EventArgs args)
         {
