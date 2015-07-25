@@ -55,9 +55,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmE", "Lane clear E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
-
 
             Game.OnUpdate += Game_OnGameUpdate;
 
@@ -170,9 +168,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
             }
 
-            if (Program.LagFree(1) && E.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(1) && E.IsReady() && Config.Item("autoQ").GetValue<bool>() && !Player.IsWindingUp)
                 LogicE();
-            if (Program.LagFree(2) && Q.IsReady() && Config.Item("autoE").GetValue<bool>())
+            if (Program.LagFree(2) && Q.IsReady() && Config.Item("autoE").GetValue<bool>() && !Player.IsWindingUp)
                 LogicQ();
             if (Program.LagFree(3) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
@@ -272,19 +270,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         CastQ(t);
                     }
-                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA)
+                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
                     {
                         foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                             CastQ(enemy);
                     }
                 }
-            }
-            else if (Q.Range > 1500 && Player.CountEnemiesInRange(1450) == 0 && Program.LaneClear && (Q.IsCharging || (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)))
-            {
-                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
-                var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
-                if (Qfarm.MinionsHit > 3 || (Q.IsCharging && Qfarm.MinionsHit > 0))
-                    Q.Cast(Qfarm.Position);
             }
         }
 
@@ -301,11 +292,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if ((OktwCommon.GetBuffCount(t, "varuswdebuff") == 3 && CanCast) || !Orbwalking.InAutoAttackRange(t))
                 {
-                    if (Program.Combo && Player.Mana > RMANA + QMANA + EMANA)
+                    if (Program.Combo && Player.Mana > RMANA + QMANA)
                     {
                         Program.CastSpell(E, t);
                     }
-                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA + EMANA)
+                    else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA)
                     {
                         foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
                             E.Cast(enemy);
@@ -356,7 +347,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             else
                 RMANA = R.Instance.ManaCost;
 
-            if (Player.Health < Player.MaxHealth * 0.2 || Q.IsCharging)
+            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
             {
                 QMANA = 0;
                 WMANA = 0;
