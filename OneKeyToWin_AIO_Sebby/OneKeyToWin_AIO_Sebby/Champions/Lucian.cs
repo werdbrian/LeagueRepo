@@ -86,7 +86,6 @@ namespace OneKeyToWin_AIO_Sebby
             if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E)
             {
                 passRdy = true;
-                Orbwalking.ResetAutoAttackTimer();
             }
         }
        
@@ -105,14 +104,13 @@ namespace OneKeyToWin_AIO_Sebby
                 if (args.SData.Name == "LucianW" || args.SData.Name == "LucianE" || args.SData.Name == "LucianQ")
                 {
                     passRdy = true;
-                    Utility.DelayAction.Add((int)(Math.Ceiling(Game.Ping / 2f) + 500),Orbwalking.ResetAutoAttackTimer);
+                    Utility.DelayAction.Add(450, Orbwalking.ResetAutoAttackTimer);
                 }
                 else
                     passRdy = false;
 
                 if (args.SData.Name == "LucianR")
                     castR = Game.Time;
-                Program.debug(args.SData.Name);
             }
         }
 
