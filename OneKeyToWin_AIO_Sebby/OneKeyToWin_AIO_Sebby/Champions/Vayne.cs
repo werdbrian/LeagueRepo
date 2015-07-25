@@ -61,6 +61,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("E config").SubMenu("Use E ").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("useE", "OneKeyToCast E closest person").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
         }
 
@@ -157,15 +158,27 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(2))
             {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMeele))
+                Obj_AI_Hero bestEnemy = null;
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range)))
                 {
-                    if (Q.IsReady() && !dashPosition.IsWall())
-                        Q.Cast(dashPosition, true);
-                    else if (E.IsReady() && Player.Health < Player.MaxHealth * 0.5)
+                    if (target.IsValidTarget(270) && target.IsMelee)
                     {
-                        E.Cast(target);
-                        Program.debug("push");
+                        if (Q.IsReady() && !dashPosition.IsWall())
+                            Q.Cast(dashPosition, true);
+                        else if (E.IsReady() && Player.Health < Player.MaxHealth * 0.5)
+                        {
+                            E.Cast(target);
+                            Program.debug("push");
+                        }
                     }
+                    if (bestEnemy == null)
+                        bestEnemy = target;
+                    else if (Player.Distance(target.Position) < Player.Distance(bestEnemy.Position))
+                        bestEnemy = target;
+                }
+                if (Config.Item("useE").GetValue<KeyBind>().Active && bestEnemy != null)
+                {
+                    E.Cast(bestEnemy);
                 }
             }
 
