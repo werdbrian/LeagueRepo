@@ -82,10 +82,10 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            if (Config.Item("AGC").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + WMANA)
+            if (Config.Item("AGC").GetValue<bool>() && Player.Mana > RMANA + WMANA)
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
-                if (E.IsReady() && Target.IsValidTarget(E.Range) && ObjectManager.Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(500) < 3)
+                if (E.IsReady() && Target.IsValidTarget(E.Range) && Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(800) < 3)
                     E.Cast(Target, true);
                 else if (W.IsReady() && Target.IsValidTarget(W.Range))
                     Program.CastSpell(W, Target);
@@ -218,7 +218,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(E.Range - 100, TargetSelector.DamageType.Physical);
 
             var t2 = TargetSelector.GetTarget(1100, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && Config.Item("autoE").GetValue<bool>())
+            if (t.IsValidTarget() && Config.Item("autoE").GetValue<bool>() &&  Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(800) < 3)
             {
                 var eDmg = E.GetDamage(t);
                 float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / Q.Speed) * 1000));
@@ -247,6 +247,7 @@ namespace OneKeyToWin_AIO_Sebby
                 else if (ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 500 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
                     E.Cast(t, true);
             }
+
             if (Config.Item("useE").GetValue<KeyBind>().Active)
             {
                 var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
