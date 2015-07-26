@@ -151,16 +151,16 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
                     {
-                        if (ally.Health - dmg < ally.CountEnemiesInRange(600) * ally.Level * 20)
+                        if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 20)
                             Player.Spellbook.CastSpell(heal, ally);
-                        else if (ally.Health - dmg <  ally.Level * 10)
+                        else if (ally.Health - dmg <  ally.Level * 15)
                             Player.Spellbook.CastSpell(heal, ally);
                     }
                 }
 
-                if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 20)
+                if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 20)
                     Player.Spellbook.CastSpell(heal, Player);
-                else if (Player.Health - dmg < Player.Level * 10)
+                else if (Player.Health - dmg < Player.Level * 15)
                     Player.Spellbook.CastSpell(heal, Player);
             }
         }
