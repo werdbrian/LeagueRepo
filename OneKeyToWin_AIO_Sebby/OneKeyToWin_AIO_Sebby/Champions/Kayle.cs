@@ -121,7 +121,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW()
         {
-            if (!Player.InFountain() && !Player.HasBuff("Recall"))
+            if (!Player.InFountain() && !Player.HasBuff("Recall") && !Player.IsRecalling())
             {
                 Obj_AI_Hero lowest = Player;
 
@@ -131,7 +131,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         lowest = ally;
                 }
                 
-
                 if (Player.Mana > WMANA + QMANA && lowest.Health < lowest.Level * 40)
                     W.CastOnUnit(lowest);
                 else if (Player.Mana > WMANA + EMANA + QMANA && lowest.Health < lowest.MaxHealth * 0.4 && lowest.Health < 1500)
