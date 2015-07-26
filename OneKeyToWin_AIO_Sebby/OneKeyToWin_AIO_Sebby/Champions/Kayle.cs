@@ -33,16 +33,17 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoWally", "Auto W ally").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoWspeed", "W speed-up").SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsAlly))
+                Config.SubMenu(Player.ChampionName).SubMenu("W Config").SubMenu("W ally:").AddItem(new MenuItem("Wally" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasE", "Harras E").SetValue(true));
 
-
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRally", "Auto R ally").SetValue(true));
-            
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsAlly))
+                Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("R ally:").AddItem(new MenuItem("Rally" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -54,47 +55,33 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!R.IsReady() || !sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1500))
+            if (!R.IsReady() || !sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1500) || !Config.Item("autoR").GetValue<bool>())
                 return;
 
             double dmg = 0;
 
-            if (args.SData.IsAutoAttack() && args.Target.IsMe)
+            foreach (var ally in Program.Allies.Where(ally => Config.Item("Rally" + ally.ChampionName).GetValue<bool>() && ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < R.Range))
             {
-                dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
-            }
-            else if (args.Target != null && args.Target.IsMe)
-            {
-                dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
-            }
-            else if ( Player.Distance(args.End) <= 300f)
-            {
-                if (!OktwCommon.CanMove(ObjectManager.Player) || ObjectManager.Player.Distance(sender.Position) < 300f)
-                    dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
-                else if (Player.Distance(args.End) < 100f)
-                    dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
-            }
-            if (Config.Item("autoRally").GetValue<bool>())
-            {
-                foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
+                if (args.Target != null && args.Target.NetworkId == ally.NetworkId)
                 {
-                    if (ally.Health - dmg < ally.CountEnemiesInRange(900) * ally.Level * 20)
-                        R.Cast(ally);
-                    else if (ally.Health - dmg <  ally.Level * 5)
-                        R.Cast(ally);
+                    dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
-            }
-            if (Config.Item("autoR").GetValue<bool>())
-            {
-                if (Player.Health - dmg < Player.CountEnemiesInRange(900) * Player.Level * 20)
-                    R.Cast(Player);
-                else if (Player.Health - dmg < Player.Level * 5)
-                    R.Cast(Player);
+                else if (ally.Distance(args.End) <= 300f)
+                {
+                    if (!OktwCommon.CanMove(ObjectManager.Player) || ObjectManager.Player.Distance(sender.Position) < 300f)
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                    else if (Player.Distance(args.End) < 100f)
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                }
+
+                if (ally.Health - dmg < ally.CountEnemiesInRange(900) * ally.Level * 20)
+                    R.Cast(ally);
+                else if (ally.Health - dmg <  ally.Level * 5)
+                    R.Cast(ally);
             }
         }
         
@@ -137,14 +124,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (!Player.InFountain() && !Player.HasBuff("Recall"))
             {
                 Obj_AI_Hero lowest = Player;
-                if (Config.Item("autoWally").GetValue<bool>())
+
+                foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Config.Item("Wally" + ally.ChampionName).GetValue<bool>() && Player.Distance(ally.Position) < W.Range))
                 {
-                    foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.Position) < W.Range))
-                    {
-                        if (ally.Health < lowest.Health)
-                            lowest = ally;
-                    }
+                    if (ally.Health < lowest.Health)
+                        lowest = ally;
                 }
+                
 
                 if (Player.Mana > WMANA + QMANA && lowest.Health < lowest.Level * 40)
                     W.CastOnUnit(lowest);
