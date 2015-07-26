@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -258,6 +259,7 @@ namespace OneKeyToWin_AIO_Sebby
             new Activator().LoadOKTW();
             new Core.OKTWward().LoadOKTW();
             new Core.AutoLvlUp().LoadOKTW();
+            new OktwCommon().LoadOKTW();
             //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
             {
@@ -584,7 +586,11 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if ((int)poutput.Hitchance < 5)
                     return;
-
+                if ( QWER.Delay > 0.4)
+                {
+                    if ((int)poutput.Hitchance < 6 || target.IsWindingUp)
+                        return;
+                }
                 var fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 2;
                 if (QWER.Delay < 0.3 && (QWER.Speed > 1500 || QWER.Type == SkillshotType.SkillshotCircle) && (target.IsWindingUp || (int)poutput.Hitchance == 6))
                 {
@@ -773,7 +779,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (enemy.IsValidTarget())
                 {
-                    
                     if (ShowClicks)
                     {
                         List<Vector2> waypoints = enemy.GetWaypoints();
