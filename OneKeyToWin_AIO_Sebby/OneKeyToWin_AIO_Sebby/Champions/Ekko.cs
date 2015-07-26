@@ -44,6 +44,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("W option").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W option").AddItem(new MenuItem("Waoe", "Cast only if 2 targets").SetValue(false));
+
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Rdmg", "R dmg % hp").SetValue(new Slider(20, 100, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
@@ -104,7 +108,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(1) && Q.IsReady() )
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady() && Player.Mana > RMANA + WMANA + EMANA + QMANA)
+            if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW").GetValue<bool>() && Player.Mana > RMANA + WMANA + EMANA + QMANA)
                 LogicW();
             if (Program.LagFree(3) && E.IsReady() )
                 LogicE();
@@ -263,7 +267,13 @@ namespace OneKeyToWin_AIO_Sebby
             if (t.IsValidTarget() )
             {
                 W.CastIfWillHit(t, 2, true);
-                if (t.HasBuffOfType(BuffType.Slow) || t.CountEnemiesInRange(250) > 1)
+                if (t.CountEnemiesInRange(250) > 1)
+                {
+                    Program.CastSpell(W, t);
+                }
+                if (Config.Item("Waoe").GetValue<bool>())
+                    return;
+                if (t.HasBuffOfType(BuffType.Slow))
                 {
                     Program.CastSpell(W, t);
                 }
