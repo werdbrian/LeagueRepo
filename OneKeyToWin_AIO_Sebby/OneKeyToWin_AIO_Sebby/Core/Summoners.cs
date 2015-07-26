@@ -112,56 +112,46 @@ namespace OneKeyToWin_AIO_Sebby
             if (!CanUse(barrier) && !CanUse(heal))
                 return;
 
-            if (!sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1000))
+            if (!sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1500))
                 return;
 
             double dmg = 0;
 
-            if (args.SData.IsAutoAttack() && args.Target.IsMe)
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
             {
-                //Program.debug( "aa");
-                dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
-            }
-            else if (args.Target != null && args.Target.IsMe)
-            {
-                dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
-            }
-            else if ( Player.Distance(args.End) <= 300f)
-            {
-                if (!OktwCommon.CanMove(ObjectManager.Player) || ObjectManager.Player.Distance(sender.Position) < 300f)
-                    dmg = dmg + sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
-                else if (Player.Distance(args.End) < 100f)
-                    dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
-            }
 
-            if (CanUse(barrier) && Config.Item("Barrier").GetValue<bool>())
-            {
-                var value = 95 + Player.Level * 20;
-                if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
-                    Player.Spellbook.CastSpell(barrier, Player);
-                if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15)
-                    Player.Spellbook.CastSpell(barrier, Player);
-                
-            }
-
-            if (CanUse(heal) && Config.Item("Heal").GetValue<bool>() && dmg > 0)
-            {
-                bool AllyHeal = Config.Item("AllyHeal").GetValue<bool>();
-                if (AllyHeal)
+                if (args.Target != null && args.Target.NetworkId == ally.NetworkId)
                 {
-                    foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
-                    {
-                        if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 20)
-                            Player.Spellbook.CastSpell(heal, ally);
-                        else if (ally.Health - dmg <  ally.Level * 15)
-                            Player.Spellbook.CastSpell(heal, ally);
-                    }
+                    dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                }
+                else if ( Player.Distance(args.End) <= 300f)
+                {
+                    if (!OktwCommon.CanMove(ally) || ally.Distance(sender.Position) < 300f)
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                    else if (Player.Distance(args.End) < 100f)
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
 
-                if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 20)
-                    Player.Spellbook.CastSpell(heal, Player);
-                else if (Player.Health - dmg < Player.Level * 15)
-                    Player.Spellbook.CastSpell(heal, Player);
+                if (CanUse(barrier) && Config.Item("Barrier").GetValue<bool>() && ally.IsMe)
+                {
+                    var value = 95 + Player.Level * 20;
+                    if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                        Player.Spellbook.CastSpell(barrier, Player);
+                    if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15)
+                        Player.Spellbook.CastSpell(barrier, Player);
+                
+                }
+
+                if (CanUse(heal) && Config.Item("Heal").GetValue<bool>() && dmg > 0)
+                {
+                    if (!Config.Item("AllyHeal").GetValue<bool>() && !ally.IsMe)
+                        return;
+
+                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 20)
+                        Player.Spellbook.CastSpell(heal, ally);
+                    else if (ally.Health - dmg <  ally.Level * 15)
+                        Player.Spellbook.CastSpell(heal, ally);
+                }
             }
         }
         private bool CanUse(SpellSlot sum)
