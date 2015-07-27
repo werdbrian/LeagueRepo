@@ -72,7 +72,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if stacks").SetValue(new Slider(10, 30, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edmg", "Auto E if stacks").SetValue(new Slider(100, 150, 50)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edmg", "E % dmg adjust").SetValue(new Slider(100, 150, 50)));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wdragon", "Auto W bug dragon").SetValue(true));
@@ -101,7 +101,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
-            
+            if (Player.IsRecalling())
+                return;
             if (R.IsReady() && Config.Item("balista").GetValue<bool>() && AllyR != null && AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range && AllyR.ChampionName == "Blitzcrank" && Player.Distance(AllyR.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
             {
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget() && !enemy.IsDead && enemy.HasBuff("rocketgrab2")))
@@ -115,6 +116,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (E.IsReady())
             {
+                LogicE();
                 JungleE();
             }
             
@@ -131,7 +133,6 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(2) && E.IsReady() && !Player.IsWindingUp)
             {
                 farm();
-                LogicE();
             }
             if (Program.LagFree(3) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
@@ -165,7 +166,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (mobs.Count > 0)
             {
                 var mob = mobs[0];
-                if (mob.Health < E.GetDamage(mob))
+                if (mob.Health < GetEdmg(mob))
                     E.Cast();
             }
         }
@@ -188,7 +189,7 @@ namespace OneKeyToWin_AIO_Sebby
 
 
                 var qDmg = Q.GetDamage(t) + Player.GetAutoAttackDamage(t);
-                var eDmg = E.GetDamage(t);
+                var eDmg = GetEdmg(t);
 
                 if (qDmg > t.Health && eDmg < t.Health && Player.Mana > QMANA + EMANA)
                     castQ(cast, t);
@@ -206,6 +207,12 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+
+        private float GetEdmg( Obj_AI_Base t)
+        {
+            return (E.GetDamage(t) * 0.01f * (float)Config.Item("Edmg").GetValue<Slider>().Value) - t.HPRegenRate;
+        }
+
         private void castQ(bool cast, Obj_AI_Base t)
         {
             if (cast)
@@ -217,8 +224,8 @@ namespace OneKeyToWin_AIO_Sebby
         {
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
             {
-                var Edmg = E.GetDamage(target);
-                if (target.Health + target.HPRegenRate < Edmg)
+                var Edmg = GetEdmg(target);
+                if (target.Health  < Edmg)
                 {
                     E.Cast();
                     return;
