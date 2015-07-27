@@ -103,6 +103,14 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Player.IsRecalling())
                 return;
+
+            if (E.IsReady())
+            {
+                farm();
+                LogicE();
+                JungleE();
+            }
+
             if (R.IsReady() && Config.Item("balista").GetValue<bool>() && AllyR != null && AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range && AllyR.ChampionName == "Blitzcrank" && Player.Distance(AllyR.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
             {
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget() && !enemy.IsDead && enemy.HasBuff("rocketgrab2")))
@@ -120,28 +128,14 @@ namespace OneKeyToWin_AIO_Sebby
                 countE = Config.Item("countE").GetValue<Slider>().Value;
             }
 
-            if (E.IsReady())
-            {
-                LogicE();
-                JungleE();
-            }
-
             if (Program.LagFree(1) && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
                 LogicQ();
-            
-                
-            if (Program.LagFree(2) && E.IsReady() && !Player.IsWindingUp)
-            {
-                farm();
-            }
+
             if (Program.LagFree(3) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
 
             if (Program.LagFree(4) && W.IsReady())
-            {
                 LogicW();
-            }
-
         }
 
         private void LogicW()
@@ -237,9 +231,9 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 
                 if (GetRStacks(target) >= countE
-                    && (GetPassiveTime(target) < 0.5 || Player.ServerPosition.Distance(target.ServerPosition) > E.Range - 100 || Player.Health < Player.MaxHealth * 0.4)
+                    && (GetPassiveTime(target) < 0.5 || Player.ServerPosition.Distance(target.ServerPosition) > E.Range - 150 || Player.Health < Player.MaxHealth * 0.3)
                     && Player.Mana > RMANA + QMANA + EMANA + WMANA
-                    && Player.CountEnemiesInRange(900) == 0)
+                    && Player.CountEnemiesInRange(800) == 0)
                 {
                     E.Cast();
                     return;
