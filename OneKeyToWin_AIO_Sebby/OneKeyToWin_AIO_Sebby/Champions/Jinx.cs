@@ -475,7 +475,14 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = 0;
             }
         }
-        
+
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
 
         private void Drawing_OnDraw(EventArgs args)
         {
@@ -510,6 +517,29 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else
                     Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
+            }
+            if (Config.Item("noti").GetValue<bool>() && R.IsReady())
+            {
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+
+                if (t.IsValidTarget())
+                {
+                    if (R.GetDamage(t,1) > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 5, System.Drawing.Color.Red);
+                    }
+                }
+                var t2 = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
+
+                if (t2.IsValidTarget())
+                {
+                    if (W.GetDamage(t2) > t2.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "W can kill: " + t2.ChampionName + " have: " + t2.Health + "hp");
+                        drawLine(t2.Position, Player.Position, 3, System.Drawing.Color.Yellow);
+                    }
+                }
             }
         }
     }
