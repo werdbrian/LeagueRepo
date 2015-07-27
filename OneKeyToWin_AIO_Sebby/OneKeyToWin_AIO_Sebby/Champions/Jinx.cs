@@ -518,27 +518,19 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Gray, 1, 1);
             }
-            if (Config.Item("noti").GetValue<bool>() && R.IsReady())
+            if (Config.Item("noti").GetValue<bool>() )
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-                if (t.IsValidTarget())
+                if ( R.IsReady() && t.IsValidTarget() && R.GetDamage(t, 1) > t.Health )
                 {
-                    if (R.GetDamage(t,1) > t.Health)
-                    {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
-                        drawLine(t.Position, Player.Position, 5, System.Drawing.Color.Red);
-                    }
+                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                    drawLine(t.Position, Player.Position, 5, System.Drawing.Color.Red);
                 }
-                var t2 = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-
-                if (t2.IsValidTarget())
+                else if (t.IsValidTarget(2000) && W.GetDamage(t) > t.Health)
                 {
-                    if (W.GetDamage(t2) > t2.Health)
-                    {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "W can kill: " + t2.ChampionName + " have: " + t2.Health + "hp");
-                        drawLine(t2.Position, Player.Position, 3, System.Drawing.Color.Yellow);
-                    }
+                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "W can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                    drawLine(t.Position, Player.Position, 3, System.Drawing.Color.Yellow);
                 }
             }
         }
