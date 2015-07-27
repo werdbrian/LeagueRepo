@@ -77,7 +77,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (!Orbwalking.InAutoAttackRange(t) && Config.Item("Rks").GetValue<bool>() && Player.GetAutoAttackDamage(t) * 4 > t.Health)
                     R.Cast();
 
-                if (t.CountEnemiesInRange(450) >= Config.Item("countR").GetValue<Slider>().Value)
+                if (t.CountEnemiesInRange(450) >= Config.Item("countR").GetValue<Slider>().Value && 0 != Config.Item("countR").GetValue<Slider>().Value)
                     R.Cast();
 
             }
