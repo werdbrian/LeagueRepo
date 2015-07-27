@@ -221,7 +221,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             if (Player.Health < Player.MaxHealth * 0.5)
             {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMeele && Config.Item("GapCloser" + target.ChampionName).GetValue<bool>()))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMelee && Config.Item("GapCloser" + target.ChampionName).GetValue<bool>()))
                 {
 
                     Program.CastSpell(R, target);

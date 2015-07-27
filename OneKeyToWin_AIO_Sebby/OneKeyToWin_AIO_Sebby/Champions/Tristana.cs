@@ -172,7 +172,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Program.debug("R turrent");
                     }
                 }
-                if (Player.Health < Player.MaxHealth * 0.4 && enemy.IsValidTarget(270) && enemy.IsMeele && Config.Item("GapCloser" + enemy.ChampionName).GetValue<bool>())
+                if (Player.Health < Player.MaxHealth * 0.4 && enemy.IsValidTarget(270) && enemy.IsMelee && Config.Item("GapCloser" + enemy.ChampionName).GetValue<bool>())
                 {
                     R.Cast(enemy);
                     Program.debug("R Meele");

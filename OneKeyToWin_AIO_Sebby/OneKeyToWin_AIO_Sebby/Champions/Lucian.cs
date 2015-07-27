@@ -268,7 +268,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (dashPosition.IsWall() || Player.Mana < RMANA + EMANA || !Config.Item("autoE").GetValue<bool>() || passRdy || SpellLock)
                 return;
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMeele))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMelee))
             {
                 if (target.Position.Distance(Game.CursorPos) > target.Position.Distance(Player.Position))
                     E.Cast(dashPosition, true);
