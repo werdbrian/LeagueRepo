@@ -59,7 +59,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var t = args.Target as Obj_AI_Hero;
                 args.Process = false;
-                if ((ObjectManager.Player.GetAutoAttackDamage(t) * 2 > t.Health || ObjectManager.Player.Mana < RMANA || !OktwCommon.CanMove(t)))
+                if ((Player.GetAutoAttackDamage(t) * 2 > t.Health || Player.Mana < RMANA || !OktwCommon.CanMove(t)))
                     args.Process = true; 
             }
 
@@ -116,7 +116,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("sup").GetValue<bool>())
                 {
-                    if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.Mana > RMANA + QMANA)
+                    if (Q.IsReady() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Player.Mana > RMANA + QMANA)
                         farmQ();
                 }
                 else
@@ -129,10 +129,10 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(2))
             {
                 SetMana();
-                if (Config.Item("autoE").GetValue<bool>() && E.IsReady() && !HaveStun && ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
+                if (Config.Item("autoE").GetValue<bool>() && E.IsReady() && !HaveStun && Player.Mana > RMANA + EMANA + QMANA + WMANA && Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.LaneClear)
                     E.Cast();
 
-                if (W.IsReady() && ObjectManager.Player.InFountain() && !HaveStun)
+                if (W.IsReady() && Player.InFountain() && !HaveStun)
                     W.Cast(ObjectManager.Player, true, true);
             }
             if (Program.LagFree(3) )
