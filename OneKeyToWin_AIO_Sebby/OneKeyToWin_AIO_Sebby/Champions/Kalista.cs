@@ -114,16 +114,16 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
             }
 
-            if (E.IsReady())
-            {
-                LogicE();
-                JungleE();
-            }
-            
             if (Program.LagFree(0))
             {
                 SetMana();
                 countE = Config.Item("countE").GetValue<Slider>().Value;
+            }
+
+            if (E.IsReady())
+            {
+                LogicE();
+                JungleE();
             }
 
             if (Program.LagFree(1) && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
