@@ -50,7 +50,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
                 {
-                    Orbwalking.ResetAutoAttackTimer();
+                    Utility.DelayAction.Add(450, Orbwalking.ResetAutoAttackTimer);
                 }
             }
             if (R.IsReady() && sender.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(sender.Position) < R.Range && Player.Distance(sender.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
@@ -72,7 +72,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if stacks").SetValue(new Slider(10, 30, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wdragon", "Auto W bug dragon").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Balista Config").AddItem(new MenuItem("balista", "Balista R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Balista Config").AddItem(new MenuItem("rangeBalista", "Balista min range").SetValue(new Slider(300, 1400, 0)));
@@ -98,6 +100,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
+            
+            Program.debug(""+Game.CursorPos);
             if (R.IsReady() && Config.Item("balista").GetValue<bool>() && AllyR != null && AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range && AllyR.ChampionName == "Blitzcrank" && Player.Distance(AllyR.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
             {
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget() && !enemy.IsDead && enemy.HasBuff("rocketgrab2")))
@@ -108,6 +112,11 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Game.Time - grabTime < 1)
                     return;
             }
+
+            if (E.IsReady())
+            {
+                JungleE();
+            }
             
             if (Program.LagFree(0))
             {
@@ -117,19 +126,35 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(1) && Q.IsReady() && !Player.IsWindingUp && !Player.IsDashing())
                 LogicQ();
-            if (Program.LagFree(2) && E.IsReady())
-                JungleE();
-            if (Program.LagFree(3) && E.IsReady() && !Player.IsWindingUp)
+            
+                
+            if (Program.LagFree(2) && E.IsReady() && !Player.IsWindingUp)
             {
                 farm();
                 LogicE();
             }
-            if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            if (Program.LagFree(3) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
 
+            if (Program.LagFree(4) && W.IsReady())
+            {
+                LogicW();
+            }
 
         }
 
+        private void LogicW()
+        {
+            if (Config.Item("Wdragon").GetValue<bool>())
+            {
+                Vector3 point;
+                point.X = 9774;
+                point.Y = 4432;
+                point.Z = 0;
+                if(Player.Distance(point) < 5000)
+                    W.Cast(point);
+            }
+        }
         private void JungleE()
         {
 
