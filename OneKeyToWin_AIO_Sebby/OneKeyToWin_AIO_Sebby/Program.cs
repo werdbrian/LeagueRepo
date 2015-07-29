@@ -39,7 +39,7 @@ namespace OneKeyToWin_AIO_Sebby
         public static Obj_AI_Hero jungler = ObjectManager.Player;
         public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
-        public static PredictionOutput DrawSpellPos;
+        public static Core.PredictionOutput DrawSpellPos;
         public static bool 
             tickSkip = true,
             RangeFix = true,
@@ -227,19 +227,20 @@ namespace OneKeyToWin_AIO_Sebby
 
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
 
-                Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("debugPred", "Draw Aiming").SetValue(false));                
+                              
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix",true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "3 Custome Collision(can drop fps)", true).SetValue(false));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "4 Cast only on new pathway", true).SetValue(false));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "5 Cast if target autoattacking", true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "6 Ignore Not-Moving targets", true).SetValue(false));
-
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - normal"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - high"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - high + max range fix"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - high + max range fix + waypionts analyzer "));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - Custome Prediction"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - common normal"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - common high"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - common high + max range fix"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - OKTW + max range fix + waypionts analyzer "));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - OKTW Custome Prediction 4"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 3,4").SetValue(false));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
             }
 
 
@@ -459,7 +460,33 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (target.Path.Count() > 1)
                 return;
-            var poutput = QWER.GetPrediction(target);
+            
+
+            Core.SkillshotType CoreType = Core.SkillshotType.SkillshotLine;
+            bool aoe = false;
+            if (QWER.Type == SkillshotType.SkillshotCircle)
+            {
+                CoreType = Core.SkillshotType.SkillshotCircle;
+                aoe = true;
+            }
+            if (QWER.Width > 100)
+                aoe = true;
+            var predInput = new Core.PredictionInput
+            {
+                Aoe = aoe,
+                Collision = QWER.Collision,
+                Speed = QWER.Speed,
+                Delay = QWER.Delay,
+                Range = QWER.Range,
+                From = Player.ServerPosition,
+                Radius = QWER.Width,
+                Unit = target,
+                Type = CoreType
+            };
+            var poutput = Core.Prediction.GetPrediction(predInput);
+            
+            
+            //var poutput2 = QWER.GetPrediction(target);
             if (Game.Time - DrawSpellTime > 0.5)
             {
                 DrawSpell = QWER;
@@ -488,13 +515,13 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             }
 
-            if (target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile )
+            if (target.HasBuff("Recall") || poutput.Hitchance == Core.HitChance.Immobile )
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
             }
 
-            if (poutput.Hitchance == HitChance.Dashing && QWER.Delay < 0.30f)
+            if (poutput.Hitchance == Core.HitChance.Dashing && QWER.Delay < 0.30f)
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
@@ -596,7 +623,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true); 
+                        QWER.Cast(poutput.CastPosition);
                     }
                     return;
                 }
@@ -606,7 +633,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                     {
 
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true); 
+                        QWER.Cast(poutput.CastPosition);
                     }
                     return;
                 }
@@ -626,12 +653,12 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
                         {
-                            QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                            QWER.Cast(poutput.CastPosition);
                         }
                     }
                     else
                     {
-                        QWER.CastIfHitchanceEquals(target, HitChance.High, true);
+                        QWER.Cast(poutput.CastPosition);
                     }
                 }
 
