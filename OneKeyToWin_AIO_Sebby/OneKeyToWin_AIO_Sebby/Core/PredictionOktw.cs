@@ -928,12 +928,25 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                             minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.RangeCheckFrom)))
                             {
                                 input.Unit = minion;
-                                var minionPrediction = Prediction.GetPrediction(input, false, false);
-                                if (minionPrediction.CastPosition.To2D()
-                                        .Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                    Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
+                                if (minion.IsMoving)
                                 {
-                                    result.Add(minion);
+                                    var minionPrediction = Prediction.GetPrediction(input, false, false);
+
+                                    if (minionPrediction.CastPosition.To2D()
+                                            .Distance(input.From.To2D(), position.To2D(), true, true) <=
+                                        Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
+                                    {
+                                        result.Add(minion);
+                                    }
+                                }
+                                else
+                                {
+                                    if (minion.ServerPosition.To2D()
+                                            .Distance(input.From.To2D(), position.To2D(), true, true) <=
+                                        Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
+                                    {
+                                        result.Add(minion);
+                                    }
                                 }
                             }
                             break;
