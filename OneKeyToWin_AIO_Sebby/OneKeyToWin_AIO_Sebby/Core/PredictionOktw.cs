@@ -544,11 +544,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (pLength >= input.Delay * speed - input.RealRadius &&
                 Math.Abs(input.Speed - float.MaxValue) > float.Epsilon)
             {
-
-                 path = path.CutPath(input.Delay * speed - input.RealRadius);
-                var distanceToTarget = input.From.Distance(input.Unit.ServerPosition);
-                var m = distanceToTarget > input.Unit.BoundingRadius ?  distanceToTarget / (distanceToTarget - input.Unit.BoundingRadius) : 1;
-                var sp = m * input.Speed;
+                path = path.CutPath(Math.Max(0, input.Delay * speed - input.RealRadius));
 
                 var tT = 0f;
                 for (var i = 0; i < path.Count - 1; i++)
@@ -566,10 +562,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     {
                         var p = pos + input.RealRadius * direction;
 
-                        if (input.Type == SkillshotType.SkillshotLine)
+                        if (input.Type == SkillshotType.SkillshotLine && false)
                         {
                             var alpha = (input.From.To2D() - p).AngleBetween(a - b);
-                            if (alpha > 50 && alpha < 180 - 50)
+                            if (alpha > 30 && alpha < 180 - 30)
                             {
                                 var beta = (float)Math.Asin(input.RealRadius / p.Distance(input.From));
                                 var cp1 = input.From.To2D() + (p - input.From.To2D()).Rotated(beta);
