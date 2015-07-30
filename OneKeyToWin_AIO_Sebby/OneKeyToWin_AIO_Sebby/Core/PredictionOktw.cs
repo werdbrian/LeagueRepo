@@ -418,9 +418,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
             var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
-            
-            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 )
-                result.Hitchance = HitChance.VeryHigh;
 
             var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
             var fixRange = (input.Unit.MoveSpeed * totalDelay) / 2;
@@ -433,12 +430,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 else
                     result.Hitchance = HitChance.High;
             }
-
             else if (input.Type == SkillshotType.SkillshotCircle)
             {
                 if (totalDelay < 0.35 && (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp))
                     result.Hitchance = HitChance.VeryHigh;
             }
+
+            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300)
+                result.Hitchance = HitChance.VeryHigh;
 
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
             {
@@ -922,17 +921,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     {
                         case CollisionableObjects.Minions:
                             foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion =>
-                                            minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.RangeCheckFrom)))
+                                            minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.From)))
                             {
                                 input.Unit = minion;
-                                Program.debug("" + minion.Path.Count());
                                 if (minion.Path.Count() > 0)
                                 {
                                     var minionPrediction = Prediction.GetPrediction(input, false, false);
 
-                                    if (minionPrediction.CastPosition.To2D()
-                                            .Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                        Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
+                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 30 + minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
