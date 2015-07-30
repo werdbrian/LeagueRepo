@@ -37,8 +37,8 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1200);
-            W = new Spell(SpellSlot.W, 1000);
+            Q = new Spell(SpellSlot.Q, 1150);
+            W = new Spell(SpellSlot.W, 900);
             E = new Spell(SpellSlot.E, 475);
             R = new Spell(SpellSlot.R, 3000f);
             
