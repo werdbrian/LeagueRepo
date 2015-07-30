@@ -329,7 +329,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             //Check for collision
             if (checkCollision && input.Collision)
             {
-                var positions = new List<Vector3> { result.UnitPosition, result.CastPosition, input.Unit.Position };
+                var positions = new List<Vector3> {result.CastPosition};
                 var originalUnit = input.Unit;
                 result.CollisionObjects = Collision.GetCollision(positions, input);
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
@@ -422,36 +422,22 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 )
                 result.Hitchance = HitChance.VeryHigh;
 
-            if (input.Type == SkillshotType.SkillshotLine)
-            {
-                if(PathTracker.GetAngle(input.From, input.Unit) < 31 + 1)
-                    result.Hitchance = HitChance.VeryHigh;
-
-            }
-            else if (input.Type == SkillshotType.SkillshotCircle)
-            {
-                if(input.Delay < 0.35 && (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp))
-                    result.Hitchance = HitChance.VeryHigh;
-            }
-
             var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
             var fixRange = (input.Unit.MoveSpeed * totalDelay) / 2;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
 
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
+            if (input.Type == SkillshotType.SkillshotLine)
             {
-                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
+                if (PathTracker.GetAngle(input.From, input.Unit) < 31 + 1)
                     result.Hitchance = HitChance.VeryHigh;
                 else
                     result.Hitchance = HitChance.High;
             }
-            else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
-            {
-                if (input.From.Distance(input.Unit.ServerPosition)  < input.Range - fixRange)
-                    result.Hitchance = HitChance.VeryHigh;
-                else
-                    result.Hitchance = HitChance.High;
 
+            else if (input.Type == SkillshotType.SkillshotCircle)
+            {
+                if (totalDelay < 0.35 && (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp))
+                    result.Hitchance = HitChance.VeryHigh;
             }
 
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
@@ -461,6 +447,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
             //BAD PREDICTION
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
+            {
+                if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
+                    result.Hitchance = HitChance.High;
+            }
+            else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
+            {
+                if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
+                    result.Hitchance = HitChance.High;
+            }
 
             if (totalDelay > 0.5 && input.Unit.IsWindingUp)
             {
@@ -929,7 +925,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                             minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.RangeCheckFrom)))
                             {
                                 input.Unit = minion;
-                                if (minion.IsMoving)
+                                Program.debug("" + minion.Path.Count());
+                                if (minion.Path.Count() > 0)
                                 {
                                     var minionPrediction = Prediction.GetPrediction(input, false, false);
 
