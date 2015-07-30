@@ -237,7 +237,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - common high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - OKTW + max range fix + waypionts analyzer "));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - OKTW Custome Prediction 4"));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "5 - OKTW NewCommon Prediction concept"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("5", "5 - OKTW NewCommon Prediction concept"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 3,4").SetValue(false));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 5, 0)));
             }
