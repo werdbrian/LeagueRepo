@@ -259,14 +259,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (ft)
             {
                 //Increase the delay due to the latency and server tick:
-                input.Delay += Game.Ping / 2000f + 0.06f;
+                input.Delay += Game.Ping / 2000f + 0.07f;
 
                 if (input.Aoe)
                 {
                     return AoePrediction.GetPrediction(input);
                 }
             }
-
+            
             //Target too far away.
             if (Math.Abs(input.Range - float.MaxValue) > float.Epsilon &&
                 input.Unit.Distance(input.RangeCheckFrom, true) > Math.Pow(input.Range * 1.5, 2))
@@ -418,8 +418,59 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
             var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
+            
+            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 )
+                result.Hitchance = HitChance.VeryHigh;
 
-            if (result.Hitchance >= HitChance.High && input.Unit is Obj_AI_Hero) { }
+            if (input.Type == SkillshotType.SkillshotLine)
+            {
+                if(PathTracker.GetAngle(input.From, input.Unit) < 31 + 1)
+                    result.Hitchance = HitChance.VeryHigh;
+
+            }
+            else if (input.Type == SkillshotType.SkillshotCircle)
+            {
+                if(input.Delay < 0.35 && (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp))
+                    result.Hitchance = HitChance.VeryHigh;
+            }
+
+            var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
+            var fixRange = (input.Unit.MoveSpeed * totalDelay) / 2;
+            var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
+
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
+            {
+                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
+                    result.Hitchance = HitChance.VeryHigh;
+                else
+                    result.Hitchance = HitChance.High;
+            }
+            else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
+            {
+                if (input.From.Distance(input.Unit.ServerPosition)  < input.Range - fixRange)
+                    result.Hitchance = HitChance.VeryHigh;
+                else
+                    result.Hitchance = HitChance.High;
+
+            }
+
+            if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
+            {
+                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
+                    result.Hitchance = HitChance.VeryHigh;
+            }
+
+            //BAD PREDICTION
+
+            if (totalDelay > 0.5 && input.Unit.IsWindingUp)
+            {
+                result.Hitchance = HitChance.Medium;
+            }
+
+            if (input.Unit.Path.Count() > 1)
+            {
+                result.Hitchance = HitChance.Medium;
+            }
 
             return result;
         }
@@ -431,7 +482,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     buff =>
                         buff.IsActive && Game.Time <= buff.EndTime &&
                         (buff.Type == BuffType.Charm || buff.Type == BuffType.Knockup || buff.Type == BuffType.Stun ||
-                         buff.Type == BuffType.Suppression || buff.Type == BuffType.Snare))
+                         buff.Type == BuffType.Suppression || buff.Type == BuffType.Snare || buff.Type == BuffType.Fear
+                         || buff.Type == BuffType.Taunt || buff.Type == BuffType.Knockback))
                     .Aggregate(0d, (current, buff) => Math.Max(current, buff.EndTime));
             return (result - Game.Time);
         }
@@ -447,7 +499,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     Input = input,
                     UnitPosition = input.Unit.ServerPosition,
                     CastPosition = input.Unit.ServerPosition,
-                    Hitchance = HitChance.VeryHigh
+                    Hitchance = HitChance.High
                 };
             }
 
@@ -480,8 +532,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             Input = input,
                             CastPosition = cp.To3D(),
                             UnitPosition = p.To3D(),
-                            Hitchance =
-                                PathTracker.GetCurrentPath(input.Unit).Time < 0.1d ? HitChance.VeryHigh : HitChance.High
+                            Hitchance = HitChance.High
                         };
                     }
 
@@ -528,8 +579,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             Input = input,
                             CastPosition = pos.To3D(),
                             UnitPosition = p.To3D(),
-                            Hitchance =
-                                PathTracker.GetCurrentPath(input.Unit).Time < 0.1d ? HitChance.VeryHigh : HitChance.High
+                            Hitchance = HitChance.High
                         };
                     }
                     tT += tB;
@@ -874,18 +924,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     switch (objectType)
                     {
                         case CollisionableObjects.Minions:
-                            foreach (var minion in
-                                ObjectManager.Get<Obj_AI_Minion>()
-                                    .Where(
-                                        minion =>
-                                            minion.IsValidTarget(
-                                                Math.Min(input.Range + input.Radius + 100, 2000), true,
-                                                input.RangeCheckFrom)))
+                            foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion =>
+                                            minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.RangeCheckFrom)))
                             {
                                 input.Unit = minion;
                                 var minionPrediction = Prediction.GetPrediction(input, false, false);
-                                if (
-                                    minionPrediction.UnitPosition.To2D()
+                                if (minionPrediction.CastPosition.To2D()
                                         .Distance(input.From.To2D(), position.To2D(), true, true) <=
                                     Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
                                 {
@@ -1063,6 +1107,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             return result.To3D();
         }
 
+
+
         public static double GetMeanSpeed(Obj_AI_Base unit, double maxT)
         {
             var paths = GetStoredPaths(unit, MaxTime);
@@ -1098,6 +1144,22 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
 
             return distance / maxT;
+        }
+        public static double GetAngle(Vector3 from, Obj_AI_Base target)
+        {
+            var C = target.ServerPosition.To2D();
+            var A = target.GetWaypoints().Last();
+
+            if (C == A)
+                return 60;
+
+            var B = from.To2D();
+
+            var AB = Math.Pow((double)A.X - (double)B.X, 2) + Math.Pow((double)A.Y - (double)B.Y, 2);
+            var BC = Math.Pow((double)B.X - (double)C.X, 2) + Math.Pow((double)B.Y - (double)C.Y, 2);
+            var AC = Math.Pow((double)A.X - (double)C.X, 2) + Math.Pow((double)A.Y - (double)C.Y, 2);
+
+            return Math.Cos((AB + BC - AC) / (2 * Math.Sqrt(AB) * Math.Sqrt(BC))) * 180 / Math.PI;
         }
     }
 }

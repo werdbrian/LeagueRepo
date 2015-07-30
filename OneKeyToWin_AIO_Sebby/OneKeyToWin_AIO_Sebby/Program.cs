@@ -225,8 +225,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
-
                               
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix",true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
@@ -239,8 +237,9 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - common high + max range fix"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - OKTW + max range fix + waypionts analyzer "));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - OKTW Custome Prediction 4"));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "5 - OKTW NewCommon Prediction concept"));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 3,4").SetValue(false));
-                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 4, 0)));
+                Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 5, 0)));
             }
 
 
@@ -458,6 +457,47 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Base target)
         {
+            if (HitChanceNum == 5)
+            {
+
+                Core.SkillshotType CoreType2 = Core.SkillshotType.SkillshotLine;
+                bool aoe2 = false;
+                if (QWER.Type == SkillshotType.SkillshotCircle)
+                {
+                    CoreType2 = Core.SkillshotType.SkillshotCircle;
+                    aoe2 = true;
+                }
+                if (QWER.Width > 100)
+                    aoe2 = true;
+                var predInput2 = new Core.PredictionInput
+                {
+                    Aoe = aoe2,
+                    Collision = QWER.Collision,
+                    Speed = QWER.Speed,
+                    Delay = QWER.Delay,
+                    Range = QWER.Range,
+                    From = Player.ServerPosition,
+                    Radius = QWER.Width,
+                    Unit = target,
+                    Type = CoreType2
+                };
+                var poutput2 = Core.Prediction.GetPrediction(predInput2);
+
+
+                //var poutput2 = QWER.GetPrediction(target);
+                if (Game.Time - DrawSpellTime > 0.5)
+                {
+                    DrawSpell = QWER;
+                    DrawSpellTime = Game.Time;
+
+                }
+
+                DrawSpellPos = poutput2;
+                if(poutput2.Hitchance == Core.HitChance.VeryHigh)
+                    QWER.Cast(poutput2.CastPosition);
+                return;
+            }
+
             if (target.Path.Count() > 1)
                 return;
             
