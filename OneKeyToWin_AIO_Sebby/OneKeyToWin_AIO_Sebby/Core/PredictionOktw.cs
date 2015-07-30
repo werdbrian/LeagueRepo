@@ -425,7 +425,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (input.Type == SkillshotType.SkillshotLine)
             {
-                if (PathTracker.GetAngle(input.From, input.Unit) < 31 + 1)
+                if (PathTracker.GetAngle(input.From, input.Unit) < 32 + 1)
                     result.Hitchance = HitChance.VeryHigh;
                 else
                     result.Hitchance = HitChance.High;
@@ -436,7 +436,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300)
+            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 300)
                 result.Hitchance = HitChance.VeryHigh;
 
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
@@ -1114,8 +1114,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             return result.To3D();
         }
 
-
-
         public static double GetMeanSpeed(Obj_AI_Base unit, double maxT)
         {
             var paths = GetStoredPaths(unit, MaxTime);
@@ -1148,8 +1146,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 return unit.MoveSpeed;
             }
-
-
             return distance / maxT;
         }
         public static double GetAngle(Vector3 from, Obj_AI_Base target)
