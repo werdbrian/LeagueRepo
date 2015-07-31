@@ -936,7 +936,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 {
                                     var minionPrediction = Prediction.GetPrediction(input, true, false);
 
-                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + minion.Path.Count() * minion.BoundingRadius), 2))
+                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 20 + minion.Path.Count() * minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
