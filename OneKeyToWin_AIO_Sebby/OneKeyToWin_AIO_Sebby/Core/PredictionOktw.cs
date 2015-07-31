@@ -464,8 +464,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 result.Hitchance = HitChance.Medium;
             }
-
-            if (totalDelay > 0.4 && input.Unit.IsWindingUp)
+            Program.debug("" + totalDelay);
+            if (totalDelay > 0.7 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
@@ -936,7 +936,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 {
                                     var minionPrediction = Prediction.GetPrediction(input, true, false);
 
-                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 30 + minion.BoundingRadius), 2))
+                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + minion.Path.Count() * minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
