@@ -36,8 +36,8 @@ namespace OneKeyToWin_AIO_Sebby
             Botrk = new Items.Item(3153, 550f),
             Cutlass = new Items.Item(3144, 550f),
             Youmuus = new Items.Item(3142, 650f),
-            Hydra = new Items.Item(3144, 440f),
-            Hydra2 = new Items.Item(3144, 440f),
+            Hydra = new Items.Item(3074, 440f),
+            Hydra2 = new Items.Item(3077, 440f),
             Hextech = new Items.Item(3146, 700f),
             //def
             Randuin = new Items.Item(3143, 500f);
