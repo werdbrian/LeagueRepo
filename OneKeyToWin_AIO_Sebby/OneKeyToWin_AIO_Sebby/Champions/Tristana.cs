@@ -43,6 +43,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("nktdE", "NoKeyToDash").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wks", "W KS logic (W+E+R calculation)").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("smartW", "SmartCast W key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R KS (E+R calculation)").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("turrentR", "Try R under turrent").SetValue(true));
@@ -89,6 +90,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Game_OnUpdate(EventArgs args)
         {
+            if (W.IsReady())
+            {
+                if (Config.Item("smartW").GetValue<KeyBind>().Active)
+                    W.Cast(Player.Position.Extend(Game.CursorPos, W.Range), true);
+            }
             if (Program.LagFree(1))
             {
                 SetMana();
