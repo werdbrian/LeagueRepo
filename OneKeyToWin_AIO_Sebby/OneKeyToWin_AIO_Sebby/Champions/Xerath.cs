@@ -60,6 +60,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("separate", "Separate lanclear from harras").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
@@ -240,7 +241,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-            if (t.IsValidTarget())
+            if (t.IsValidTarget() && (Config.Item("separate").GetValue<bool>() && Program.LaneClear))
             {
                 if (Q.IsCharging)
                 {
