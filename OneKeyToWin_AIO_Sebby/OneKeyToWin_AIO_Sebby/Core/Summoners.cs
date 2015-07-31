@@ -147,9 +147,9 @@ namespace OneKeyToWin_AIO_Sebby
                     if (!Config.Item("AllyHeal").GetValue<bool>() && !ally.IsMe)
                         return;
 
-                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 20)
+                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 15)
                         Player.Spellbook.CastSpell(heal, ally);
-                    else if (ally.Health - dmg <  ally.Level * 15)
+                    else if (ally.Health - dmg <  ally.Level * 10)
                         Player.Spellbook.CastSpell(heal, ally);
                 }
             }
