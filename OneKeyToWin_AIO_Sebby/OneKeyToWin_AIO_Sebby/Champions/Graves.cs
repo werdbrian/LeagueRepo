@@ -28,10 +28,10 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R, 1000f);
             R1 = new Spell(SpellSlot.R, 1500f);
 
-            Q.SetSkillshot(0.26f, 50f, 1950f, false, SkillshotType.SkillshotLine);
-            W.SetSkillshot(0.35f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.25f, 50f, 2000f, false, SkillshotType.SkillshotLine);
+            W.SetSkillshot(0.35f, 150f, 1650f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.25f, 120f, 2100f, false, SkillshotType.SkillshotLine);
-            R1.SetSkillshot(0.26f, 120f, 2100f, false, SkillshotType.SkillshotLine);
+            R1.SetSkillshot(0.25f, 100f, 2100f, false, SkillshotType.SkillshotLine);
 
             LoadMenuOKTW();
 
@@ -51,36 +51,43 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Haras").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
-            
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("Qafter", "Q only after AA").SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+                Config.SubMenu(Player.ChampionName).SubMenu("Q config").SubMenu("Harras").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("fastR", "Fast R ks Combo").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-
-            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu(Player.ChampionName).SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCE", "AntiGapcloserE").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCW", "AntiGapcloserW").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
         }
 
         public void Orbwalker_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe)
                 return;
-
+            Jungle();
             if (Q.IsReady() && Config.Item("Qafter").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget(Q.Range))
+                if (t.IsValidTarget())
                 {
                     if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                         Program.CastSpell(Q, t);
-                    else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
+                    else if ((Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
                         Program.CastSpell(Q, t);
                 }
             }
@@ -100,7 +107,7 @@ namespace OneKeyToWin_AIO_Sebby
                     }
                     else if (W.IsReady() && Config.Item("AGCW").GetValue<bool>())
                     {
-                        W.Cast(ObjectManager.Player.Position, true);
+                        W.Cast(gapcloser.End);
                         Program.debug("W AGC");
                     }
                 }
@@ -135,12 +142,34 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (Program.LagFree(1) && E.IsReady() && !Player.IsWindingUp && Config.Item("autoE").GetValue<bool>())
                 LogicE();
-            if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp)
+            if (Program.LagFree(2) && Q.IsReady() && !Player.IsWindingUp && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
-            if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp)
+            if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp && Config.Item("autoW").GetValue<bool>())
                 LogicW();
             if (Program.LagFree(4) && R.IsReady() && !Player.IsWindingUp && Config.Item("autoR").GetValue<bool>())
                 LogicR();
+        }
+
+        private void Jungle()
+        {
+            if (Program.LaneClear && Player.Mana > RMANA + WMANA + QMANA + EMANA)
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 600, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>() )
+                    {
+                        Q.Cast(mob.Position);
+                        return;
+                    }
+                    if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
+                    {
+                        W.Cast(mob.Position);
+                        return;
+                    }
+                }
+            }
         }
 
         private void LogicQ()
@@ -165,13 +194,13 @@ namespace OneKeyToWin_AIO_Sebby
 
                 else if (!Config.Item("Qafter").GetValue<bool>())
                 {
-                    if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                    if (Program.Combo && Player.Mana > RMANA + QMANA)
                         Program.CastSpell(Q, t);
-                    else if ((Program.Farm && ObjectManager.Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
+                    else if ((Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + QMANA + QMANA) && t.IsValidTarget(Q.Range - 100) && Config.Item("haras" + t.BaseSkinName).GetValue<bool>())
                         Program.CastSpell(Q, t);
                 }
 
-                if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
+                if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA + EMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true, true);
