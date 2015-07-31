@@ -446,10 +446,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
             //BAD PREDICTION
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
+                else
+                    result.Hitchance = HitChance.VeryHigh;
             }
             else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
             {
@@ -457,7 +459,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.High;
             }
 
-            if (totalDelay > 0.5 && input.Unit.IsWindingUp)
+            float BackToFront = ((input.Unit.MoveSpeed * input.Delay) + (input.From.Distance(input.Unit.ServerPosition) / input.Speed));
+            if (input.Unit.Path.Count() > 0 && input.Unit.Distance(LastWaypiont) < BackToFront)
+            {
+                result.Hitchance = HitChance.Medium;
+            }
+
+            if (totalDelay > 0.4 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
