@@ -465,7 +465,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.Medium;
             }
             Program.debug("" + totalDelay);
-            if (totalDelay > 0.7 && input.Unit.IsWindingUp)
+            if (input.Type != SkillshotType.SkillshotCircle && totalDelay > 0.7 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
