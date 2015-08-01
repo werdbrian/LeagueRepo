@@ -432,7 +432,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
             else if (input.Type == SkillshotType.SkillshotCircle)
             {
-                if (totalDelay < 0.35 && (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp))
+                if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
