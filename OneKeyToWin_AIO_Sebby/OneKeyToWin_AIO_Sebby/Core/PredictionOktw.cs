@@ -423,9 +423,18 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var fixRange = (input.Unit.MoveSpeed * totalDelay) / 2;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
 
+            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 300)
+                result.Hitchance = HitChance.VeryHigh;
+
+            if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
+            {
+                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
+                    result.Hitchance = HitChance.VeryHigh;
+            }
+
             if (input.Type == SkillshotType.SkillshotLine)
             {
-                if (PathTracker.GetAngle(input.From, input.Unit) < 32 + 1)
+                if (PathTracker.GetAngle(input.From, input.Unit) < 33)
                     result.Hitchance = HitChance.VeryHigh;
                 else
                     result.Hitchance = HitChance.High;
@@ -436,14 +445,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 300)
-                result.Hitchance = HitChance.VeryHigh;
-
-            if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
-            {
-                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
-                    result.Hitchance = HitChance.VeryHigh;
-            }
+            
 
             //BAD PREDICTION
             if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
@@ -464,13 +466,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 result.Hitchance = HitChance.Medium;
             }
-            Program.debug("" + totalDelay);
+
             if (input.Type != SkillshotType.SkillshotCircle && totalDelay > 0.7 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
 
-            if (input.Unit.Path.Count() > 1)
+            if (input.Unit.Path.Count() > 1 && input.Type == SkillshotType.SkillshotLine)
             {
                 result.Hitchance = HitChance.Medium;
             }
