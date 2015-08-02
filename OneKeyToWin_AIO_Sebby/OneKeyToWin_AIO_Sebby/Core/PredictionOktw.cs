@@ -335,7 +335,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (result.Hitchance > HitChance.Medium)
                 WayPointAnalysis(result, input);
             //Check for collision
-            if (checkCollision && input.Collision)
+            if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
                 var positions = new List<Vector3> { result.CastPosition };
                 var originalUnit = input.Unit;
@@ -343,7 +343,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
-
             return result;
         }
 
