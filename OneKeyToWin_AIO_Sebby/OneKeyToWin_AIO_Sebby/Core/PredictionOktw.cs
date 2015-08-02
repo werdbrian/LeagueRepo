@@ -116,6 +116,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public Obj_AI_Base Unit = ObjectManager.Player;
 
         /// <summary>
+        ///     Source unit for the prediction 
+        /// </summary>
+        public Obj_AI_Base Source = ObjectManager.Player;
+
+        /// <summary>
         ///     Set to true to increase the prediction radius by the unit bounding radius.
         /// </summary>
         public bool UseBoundingRadius = true;
@@ -266,7 +271,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     return AoePrediction.GetPrediction(input);
                 }
             }
-            
+
             //Target too far away.
             if (Math.Abs(input.Range - float.MaxValue) > float.Epsilon &&
                 input.Unit.Distance(input.RangeCheckFrom, true) > Math.Pow(input.Range * 1.5, 2))
@@ -311,6 +316,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.OutOfRange;
                 }
 
+                /* This does not need to be handled for the updated predictions, but left as a reference.*/
+
                 if (input.RangeCheckFrom.Distance(result.CastPosition, true) > Math.Pow(input.Range, 2))
                 {
                     if (result.Hitchance != HitChance.OutOfRange)
@@ -325,11 +332,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-
+            if (result.Hitchance > HitChance.Medium)
+                WayPointAnalysis(result, input);
             //Check for collision
             if (checkCollision && input.Collision)
             {
-                var positions = new List<Vector3> {result.CastPosition};
+                var positions = new List<Vector3> { result.CastPosition };
                 var originalUnit = input.Unit;
                 result.CollisionObjects = Collision.GetCollision(positions, input);
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
@@ -419,35 +427,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
 
+            return result; 
+        }
+        private static PredictionOutput WayPointAnalysis(PredictionOutput result, PredictionInput input)
+        {
+
             var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
             var fixRange = (input.Unit.MoveSpeed * totalDelay) / 2;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
 
-            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 300)
-                result.Hitchance = HitChance.VeryHigh;
-
-            if (LastWaypiont.Distance(input.Unit.ServerPosition) > 700)
+            if (input.Type == SkillshotType.SkillshotCircle)
             {
-                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
-                    result.Hitchance = HitChance.VeryHigh;
+                fixRange -= input.Radius / 2;
             }
 
-            if (input.Type == SkillshotType.SkillshotLine)
-            {
-                if (PathTracker.GetAngle(input.From, input.Unit) < 33)
-                    result.Hitchance = HitChance.VeryHigh;
-                else
-                    result.Hitchance = HitChance.High;
-            }
-            else if (input.Type == SkillshotType.SkillshotCircle)
-            {
-                if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || input.Unit.IsWindingUp)
-                    result.Hitchance = HitChance.VeryHigh;
-            }
-
-            
-
-            //BAD PREDICTION
             if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
@@ -458,14 +451,60 @@ namespace OneKeyToWin_AIO_Sebby.Core
             else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
+                {
                     result.Hitchance = HitChance.High;
+                    return result;
+                }
+            }
+
+            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 250)
+            {
+                result.Hitchance = HitChance.VeryHigh;
+                return result;
             }
 
             float BackToFront = ((input.Unit.MoveSpeed * input.Delay) + (input.From.Distance(input.Unit.ServerPosition) / input.Speed));
-            if (input.Unit.Path.Count() > 0 && input.Unit.Distance(LastWaypiont) < BackToFront)
+            if (input.Unit.Path.Count() > 0)
             {
-                result.Hitchance = HitChance.Medium;
+                if (input.Unit.Distance(LastWaypiont) < BackToFront)
+                {
+                    result.Hitchance = HitChance.Medium;
+                    return result;
+                }
             }
+
+            if (LastWaypiont.Distance(input.Unit.ServerPosition) > input.Unit.AttackRange)
+            {
+                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
+                    result.Hitchance = HitChance.VeryHigh;
+            }
+
+            if (input.Type == SkillshotType.SkillshotLine)
+            {
+                if (input.Unit.Path.Count() > 0)
+                {
+                    if (GetAngle(input.From, input.Unit) < 34)
+                        result.Hitchance = HitChance.VeryHigh;
+                    else
+                        result.Hitchance = HitChance.High;
+                }
+                if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+                {
+                    result.Hitchance = HitChance.VeryHigh;
+                }
+            }
+            else if (input.Type == SkillshotType.SkillshotCircle)
+            {
+                if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+                    result.Hitchance = HitChance.VeryHigh;
+            }
+
+            //BAD PREDICTION
+
+            if (input.Radius / input.Unit.MoveSpeed >= input.Delay + input.From.Distance(result.CastPosition / input.Speed))
+                result.Hitchance = HitChance.VeryHigh;
+
+
 
             if (input.Type != SkillshotType.SkillshotCircle && totalDelay > 0.7 && input.Unit.IsWindingUp)
             {
@@ -476,10 +515,25 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 result.Hitchance = HitChance.Medium;
             }
-
             return result;
         }
 
+        private static double GetAngle(Vector3 from, Obj_AI_Base target)
+        {
+            var C = target.ServerPosition.To2D();
+            var A = target.GetWaypoints().Last();
+
+            if (C == A)
+                return 60;
+
+            var B = from.To2D();
+
+            var AB = Math.Pow((double)A.X - (double)B.X, 2) + Math.Pow((double)A.Y - (double)B.Y, 2);
+            var BC = Math.Pow((double)B.X - (double)C.X, 2) + Math.Pow((double)B.Y - (double)C.Y, 2);
+            var AC = Math.Pow((double)A.X - (double)C.X, 2) + Math.Pow((double)A.Y - (double)C.Y, 2);
+
+            return Math.Cos((AB + BC - AC) / (2 * Math.Sqrt(AB) * Math.Sqrt(BC))) * 180 / Math.PI;
+        }
         internal static double UnitIsImmobileUntil(Obj_AI_Base unit)
         {
             var result =
@@ -549,7 +603,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (pLength >= input.Delay * speed - input.RealRadius &&
                 Math.Abs(input.Speed - float.MaxValue) > float.Epsilon)
             {
-                path = path.CutPath(Math.Max(0, input.Delay * speed - input.RealRadius));
+                path = path.CutPath(input.Delay * speed - input.RealRadius);
+                var distanceToTarget = input.From.Distance(input.Unit.ServerPosition);
+                var m = distanceToTarget > input.Unit.BoundingRadius ? distanceToTarget / (distanceToTarget - input.Unit.BoundingRadius) : 1;
+                var sp = m * input.Speed;
 
                 var tT = 0f;
                 for (var i = 0; i < path.Count - 1; i++)
@@ -559,7 +616,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     var tB = a.Distance(b) / speed;
                     var direction = (b - a).Normalized();
                     a = a - speed * tT * direction;
-                    var sol = Geometry.VectorMovementCollision(a, b, speed, input.From.To2D(), input.Speed, tT);
+                    var sol = Geometry.VectorMovementCollision(a, b, speed, input.From.To2D(), sp, tT);
                     var t = (float)sol[0];
                     var pos = (Vector2)sol[1];
 
@@ -570,9 +627,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         if (input.Type == SkillshotType.SkillshotLine && false)
                         {
                             var alpha = (input.From.To2D() - p).AngleBetween(a - b);
-                            if (alpha > 30 && alpha < 180 - 30)
+                            if (alpha > 50 && alpha < 180 - 50)
                             {
-                                var beta = (float)Math.Asin(input.RealRadius / p.Distance(input.From));
+                                var beta = (float)Math.Asin(input.RealRadius * 0.85f / p.Distance(input.From));
                                 var cp1 = input.From.To2D() + (p - input.From.To2D()).Rotated(beta);
                                 var cp2 = input.From.To2D() + (p - input.From.To2D()).Rotated(-beta);
 
@@ -1037,6 +1094,47 @@ namespace OneKeyToWin_AIO_Sebby.Core
         }
     }
 
+    internal class StoredAutoAttackTime
+    {
+        public int Tick { get; set; }
+        public int NetworkId { get; set; }
+        public double Time { get { return (Utils.TickCount - Tick) / 1000d; } }
+    }
+
+    internal static class OnProcessSpellDetection
+    {
+        public static List<StoredAutoAttackTime> StoredAutoAttackTimeList = new List<StoredAutoAttackTime>();
+
+        static OnProcessSpellDetection()
+        {
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+        }
+
+        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!(sender is Obj_AI_Hero)) { return; }
+            if (!args.SData.IsAutoAttack()) { return; }
+
+            var FindTime = StoredAutoAttackTimeList.Find(x => x.NetworkId == sender.NetworkId);
+            if (FindTime == null)
+            {
+                StoredAutoAttackTimeList.Add(new StoredAutoAttackTime() { NetworkId = sender.NetworkId, Tick = Utils.TickCount });
+            }
+            else
+            {
+                FindTime.Tick = Utils.TickCount;
+            }
+        }
+        public static double GetLastAutoAttackTime(Obj_AI_Base unit)
+        {
+            var FindTime = StoredAutoAttackTimeList.Find(x => x.NetworkId == unit.NetworkId);
+
+            if (FindTime == null)
+                return 1;
+            else
+                return FindTime.Time;
+        }
+    }
     internal class StoredPath
     {
         public List<Vector2> Path;
@@ -1156,8 +1254,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 return unit.MoveSpeed;
             }
+
+
             return distance / maxT;
         }
+
         public static double GetAngle(Vector3 from, Obj_AI_Base target)
         {
             var C = target.ServerPosition.To2D();
