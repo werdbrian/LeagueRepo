@@ -20,6 +20,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
     class OneKeyToBrain
     {
+        private Menu Config = Program.Config;
         public Font Text, TextBold;
         public List<ChampionInfo> ChampionInfoList = new List<ChampionInfo>();
 
@@ -46,6 +47,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.ClearType
                 });
+
+            Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
@@ -74,10 +77,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                     
                 }
-                else if (enemy.IsDead)
-                {
-                    ChampionInfoList.RemoveAll(x => x.NetworkId == enemy.NetworkId);
-                }
             }
         }
 
@@ -89,24 +88,27 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private void Drawing_OnDraw(EventArgs args)
         {
             float offset = 0;
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid && enemy != Program.jungler))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
             {
-                if (!enemy.IsVisible)
+                offset += 0.15f;
+                if (!enemy.IsVisible && !enemy.IsDead)
                 {
-                    var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
-                    if (ChampionInfoOne != null)
+                    if (Config.Item("SS").GetValue<bool>())
                     {
-                        offset += 0.15f;
-                        if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 6)
+                        var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+                        if (ChampionInfoOne != null && enemy != Program.jungler)
                         {
-                            if ((int)(Game.Time * 10) % 2 == 0)
+                            if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 6)
+                            {
+                                if ((int)(Game.Time * 10) % 2 == 0)
+                                {
+                                    DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.1f, SharpDX.Color.OrangeRed);
+                                }
+                            }
+                            if (Game.Time - ChampionInfoOne.LastVisableTime > 7)
                             {
                                 DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.1f, SharpDX.Color.OrangeRed);
                             }
-                        }
-                        if ( Game.Time - ChampionInfoOne.LastVisableTime > 7)
-                        {
-                            DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.1f, SharpDX.Color.OrangeRed);
                         }
                     }
                 }
