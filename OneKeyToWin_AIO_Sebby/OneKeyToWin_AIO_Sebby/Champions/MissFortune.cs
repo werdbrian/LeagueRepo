@@ -68,7 +68,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (!unit.IsMe)
                 return;
 
-            if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.5)
+            if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.2)
             {
                 Orbwalking.Attack = false;
                 Orbwalking.Move = false;
@@ -127,7 +127,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.5)
+            if (Player.IsChannelingImportantSpell() || Game.Time - RCastTime < 0.3)
             {
                 if (Config.Item("forceBlockMove").GetValue<bool>())
                 {
@@ -205,7 +205,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var minionQ = col.Last();
                 if (minionQ.IsValidTarget(Q.Range))
                 {
-                    if (Config.Item("killQ").GetValue<bool>() && Q.GetDamage(minionQ) < minionQ.Health)
+                    if (Config.Item("killQ").GetValue<bool>() && Q.GetDamage(minionQ) > minionQ.Health - minionQ.GetAutoAttackDamage(minionQ) * 2)
                         return;
                     if (minionQ.Distance(Player.Position) > 400 && minionQ.Distance(poutput.CastPosition) < 380 && minionQ.Distance(t1.Position) < 380 && minionQ.Distance(poutput.CastPosition) > 150)
                     {
@@ -251,9 +251,9 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (t.IsValidTarget(R.Range))
             {
-                var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 12);
+                var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 10);
 
-                if (Player.CountEnemiesInRange(800) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
+                if (Player.CountEnemiesInRange(700) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
                 {
                     var tDis = Player.Distance(t.ServerPosition);
                     if (rDmg * 7 > t.Health && tDis < 800)
@@ -294,7 +294,7 @@ namespace OneKeyToWin_AIO_Sebby
                     RCastTime = Game.Time;
                     return;
                 }
-                else if (rDmg * 8 > t.Health && !OktwCommon.CanMove(t) && Player.CountEnemiesInRange(700) == 0)
+                else if (rDmg * 8 > t.Health && !OktwCommon.CanMove(t) && Player.CountEnemiesInRange(600) == 0)
                 {
                     R.Cast(t, true, true);
                     RCastTime = Game.Time;
@@ -330,6 +330,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Draw").AddItem(new MenuItem("QRange", "Q range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("ERange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("RRange", "R range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Use Q on minion").SetValue(true));
@@ -350,8 +351,46 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
         }
 
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("noti").GetValue<bool>() && R.IsReady())
+            {
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+
+                if (t.IsValidTarget())
+                {
+                    var rDamage = R.GetDamage(t) + (W.GetDamage(t) * 10);
+                    if (rDamage * 8 > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, "8 x R wave can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.GreenYellow);
+                    }
+                    else if (rDamage * 5 > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Orange, "5 x R wave can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Orange);
+                    }
+                    else if (rDamage * 3 > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Yellow, "3 x R wave can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+                    else if (rDamage > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "1 x R wave can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Red);
+                    }
+                }
+            }
+
             if (Config.Item("watermark").GetValue<bool>())
             {
                 Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
