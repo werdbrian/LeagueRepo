@@ -50,7 +50,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
                 {
-                    Utility.DelayAction.Add(450, Orbwalking.ResetAutoAttackTimer);
+                    Orbwalking.ResetAutoAttackTimer();
                 }
             }
             if (R.IsReady() && sender.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(sender.Position) < R.Range && Player.Distance(sender.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
