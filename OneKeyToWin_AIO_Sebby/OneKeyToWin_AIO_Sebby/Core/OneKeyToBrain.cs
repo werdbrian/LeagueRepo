@@ -58,12 +58,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
             {
+                var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
                 {
 
                     var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
 
-                    var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+                    
                     if (ChampionInfoOne == null)
                     {
                         ChampionInfoList.Add(new ChampionInfo() { NetworkId = enemy.NetworkId, LastVisablePos = enemy.Position, LastVisableTime = Game.Time, PredictedPos = prepos });
@@ -77,6 +78,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                     
                 }
+                if (enemy.IsDead)
+                {
+                    if (ChampionInfoOne != null)
+                    {
+           
+                        ChampionInfoOne.NetworkId = enemy.NetworkId;
+                        ChampionInfoOne.LastVisablePos = enemy.Position;
+                        ChampionInfoOne.LastVisableTime = Game.Time;
+                    }
+                }
             }
         }
 
@@ -87,6 +98,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Drawing_OnDraw(EventArgs args)
         {
+            if (Config.Item("disableDraws").GetValue<bool>())
+                return;
             float offset = 0;
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
             {
@@ -98,16 +111,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
                         if (ChampionInfoOne != null && enemy != Program.jungler)
                         {
-                            if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 6)
+                            if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
                             {
                                 if ((int)(Game.Time * 10) % 2 == 0)
                                 {
-                                    DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.1f, SharpDX.Color.OrangeRed);
+                                    DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.01f, SharpDX.Color.OrangeRed);
                                 }
                             }
-                            if (Game.Time - ChampionInfoOne.LastVisableTime > 7)
+                            if (Game.Time - ChampionInfoOne.LastVisableTime >= 7)
                             {
-                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.1f, SharpDX.Color.OrangeRed);
+                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.01f, SharpDX.Color.OrangeRed);
                             }
                         }
                     }
