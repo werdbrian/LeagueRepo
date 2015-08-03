@@ -260,6 +260,8 @@ namespace OneKeyToWin_AIO_Sebby
             new Core.OKTWward().LoadOKTW();
             new Core.AutoLvlUp().LoadOKTW();
             new OktwCommon().LoadOKTW();
+            new Core.OneKeyToBrain().LoadOKTW();
+
             //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
             {
@@ -298,7 +300,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void AutoWard()
         {
-            foreach (var enemy in Enemies.Where(enemy => enemy.IsEnemy && enemy.IsValid))
+            foreach (var enemy in Enemies.Where(enemy => enemy.IsValid))
             {
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
                 {
