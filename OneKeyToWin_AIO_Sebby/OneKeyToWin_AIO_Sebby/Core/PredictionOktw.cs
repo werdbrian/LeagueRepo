@@ -482,7 +482,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.Unit.Path.Count() > 0)
                 {
-                    if (GetAngle(input.From, input.Unit) < 34)
+                    if (GetAngle(input.From, input.Unit) < 36 || input.Unit.Distance(LastWaypiont) > BackToFront * 2)
                         result.Hitchance = HitChance.VeryHigh;
                     else
                         result.Hitchance = HitChance.High;
@@ -494,7 +494,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
             else if (input.Type == SkillshotType.SkillshotCircle)
             {
-                if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d || OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+                if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+                    result.Hitchance = HitChance.VeryHigh;
+
+
+                if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
