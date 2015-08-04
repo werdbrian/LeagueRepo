@@ -50,6 +50,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("nktdE", "NoKeyToDash").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("slowE", "Auto SlowBuff E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
@@ -61,7 +62,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
             
             Game.OnUpdate += Game_OnGameUpdate;
-
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.AfterAttack += afterAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
@@ -69,6 +69,7 @@ namespace OneKeyToWin_AIO_Sebby
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
 
         }
+
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if ( E.IsReady() && ObjectManager.Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(400) < 3)
@@ -81,6 +82,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             return;
         }
+
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
             if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E)
@@ -89,12 +91,10 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
        
-
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (!unit.IsMe)
                 return;
-            
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
@@ -184,7 +184,6 @@ namespace OneKeyToWin_AIO_Sebby
                 var distance = Player.Distance(prepos.CastPosition);
                 var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
                 
-
                 foreach (var minion in minions.Where(minion => minion.IsValidTarget(Q.Range)))
                 {
                     if (prepos.CastPosition.Distance(Player.Position.Extend(minion.Position, distance)) < 25)
@@ -193,9 +192,9 @@ namespace OneKeyToWin_AIO_Sebby
                         return;
                     }
                 }
-
             }
         }
+
         private void LogicW()
         {
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
@@ -257,7 +256,8 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicE()
         {
             var dashPosition = Player.Position.Extend(Game.CursorPos, E.Range);
-
+            if (dashPosition.IsWall() || dashPosition.CountEnemiesInRange(800) < 3)
+                return;
             if (Game.CursorPos.Distance(Player.Position) > Player.AttackRange + Player.BoundingRadius * 2 && Program.Combo && Config.Item("nktdE").GetValue<bool>() && Player.Mana > RMANA + EMANA - 10)
             {
                 if (!passRdy && !SpellLock)
@@ -266,12 +266,18 @@ namespace OneKeyToWin_AIO_Sebby
                     E.Cast(Game.CursorPos);
             }
 
-            if (dashPosition.IsWall() || Player.Mana < RMANA + EMANA || !Config.Item("autoE").GetValue<bool>() || passRdy || SpellLock)
+            if ( Player.Mana < RMANA + EMANA || !Config.Item("autoE").GetValue<bool>() || passRdy || SpellLock)
                 return;
+
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMelee))
             {
                 if (target.Position.Distance(Game.CursorPos) > target.Position.Distance(Player.Position))
                     E.Cast(dashPosition, true);
+            }
+
+            if (Config.Item("slowE").GetValue<bool>() && Player.HasBuffOfType(BuffType.Slow))
+            {
+                E.Cast(dashPosition, true);
             }
         }
 
