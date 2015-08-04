@@ -86,7 +86,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public void Orbwalker_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (!unit.IsMe)
+            if (!unit.IsMe && Orbwalker.GetTarget().IsValidTarget())
                 return;
             
             if (W.IsReady())
@@ -96,7 +96,7 @@ namespace OneKeyToWin_AIO_Sebby
                     W.Cast();
                 else if (Config.Item("harasW").GetValue<bool>() && (target is Obj_AI_Hero || t.IsValidTarget()) && Player.Mana > RMANA + WMANA + QMANA)
                     W.Cast();
-                else if (Config.Item("farmW").GetValue<bool>() && Program.Farm && Player.Mana > RMANA + WMANA + QMANA)
+                else if (Config.Item("farmW").GetValue<bool>() && Program.Farm && Player.Mana > RMANA + WMANA + QMANA && !Player.UnderTurret(true))
                 {
                     if (farmW() && Program.LaneClear)
                         W.Cast();
@@ -182,7 +182,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.Cast(t, true);
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
-                else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>())
+                else if (Program.Farm && Config.Item("haras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true))
                 {
                      if (Player.Mana > Player.MaxMana * 0.9)
                         Program.CastSpell(Q, t);
