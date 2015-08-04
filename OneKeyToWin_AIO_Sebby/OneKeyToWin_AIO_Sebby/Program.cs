@@ -119,6 +119,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
+            
 
             Q = new Spell(SpellSlot.Q);
             E = new Spell(SpellSlot.E);
@@ -216,6 +217,9 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                     case "Kayle":
                         new Champions.Kayle().LoadOKTW();
+                        break;
+                    case "Thresh":
+                        new Champions.Thresh().LoadOKTW();
                         break;
                        
                 }
@@ -981,8 +985,6 @@ namespace OneKeyToWin_AIO_Sebby
                             drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.Gray);
                         }
                     }
-                    
-                    
                 }
                 positionGang = positionGang + 100;
             }
