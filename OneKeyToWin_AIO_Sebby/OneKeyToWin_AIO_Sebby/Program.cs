@@ -75,6 +75,7 @@ namespace OneKeyToWin_AIO_Sebby
            // Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
+            Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "DONATE: kaczor.sebastian@gmail.com"));
 
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("3", "Annie "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("4", "Jinx "));
@@ -96,6 +97,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("20", "Ekko "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("21", "Twitch "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("22", "Tristana "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("23", "Xerath "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("22", "Kayle "));
+            Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("22", "Thresh "));
 
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("aio", "Disable AIO champions (need F5)").SetValue(false));
             Config.SubMenu("OneKeyToBrain©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
@@ -120,7 +124,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("HpBar", "Dmg BAR OKTW© style").SetValue(true));
             Config.SubMenu("OneKeyToBrain©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
             
-
             Q = new Spell(SpellSlot.Q);
             E = new Spell(SpellSlot.E);
             W = new Spell(SpellSlot.W);
@@ -223,13 +226,13 @@ namespace OneKeyToWin_AIO_Sebby
                         break;
                        
                 }
+
                 Config.SubMenu("Draw").AddItem(new MenuItem("disableDraws", "Disable other draws").SetValue(false));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
                 Config.SubMenu("Draw").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-
-                              
+   
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix",true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
                 Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "3 Custome Collision(can drop fps)", true).SetValue(false));
@@ -245,7 +248,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 3,4").SetValue(false));
                 Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 5, 0)));
             }
-
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -276,15 +278,15 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
             Drawing.OnDraw += OnDraw;
-
         }
 
         private static void OnUpdate(EventArgs args)
         {
-
             tickIndex++;
+
             if (tickIndex > 4)
                 tickIndex = 0;
+
             if (LagFree(0))
             {
                 //tickSkip = Config.Item("pre").GetValue<bool>();
@@ -465,7 +467,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (HitChanceNum == 5)
             {
-
                 Core.SkillshotType CoreType2 = Core.SkillshotType.SkillshotLine;
                 bool aoe2 = false;
                 if (QWER.Type == SkillshotType.SkillshotCircle)
@@ -489,7 +490,6 @@ namespace OneKeyToWin_AIO_Sebby
                 };
                 var poutput2 = Core.Prediction.GetPrediction(predInput2);
 
-
                 //var poutput2 = QWER.GetPrediction(target);
                 if (Game.Time - DrawSpellTime > 0.5)
                 {
@@ -507,7 +507,6 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.Path.Count() > 1)
                 return;
             
-
             Core.SkillshotType CoreType = Core.SkillshotType.SkillshotLine;
             bool aoe = false;
             if (QWER.Type == SkillshotType.SkillshotCircle)
@@ -530,7 +529,6 @@ namespace OneKeyToWin_AIO_Sebby
                 Type = CoreType
             };
             var poutput = Core.Prediction.GetPrediction(predInput);
-            
             
             //var poutput2 = QWER.GetPrediction(target);
             if (Game.Time - DrawSpellTime > 0.5)
@@ -914,12 +912,14 @@ namespace OneKeyToWin_AIO_Sebby
                 }
 
                 var kolor = System.Drawing.Color.GreenYellow;
+
                 if (enemy.IsDead)
                     kolor = System.Drawing.Color.Gray;
                 else if (!enemy.IsVisible)
                     kolor = System.Drawing.Color.OrangeRed;
 
                 var kolorHP = System.Drawing.Color.GreenYellow;
+
                 if (enemy.IsDead)
                     kolorHP = System.Drawing.Color.GreenYellow;
                 else if ((int)enemy.HealthPercent < 30)
