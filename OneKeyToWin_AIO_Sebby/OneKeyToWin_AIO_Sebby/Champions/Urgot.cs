@@ -190,7 +190,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (ObjectManager.Player.CountEnemiesInRange(Q.Range - 200) == 0)
+            if (Player.CountEnemiesInRange(Q.Range - 200) == 0)
                 t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             else
                 t = TargetSelector.GetTarget(Q.Range - 200, TargetSelector.DamageType.Physical);
@@ -203,7 +203,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.CastSpell(Q, t);
                 else if ((Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA) && !Player.UnderTurret(true))
                 {
-                    foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range)))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
                         Program.CastSpell(Q, enemy);
                 }
                 else if ((Program.Combo || Program.Farm) && ObjectManager.Player.Mana > RMANA + QMANA + EMANA)
