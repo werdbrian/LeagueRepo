@@ -155,7 +155,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         var allyW = Player;
                         foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < W.Range + 300))
                         {
-                            if (enemy.Distance(ally.ServerPosition) > 800)
+                            if (enemy.Distance(ally.ServerPosition) > 800 && Player.Distance(ally.ServerPosition) > 600)
                             {
                                 W.Cast(Prediction.GetPrediction(ally, 1f).CastPosition);
                             }
