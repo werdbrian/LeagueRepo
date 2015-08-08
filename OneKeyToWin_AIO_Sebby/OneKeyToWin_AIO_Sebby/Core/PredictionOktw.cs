@@ -494,11 +494,15 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
             else if (input.Type == SkillshotType.SkillshotCircle && totalDelay < 1.2)
             {
-                if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
-                    result.Hitchance = HitChance.VeryHigh;
+                if (totalDelay < 1.2)
+                {
+                    if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+                        result.Hitchance = HitChance.VeryHigh;
 
-                if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
-                    result.Hitchance = HitChance.VeryHigh;
+                    if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
+                        result.Hitchance = HitChance.VeryHigh;
+                }
+
             }
 
             //BAD PREDICTION
@@ -508,7 +512,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
 
 
-            if (input.Type != SkillshotType.SkillshotCircle && totalDelay > 0.7 && input.Unit.IsWindingUp)
+            if (totalDelay > 1.2 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
