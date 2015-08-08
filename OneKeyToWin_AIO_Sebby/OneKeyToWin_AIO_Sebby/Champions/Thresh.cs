@@ -58,6 +58,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("comboR", "always R in combo").SetValue(false));
 
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
@@ -115,7 +116,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
-
         private void Game_OnGameUpdate(EventArgs args)
         {
             if (Program.LagFree(1) && Q.IsReady())
@@ -126,7 +126,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicW();
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
-            
         }
 
         private void LogicE()
@@ -206,7 +205,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicR()
         {
             bool rKs = Config.Item("rKs").GetValue<bool>();
-            bool afterGrab = Config.Item("afterGrab").GetValue<bool>();
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && target.HasBuff("rocketgrab2")))
             {
                 if (rKs && R.GetDamage(target) > target.Health)
@@ -260,15 +258,26 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     Utility.DrawCircle(Player.Position, (float)Config.Item("maxGrab").GetValue<Slider>().Value, System.Drawing.Color.Cyan, 1, 1);
             }
 
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+
             if (Config.Item("eRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
                 {
                     if (E.IsReady())
-                        Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Cyan, 1, 1);
+                        Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Orange, 1, 1);
                 }
                 else
-                    Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Cyan, 1, 1);
+                    Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Orange, 1, 1);
             }
 
             if (Config.Item("rRange").GetValue<bool>())
