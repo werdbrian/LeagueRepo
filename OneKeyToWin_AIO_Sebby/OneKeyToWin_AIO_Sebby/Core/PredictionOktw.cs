@@ -492,11 +492,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
                 }
             }
-            else if (input.Type == SkillshotType.SkillshotCircle)
+            else if (input.Type == SkillshotType.SkillshotCircle && totalDelay < 1.2)
             {
                 if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
-
 
                 if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
