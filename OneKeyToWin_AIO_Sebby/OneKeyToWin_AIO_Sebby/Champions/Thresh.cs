@@ -28,10 +28,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             Q = new Spell(SpellSlot.Q, 1075);
             W = new Spell(SpellSlot.W, 950);
-            E = new Spell(SpellSlot.E, 400);
-            R = new Spell(SpellSlot.R, 450);
+            E = new Spell(SpellSlot.E, 450);
+            R = new Spell(SpellSlot.R, 430);
 
-            Q.SetSkillshot(0.5f, 70, 1900f, true, SkillshotType.SkillshotLine);            
+            Q.SetSkillshot(0.5f, 70, 1900f, true, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.25f, 2000, 1900f, false, SkillshotType.SkillshotLine);  
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
@@ -41,6 +42,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("maxGrab", "Max range grab").SetValue(new Slider((int)Q.Range, 125, (int)Q.Range)));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Q option").SubMenu("Grab").AddItem(new MenuItem("grab" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("GapQ", "OnEnemyGapcloser Q")).SetValue(true);
 
             Config.SubMenu(Player.ChampionName).SubMenu("W option").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W option").AddItem(new MenuItem("autoW3", "Auto W shield big dmg").SetValue(true));
@@ -56,6 +58,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("comboR", "always R in combo").SetValue(false));
 
             Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
@@ -74,9 +77,21 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (E.IsReady() && Config.Item("Gap").GetValue<bool>())
+            {
+                E.Cast(gapcloser.End);
+            }
+            else if (Q.IsReady() && Config.Item("GapQ").GetValue<bool>())
+            {
+                Q.Cast(gapcloser.End);
+            }
+        }
+
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!W.IsReady() || !Config.Item("autoW").GetValue<bool>() || !sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1500) )
+            if (!W.IsReady() || !Config.Item("autoW").GetValue<bool>() || !sender.IsEnemy || !sender.IsValidTarget(1500) )
                 return;
 
             double dmg = 0;
@@ -100,13 +115,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
-        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
-        {
-            if (E.IsReady() && Config.Item("Gap").GetValue<bool>() && gapcloser.Sender.IsValidTarget(E.Range))
-            {
-                E.Cast(gapcloser.Sender.ServerPosition);
-            }
-        }
 
         private void Game_OnGameUpdate(EventArgs args)
         {
@@ -118,6 +126,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicW();
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
+            
         }
 
         private void LogicE()
@@ -133,11 +142,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var revertPosition = t.ServerPosition;
                 if (Program.Combo)
                 {
-                    revertPosition = Player.ServerPosition - (t.ServerPosition - ObjectManager.Player.ServerPosition);
+                    CastE(false, t);
                 }
                 else
                 {
-                    revertPosition = t.ServerPosition;
+                    CastE(true, t);
                 }
                 E.Cast(revertPosition);
             }
@@ -225,6 +234,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        private void CastE(bool pull, Obj_AI_Base target)
+        {
+            var eCastPosition = E.GetPrediction(target).CastPosition;
+            if (pull)
+            {
+                E.Cast(eCastPosition);
+            }
+            else
+            {
+                E.Cast(Player.Position.Extend(eCastPosition, -300));
+            }
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("qRange").GetValue<bool>())
@@ -237,6 +259,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 else
                     Utility.DrawCircle(Player.Position, (float)Config.Item("maxGrab").GetValue<Slider>().Value, System.Drawing.Color.Cyan, 1, 1);
             }
+
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Cyan, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Cyan, 1, 1);
+            }
+
             if (Config.Item("rRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
