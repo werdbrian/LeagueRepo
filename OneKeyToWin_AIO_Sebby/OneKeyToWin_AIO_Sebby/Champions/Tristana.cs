@@ -26,11 +26,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             
             W.SetSkillshot(0.25f, 100, 1225, false, SkillshotType.SkillshotCircle);
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eInfo", "E info").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eInfo", "E info").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q").SetValue(true));
 

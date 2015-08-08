@@ -36,11 +36,11 @@ namespace OneKeyToWin_AIO_Sebby
             R.SetSkillshot(0.1f, 110, 2800, true, SkillshotType.SkillshotLine);
             R1.SetSkillshot(0.1f, 110, 2800, false, SkillshotType.SkillshotLine);
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Use Q on minion").SetValue(true));

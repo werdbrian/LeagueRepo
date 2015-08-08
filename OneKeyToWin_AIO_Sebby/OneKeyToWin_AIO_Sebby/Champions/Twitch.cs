@@ -28,11 +28,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R, 975);
 
             W.SetSkillshot(0.25f, 100f, 1410f, false, SkillshotType.SkillshotCircle);
-            Config.SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("countQ", "Auto Q if x enemies are going in your direction 0-disable").SetValue(new Slider(3, 5, 0)));
 

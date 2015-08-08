@@ -29,11 +29,11 @@ namespace OneKeyToWin_AIO_Sebby
             Q.SetSkillshot(0.25f, 90f, 1350f, false, SkillshotType.SkillshotLine);
             Qc.SetSkillshot(0.25f, 90f, 1350f, true, SkillshotType.SkillshotLine);
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show KS notification").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("Qhelp", "Show Q helper").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show KS notification").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("Qhelp", "Show Q helper").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(true));

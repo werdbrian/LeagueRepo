@@ -50,10 +50,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Items").AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
             Config.SubMenu("Items").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E haras").SetValue(true));
 
@@ -63,9 +63,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("R option").SubMenu("GapCloser R").AddItem(new MenuItem("GapCloser" + enemy.ChampionName, enemy.ChampionName, true).SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Waa", "Auto W befor AA").SetValue(true));

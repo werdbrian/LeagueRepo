@@ -36,10 +36,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LoadMenuOKTW()
         {
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("haras", "Harras Q").SetValue(true));

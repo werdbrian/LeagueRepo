@@ -21,8 +21,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         public void LoadOKTW()
         {
-            Config.SubMenu("OneKeyToBrain©").SubMenu("Auto ward").AddItem(new MenuItem("AutoWardPink", "Auto VisionWard & OracleLens").SetValue(true));
-
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardPink", "Auto VisionWard & OracleLens").SetValue(true));
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             GameObject.OnCreate +=GameObject_OnCreate;
@@ -41,7 +40,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Game_OnUpdate(EventArgs args)
         {
-            if (Program.LagFree(4))
+            if (Program.LagFree(0))
             {
                 if(rengar && Player.HasBuff("rengarralertsound"))
                     CastVisionWards(Player.ServerPosition);

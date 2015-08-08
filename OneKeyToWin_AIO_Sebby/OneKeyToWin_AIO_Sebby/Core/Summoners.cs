@@ -37,29 +37,29 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (exhaust != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust", "Exhaust").SetValue(true));
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust1", "Exhaust if Channeling Important Spell ").SetValue(true));
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust2", "Always in combo").SetValue(false));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust", "Exhaust").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust1", "Exhaust if Channeling Important Spell ").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust2", "Always in combo").SetValue(false));
             }
             if (heal != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("Heal", "Heal").SetValue(true));
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("AllyHeal", "AllyHeal").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("Heal", "Heal").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Heal").AddItem(new MenuItem("AllyHeal", "AllyHeal").SetValue(true));
             }
             if (barrier != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").AddItem(new MenuItem("Barrier", "Barrier").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").AddItem(new MenuItem("Barrier", "Barrier").SetValue(true));
 
             }
             if (ignite != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").AddItem(new MenuItem("Ignite", "Ignite").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").AddItem(new MenuItem("Ignite", "Ignite").SetValue(true));
             }
             if (smite != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("Smite", "Smite").SetValue(true));
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlue", "BlueSmite KS").SetValue(true));
-                Config.SubMenu("Activator").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteRed", "RedSmite Combo").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("Smite", "Smite").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlue", "BlueSmite KS").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteRed", "RedSmite Combo").SetValue(true));
             }
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Game.OnUpdate += Game_OnGameUpdate;

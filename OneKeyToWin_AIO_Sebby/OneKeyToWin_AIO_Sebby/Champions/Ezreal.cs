@@ -46,12 +46,12 @@ namespace OneKeyToWin_AIO_Sebby
             W.SetSkillshot(0.25f, 80f, 1600f, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(1.2f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Items").AddItem(new MenuItem("mura", "Auto Muramana").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Items").AddItem(new MenuItem("stack", "Stack Tear if full mana").SetValue(false));

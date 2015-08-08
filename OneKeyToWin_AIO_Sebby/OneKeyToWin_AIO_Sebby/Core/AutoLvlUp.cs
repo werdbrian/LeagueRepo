@@ -9,18 +9,19 @@ using SharpDX;
 
 namespace OneKeyToWin_AIO_Sebby.Core
 {
+
     class AutoLvlUp
     {
         private Menu Config = Program.Config;
         int lvl1, lvl2, lvl3, lvl4;
         public void LoadOKTW()
         {
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("AutoLvl", "ENABLE").SetValue(true));
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("1", "1",true).SetValue(new StringList(new[] { "Q", "W", "E","R" }, 3)));
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("2", "2", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("3", "3", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("4", "4", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
-            Config.SubMenu("AutoLvlUp").AddItem(new MenuItem("LvlStart", "Auto LVL start", true).SetValue(new Slider(2, 6, 1)));
+            Config.SubMenu("AutoLvlUp OKTW©").AddItem(new MenuItem("AutoLvl", "ENABLE").SetValue(true));
+            Config.SubMenu("AutoLvlUp OKTW©").AddItem(new MenuItem("1", "1", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 3)));
+            Config.SubMenu("AutoLvlUp OKTW©").AddItem(new MenuItem("2", "2", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
+            Config.SubMenu("AutoLvlUp OKTW©").AddItem(new MenuItem("3", "3", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
+            Config.SubMenu("AutoLvlUp OKTW©").AddItem(new MenuItem("4", "4", true).SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
+            Config.SubMenu("AutoLvlUp OKTW©").AddItem(new MenuItem("LvlStart", "Auto LVL start", true).SetValue(new Slider(2, 6, 1)));
             
             Game.OnUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnLevelUp +=Obj_AI_Base_OnLevelUp;

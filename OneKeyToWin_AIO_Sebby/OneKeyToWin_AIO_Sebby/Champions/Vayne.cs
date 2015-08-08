@@ -43,9 +43,9 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LoadMenuOKTW()
         {
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu("Draw").AddItem(new MenuItem("eRange2", "E push position").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange2", "E push position").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Q farm helper").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("QE", "try Q + E ").SetValue(true));

@@ -33,8 +33,8 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
-            Config.SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
-            Config.SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRaoe", "Auto R aoe").SetValue(true));
@@ -85,25 +85,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Config.Item("autoRinter").GetValue<bool>() && R.IsReady() && unit.IsValidTarget(R.Range))
                 R.Cast(unit);
-        }
-
-
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            if (Config.Item("debug").GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Height * 0.5f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, "ManaCost: Q " + QMANA + " W " + WMANA + " E " + 0 + " R " + RMANA);
-            }
-            if (Config.Item("wRange").GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy").GetValue<bool>())
-                {
-                    if (W.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
-            }
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -258,6 +239,23 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            if (Config.Item("debug").GetValue<bool>())
+            {
+                Drawing.DrawText(Drawing.Height * 0.5f, Drawing.Height * 0.5f, System.Drawing.Color.GreenYellow, "ManaCost: Q " + QMANA + " W " + WMANA + " E " + 0 + " R " + RMANA);
+            }
+            if (Config.Item("wRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (W.IsReady())
+                        Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
+            }
+        }
         
     }
 }
