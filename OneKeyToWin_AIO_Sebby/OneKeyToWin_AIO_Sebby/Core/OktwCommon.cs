@@ -196,9 +196,11 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static int GetBuffCount(Obj_AI_Base target, String buffName)
         {
-            foreach (var buff in target.Buffs)
+            foreach (var buff in target.Buffs.Where(buff => buff.Name == buffName))
             {
-                if (buff.Name == buffName)
+                if (buff.Count == 0)
+                    return 1;
+                else
                     return buff.Count;
             }
             return 0;

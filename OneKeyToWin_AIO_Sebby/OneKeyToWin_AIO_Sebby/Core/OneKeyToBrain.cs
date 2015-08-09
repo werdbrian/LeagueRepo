@@ -48,7 +48,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     Quality = FontQuality.ClearType
                 });
 
-            Config.SubMenu("Utility & Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
