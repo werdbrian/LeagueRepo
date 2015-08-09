@@ -58,7 +58,9 @@ namespace OneKeyToWin_AIO_Sebby
         public static Items.Item 
             WardN = new Items.Item(2044, 600f),
             TrinketN = new Items.Item(3340, 600f),
-            SightStone = new Items.Item(2049, 600f);
+            SightStone = new Items.Item(2049, 600f),
+            FarsightOrb = new Items.Item(3342, 4000f),
+            ScryingOrb = new Items.Item(3363, 3500f);
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
 
@@ -133,6 +135,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
 
             Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardBlue", "Auto Blue Trinket").SetValue(true));
             Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
 
             Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix", true).SetValue(true));
@@ -363,26 +366,42 @@ namespace OneKeyToWin_AIO_Sebby
                             return;
                         }
                     }
-                    if (Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
+                    if (Game.Time - need.time < 4 )
                     {
                         if (Config.Item("AutoWardCombo").GetValue<bool>() && !Combo)
                             return;
                         if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
                         {
-                            if (TrinketN.IsReady())
+                            if (need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
                             {
-                                TrinketN.Cast(need.PredictedPos);
-                                need.time = Game.Time - 5;
+                                if (TrinketN.IsReady())
+                                {
+                                    TrinketN.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                                }
+                                else if (SightStone.IsReady())
+                                {
+                                    SightStone.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                                }
+                                else if (WardN.IsReady())
+                                {
+                                    WardN.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                                }
                             }
-                            else if (SightStone.IsReady())
+                            if (need.PredictedPos.Distance(Player.Position) < 1400 && Config.Item("AutoWardBlue").GetValue<bool>())
                             {
-                                SightStone.Cast(need.PredictedPos);
-                                need.time = Game.Time - 5;
-                            }
-                            else if (WardN.IsReady())
-                            {
-                                WardN.Cast(need.PredictedPos);
-                                need.time = Game.Time - 5;
+                                if (FarsightOrb.IsReady())
+                                {
+                                    FarsightOrb.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                                }
+                                else if (ScryingOrb.IsReady())
+                                {
+                                    ScryingOrb.Cast(need.PredictedPos);
+                                    need.time = Game.Time - 5;
+                                }
                             }
                         }
                     }
