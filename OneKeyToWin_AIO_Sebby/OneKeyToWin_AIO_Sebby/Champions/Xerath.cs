@@ -185,7 +185,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     R.Cast();
                 }
-                if (!t.IsValidTarget(W.Range) && !IsCastingR && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1500) == 0)
+                if (!t.IsValidTarget(W.Range) && !IsCastingR && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1000) == 0)
                 {
                     if (R.GetDamage(t) * 2 > t.Health)
                     {
