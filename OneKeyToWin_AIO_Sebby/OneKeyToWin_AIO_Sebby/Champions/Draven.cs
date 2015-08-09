@@ -96,15 +96,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
+            
+
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
-            if (Q.IsReady())
+            if (Q.IsReady() && Player.Mana > RMANA + QMANA)
             {
-                if (Program.Combo && Player.Mana > RMANA + QMANA && OktwCommon.GetBuffCount(Player,"dravenspinningattack") + axeList.Count < 2)
+                if (args.Target is Obj_AI_Hero && Player.Mana > RMANA + QMANA && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
                 {
                     Q.Cast();
                 }
-                if (Program.Farm && Player.Mana > RMANA + QMANA + EMANA + WMANA && OktwCommon.GetBuffCount(Player, "dravenspinningattack") + axeList.Count == 0)
-                    Q.Cast();
+                if (Program.Farm && Player.Mana > RMANA + QMANA + EMANA + WMANA )
+                {
+                    if( OktwCommon.GetBuffCount(Player, "dravenspinningattack") + axeList.Count == 0 )
+                        Q.Cast();
+                }
             }
         }
 
