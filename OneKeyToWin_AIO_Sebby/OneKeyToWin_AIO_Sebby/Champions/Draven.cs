@@ -27,14 +27,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E = new Spell(SpellSlot.E, 1050);
             R = new Spell(SpellSlot.R, 3000f);
 
-            E.SetSkillshot(0.25f, 130, 1400, false, SkillshotType.SkillshotLine);
+            E.SetSkillshot(0.25f, 100, 1400, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.4f, 160, 2000, false, SkillshotType.SkillshotLine);
 
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeCatchRange", "Axe catch range").SetValue(new Slider(500, 200, 2000)));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower", "Don't catch axe under enemy turret").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeEnemy", "Don't catch axe under enemy grup").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeEnemy", "Don't catch axe in enemy grup").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("slowW", "Auto W slow").SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
@@ -96,12 +101,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            
-
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
-            if (Q.IsReady() && Player.Mana > RMANA + QMANA)
+            if (Q.IsReady() && Config.Item("autoQ").GetValue<KeyBind>().Active && Player.Mana > RMANA + QMANA)
             {
-                if (args.Target is Obj_AI_Hero && Player.Mana > RMANA + QMANA && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
+                if (args.Target.IsValid<Obj_AI_Hero>() && Player.Mana > RMANA + QMANA && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
                 {
                     Q.Cast();
                 }
@@ -140,7 +143,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Program.LagFree(1) && E.IsReady() && !Player.IsWindingUp)
                 LogicE();
 
-            if (Program.LagFree(3) && W.IsReady() && (!Player.HasBuff("dravenfurybuff")) ||Player.HasBuffOfType(BuffType.Slow))
+            if (Program.LagFree(3) && W.IsReady())
                 LogicW();
 
             if (Program.LagFree(4) && R.IsReady() && !Player.IsWindingUp)
@@ -149,9 +152,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW()
         {
-            if (Program.Combo && Player.Mana > RMANA + EMANA + WMANA && Player.CountEnemiesInRange(1000) > 0)
+            if (Player.Mana > RMANA + EMANA + WMANA)
             {
-                W.Cast();
+                if (Config.Item("autoW").GetValue<KeyBind>().Active && Program.Combo && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
+                    W.Cast();
+                else if (Config.Item("slowW").GetValue<KeyBind>().Active && Player.HasBuffOfType(BuffType.Slow))
+                    W.Cast();
             }
         }
 
@@ -175,7 +181,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     E.CastIfWillHit(t, 2, true);
                     if(Player.Health < Player.MaxHealth * 0.5)
                         Program.CastSpell(E, t);
-
                 }
             }
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range)))
