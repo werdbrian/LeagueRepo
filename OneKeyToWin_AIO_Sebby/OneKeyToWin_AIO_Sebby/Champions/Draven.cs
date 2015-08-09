@@ -104,7 +104,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
             if (Q.IsReady() && Config.Item("autoQ").GetValue<bool>() && Player.Mana > RMANA + QMANA)
             {
-                if (args.Target.IsValid<Obj_AI_Hero>() && Player.Mana > RMANA + QMANA && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
+                if (args.Target.IsValid<Obj_AI_Hero>() && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
                 {
                     Q.Cast();
                 }
