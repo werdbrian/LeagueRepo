@@ -102,7 +102,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
-            if (Q.IsReady() && Config.Item("autoQ").GetValue<KeyBind>().Active && Player.Mana > RMANA + QMANA)
+            if (Q.IsReady() && Config.Item("autoQ").GetValue<bool>() && Player.Mana > RMANA + QMANA)
             {
                 if (args.Target.IsValid<Obj_AI_Hero>() && Player.Mana > RMANA + QMANA && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
                 {
@@ -154,9 +154,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Player.Mana > RMANA + EMANA + WMANA)
             {
-                if (Config.Item("autoW").GetValue<KeyBind>().Active && Program.Combo && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
+                if (Config.Item("autoW").GetValue<bool>() && Program.Combo && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
                     W.Cast();
-                else if (Config.Item("slowW").GetValue<KeyBind>().Active && Player.HasBuffOfType(BuffType.Slow))
+                else if (Config.Item("slowW").GetValue<bool>() && Player.HasBuffOfType(BuffType.Slow))
                     W.Cast();
             }
         }
