@@ -25,8 +25,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 1100);
-            R = new Spell(SpellSlot.E, 3000);
+            E = new Spell(SpellSlot.E, 1050);
+            R = new Spell(SpellSlot.R, 3000f);
 
             E.SetSkillshot(0.25f, 130, 1400, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.4f, 160, 2000, false, SkillshotType.SkillshotLine);
@@ -58,7 +58,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
-            
+            if (E.IsReady() && gapcloser.Sender.IsValidTarget(E.Range))
+            {
+                E.Cast(gapcloser.Sender);
+            }
         }
 
         private void Obj_SpellMissile_OnDelete(GameObject sender, EventArgs args)
@@ -160,7 +163,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         Program.CastSpell(E, t);
                     }
-                    R.CastIfWillHit(t, 2, true);
+                    E.CastIfWillHit(t, 2, true);
                     if(Player.Health < Player.MaxHealth * 0.5)
                         Program.CastSpell(E, t);
 
@@ -189,27 +192,30 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             if (Config.Item("autoR").GetValue<bool>())
             {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
-                {
 
-                    float predictedHealth = target.Health + target.HPRegenRate * 2;
-                    double Rdmg = R.GetDamage(target);
-                    if (Rdmg > predictedHealth)
-                        Rdmg = getRdmg(target);
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target) && target.CountAlliesInRange(400) == 0))
+                {
+                    
+                    float predictedHealth = target.Health;
+                    double Rdmg = CalculateR(target) * 2;
+                    if (Rdmg >predictedHealth )
+                        Rdmg = CalculateR(target) + getRdmg(target);
+
+                       
                     var qDmg = Q.GetDamage(target);
-                    var wDmg = W.GetDamage(target);
-                    if (Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0)
+                    var eDmg = E.GetDamage(target);
+                    if (Rdmg > predictedHealth)
                     {
-                        castR(target);
+                        Program.CastSpell(R, target);
                         Program.debug("R normal");
                     }
-                    else if (Rdmg > predictedHealth && target.HasBuff("Recall"))
+                    else if (Program.Combo && Rdmg * 2 > predictedHealth && Orbwalking.InAutoAttackRange(target))
                     {
-                        R.Cast(target, true, true);
-                        Program.debug("R recall");
+                        Program.CastSpell(R, target);
+                        Program.debug("R normal");
                     }
                     else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() &&
-                        target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg * 4 > predictedHealth)
+                        target.IsValidTarget( E.Range) && Rdmg * 2 > predictedHealth)
                     {
                         R.CastIfWillHit(target, 2, true);
                         R.Cast(target, true);
@@ -218,7 +224,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         R.CastIfWillHit(target, 3, true);
                     }
-                    else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + wDmg > predictedHealth && Program.Combo && Config.Item("Raoe").GetValue<bool>())
+                    else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + eDmg > predictedHealth && Program.Combo && Config.Item("Raoe").GetValue<bool>())
                     {
                         R.CastIfWillHit(target, 2, true);
                     }
@@ -240,9 +246,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 Program.CastSpell(R, target);
         }
 
+        private float CalculateR(Obj_AI_Base target)
+        {
+            return (float)Player.CalcDamage(target, Damage.DamageType.Physical, (75 + (100 * R.Level)) + Player.FlatPhysicalDamageMod * 1.1);
+        }
+
         private double getRdmg(Obj_AI_Base target)
         {
-            var rDmg = R.GetDamage(target) ;
+            var rDmg = R.GetDamage(target);
             var dmg = 0;
             PredictionOutput output = R.GetPrediction(target);
             Vector2 direction = output.CastPosition.To2D() - Player.Position.To2D();
@@ -280,10 +291,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             //if (Config.Item("debug").GetValue<bool>())
             //    Game.PrintChat("R collision" + dmg);
 
-            if (dmg > 7)
-                return rDmg * 0.7 + R.GetDamage(target);
+            if (dmg > 8)
+                return rDmg * 0.6;
             else
-                return rDmg - (rDmg * 0.1 * dmg) + R.GetDamage(target);
+                return rDmg - (rDmg * 0.08 * dmg);
         }
 
         private void AxeLogic()
@@ -346,10 +357,21 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             foreach (var obj in axeList)
             {
-                Utility.DrawCircle(obj.Position, 200, System.Drawing.Color.Red, 1, 1);
+                if (Game.CursorPos.Distance(obj.Position) > axeCatchRange || obj.Position.UnderTurret(true))
+                {
+                    Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.OrangeRed, 1, 1);
+                }
+                else if (Player.Distance(obj.Position) > 120)
+                {
+                    Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.Yellow, 1, 1);
+                }
+                else if (Player.Distance(obj.Position) < 150)
+                {
+                    Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.YellowGreen, 1, 1);
+                }
             }
 
-            Utility.DrawCircle(Game.CursorPos, axeCatchRange, System.Drawing.Color.LemonChiffon, 1, 1);
+            Utility.DrawCircle(Game.CursorPos, axeCatchRange, System.Drawing.Color.LightSteelBlue, 1, 1);
             if (RMissile != null )
                 OktwCommon.DrawLineRectangle(RMissile.Position, Player.Position, (int)R.Width, 1, System.Drawing.Color.White);
         }
