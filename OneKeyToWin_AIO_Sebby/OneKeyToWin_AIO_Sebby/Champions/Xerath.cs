@@ -166,10 +166,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicE();
             if (Program.LagFree(2) && W.IsReady() && !Player.IsWindingUp && Config.Item("autoW").GetValue<bool>())
                 LogicW();
-            if (Program.LagFree(3) && Q.IsReady() && !Player.IsWindingUp && Config.Item("autoQ").GetValue<bool>())
-                LogicQ();
-            if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
+            if (Program.LagFree(3) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
                 LogicR();
+            if (Program.LagFree(4) && Q.IsReady() && !Player.IsWindingUp && Config.Item("autoQ").GetValue<bool>())
+                LogicQ();
         }
 
         private void LogicR()
@@ -185,7 +185,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     R.Cast();
                 }
-                if (!t.IsValidTarget(W.Range) && !IsCastingR && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1000) == 0)
+                if (!t.IsValidTarget(W.Range) && !IsCastingR && t.CountAlliesInRange(500) == 0 && Player.CountEnemiesInRange(1100) == 0)
                 {
                     if (R.GetDamage(t) * 2 > t.Health)
                     {
