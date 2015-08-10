@@ -100,6 +100,9 @@ namespace OneKeyToWin_AIO_Sebby
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
                 if (target.IsValidTarget(R.Range) && Program.ValidUlt(target))
                 {
+                    if (Config.Item("Raa").GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
+                        return;
+
                     double Rdmg = R.GetDamage(target) + (R.GetDamage(target) * target.CountAlliesInRange(500));
                     // Overkill protection
                     if (target.Health < R.GetDamage(target) * target.CountAlliesInRange(500) * 0.2)
@@ -341,6 +344,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Rslow", "R slow").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Raa", "R only out off AA range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "R killable info").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
