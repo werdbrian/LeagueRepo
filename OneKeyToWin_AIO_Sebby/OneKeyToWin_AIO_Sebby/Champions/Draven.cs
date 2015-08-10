@@ -30,11 +30,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E.SetSkillshot(0.25f, 100, 1400, false, SkillshotType.SkillshotLine);
             R.SetSkillshot(0.4f, 160, 2000, false, SkillshotType.SkillshotLine);
 
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Draw R helper").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qCatchRange", "Q catch range").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qAxePos", "Q axe position").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
+
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeCatchRange", "Axe catch range").SetValue(new Slider(500, 200, 2000)));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower", "Don't catch axe under enemy turret").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeEnemy", "Don't catch axe in enemy grup").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("slowW", "Auto W slow").SetValue(true));
@@ -102,13 +109,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
-            if (Q.IsReady() && Config.Item("autoQ").GetValue<bool>() && Player.Mana > RMANA + QMANA)
+            if (Q.IsReady()  && Player.Mana > RMANA + QMANA)
             {
-                if (args.Target.IsValid<Obj_AI_Hero>() && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0)
+                if (Config.Item("autoQ").GetValue<bool>() && args.Target.IsValid<Obj_AI_Hero>() && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0 )
                 {
                     Q.Cast();
                 }
-                if (Program.Farm && Player.Mana > RMANA + QMANA + EMANA + WMANA )
+                if (Program.Farm && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + EMANA + WMANA )
                 {
                     if( OktwCommon.GetBuffCount(Player, "dravenspinningattack") + axeList.Count == 0 )
                         Q.Cast();
@@ -389,25 +396,41 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Drawing_OnDraw(EventArgs args)
         {
-            foreach (var obj in axeList)
+            if (Config.Item("qAxePos").GetValue<bool>())
             {
-                if (Game.CursorPos.Distance(obj.Position) > axeCatchRange || obj.Position.UnderTurret(true))
+                foreach (var obj in axeList)
                 {
-                    Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.OrangeRed, 1, 1);
-                }
-                else if (Player.Distance(obj.Position) > 120)
-                {
-                    Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.Yellow, 1, 1);
-                }
-                else if (Player.Distance(obj.Position) < 150)
-                {
-                    Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.YellowGreen, 1, 1);
+                    if (Game.CursorPos.Distance(obj.Position) > axeCatchRange || obj.Position.UnderTurret(true))
+                    {
+                        Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.OrangeRed, 1, 1);
+                    }
+                    else if (Player.Distance(obj.Position) > 120)
+                    {
+                        Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.Yellow, 1, 1);
+                    }
+                    else if (Player.Distance(obj.Position) < 150)
+                    {
+                        Utility.DrawCircle(obj.Position, 150, System.Drawing.Color.YellowGreen, 1, 1);
+                    }
                 }
             }
 
-            Utility.DrawCircle(Game.CursorPos, axeCatchRange, System.Drawing.Color.LightSteelBlue, 1, 1);
-            if (RMissile != null )
+            if (Config.Item("qCatchRange").GetValue<bool>())
+                Utility.DrawCircle(Game.CursorPos, axeCatchRange, System.Drawing.Color.LightSteelBlue, 1, 1);
+            
+            if (Config.Item("noti").GetValue<bool>() && RMissile != null)
                 OktwCommon.DrawLineRectangle(RMissile.Position, Player.Position, (int)R.Width, 1, System.Drawing.Color.White);
+
+            if (Config.Item("eRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (E.IsReady())
+                        Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+            }
         }
     }
 }
