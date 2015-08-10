@@ -150,7 +150,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         internal float RealRadius
         {
-            get { return UseBoundingRadius ? Radius + Unit.BoundingRadius : Radius; }
+            get { return UseBoundingRadius ? Radius + Unit.BoundingRadius / 2 : Radius; }
         }
     }
 
@@ -446,6 +446,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.VeryHigh;
+                return result;
             }
             else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
             {
@@ -462,19 +463,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 return result;
             }
 
-            float BackToFront = ((input.Unit.MoveSpeed * input.Delay) + (input.From.Distance(input.Unit.ServerPosition) / input.Speed));
-            if (input.Unit.Path.Count() > 0)
+            if (LastWaypiont.Distance(input.Unit.ServerPosition) > 800)
             {
-                if (input.Unit.Distance(LastWaypiont) < BackToFront)
-                {
-                    result.Hitchance = HitChance.Medium;
-                    return result;
-                }
-            }
-
-            if (LastWaypiont.Distance(input.Unit.ServerPosition) > input.Unit.AttackRange)
-            {
-                if (input.From.Distance(input.Unit.ServerPosition) < input.Range - fixRange)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
@@ -482,17 +472,17 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.Unit.Path.Count() > 0)
                 {
-                    if (GetAngle(input.From, input.Unit) < 36 || input.Unit.Distance(LastWaypiont) > BackToFront * 2)
+                    if (GetAngle(input.From, input.Unit) < 36)
+                    {
                         result.Hitchance = HitChance.VeryHigh;
+                        return result;
+                    }
                     else
                         result.Hitchance = HitChance.High;
-                }
-                if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
-                {
-                    result.Hitchance = HitChance.VeryHigh;
+
                 }
             }
-            else if (input.Type == SkillshotType.SkillshotCircle && totalDelay < 1.2)
+            else if (input.Type == SkillshotType.SkillshotCircle)
             {
                 if (totalDelay < 1.2)
                 {
@@ -502,17 +492,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
                         result.Hitchance = HitChance.VeryHigh;
                 }
-
             }
 
-            //BAD PREDICTION
+            float BackToFront = ((input.Unit.MoveSpeed * input.Delay) + (input.From.Distance(input.Unit.ServerPosition) / input.Speed));
 
-            if (input.Radius / input.Unit.MoveSpeed >= input.Delay + input.From.Distance(result.CastPosition / input.Speed))
-                result.Hitchance = HitChance.VeryHigh;
+            if (input.Unit.Path.Count() > 0)
+            {
+                if (input.Unit.Distance(LastWaypiont) < BackToFront)
+                {
+                    result.Hitchance = HitChance.Medium;
+                    return result;
+                }
+            }
 
-
-
-            if (totalDelay > 1.2 && input.Unit.IsWindingUp)
+            if (totalDelay > 0.8 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
@@ -1107,6 +1100,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public double Time { get { return (Utils.TickCount - Tick) / 1000d; } }
     }
 
+    internal class StoredDashes
+    {
+        
+    }
+
     internal static class OnProcessSpellDetection
     {
         public static List<StoredAutoAttackTime> StoredAutoAttackTimeList = new List<StoredAutoAttackTime>();
@@ -1119,16 +1117,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (!(sender is Obj_AI_Hero)) { return; }
-            if (!args.SData.IsAutoAttack()) { return; }
 
-            var FindTime = StoredAutoAttackTimeList.Find(x => x.NetworkId == sender.NetworkId);
-            if (FindTime == null)
+
+            if (args.SData.IsAutoAttack())
             {
-                StoredAutoAttackTimeList.Add(new StoredAutoAttackTime() { NetworkId = sender.NetworkId, Tick = Utils.TickCount });
-            }
-            else
-            {
-                FindTime.Tick = Utils.TickCount;
+                var FindTime = StoredAutoAttackTimeList.Find(x => x.NetworkId == sender.NetworkId);
+                if (FindTime == null)
+                {
+                    StoredAutoAttackTimeList.Add(new StoredAutoAttackTime() { NetworkId = sender.NetworkId, Tick = Utils.TickCount });
+                }
+                else
+                {
+                    FindTime.Tick = Utils.TickCount;
+                }
             }
         }
         public static double GetLastAutoAttackTime(Obj_AI_Base unit)
@@ -1260,26 +1261,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 return unit.MoveSpeed;
             }
-
-
             return distance / maxT;
-        }
-
-        public static double GetAngle(Vector3 from, Obj_AI_Base target)
-        {
-            var C = target.ServerPosition.To2D();
-            var A = target.GetWaypoints().Last();
-
-            if (C == A)
-                return 60;
-
-            var B = from.To2D();
-
-            var AB = Math.Pow((double)A.X - (double)B.X, 2) + Math.Pow((double)A.Y - (double)B.Y, 2);
-            var BC = Math.Pow((double)B.X - (double)C.X, 2) + Math.Pow((double)B.Y - (double)C.Y, 2);
-            var AC = Math.Pow((double)A.X - (double)C.X, 2) + Math.Pow((double)A.Y - (double)C.Y, 2);
-
-            return Math.Cos((AB + BC - AC) / (2 * Math.Sqrt(AB) * Math.Sqrt(BC))) * 180 / Math.PI;
         }
     }
 }
