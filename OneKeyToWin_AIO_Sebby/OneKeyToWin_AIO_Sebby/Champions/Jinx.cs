@@ -83,7 +83,7 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (FishBoneActive && t.IsValidTarget())
             {
-                if (Program.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (Player.Mana < RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 < t.Health))
+                if (Program.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (Player.Mana < RMANA  + 20 || Player.GetAutoAttackDamage(t) * 2 < t.Health))
                     Q.Cast();
                 else if (Program.Farm && Config.Item("Qharras").GetValue<bool>() && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
