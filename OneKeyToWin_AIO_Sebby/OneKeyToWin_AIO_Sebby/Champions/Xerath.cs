@@ -114,7 +114,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (args.Target.IsValid<Obj_AI_Minion>() && !Player.HasBuff("xerathascended2onhit") && Program.Combo)
             {
                 args.Process = false;
-                
             }
         }
 
@@ -152,6 +151,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 SetMana();
                 Jungle();
+
+                if (!Player.HasBuff("xerathascended2onhit"))
+                    Orbwalker.ForceTarget(null);
+
                 if (Program.Combo && Config.Item("force").GetValue<bool>() && Player.Mana < Player.MaxMana && Player.HasBuff("xerathascended2onhit") && !Orbwalker.GetTarget().IsValidTarget())
                 {
                     var allMinions = MinionManager.GetMinions(Player.ServerPosition, Player.AttackRange + Player.BoundingRadius * 2, MinionTypes.All);
