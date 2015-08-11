@@ -37,7 +37,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeCatchRange", "Axe catch range").SetValue(new Slider(500, 200, 2000)));
-            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower", "Don't catch axe under enemy turret").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower", "Don't catch axe under enemy turret combo").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower2", "Don't catch axe under enemy turret farm").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeEnemy", "Don't catch axe in enemy grup").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
@@ -353,13 +354,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 return;
             }
 
-            if (Config.Item("axeTower").GetValue<bool>() && Axe.Position.UnderTurret(true))
+            if (Config.Item("axeTower").GetValue<bool>() && Program.Combo && Axe.Position.UnderTurret(true))
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 return;
             }
 
-            if (Config.Item("axeTower").GetValue<bool>() && Axe.Position.UnderTurret(true))
+            if (Config.Item("axeTower2").GetValue<bool>() && Program.Farm && Axe.Position.UnderTurret(true))
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 return;
