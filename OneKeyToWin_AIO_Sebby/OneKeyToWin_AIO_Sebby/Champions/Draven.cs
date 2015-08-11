@@ -192,7 +192,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     if(Player.Health < Player.MaxHealth * 0.5)
                         Program.CastSpell(E, t);
                 }
-                if (Program.Farm && Config.Item("autoE2k").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + QMANA)
+                if (Program.Farm && Config.Item("autoE2").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + QMANA)
                 {
                     E.CastIfWillHit(t, 2, true);
                 }
