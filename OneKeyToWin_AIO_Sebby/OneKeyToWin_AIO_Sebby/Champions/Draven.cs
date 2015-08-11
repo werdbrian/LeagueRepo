@@ -47,10 +47,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("slowW", "Auto W slow").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE2", "Harras E if can hit 2 targets").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("comboR", "Auto R in combo").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Rcc", "R cc").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Raoe", "R aoe combo").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
@@ -147,7 +149,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             axeList.RemoveAll(x => !x.IsValid);
             AxeLogic();
 
-            if (Program.LagFree(1) && E.IsReady() && !Player.IsWindingUp)
+            if (Program.LagFree(1) && E.IsReady() && Config.Item("autoE").GetValue<bool>() && !Player.IsWindingUp)
                 LogicE();
 
             if (Program.LagFree(3) && W.IsReady())
@@ -189,6 +191,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     if(Player.Health < Player.MaxHealth * 0.5)
                         Program.CastSpell(E, t);
                 }
+                if (Program.Farm && Config.Item("autoE2k").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + QMANA)
+                {
+                    E.CastIfWillHit(t, 2, true);
+                }
             }
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range)))
             {
@@ -226,7 +232,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         castR(target);
                         Program.debug("R normal");
                     }
-                    else if (Program.Combo && Rdmg * 2 > predictedHealth && Orbwalking.InAutoAttackRange(target))
+                    else if (Program.Combo && Config.Item("comboR").GetValue<bool>() && Rdmg * 2 > predictedHealth && Orbwalking.InAutoAttackRange(target))
                     {
                         castR(target);
                         Program.debug("R normal");
