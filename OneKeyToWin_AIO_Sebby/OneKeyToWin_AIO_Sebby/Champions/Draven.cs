@@ -248,7 +248,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         R.CastIfWillHit(target, 3, true);
                     }
-                    else if (target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg + eDmg > predictedHealth && Program.Combo && Config.Item("Raoe").GetValue<bool>())
+                    else if (target.IsValidTarget(E.Range) && Rdmg * 2 + qDmg + eDmg > predictedHealth && Config.Item("Raoe").GetValue<bool>())
                     {
                         R.CastIfWillHit(target, 2, true);
                     }
