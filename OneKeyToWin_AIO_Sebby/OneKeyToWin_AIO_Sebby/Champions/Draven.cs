@@ -411,10 +411,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        public static void drawText2(string msg, Vector3 Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("qAxePos").GetValue<bool>())
             {
+                if (Player.HasBuff("dravenspinningattack"))
+                    drawText2("Q:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "dravenspinningattack")), Player.Position, System.Drawing.Color.Yellow);
                 foreach (var obj in axeList)
                 {
                     if (Game.CursorPos.Distance(obj.Position) > axeCatchRange || obj.Position.UnderTurret(true))
