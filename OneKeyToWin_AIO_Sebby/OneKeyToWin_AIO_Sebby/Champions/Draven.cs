@@ -144,13 +144,17 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void GameOnOnUpdate(EventArgs args)
         {
-            SetMana();
-            //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
-            axeCatchRange = Config.Item("axeCatchRange").GetValue<Slider>().Value;
             axeList.RemoveAll(x => !x.IsValid);
-            AxeLogic();
-
-            if (Program.LagFree(1) && E.IsReady() && Config.Item("autoE").GetValue<bool>() && !Player.IsWindingUp)
+            if (Program.LagFree(1))
+            {
+                axeCatchRange = Config.Item("axeCatchRange").GetValue<Slider>().Value;
+                SetMana();
+                AxeLogic();
+            }
+            
+            //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
+            
+            if (Program.LagFree(2) && E.IsReady() && Config.Item("autoE").GetValue<bool>() && !Player.IsWindingUp)
                 LogicE();
 
             if (Program.LagFree(3) && W.IsReady())
@@ -162,13 +166,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW()
         {
-            if (Player.Mana > RMANA + EMANA + WMANA)
-            {
-                if (Config.Item("autoW").GetValue<bool>() && Program.Combo && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
-                    W.Cast();
-                else if (Config.Item("slowW").GetValue<bool>() && Player.HasBuffOfType(BuffType.Slow))
-                    W.Cast();
-            }
+            if (Config.Item("autoW").GetValue<bool>() && Program.Combo && Player.Mana > RMANA + EMANA + WMANA && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
+                W.Cast();
+            else if (Config.Item("slowW").GetValue<bool>()&& Player.Mana > RMANA + EMANA + WMANA && Player.HasBuffOfType(BuffType.Slow))
+                W.Cast();
         }
 
         private void LogicE()
@@ -223,9 +224,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target) && target.CountAlliesInRange(500) == 0))
                 {
                     float predictedHealth = target.Health;
-                    double Rdmg = CalculateR(target) * 2;
-                    if (Rdmg >predictedHealth )
-                        Rdmg = CalculateR(target) + getRdmg(target);
+                    double Rdmg = CalculateR(target) ;
+                    if (Rdmg * 2 > predictedHealth )
+                        Rdmg = Rdmg + getRdmg(target);
                     var qDmg = Q.GetDamage(target);
                     var eDmg = E.GetDamage(target);
                     if (Rdmg > predictedHealth)
@@ -233,7 +234,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         castR(target);
                         Program.debug("R normal");
                     }
-                    else if (Program.Combo && Config.Item("comboR").GetValue<bool>() && Rdmg * 2 > predictedHealth && Orbwalking.InAutoAttackRange(target))
+                    else if (Program.Combo && Config.Item("comboR").GetValue<bool>() && Orbwalking.InAutoAttackRange(target) && Rdmg * 2 > predictedHealth)
                     {
                         castR(target);
                         Program.debug("R normal");
@@ -328,15 +329,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 return;
             }
-            var bestAxe = axeList.First();
-
+            
             if (axeList.Count == 1)
             {
-                CatchAxe(bestAxe);
+                CatchAxe(axeList.First());
                 return;
             }
             else
             {
+                var bestAxe = axeList.First();
                 foreach (var obj in axeList)
                 {
                     if (Game.CursorPos.Distance(bestAxe.Position) > Game.CursorPos.Distance(obj.Position))
