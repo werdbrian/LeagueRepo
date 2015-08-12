@@ -178,7 +178,7 @@ namespace OneKeyToWin_AIO_Sebby
                 var distance = GetRealDistance(t);
                 if (!FishBoneActive && (!Orbwalking.InAutoAttackRange(t) || t.CountEnemiesInRange(250) > 2))
                 {
-                    if (Program.Combo && (Player.Mana > RMANA + WMANA + 20 || Player.GetAutoAttackDamage(t) * 2 > t.Health))
+                    if (Program.Combo && (Player.Mana > RMANA + WMANA || Player.GetAutoAttackDamage(t) * 2 > t.Health))
                         Q.Cast();
                     else if (Program.Farm && Config.Item("Qharras").GetValue<bool>() && Orbwalker.GetTarget() == null && Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + Player.BoundingRadius)
                         Q.Cast();
