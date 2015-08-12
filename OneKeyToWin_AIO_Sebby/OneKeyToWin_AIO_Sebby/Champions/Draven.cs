@@ -114,15 +114,21 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
-            if (Q.IsReady()  && Player.Mana > RMANA + QMANA)
+            if (Q.IsReady())
             {
-                if (Config.Item("autoQ").GetValue<bool>() && args.Target.IsValid<Obj_AI_Hero>() && OktwCommon.GetBuffCount(Player, "dravenspinningattack") == 0 )
+                var buffCount = OktwCommon.GetBuffCount(Player, "dravenspinningattack");
+                if (Config.Item("autoQ").GetValue<bool>() && args.Target.IsValid<Obj_AI_Hero>()  )
                 {
-                    Q.Cast();
+                    if (Player.Mana > RMANA + QMANA && buffCount + axeList.Count == 0)
+                        Q.Cast();
+                    else if (Player.Mana > RMANA + QMANA + EMANA && buffCount == 0)
+                        Q.Cast();
                 }
-                if (Program.Farm && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + EMANA + WMANA )
+                if (Program.Farm && Config.Item("farmQ").GetValue<bool>()  )
                 {
-                    if( OktwCommon.GetBuffCount(Player, "dravenspinningattack") + axeList.Count == 0 )
+                    if (buffCount + axeList.Count == 0 && Player.Mana > RMANA + QMANA + EMANA + WMANA)
+                        Q.Cast();
+                    else if (Player.Mana == Player.MaxMana * 0.95 && buffCount == 0)
                         Q.Cast();
                 }
             }
@@ -172,7 +178,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
             
-            if (Program.LagFree(2) && E.IsReady() && Config.Item("autoE").GetValue<bool>() && !Player.IsWindingUp)
+            if (Program.LagFree(2) && E.IsReady() && Config.Item("autoE").GetValue<bool>() )
                 LogicE();
 
             if (Program.LagFree(3) && W.IsReady())
@@ -184,7 +190,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW()
         {
-            if (Config.Item("autoW").GetValue<bool>() && Program.Combo && Player.Mana > RMANA + EMANA + WMANA && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
+            if (Config.Item("autoW").GetValue<bool>() && Program.Combo && Player.Mana > RMANA + EMANA + WMANA + QMANA && Player.CountEnemiesInRange(1000) > 0 && !Player.HasBuff("dravenfurybuff"))
                 W.Cast();
             else if (Config.Item("slowW").GetValue<bool>()&& Player.Mana > RMANA + EMANA + WMANA && Player.HasBuffOfType(BuffType.Slow))
                 W.Cast();
@@ -201,15 +207,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                if (Program.Combo && Player.Mana > RMANA + EMANA)
+                if (Program.Combo )
                 {
-                    if (!Orbwalking.InAutoAttackRange(t))
+                    if (Player.Mana > RMANA + EMANA)
                     {
-                        Program.CastSpell(E, t);
+                        if (!Orbwalking.InAutoAttackRange(t))
+                            Program.CastSpell(E, t);
+                        if (Player.Health < Player.MaxHealth * 0.5)
+                            Program.CastSpell(E, t);
                     }
-                    E.CastIfWillHit(t, 2, true);
-                    if(Player.Health < Player.MaxHealth * 0.5)
-                        Program.CastSpell(E, t);
+                    
+                    if(Player.Mana > RMANA + EMANA + QMANA)
+                        E.CastIfWillHit(t, 2, true);
+                    
+                    
                 }
                 if (Program.Farm && Config.Item("autoE2").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + QMANA)
                 {
