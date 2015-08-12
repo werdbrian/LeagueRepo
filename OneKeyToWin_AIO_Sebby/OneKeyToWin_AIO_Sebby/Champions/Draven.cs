@@ -422,7 +422,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Config.Item("qAxePos").GetValue<bool>())
             {
                 if (Player.HasBuff("dravenspinningattack"))
-                    drawText2("Q:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "dravenspinningattack")), Player.Position, System.Drawing.Color.Yellow);
+                {
+                    var BuffTime = OktwCommon.GetPassiveTime(Player, "dravenspinningattack");
+                    if (BuffTime < 2 )
+                    {
+                        if ((int)(Game.Time * 10) % 2 == 0)
+                        {
+                            drawText2("Q:  " + String.Format("{0:0.0}", BuffTime), Player.Position, System.Drawing.Color.Yellow);
+                        }
+                    }
+                    else
+                        drawText2("Q:  " + String.Format("{0:0.0}", BuffTime), Player.Position, System.Drawing.Color.GreenYellow);
+                }
                 foreach (var obj in axeList)
                 {
                     if (Game.CursorPos.Distance(obj.Position) > axeCatchRange || obj.Position.UnderTurret(true))
