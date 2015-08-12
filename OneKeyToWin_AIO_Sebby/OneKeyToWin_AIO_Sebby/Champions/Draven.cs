@@ -230,7 +230,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Rdmg = Rdmg + getRdmg(target);
                     var qDmg = Q.GetDamage(target);
                     var eDmg = E.GetDamage(target);
-                    if (Rdmg > predictedHealth)
+                    if (Rdmg > predictedHealth && !Orbwalking.InAutoAttackRange(target))
                     {
                         castR(target);
                         Program.debug("R normal");
@@ -325,9 +325,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void AxeLogic()
         {
-            var orbT = Orbwalker.GetTarget() as Obj_AI_Base;
 
-            if (Config.Item("axeKill").GetValue<bool>() && orbT.IsValid<Obj_AI_Hero>() && Player.GetAutoAttackDamage(orbT) * 2 > orbT.Health)
+            var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
+
+            if (Config.Item("axeKill").GetValue<bool>() && t.IsValidTarget() && Player.Distance(t.Position) > 400 && Player.GetAutoAttackDamage(t) * 2 > t.Health)
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 return;
