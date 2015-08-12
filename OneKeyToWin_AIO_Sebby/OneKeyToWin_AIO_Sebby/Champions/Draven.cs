@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E, 1050);
+            E = new Spell(SpellSlot.E, 1000);
             R = new Spell(SpellSlot.R, 3000f);
 
             E.SetSkillshot(0.25f, 100, 1400, false, SkillshotType.SkillshotLine);
@@ -119,9 +119,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var buffCount = OktwCommon.GetBuffCount(Player, "dravenspinningattack");
                 if (Config.Item("autoQ").GetValue<bool>() && args.Target.IsValid<Obj_AI_Hero>()  )
                 {
-                    if (Player.Mana > RMANA + QMANA && buffCount + axeList.Count == 0)
+                    if (buffCount + axeList.Count == 0)
                         Q.Cast();
-                    else if (Player.Mana > RMANA + QMANA + EMANA && buffCount == 0)
+                    else if (Player.Mana > RMANA + QMANA && buffCount == 0)
                         Q.Cast();
                 }
                 if (Program.Farm && Config.Item("farmQ").GetValue<bool>()  )
@@ -219,8 +219,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     
                     if(Player.Mana > RMANA + EMANA + QMANA)
                         E.CastIfWillHit(t, 2, true);
-                    
-                    
                 }
                 if (Program.Farm && Config.Item("autoE2").GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + QMANA)
                 {
