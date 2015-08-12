@@ -40,6 +40,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower", "Don't catch axe under enemy turret combo").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower2", "Don't catch axe under enemy turret farm").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeEnemy", "Don't catch axe in enemy grup").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeKill", "Don't catch axe if can kill 2 AA").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
@@ -324,6 +325,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void AxeLogic()
         {
+            var orbT = Orbwalker.GetTarget() as Obj_AI_Base;
+
+            if (Config.Item("axeKill").GetValue<bool>() && orbT.IsValid<Obj_AI_Hero>() && Player.GetAutoAttackDamage(orbT) * 2 > orbT.Health)
+            {
+                Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+                return;
+            }
             if (axeList.Count == 0)
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
@@ -349,7 +357,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void CatchAxe(GameObject Axe)
         {
-            if (Player.Distance(Axe.Position) < 120)
+            if (Player.Distance(Axe.Position) < 110)
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 return;
