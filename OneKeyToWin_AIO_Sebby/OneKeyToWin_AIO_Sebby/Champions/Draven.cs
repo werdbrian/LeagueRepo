@@ -41,6 +41,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeTower2", "Don't catch axe under enemy turret farm").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeEnemy", "Don't catch axe in enemy grup").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axeKill", "Don't catch axe if can kill 2 AA").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("AXE option").AddItem(new MenuItem("axePro", "if axe timeout: force laneclear").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
@@ -151,6 +152,22 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 axeCatchRange = Config.Item("axeCatchRange").GetValue<Slider>().Value;
                 SetMana();
                 AxeLogic();
+                if (Config.Item("axePro").GetValue<bool>() && Player.HasBuff("dravenspinningattack"))
+                {
+                    var BuffTime = OktwCommon.GetPassiveTime(Player, "dravenspinningattack");
+                    if (BuffTime < 1)
+                    {
+                        Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.LaneClear;
+                    }
+                    else
+                    {
+                        Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
+                    }
+                }
+                else
+                {
+                    Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
+                }
             }
             
             //Program.debug("" + OktwCommon.GetBuffCount(Player, "dravenspinningattack"));
@@ -429,10 +446,16 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         if ((int)(Game.Time * 10) % 2 == 0)
                         {
                             drawText2("Q:  " + String.Format("{0:0.0}", BuffTime), Player.Position, System.Drawing.Color.Yellow);
+                            Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.LaneClear;
                         }
+
+
                     }
                     else
+                        {
                         drawText2("Q:  " + String.Format("{0:0.0}", BuffTime), Player.Position, System.Drawing.Color.GreenYellow);
+                        Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
+                        }
                 }
                 foreach (var obj in axeList)
                 {
