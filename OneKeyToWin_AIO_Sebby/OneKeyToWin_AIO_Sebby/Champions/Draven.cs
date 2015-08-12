@@ -128,7 +128,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     if (buffCount + axeList.Count == 0 && Player.Mana > RMANA + QMANA + EMANA + WMANA)
                         Q.Cast();
-                    else if (Player.Mana == Player.MaxMana * 0.95 && buffCount == 0)
+                    else if (Player.Mana > Player.MaxMana * 0.95 && buffCount == 0)
                         Q.Cast();
                 }
             }
