@@ -446,16 +446,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         if ((int)(Game.Time * 10) % 2 == 0)
                         {
                             drawText2("Q:  " + String.Format("{0:0.0}", BuffTime), Player.Position, System.Drawing.Color.Yellow);
-                            Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.LaneClear;
                         }
-
-
                     }
                     else
-                        {
+                    {
                         drawText2("Q:  " + String.Format("{0:0.0}", BuffTime), Player.Position, System.Drawing.Color.GreenYellow);
-                        Orbwalker.ActiveMode = Orbwalking.OrbwalkingMode.None;
-                        }
+                    }
                 }
                 foreach (var obj in axeList)
                 {
