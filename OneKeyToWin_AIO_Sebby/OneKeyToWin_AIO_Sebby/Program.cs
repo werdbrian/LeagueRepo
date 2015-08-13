@@ -523,28 +523,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.Path.Count() > 1)
                 return;
             
-            Core.SkillshotType CoreType = Core.SkillshotType.SkillshotLine;
-            bool aoe = false;
-            if (QWER.Type == SkillshotType.SkillshotCircle)
-            {
-                CoreType = Core.SkillshotType.SkillshotCircle;
-                aoe = true;
-            }
-            if (QWER.Width > 100)
-                aoe = true;
-            var predInput = new Core.PredictionInput
-            {
-                Aoe = aoe,
-                Collision = QWER.Collision,
-                Speed = QWER.Speed,
-                Delay = QWER.Delay,
-                Range = QWER.Range,
-                From = Player.ServerPosition,
-                Radius = QWER.Width,
-                Unit = target,
-                Type = CoreType
-            };
-            var poutput = Core.Prediction.GetPrediction(predInput);
+            var poutput = QWER.GetPrediction(target);
             
             //var poutput2 = QWER.GetPrediction(target);
             if (Game.Time - DrawSpellTime > 0.5)
@@ -554,7 +533,7 @@ namespace OneKeyToWin_AIO_Sebby
                 
             }
             
-            DrawSpellPos = poutput;
+            //DrawSpellPos = poutput;
             if (ColFix  && HitChanceNum == 4)
             {
                 if (QWER.Collision && OktwCommon.GetCollision(target, QWER, false, true))
@@ -575,13 +554,13 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             }
 
-            if (target.HasBuff("Recall") || poutput.Hitchance == Core.HitChance.Immobile )
+            if (target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile )
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
             }
 
-            if (poutput.Hitchance == Core.HitChance.Dashing && QWER.Delay < 0.30f)
+            if (poutput.Hitchance == HitChance.Dashing && QWER.Delay < 0.30f)
             {
                 QWER.Cast(poutput.CastPosition);
                 return;
