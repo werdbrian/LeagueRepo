@@ -153,6 +153,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void GameOnOnUpdate(EventArgs args)
         {
             axeList.RemoveAll(x => !x.IsValid);
+            if (ObjectManager.Player.HasBuff("Recall"))
+                return;
             if (Program.LagFree(1))
             {
                 axeCatchRange = Config.Item("axeCatchRange").GetValue<Slider>().Value;
