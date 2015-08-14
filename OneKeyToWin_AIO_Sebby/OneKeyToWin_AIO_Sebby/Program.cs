@@ -149,8 +149,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - common high + max range fix"));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - OKTW + max range fix + waypionts analyzer "));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - OKTW Custome Prediction 4"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("5", "5 - OKTW NewCommon Prediction concept"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 3,4").SetValue(false));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("5", "5 - OKTW NewCommon Prediction concept BETA"));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 5 BETA").SetValue(false));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction OKTW©", true).SetValue(new Slider(4, 5, 0)));
 
             new Summoners().LoadOKTW();
@@ -791,7 +791,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
             var debugPred = Config.Item("debugPred").GetValue<bool>();
-            if (debugPred && Game.Time - DrawSpellTime < 0.5)
+            if (debugPred && HitChanceNum == 5 && Game.Time - DrawSpellTime < 0.5)
             {
                 if (DrawSpell.Type == SkillshotType.SkillshotLine)
                     OktwCommon.DrawLineRectangle(DrawSpellPos.CastPosition, Player.Position, (int)DrawSpell.Width, 1, System.Drawing.Color.DimGray);
