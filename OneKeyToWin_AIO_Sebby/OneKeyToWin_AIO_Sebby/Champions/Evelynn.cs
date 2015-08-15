@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E = new Spell(SpellSlot.E, 250f);
             R = new Spell(SpellSlot.R, 650f);
 
-            R.SetSkillshot(0.25f, 350f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            R.SetSkillshot(0.25f, 300f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
@@ -118,7 +118,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (Config.Item("rCount").GetValue<Slider>().Value > 0 && Config.Item("rCount").GetValue<Slider>().Value <= aoeCount)
                     R.Cast(poutput.CastPosition);
                 
-                if (Player.Health < Player.MaxHealth * 0.5)
+                if (Player.Health < Player.MaxHealth * 0.3)
                     R.Cast(t);
             }
         }

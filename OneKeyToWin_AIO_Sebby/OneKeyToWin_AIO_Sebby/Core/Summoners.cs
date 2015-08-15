@@ -72,7 +72,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (smiteHero == 2 && Config.Item("SmiteBlue").GetValue<bool>())
                 {
-                    var t = TargetSelector.GetTarget(760, TargetSelector.DamageType.Physical);
+                    var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
                     {
                         var smaitDmg = Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Smite);
