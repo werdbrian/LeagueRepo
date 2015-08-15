@@ -114,8 +114,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var aoeCount = poutput.AoeTargetsHitCount;
                 if (aoeCount == 0)
                     aoeCount = 1;
+                
                 if (Config.Item("rCount").GetValue<Slider>().Value > 0 && Config.Item("rCount").GetValue<Slider>().Value <= aoeCount)
                     R.Cast(poutput.CastPosition);
+                
+                if (Player.Health < Player.MaxHealth * 0.5)
+                    R.Cast(t);
             }
         }
 
