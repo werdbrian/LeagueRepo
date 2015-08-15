@@ -109,6 +109,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("25", "Thresh "));
 
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("disableDraws", "Disable Utility draws").SetValue(false));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("disableChampion", "Disable AIO champion (utility mode only) need F5").SetValue(false));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
@@ -166,101 +167,103 @@ namespace OneKeyToWin_AIO_Sebby
                 new Core.OKTWlab().LoadOKTW();
             }
 
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Config.AddSubMenu(targetSelectorMenu);
-
-            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-                
-            switch (Player.ChampionName)
+            if (!Config.Item("disableChampion").GetValue<bool>())
             {
-                case "Jinx":
-                    new Jinx().LoadOKTW();
-                    break;
-                case "Sivir":
-                    new Sivir().LoadOKTW();
-                    break;
-                case "Ezreal":
-                    new Ezreal().LoadOKTW();
-                    break;
-                case "KogMaw":
-                    new KogMaw().LoadOKTW();
-                    break;
-                case "Annie":
-                    new Annie().LoadOKTW();
-                    break;
-                case "Ashe":
-                    new Ashe().LoadOKTW();
-                    break;
-                case "MissFortune":
-                    new MissFortune().LoadOKTW();
-                    break;
-                case "Quinn":
-                    new Quinn().LoadOKTW();
-                    break;
-                case "Kalista":
-                    new Kalista().LoadOKTW();
-                    break;
-                case "Caitlyn":
-                    new Caitlyn().LoadOKTW();
-                    break;
-                case "Graves":
-                    new Graves().LoadOKTW();
-                    break;
-                case "Urgot":
-                    new Urgot().LoadOKTW();
-                    break;
-                case "Anivia":
-                    new Anivia().LoadOKTW();
-                    break;
-                case "Orianna":
-                    new Orianna().LoadOKTW();
-                    break;
-                case "Ekko":
-                    new Ekko().LoadOKTW();
-                    break;
-                case "Vayne":
-                    new Vayne().LoadOKTW();
-                    break;
-                case "Lucian":
-                    new Lucian().LoadOKTW();
-                    break;
-                case "Darius":
-                    new Champions.Darius().LoadOKTW();
-                    break;
-                case "Blitzcrank":
-                    new Champions.Blitzcrank().LoadOKTW();
-                    break;
-                case "Corki":
-                    new Champions.Corki().LoadOKTW();
-                    break;
-                case "Varus":
-                    new Champions.Varus().LoadOKTW();
-                    break;
-                case "Twitch":
-                    new Champions.Twitch().LoadOKTW();
-                    break;
-                case "Tristana":
-                    new Champions.Tristana().LoadMenuOKTW();
-                    break;
-                case "Xerath":
-                    new Champions.Xerath().LoadOKTW();
-                    break;
-                case "Syndra":
-                    new Champions.Syndra().LoadOKTW();
-                    break;
-                case "Kayle":
-                    new Champions.Kayle().LoadOKTW();
-                    break;
-                case "Thresh":
-                    new Champions.Thresh().LoadOKTW();
-                    break;
-                case "Draven":
-                    new Champions.Draven().LoadOKTW();
-                    break;
-            }
+                var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+                TargetSelector.AddToMenu(targetSelectorMenu);
+                Config.AddSubMenu(targetSelectorMenu);
 
+                Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+                Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+
+                switch (Player.ChampionName)
+                {
+                    case "Jinx":
+                        new Jinx().LoadOKTW();
+                        break;
+                    case "Sivir":
+                        new Sivir().LoadOKTW();
+                        break;
+                    case "Ezreal":
+                        new Ezreal().LoadOKTW();
+                        break;
+                    case "KogMaw":
+                        new KogMaw().LoadOKTW();
+                        break;
+                    case "Annie":
+                        new Annie().LoadOKTW();
+                        break;
+                    case "Ashe":
+                        new Ashe().LoadOKTW();
+                        break;
+                    case "MissFortune":
+                        new MissFortune().LoadOKTW();
+                        break;
+                    case "Quinn":
+                        new Quinn().LoadOKTW();
+                        break;
+                    case "Kalista":
+                        new Kalista().LoadOKTW();
+                        break;
+                    case "Caitlyn":
+                        new Caitlyn().LoadOKTW();
+                        break;
+                    case "Graves":
+                        new Graves().LoadOKTW();
+                        break;
+                    case "Urgot":
+                        new Urgot().LoadOKTW();
+                        break;
+                    case "Anivia":
+                        new Anivia().LoadOKTW();
+                        break;
+                    case "Orianna":
+                        new Orianna().LoadOKTW();
+                        break;
+                    case "Ekko":
+                        new Ekko().LoadOKTW();
+                        break;
+                    case "Vayne":
+                        new Vayne().LoadOKTW();
+                        break;
+                    case "Lucian":
+                        new Lucian().LoadOKTW();
+                        break;
+                    case "Darius":
+                        new Champions.Darius().LoadOKTW();
+                        break;
+                    case "Blitzcrank":
+                        new Champions.Blitzcrank().LoadOKTW();
+                        break;
+                    case "Corki":
+                        new Champions.Corki().LoadOKTW();
+                        break;
+                    case "Varus":
+                        new Champions.Varus().LoadOKTW();
+                        break;
+                    case "Twitch":
+                        new Champions.Twitch().LoadOKTW();
+                        break;
+                    case "Tristana":
+                        new Champions.Tristana().LoadMenuOKTW();
+                        break;
+                    case "Xerath":
+                        new Champions.Xerath().LoadOKTW();
+                        break;
+                    case "Syndra":
+                        new Champions.Syndra().LoadOKTW();
+                        break;
+                    case "Kayle":
+                        new Champions.Kayle().LoadOKTW();
+                        break;
+                    case "Thresh":
+                        new Champions.Thresh().LoadOKTW();
+                        break;
+                    case "Draven":
+                        new Champions.Draven().LoadOKTW();
+                        break;
+                }
+            }
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                 if (IsJungler(hero) && hero.IsEnemy)
@@ -994,7 +997,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
             }
 
-            if (Config.Item("orb").GetValue<bool>())
+            if (Config.Item("orb").GetValue<bool>() && !Config.Item("disableChampion").GetValue<bool>())
             {
                 var orbT = Orbwalker.GetTarget();
 
