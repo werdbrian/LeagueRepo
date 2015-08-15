@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby
         public Spell Q, Q2, W, E, R;
         public float QMANA, WMANA, EMANA, RMANA;
 
-        private int count = 0 , countE = 0;
+        private int count = 0 , countE = 0 , wCount = 0;
         private float grabTime = Game.Time;
 
         private static Obj_AI_Hero AllyR;
@@ -52,6 +52,11 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Orbwalking.ResetAutoAttackTimer();
                 }
+                if (args.SData.Name == "kalistaw")
+                {
+                    wCount++;
+                }
+                Program.debug(args.SData.Name);
             }
             if (R.IsReady() && sender.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(sender.Position) < R.Range && Player.Distance(sender.Position) > Config.Item("rangeBalista").GetValue<Slider>().Value)
             {
@@ -72,10 +77,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if stacks").SetValue(new Slider(10, 30, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("minionE", "Auto E big minion").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edmg", "E % dmg adjust").SetValue(new Slider(100, 150, 50)));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wdragon", "Auto W bug dragon").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wdragon", "Auto W Dragon, Baron, Blue, Red").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Balista Config").AddItem(new MenuItem("balista", "Balista R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Balista Config").AddItem(new MenuItem("rangeBalista", "Balista min range").SetValue(new Slider(300, 1400, 0)));
@@ -89,14 +95,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Q.IsReady() && Target.IsValidTarget(Q.Range) )
                     Q.Cast(Target, true);
             }
-        }
-
-        
-
-        public static void drawText(string msg, Obj_AI_Hero Hero, System.Drawing.Color color)
-        {
-            var wts = Drawing.WorldToScreen(Hero.Position);
-            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -140,14 +138,58 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
-            if (Config.Item("Wdragon").GetValue<bool>())
+            if (Config.Item("Wdragon").GetValue<bool>() &&  !Orbwalker.GetTarget().IsValidTarget() && !Program.Combo)
             {
-                Vector3 point;
-                point.X = 9774;
-                point.Y = 4432;
-                point.Z = 0;
-                if(Player.Distance(point) < 5000)
-                    W.Cast(point);
+                if (wCount > 0)
+                {
+                    Vector3 baronPos;
+                    baronPos.X = 5232;
+                    baronPos.Y = 10788;
+                    baronPos.Z = 0;
+                    if (Player.Distance(baronPos) < 5000)
+                        W.Cast(baronPos);
+                }
+                if (wCount == 0)
+                {
+                    Vector3 dragonPos;
+                    dragonPos.X = 9774;
+                    dragonPos.Y = 4432;
+                    dragonPos.Z = 0;
+                    if (Player.Distance(dragonPos) < 5000)
+                        W.Cast(dragonPos);
+                    else
+                        wCount ++;
+                    return;
+                }
+
+                if (wCount == 1)
+                {
+                    Vector3 redPos;
+                    redPos.X = 8022;
+                    redPos.Y = 4156;
+                    redPos.Z = 0;
+                    if (Player.Distance(redPos) < 5000)
+                        W.Cast(redPos);
+                    else
+                        wCount++;
+                    return;
+                }
+                if (wCount == 2)
+                {
+                    Vector3 bluePos;
+                    bluePos.X = 11396;
+                    bluePos.Y = 7076;
+                    bluePos.Z = 0;
+                    if (Player.Distance(bluePos) < 5000)
+                        W.Cast(bluePos);
+                    else
+                        wCount++;
+                    return;
+                }
+                if (wCount > 2)
+                {
+                    wCount = 0;
+                }
             }
         }
         private void JungleE()
@@ -160,7 +202,19 @@ namespace OneKeyToWin_AIO_Sebby
             if (mobs.Count > 0)
             {
                 var mob = mobs[0];
-                if (mob.Health < GetEdmg(mob))
+                var dmg = GetEdmg(mob);
+
+
+                if (mob.Name.Contains("Baron") && Player.HasBuff("barontarget"))
+                {
+                    dmg = dmg * 0.5f;
+                }
+                if (mob.Name.Contains("Dragon") && Player.HasBuff("s5test_dragonslayerbuff"))
+                {
+                    dmg = dmg * (1 - (0.07f * ObjectManager.Player.GetBuffCount("s5test_dragonslayerbuff")));
+                }
+
+                if (mob.Health < dmg)
                     E.Cast();
             }
         }
@@ -270,12 +324,21 @@ namespace OneKeyToWin_AIO_Sebby
             int outRange = 0;
             foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget(E.Range) && minion.IsEnemy))
             {
-                if (minion.Health < E.GetDamage(minion) && GetPassiveTime(minion) > 0.25 && minion.GetAutoAttackDamage(minion) * 3 < E.GetDamage(minion) && minion.Health > minion.GetAutoAttackDamage(minion) * 2)
+                var minionDmg = E.GetDamage(minion); 
+                if (minion.Health < minionDmg)
                 {
-                    count++;
-                    if (!Orbwalking.InAutoAttackRange(minion))
+
+                    if (GetPassiveTime(minion) > 0.5 && HealthPrediction.LaneClearHealthPrediction(minion, 1000) > minion.GetAutoAttackDamage(minion) * 3 + Player.GetAutoAttackDamage(minion))
                     {
-                        outRange++;
+                        count++;
+                        if (!Orbwalking.InAutoAttackRange(minion))
+                        {
+                            outRange++;
+                        }
+                    }
+                    if ((minion.SkinName.ToLower().Contains("siege") || minion.SkinName.ToLower().Contains("super")) && Config.Item("minionE").GetValue<bool>())
+                    {
+                        outRange++; 
                     }
                 }
             }
@@ -326,6 +389,13 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = 0;
             }
         }
+
+        public static void drawText(string msg, Obj_AI_Base Hero, System.Drawing.Color color)
+        {
+            var wts = Drawing.WorldToScreen(Hero.Position);
+            Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
 
@@ -338,9 +408,17 @@ namespace OneKeyToWin_AIO_Sebby
                     dmg = (float)Player.GetAutoAttackDamage(enemy) + (E.GetDamage(enemy) / (float)stack);
 
                 if (hp > 0)
-                    drawText((int)((hp / dmg) + 1) + "hit", enemy, System.Drawing.Color.GreenYellow);
+                    drawText((int)((E.GetDamage(enemy) / enemy.Health) * 100) + " %", enemy, System.Drawing.Color.GreenYellow);
                 else
                     drawText("KILL E", enemy, System.Drawing.Color.Red);
+            }
+
+            var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            if (mobs.Count > 0)
+            {
+                var mob = mobs[0];
+                drawText((int)((E.GetDamage(mob) / mob.Health) * 100) + " %", mob, System.Drawing.Color.GreenYellow);
+
             }
 
             if (Config.Item("qRange").GetValue<bool>())
