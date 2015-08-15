@@ -262,6 +262,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Draven":
                         new Champions.Draven().LoadOKTW();
                         break;
+                    case "Evelynn":
+                        new Champions.Evelynn().LoadOKTW();
+                        break;
                 }
             }
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())

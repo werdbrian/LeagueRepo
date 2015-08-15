@@ -59,6 +59,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("Smite", "Smite").SetValue(true));
                 Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlue", "BlueSmite KS").SetValue(true));
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlueCombo", "BlueSmite COMBO").SetValue(false));
                 Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteRed", "RedSmite Combo").SetValue(true));
             }
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
@@ -71,13 +72,16 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (smiteHero == 2 && Config.Item("SmiteBlue").GetValue<bool>())
                 {
-                    Program.debug("2");
                     var t = TargetSelector.GetTarget(760, TargetSelector.DamageType.Physical);
                     if (t.IsValidTarget())
                     {
                         var smaitDmg = Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Smite);
                         if (t.Health <= smaitDmg )
                             Player.Spellbook.CastSpell(smite, t);
+                        if (Program.Combo && Config.Item("SmiteBlueCombo").GetValue<bool>())
+                        {
+                            Player.Spellbook.CastSpell(smite, t);
+                        }
                     }
                 }
                 else if (smiteHero == 1 && Program.Combo && Config.Item("SmiteRed").GetValue<bool>())
