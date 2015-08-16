@@ -99,7 +99,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnUpdate(EventArgs args)
         {
-            if (Player.IsRecalling())
+            if (ObjectManager.Player.HasBuff("Recall"))
                 return;
 
             if (E.IsReady())
