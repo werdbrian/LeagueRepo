@@ -91,7 +91,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LaneClear && !FishBoneActive && Config.Item("farmQ").GetValue<bool>() && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Player.Mana > RMANA + EMANA + WMANA + 30)
             {
-                Program.debug("mana "+ Player.ManaPercent);
+                
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, bonusRange(), MinionTypes.All);
                 foreach (var minion in allMinionsQ.Where(
                     minion => args.Target.NetworkId != minion.NetworkId && minion.Distance(args.Target.Position) < 200 && (5 - Q.Level) * Player.GetAutoAttackDamage(minion) < args.Target.Health && (5 - Q.Level) * Player.GetAutoAttackDamage(minion) < minion.Health))
