@@ -304,7 +304,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
-                && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || (Player.UnderTurret(false) && !Player.UnderTurret(true) && Player.ManaPercentage() > 20)))
+                && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || (Player.UnderTurret(false) && !Player.UnderTurret(true) && Player.ManaPercent > 20)))
             {
 
                 var Qfarm = Q.GetCircularFarmLocation(allMinions, 100);
