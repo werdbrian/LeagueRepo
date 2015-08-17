@@ -386,7 +386,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void CatchAxe(GameObject Axe)
         {
-            if (Player.Distance(Axe.Position) < 105)
+            if (Player.Distance(Axe.Position) < 100)
             {
                 Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 return;
