@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Champions\Ahri.cs" />
     <Compile Include="Champions\Blitzcrank.cs" />
     <Compile Include="Champions\Corki.cs" />
     <Compile Include="Champions\Darius.cs" />
