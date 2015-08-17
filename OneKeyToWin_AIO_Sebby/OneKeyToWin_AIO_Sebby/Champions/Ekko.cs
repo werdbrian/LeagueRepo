@@ -175,7 +175,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Jungle()
         {
-            if (Player.Mana > RMANA + WMANA + RMANA &&  Config.Item("jungleQ").GetValue<bool>())
+            if (Player.Mana > QMANA + WMANA + RMANA &&  Config.Item("jungleQ").GetValue<bool>())
             {
                 var mobs = MinionManager.GetMinions(Player.ServerPosition, 500, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                 if (mobs.Count > 0)
