@@ -44,6 +44,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W option").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W option").AddItem(new MenuItem("Waoe", "Cast only if 2 targets").SetValue(false));
@@ -104,6 +105,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(0))
             {
                 SetMana();
+                Jungle();
             }
 
             if (Program.LagFree(1) && Q.IsReady() )
@@ -175,18 +177,22 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Jungle()
         {
-            if (Player.Mana > QMANA + WMANA + RMANA &&  Config.Item("jungleQ").GetValue<bool>())
+            if (Program.LaneClear && Player.Mana > QMANA + RMANA )
             {
                 var mobs = MinionManager.GetMinions(Player.ServerPosition, 500, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                 if (mobs.Count > 0)
                 {
                     var mob = mobs[0];
-
-                    if (Q.IsReady() )
+                    if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
                     {
-                        Q.Cast(mob);
+                        W.Cast(mob.Position);
                         return;
                     }
+                    if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>())
+                    {
+                        Q.Cast(mob.Position);
+                        return;
+                    }  
                 }
             }
         }
@@ -247,14 +253,13 @@ namespace OneKeyToWin_AIO_Sebby
                         Q1.Cast(enemy, true);
                 }
             }
-            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
+            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && ObjectManager.Player.Mana > RMANA + QMANA + WMANA)
             {
 
-                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q1.Range, MinionTypes.All);
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q1.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
                 if (Qfarm.MinionsHit > 5 && Q1.IsReady())
                     Q.Cast(Qfarm.Position);
-                Jungle();
             }
             
         }
