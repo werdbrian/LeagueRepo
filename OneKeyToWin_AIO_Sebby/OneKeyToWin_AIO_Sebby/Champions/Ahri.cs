@@ -23,7 +23,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q = new Spell(SpellSlot.Q, 880);
             W = new Spell(SpellSlot.W, 600);
             E = new Spell(SpellSlot.E, 950);
-            R = new Spell(SpellSlot.R, 450);
+            R = new Spell(SpellSlot.R, 600);
 
             Q.SetSkillshot(0.25f, 100, 1600, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 60, 1550, true, SkillshotType.SkillshotLine);
@@ -114,8 +114,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            SetMana();
-
+            if (Program.LagFree(0))
+            {
+                SetMana();
+            }
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
             if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
@@ -128,7 +130,42 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
+            var dashPosition = Player.Position.Extend(Game.CursorPos, 450);
+            if (Player.Distance(Game.CursorPos) < 450)
+                dashPosition = Game.CursorPos;
+
+            if (Player.HasBuff("AhriTumble"))
+            {
+                var BuffTime = OktwCommon.GetPassiveTime(Player, "AhriTumble");
+                Program.debug("" + BuffTime);
+                if (BuffTime < 3)
+                {
+                    R.Cast(dashPosition);
+                }
+            }
             
+            var t = TargetSelector.GetTarget(450 + R.Range, TargetSelector.DamageType.Magical);
+            if (t.IsValidTarget())
+            {
+                var comboDmg = R.GetDamage(t) * 3;
+                if (Q.IsReady())
+                {
+                    comboDmg += Q.GetDamage(t) * 2;
+                }
+                if (W.IsReady())
+                {
+                    comboDmg += W.GetDamage(t) + W.GetDamage(t,1);
+                }
+                if (comboDmg > t.Health && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position) && dashPosition.CountEnemiesInRange(800) < 3 && dashPosition.Distance(t.ServerPosition) < 550)
+                {
+                    R.Cast(dashPosition);
+                }
+
+                foreach (var target in Program.Enemies.Where(target => target.IsMelee && target.IsValidTarget(270)))
+                {
+                    R.Cast(dashPosition);
+                }
+            }
         }
 
         private void LogicW()
@@ -136,7 +173,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget())
             {
-                if (W.GetDamage(t) > t.Health)
+                if (W.GetDamage(t) + W.GetDamage(t, 1) + Q.GetDamage(t) * 2 > t.Health)
                     W.Cast();
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
                     W.Cast();
@@ -161,6 +198,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true);
                 }
+            }
+            else if ( Program.LaneClear && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA))
+            {
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
+                var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
+                if (Qfarm.MinionsHit > 3 || (Q.IsCharging && Qfarm.MinionsHit > 0))
+                    Q.Cast(Qfarm.Position);
             }
         }
 
