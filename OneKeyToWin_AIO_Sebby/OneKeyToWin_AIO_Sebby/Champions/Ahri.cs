@@ -56,7 +56,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
@@ -117,7 +116,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Program.LagFree(0))
             {
                 SetMana();
+                Jungle();
             }
+            
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
             if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
@@ -225,6 +226,28 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     Program.CastSpell(E, t);
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
                     E.Cast(enemy);
+            }
+        }
+
+        private void Jungle()
+        {
+            if (Program.LaneClear && Player.Mana > QMANA + RMANA)
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 500, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
+                    {
+                        W.Cast(mob.Position);
+                        return;
+                    }
+                    if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>())
+                    {
+                        Q.Cast(mob.Position);
+                        return;
+                    }
+                }
             }
         }
 
