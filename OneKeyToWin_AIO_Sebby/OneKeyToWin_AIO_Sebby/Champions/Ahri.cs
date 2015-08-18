@@ -45,10 +45,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasE", "Harras E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R 2 x dmg R").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("trinkiet", "Auto blue trinkiet").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("delayR", "custome R delay ms (1000ms = 1 sec)").SetValue(new Slider(0, 3000, 0)));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("MaxRangeR", "Max R adjustment (R range - slider)").SetValue(new Slider(0, 5000, 0)));
+            
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
@@ -138,7 +135,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Player.HasBuff("AhriTumble"))
             {
                 var BuffTime = OktwCommon.GetPassiveTime(Player, "AhriTumble");
-                Program.debug("" + BuffTime);
                 if (BuffTime < 3)
                 {
                     R.Cast(dashPosition);
@@ -162,7 +158,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     R.Cast(dashPosition);
                 }
 
-                foreach (var target in Program.Enemies.Where(target => target.IsMelee && target.IsValidTarget(270)))
+                foreach (var target in Program.Enemies.Where(target => target.IsMelee && target.IsValidTarget(300)))
                 {
                     R.Cast(dashPosition);
                 }
@@ -239,7 +235,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     var mob = mobs[0];
                     if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
                     {
-                        W.Cast(mob.Position);
+                        W.Cast();
                         return;
                     }
                     if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>())
@@ -271,6 +267,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 EMANA = 0;
                 RMANA = 0;
             }
+        }
+
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
         }
 
         private void Drawing_OnDraw(EventArgs args)
@@ -309,6 +313,35 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else
                     Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+            }
+
+            if (Config.Item("noti").GetValue<bool>() && (int)(Game.Time * 10) % 2 == 0)
+            {
+
+                var t = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
+
+                if (t.IsValidTarget())
+                {
+                    var comboDmg = 0f;
+                    if (R.IsReady())
+                    {
+                        comboDmg += R.GetDamage(t) * 3;
+                    }
+                    if (Q.IsReady())
+                    {
+                        comboDmg += Q.GetDamage(t) * 2;
+                    }
+                    if (W.IsReady())
+                    {
+                        comboDmg += W.GetDamage(t) + W.GetDamage(t, 1);
+                    }
+                    if (comboDmg > t.Health)
+                    {
+
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "COMBO KILL " + t.ChampionName + " have: " + t.Health + "hp");
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+                }
             }
         }
     }
