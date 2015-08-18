@@ -176,8 +176,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicR()
         {
             R.Range = 2000 + R.Level * 1200;
-
-            R.Range = R.Range- Config.Item("MaxRangeR").GetValue<Slider>().Value;
+            if (!IsCastingR)
+                R.Range = R.Range - Config.Item("MaxRangeR").GetValue<Slider>().Value;
             
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
@@ -248,9 +248,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     if (OktwCommon.GetPassiveTime(Player, "XerathArcanopulseChargeUp") < 2 || t.IsValidTarget(W.Range))
                         Q.Cast(Q.GetPrediction(t).CastPosition);
-                        
+
                     else
+                    {
                         Program.CastSpell(Q, t);
+                    }
                     return;
                 }
                 else if (t.IsValidTarget(Q.Range - 300))
