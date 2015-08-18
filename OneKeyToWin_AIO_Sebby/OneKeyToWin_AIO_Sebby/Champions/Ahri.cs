@@ -172,9 +172,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (W.GetDamage(t) + W.GetDamage(t, 1) + Q.GetDamage(t) * 2 > t.Health)
                     W.Cast();
-                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && Player.Mana > RMANA + WMANA)
                     W.Cast();
-                else if (Program.Farm && Player.Mana > RMANA + WMANA + QMANA)
+                else if (Program.Farm && Player.Mana > RMANA + QMANA + WMANA )
                     W.Cast();
             }
         }
