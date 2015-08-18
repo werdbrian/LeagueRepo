@@ -22,7 +22,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             Q = new Spell(SpellSlot.Q, 880);
             W = new Spell(SpellSlot.W, 550);
-            E = new Spell(SpellSlot.E, 920);
+            E = new Spell(SpellSlot.E, 900);
             R = new Spell(SpellSlot.R, 600);
 
             Q.SetSkillshot(0.25f, 100, 1600, false, SkillshotType.SkillshotLine);
@@ -120,10 +120,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicE();
             if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
                 LogicW();
-            if (Program.LagFree(3) && R.IsReady() && Config.Item("autoR").GetValue<bool>())
-                LogicR();
-            if (Program.LagFree(4) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(3) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
+            if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR").GetValue<bool>() && Program.Combo)
+                LogicR();
         }
 
         private void LogicR()
@@ -315,7 +315,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
             }
 
-            if (Config.Item("noti").GetValue<bool>() && (int)(Game.Time * 10) % 2 == 0)
+            if (Config.Item("noti").GetValue<bool>())
             {
 
                 var t = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Physical);
