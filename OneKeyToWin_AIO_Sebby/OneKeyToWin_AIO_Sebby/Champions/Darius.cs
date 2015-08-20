@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E = new Spell(SpellSlot.E, 540);
             R = new Spell(SpellSlot.R, 460);
 
-            E.SetSkillshot(0.1f, 50f * (float)Math.PI / 180, float.MaxValue, false, SkillshotType.SkillshotCone);
+            E.SetSkillshot(0.1f, 50f, float.MaxValue, false, SkillshotType.SkillshotLine);
 
             LoadMenuOKTW();
 
@@ -89,8 +89,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (target.IsValidTarget() && ((Player.UnderTurret(false) && !Player.UnderTurret(true)) || Program.Combo) )
                 {
-                    if ((target.Path.Count() > 0 || (ObjectManager.Player.Distance(target.ServerPosition) > 460 && target.Path.Count() == 0)) && ObjectManager.Player.Distance(target.ServerPosition) >= ObjectManager.Player.Distance(target.Position) && ObjectManager.Player.Distance(target.ServerPosition) > 260)
-                        E.Cast(target, true, true);
+                    if (!Orbwalking.InAutoAttackRange(target) && Player.Distance(target.GetWaypoints().Last<Vector2>().To3D()) >= Player.Distance(target.Position))
+                        E.Cast(target, true);
                 }
             }
         }
