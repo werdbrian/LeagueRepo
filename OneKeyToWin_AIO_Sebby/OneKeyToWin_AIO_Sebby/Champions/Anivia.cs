@@ -91,7 +91,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "AA in combo").SetValue(false));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "Disable AA if can use E").SetValue(true));
         }
 
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
@@ -124,7 +124,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (Program.Combo && !Config.Item("AACombo").GetValue<bool>())
+            if (Program.Combo && Config.Item("AACombo").GetValue<bool>())
             {
                 if (!E.IsReady())
                     Orbwalking.Attack = true;
@@ -162,16 +162,16 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicW()
         {
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && t.IsValidTarget(W.Range) && ObjectManager.Player.Mana > RMANA + EMANA + WMANA && W.GetPrediction(t).CastPosition.Distance(t.Position) > 100)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && t.IsValidTarget(W.Range) && Player.Mana > RMANA + EMANA + WMANA && W.GetPrediction(t).CastPosition.Distance(t.Position) > 100)
             {
-                if (ObjectManager.Player.Position.Distance(t.ServerPosition) > ObjectManager.Player.Position.Distance(t.Position))
+                if (ObjectManager.Player.Position.Distance(t.ServerPosition) > Player.Position.Distance(t.Position))
                 {
-                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) < t.Position.Distance(ObjectManager.Player.Position))
+                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) < t.Position.Distance(Player.Position))
                         Program.CastSpell(W, t);
                 }
                 else
                 {
-                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) > t.Position.Distance(ObjectManager.Player.Position) )
+                    if (t.Position.Distance(ObjectManager.Player.ServerPosition) > t.Position.Distance(Player.Position) )
                         Program.CastSpell(W, t);
                 }
             }
@@ -184,9 +184,9 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (R.GetDamage(t) > t.Health)
                     R.Cast(t, true, true);
-                else if (ObjectManager.Player.Mana > RMANA + EMANA && E.GetDamage(t) * 2 + R.GetDamage(t) > t.Health)
+                else if (Player.Mana > RMANA + EMANA && E.GetDamage(t) * 2 + R.GetDamage(t) > t.Health)
                     R.Cast(t, true, true);
-                if (ObjectManager.Player.Mana > RMANA + EMANA + QMANA + WMANA)
+                if (Player.Mana > RMANA + EMANA + QMANA + WMANA)
                     R.Cast(t, true, true);
             }
 
@@ -195,7 +195,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (RMissile == null
                 && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value
-                && Config.Item("farmR").GetValue<bool>() && ObjectManager.Player.Mana > QMANA + EMANA
+                && Config.Item("farmR").GetValue<bool>() && Player.Mana > QMANA + EMANA
                 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
                 && Rfarm.MinionsHit > 2)
             {
@@ -207,7 +207,7 @@ namespace OneKeyToWin_AIO_Sebby
                 R.Cast();
                 Program.debug("combo");
             }
-            else if (RMissile != null && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (Rfarm.MinionsHit < 3 || ObjectManager.Player.Mana < QMANA + EMANA + WMANA || Rfarm.Position.Distance(RMissile.Position) > 400))
+            else if (RMissile != null && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && (Rfarm.MinionsHit < 3 || Player.Mana < QMANA + EMANA + WMANA || Rfarm.Position.Distance(RMissile.Position) > 400))
             {
                 R.Cast();
                 Program.debug("farm");
