@@ -62,6 +62,30 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 grabTime = Game.Time;
             }
+
+
+            if ( Config.Item("Edead").GetValue<bool>() && E.IsReady()  && sender.IsEnemy && sender.IsValidTarget(1500))
+            {
+
+                double dmg = 0;
+
+                if (args.Target != null && args.Target.IsMe)
+                {
+                    dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
+                }
+                else if (Player.Distance(args.End) <= 300f)
+                {
+                    if (!OktwCommon.CanMove(Player) || Player.Distance(sender.Position) < 300f)
+                        dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
+                    else if (Player.Distance(args.End) < 100f)
+                        dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
+                }
+
+                if (Player.Health - dmg < (Player.CountEnemiesInRange(600) * Player.Level * 10 ) + (Player.Level * 10))
+                {
+                     E.Cast();
+                }
+            }
         }
 
         private void LoadMenuOKTW()
@@ -79,6 +103,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions").SetValue(new Slider(2, 10, 1)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("minionE", "Auto E big minion").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edmg", "E % dmg adjust").SetValue(new Slider(100, 150, 50)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edead", "Cast E before Kalista dead").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("Wdragon", "Auto W Dragon, Baron, Blue, Red").SetValue(true));
@@ -365,7 +390,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (AllyR.IsVisible && AllyR.Distance(Player.Position) < R.Range)
             {
-                if (AllyR.Health < AllyR.CountEnemiesInRange(600) * AllyR.Level * 20)
+                if (AllyR.Health < AllyR.CountEnemiesInRange(600) * AllyR.Level * 30)
                 {
                     R.Cast();
                 }
