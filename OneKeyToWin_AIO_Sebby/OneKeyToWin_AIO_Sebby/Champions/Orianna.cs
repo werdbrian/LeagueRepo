@@ -340,6 +340,28 @@ namespace OneKeyToWin_AIO_Sebby
 
             float delay = (distance / Q.Speed + Q.Delay);
 
+            if (E.IsReady() && Player.Mana > RMANA + QMANA + WMANA + EMANA && distance > Player.Distance(target.ServerPosition) + 300)
+            {
+                E.CastOnUnit(Player);
+                return;
+            }
+
+            if (Config.Item("Hit", true).GetValue<Slider>().Value == 5)
+            {
+                var prepos5 = Core.Prediction.GetPrediction(target, delay);
+
+                if ((int)prepos5.Hitchance > 5)
+                {
+                    if (prepos5.CastPosition.Distance(prepos5.CastPosition) < Q.Range)
+                    {
+
+                        Q.Cast(prepos5.CastPosition);
+
+                    }
+                }
+
+            }
+
             var prepos = Prediction.GetPrediction(target, delay);
             
             if ((int)prepos.Hitchance > 4)
