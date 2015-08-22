@@ -146,7 +146,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (!CanUse(barrier) && !CanUse(heal))
                 return;
 
-            if (!sender.IsEnemy || sender.IsMinion || !sender.IsValidTarget(1500))
+            if (!sender.IsEnemy || !sender.IsValidTarget(1500))
                 return;
 
             double dmg = 0;
