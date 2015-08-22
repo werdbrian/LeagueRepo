@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R, 430);
 
             Q.SetSkillshot(0.5f, 70, 1900f, true, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.25f, 2000, 1900f, false, SkillshotType.SkillshotLine);  
+            E.SetSkillshot(0.1f, 2000, 1900f, false, SkillshotType.SkillshotLine);  
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
@@ -241,7 +241,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             else
             {
-                E.Cast(Player.Position.Extend(eCastPosition, -300));
+                E.Cast(Player.Position.Extend(target.Position, -300));
             }
         }
 
