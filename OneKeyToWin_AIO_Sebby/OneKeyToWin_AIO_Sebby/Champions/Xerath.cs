@@ -75,8 +75,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack +=Orbwalking_BeforeAttack;
+            Orbwalking.AfterAttack +=Orbwalking_AfterAttack;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+        }
+
+        private void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (unit.IsMe)
+                Orbwalker.ForceTarget(null);
         }
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -240,9 +247,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var t2 = TargetSelector.GetTarget(1500, TargetSelector.DamageType.Magical);
 
-            if (t.IsValidTarget() && !(Config.Item("separate").GetValue<bool>() && Program.LaneClear))
+            if (t.IsValidTarget() && t2.IsValidTarget() && t == t2 && !(Config.Item("separate").GetValue<bool>() && Program.LaneClear))
             {
                 if (Q.IsCharging)
                 {
@@ -401,6 +409,17 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else
                     Utility.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
+            }
+
+            if (Config.Item("rRange").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
             }
 
             if (Config.Item("noti").GetValue<bool>() && R.IsReady())
