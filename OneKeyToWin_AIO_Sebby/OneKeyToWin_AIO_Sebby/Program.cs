@@ -463,7 +463,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return false;
         }
 
-        public static bool Farm { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit); } }
+        public static bool Farm { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) || (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed); } }
 
         public static bool Combo { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); } }
 
@@ -822,7 +822,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (timer > 0)
                         drawText("Jungler in jungle " + timer, Player.Position, System.Drawing.Color.Orange, 100);
-                    else
+                    else if ((int)(Game.Time * 10) % 2 == 0)
                         drawText("Be careful " + timer, Player.Position, System.Drawing.Color.Red, 100);
                     if (Game.Time - JungleTime >= 1)
                     {
