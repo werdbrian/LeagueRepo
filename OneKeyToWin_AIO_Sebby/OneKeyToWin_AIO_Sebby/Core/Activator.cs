@@ -40,6 +40,10 @@ namespace OneKeyToWin_AIO_Sebby
             Hydra2 = new Items.Item(3077, 440f),
             Hextech = new Items.Item(3146, 700f),
             //def
+
+            FaceOfTheMountain = new Items.Item(3401, 600f),
+            Zhonya = new Items.Item(3157, 0),
+            Seraph = new Items.Item(3040, 0),
             Randuin = new Items.Item(3143, 500f);
         
         public void LoadOKTW()
@@ -70,6 +74,9 @@ namespace OneKeyToWin_AIO_Sebby
 
             // DEF
             Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Randuin", "Randuin").SetValue(true));
+            Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("FaceOfTheMountain", "FaceOfTheMountain").SetValue(true));
+            Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Zhonya", "Zhonya").SetValue(true));
+            Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Seraph", "Seraph").SetValue(true));
 
             // CLEANSERS 
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
@@ -87,7 +94,68 @@ namespace OneKeyToWin_AIO_Sebby
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             //Drawing.OnDraw += Drawing_OnDraw;
+        }
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!sender.IsEnemy || !sender.IsValidTarget(1500))
+                return;
+
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead ))
+            {
+                double dmg = 0;
+                if (args.Target != null && args.Target.NetworkId == ally.NetworkId)
+                {
+                    dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                }
+                else if (Player.Distance(args.End) <= 300f)
+                {
+                    if (!OktwCommon.CanMove(ally) || ally.Distance(sender.Position) < 300f)
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                    else if (Player.Distance(args.End) < 100f)
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                }
+
+                if (Config.Item("FaceOfTheMountain").GetValue<bool>() && Player.Distance(ally.ServerPosition) < FaceOfTheMountain.Range)
+                {
+                    if (FaceOfTheMountain.IsReady())
+                    {
+                        if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                            FaceOfTheMountain.Cast(ally);
+                        else if (ally.Health - dmg < ally.Level * 10)
+                            FaceOfTheMountain.Cast(ally);
+                    }
+                }
+
+                if (Config.Item("Seraph").GetValue<bool>())
+                {
+                    if (Seraph.IsReady() && ally.IsMe)
+                    {
+                        var value = Player.Level * 20;
+                        if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                            Seraph.Cast();
+                        else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                            Seraph.Cast();
+                        else if (ally.Health - dmg < ally.Level * 10)
+                            Seraph.Cast();
+                    }
+                }
+                
+                if (Config.Item("Zhonya").GetValue<bool>())
+                {
+                    if (Zhonya.IsReady() && ally.IsMe)
+                    {
+                        var value = 95 + Player.Level * 20;
+                        if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                            Zhonya.Cast();
+                        else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                            Zhonya.Cast();
+                        else if (ally.Health - dmg < ally.Level * 10)
+                            Zhonya.Cast();
+                    }
+                }
+            }
         }
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -122,7 +190,6 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             Cleansers();
-            
             if (!Program.LagFree(0))
                 return;
 
@@ -130,6 +197,7 @@ namespace OneKeyToWin_AIO_Sebby
                 PotionManagement();
 
             Offensive();
+            Defensive();
         }
 
         private void Cleansers()
@@ -181,8 +249,10 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Randuin.IsReady() && Player.CountEnemiesInRange(Randuin.Range) > 0)
                     Randuin.Cast();
-            }
+            } 
+            
         }
+
         private void Offensive()
         {
             if (Botrk.IsReady() && Config.Item("Botrk").GetValue<bool>())

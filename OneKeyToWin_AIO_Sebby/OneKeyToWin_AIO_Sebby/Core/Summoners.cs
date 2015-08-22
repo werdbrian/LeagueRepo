@@ -12,9 +12,10 @@ namespace OneKeyToWin_AIO_Sebby
     class Summoners
     {
         private Menu Config = Program.Config;
-        private SpellSlot heal, barrier, ignite, smite, exhaust;
+        private SpellSlot heal, barrier, ignite, smite, exhaust, flash;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; }}
         private int smiteHero = 0;
+        private bool TryUse = false;
 
         public void LoadOKTW()
         {
@@ -22,19 +23,13 @@ namespace OneKeyToWin_AIO_Sebby
             barrier = Player.GetSpellSlot("summonerbarrier");
             ignite = Player.GetSpellSlot("summonerdot");
             exhaust = Player.GetSpellSlot("summonerexhaust");
+            flash = Player.GetSpellSlot("summonerflash");
 
-            var spells = Player.Spellbook.GetSpell(SpellSlot.Summoner1);
-            foreach (var spell in Player.Spellbook.Spells.Where(spell => spell.Name.ToLower().Contains("smite")))
+            if (flash != SpellSlot.Unknown)
             {
-                smite = Player.GetSpellSlot(spell.Name);
-                //red
-                if (spell.Name == "s5_summonersmiteduel" )
-                    smiteHero = 1;
-                //blue
-                if (spell.Name == "s5_summonersmiteplayerganker")
-                    smiteHero = 2;
-            }
+                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Flash").AddItem(new MenuItem("Flash", "Flash max range").SetValue(true));
 
+            }
             if (exhaust != SpellSlot.Unknown)
             {
                 Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Exhaust").AddItem(new MenuItem("Exhaust", "Exhaust").SetValue(true));
@@ -55,46 +50,26 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 Config.SubMenu("Activator OKTW©").SubMenu("Summoners").AddItem(new MenuItem("Ignite", "Ignite").SetValue(true));
             }
-            if (smite != SpellSlot.Unknown)
-            {
-                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("Smite", "Smite").SetValue(true));
-                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlue", "BlueSmite KS").SetValue(true));
-                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteBlueCombo", "BlueSmite COMBO").SetValue(false));
-                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Smite").AddItem(new MenuItem("SmiteRed", "RedSmite Combo").SetValue(true));
-            }
+
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Game.OnUpdate += Game_OnGameUpdate;
+            Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+        }
+
+        private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+
+            if (flash != SpellSlot.Unknown && Config.Item("Flash").GetValue<bool>() && sender.ActiveSpellSlot == flash && flash.IsReady() && args.Slot == flash)
+            {
+                args.Process = false;
+                Player.Spellbook.CastSpell(flash, ObjectManager.Player.Position.Extend(Game.CursorPos, 500), false);
+            }
+           
         }
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if ( CanUse(smite) && Config.Item("Smite").GetValue<bool>())
-            {
-                if (smiteHero == 2 && Config.Item("SmiteBlue").GetValue<bool>())
-                {
-                    var t = TargetSelector.GetTarget(800, TargetSelector.DamageType.Physical);
-                    if (t.IsValidTarget())
-                    {
-                        var smaitDmg = Player.GetSummonerSpellDamage(t, Damage.SummonerSpell.Smite);
-                        if (t.Health <= smaitDmg )
-                            Player.Spellbook.CastSpell(smite, t);
-                        if (Program.Combo && Config.Item("SmiteBlueCombo").GetValue<bool>())
-                        {
-                            Player.Spellbook.CastSpell(smite, t);
-                        }
-                    }
-                }
-                else if (smiteHero == 1 && Program.Combo && Config.Item("SmiteRed").GetValue<bool>())
-                {
-                    
-                    var t = TargetSelector.GetTarget(760, TargetSelector.DamageType.Physical);
-                    if (t.IsValidTarget())
-                    {
-                        Program.debug("1");
-                        Player.Spellbook.CastSpell(smite, t);
-                    }
-                }
-            }
+           
             if(Program.LagFree(4) )
             {
                 if (CanUse(ignite) && Config.Item("Ignite").GetValue<bool>())
@@ -149,11 +124,11 @@ namespace OneKeyToWin_AIO_Sebby
             if (!sender.IsEnemy || !sender.IsValidTarget(1500))
                 return;
 
-            double dmg = 0;
+            
 
             foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
             {
-
+                double dmg = 0;
                 if (args.Target != null && args.Target.NetworkId == ally.NetworkId)
                 {
                     dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
@@ -171,7 +146,7 @@ namespace OneKeyToWin_AIO_Sebby
                     var value = 95 + Player.Level * 20;
                     if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
                         Player.Spellbook.CastSpell(barrier, Player);
-                    if (Player.Health - dmg < Player.CountEnemiesInRange(600) * Player.Level * 15)
+                    if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 15)
                         Player.Spellbook.CastSpell(barrier, Player);
                 
                 }
@@ -187,7 +162,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if (!Config.Item("AllyHeal").GetValue<bool>() && !ally.IsMe)
                         return;
 
-                    if (ally.Health - dmg < ally.CountEnemiesInRange(600) * ally.Level * 10)
+                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
                         Player.Spellbook.CastSpell(heal, ally);
                     else if (ally.Health - dmg <  ally.Level * 10)
                         Player.Spellbook.CastSpell(heal, ally);
