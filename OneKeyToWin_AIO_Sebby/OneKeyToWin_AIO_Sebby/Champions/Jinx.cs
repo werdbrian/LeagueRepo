@@ -122,8 +122,14 @@ namespace OneKeyToWin_AIO_Sebby
                 E.Cast(unit.ServerPosition, true);
                 debug("E ope");
             }
-            if (unit.IsMe && args.SData.Name == "JinxWMissile")
-                WCastTime = Game.Time;
+            if (unit.IsMe )
+            {
+                if (args.SData.Name == "JinxQ")
+                    Orbwalking.ResetAutoAttackTimer();
+                Program.debug(args.SData.Name);
+                if (args.SData.Name == "JinxWMissile")
+                    WCastTime = Game.Time;
+            }
             if (E.IsReady() && unit.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(unit.Position) < E.Range )
             {
                 grabTime = Game.Time;
