@@ -259,7 +259,6 @@ namespace OneKeyToWin_AIO_Sebby
             var dashPosition = Player.Position.Extend(Game.CursorPos, E.Range);
             if (dashPosition.IsWall() || dashPosition.CountEnemiesInRange(800) > 2)
                 return;
-            Program.debug("DUPA");
             if (Game.CursorPos.Distance(Player.Position) > Player.AttackRange + Player.BoundingRadius * 2 && Program.Combo && Config.Item("nktdE").GetValue<bool>() && Player.Mana > RMANA + EMANA - 10)
             {
                 if (!passRdy && !SpellLock)
