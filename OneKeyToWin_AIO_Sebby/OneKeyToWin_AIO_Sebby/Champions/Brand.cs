@@ -98,7 +98,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t2 = TargetSelector.GetTarget(R.Range + 400, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget() )
             {
-                if (!W.IsReady() && !E.IsReady() && R.GetDamage(t) * t.CountEnemiesInRange(450) > t.Health)
+                if (!W.IsReady() && !E.IsReady() && R.GetDamage(t) * (t.CountEnemiesInRange(450)-1) > t.Health)
                     R.CastOnUnit(t);
 
             }
