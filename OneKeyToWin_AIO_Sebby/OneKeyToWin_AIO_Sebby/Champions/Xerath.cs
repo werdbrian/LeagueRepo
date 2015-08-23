@@ -69,6 +69,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoBuy", "Auto Buy ScryingOrbTrinket after lvl 6").SetValue(true));
 
             Game.OnUpdate += Game_OnGameUpdate;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
@@ -168,7 +169,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Orbwalker.ForceTarget(minion);
                     }
                 }
-                if (Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
+                if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
                     ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
 
