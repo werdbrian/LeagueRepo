@@ -83,9 +83,10 @@ namespace OneKeyToWin_AIO_Sebby
             
             if (FishBoneActive && t.IsValidTarget())
             {
-                if (Program.Combo && GetRealDistance(t) < GetRealPowPowRange(t) && (Player.Mana < RMANA  + 20 || Player.GetAutoAttackDamage(t) * 3 < t.Health))
+                var realDistance = GetRealDistance(t);
+                if (Program.Combo && realDistance < GetRealPowPowRange(t) && (Player.Mana < RMANA + 20 || Player.GetAutoAttackDamage(t) * 3 < t.Health))
                     Q.Cast();
-                else if (Program.Farm && Config.Item("Qharras").GetValue<bool>() && (GetRealDistance(t) > bonusRange() || GetRealDistance(t) < GetRealPowPowRange(t) || Player.Mana < RMANA + EMANA + WMANA + WMANA))
+                else if (Program.Farm && Config.Item("Qharras").GetValue<bool>() && (realDistance > bonusRange() || realDistance < GetRealPowPowRange(t) || Player.Mana < RMANA + EMANA + WMANA + WMANA))
                     Q.Cast();
             }
 
@@ -126,7 +127,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (args.SData.Name == "JinxQ")
                     Orbwalking.ResetAutoAttackTimer();
-                Program.debug(args.SData.Name);
                 if (args.SData.Name == "JinxWMissile")
                     WCastTime = Game.Time;
             }
@@ -161,7 +161,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Program.LagFree(1) && E.IsReady())
                 LogicE();
 
-            if (Program.LagFree(2) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
+            if (Program.LagFree(2) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>() )
                 LogicQ();
 
             if (Program.LagFree(3) && W.IsReady() && !Player.IsWindingUp && Config.Item("autoW").GetValue<bool>())
@@ -173,17 +173,18 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicQ()
         {
-            if ((Game.Time - lag > 0.1) && Program.Farm && !Player.IsWindingUp && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
+            if ((Game.Time - lag > 0.1) && Program.Farm && !Player.IsWindingUp && Orbwalking.CanAttack() && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + WMANA + EMANA + 10 && !FishBoneActive)
             {
                 farmQ();
                 lag = Game.Time;
             }
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget())
+            if (t.IsValidTarget() && Orbwalking.CanAttack())
             {
-                var distance = GetRealDistance(t);
+                
                 if (!FishBoneActive && (!Orbwalking.InAutoAttackRange(t) || t.CountEnemiesInRange(250) > 2))
                 {
+                    var distance = GetRealDistance(t);
                     if (Program.Combo && (Player.Mana > RMANA + WMANA || Player.GetAutoAttackDamage(t) * 2 > t.Health))
                         Q.Cast();
                     else if (Program.Farm && Config.Item("Qharras").GetValue<bool>() && Orbwalker.GetTarget() == null && Player.Mana > RMANA + WMANA + EMANA + 20 && distance < bonusRange() + t.BoundingRadius + Player.BoundingRadius)
@@ -196,8 +197,10 @@ namespace OneKeyToWin_AIO_Sebby
                 Q.Cast();
             else if (FishBoneActive && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
                 Q.Cast();
-            else if (FishBoneActive && Program.Farm && Config.Item("Qharras").GetValue<bool>())
+            else if (FishBoneActive && Program.Farm)
+            {
                 Q.Cast();
+            }
         }
 
         private void LogicW()
@@ -205,13 +208,24 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-                foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && W.GetDamage(enemy) > enemy.Health))
+
+                var comboDmg = W.GetDamage(t);
+                if (R.IsReady())
+                {
+                    comboDmg += R.GetDamage(t, 1);
+                }
+                else
+                {
+                    comboDmg += (float)Player.GetAutoAttackDamage(t) * 3;
+                }
+
+                foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && comboDmg > enemy.Health))
                 {
                     Program.CastSpell(W, enemy);
                     return;
                 }
 
-                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
+                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0 && !Orbwalking.InAutoAttackRange(t))
                 {
                     Program.CastSpell(W, t);
                 }
@@ -356,11 +370,11 @@ namespace OneKeyToWin_AIO_Sebby
 
         private bool FishBoneActive {get { return Player.AttackRange > 525f; }}
 
-        private  float GetRealPowPowRange(GameObject target) {return 630f + Player.BoundingRadius + target.BoundingRadius;}
+        private  float GetRealPowPowRange(GameObject target) {return 650f + Player.BoundingRadius + target.BoundingRadius;}
 
         private float GetRealDistance(Obj_AI_Base target)
         {
-            return Player.ServerPosition.Distance(target.ServerPosition) + Player.BoundingRadius +
+            return Prediction.GetPrediction(Player, 0.1f).CastPosition.Distance(Prediction.GetPrediction(target, 0.1f).CastPosition) + Player.BoundingRadius +
                    target.BoundingRadius;
         }
 
