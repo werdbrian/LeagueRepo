@@ -169,7 +169,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Orbwalker.ForceTarget(minion);
                     }
                 }
-                if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
+                if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 4)
                     ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
 
