@@ -374,8 +374,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private float GetRealDistance(Obj_AI_Base target)
         {
-            return Prediction.GetPrediction(Player, 0.05f).CastPosition.Distance(Prediction.GetPrediction(target, 0.05f).CastPosition) + Player.BoundingRadius +
-                   target.BoundingRadius;
+            return Player.ServerPosition.Distance(target.ServerPosition) + Player.BoundingRadius + target.BoundingRadius;
         }
 
         public bool ShouldUseE(string SpellName)
