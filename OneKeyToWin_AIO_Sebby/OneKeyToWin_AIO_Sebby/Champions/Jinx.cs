@@ -181,7 +181,6 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() && Orbwalking.CanAttack())
             {
-                
                 if (!FishBoneActive && (!Orbwalking.InAutoAttackRange(t) || t.CountEnemiesInRange(250) > 2))
                 {
                     var distance = GetRealDistance(t);
@@ -193,9 +192,9 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (!FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
                 Q.Cast();
-            else if (FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.Mana < RMANA + WMANA + 20)
+            else if (FishBoneActive && Program.Combo && Player.Mana < RMANA + WMANA + 20)
                 Q.Cast();
-            else if (FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
+            else if (FishBoneActive && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
                 Q.Cast();
             else if (FishBoneActive && Program.Farm)
             {
