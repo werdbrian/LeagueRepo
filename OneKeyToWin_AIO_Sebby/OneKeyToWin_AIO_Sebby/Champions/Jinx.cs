@@ -81,7 +81,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
             
-            if (FishBoneActive && t.IsValidTarget())
+            if (FishBon          eActive && t.IsValidTarget())
             {
                 var realDistance = GetRealDistance(t);
                 if (Program.Combo && realDistance < GetRealPowPowRange(t) && (Player.Mana < RMANA + 20 || Player.GetAutoAttackDamage(t) * 3 < t.Health))
@@ -374,7 +374,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private float GetRealDistance(Obj_AI_Base target)
         {
-            return Prediction.GetPrediction(Player, 0.1f).CastPosition.Distance(Prediction.GetPrediction(target, 0.1f).CastPosition) + Player.BoundingRadius +
+            return Prediction.GetPrediction(Player, 0.05f).CastPosition.Distance(Prediction.GetPrediction(target, 0.05f).CastPosition) + Player.BoundingRadius +
                    target.BoundingRadius;
         }
 
