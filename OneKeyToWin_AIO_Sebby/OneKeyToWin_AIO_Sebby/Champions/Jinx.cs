@@ -81,7 +81,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
             
-            if (FishBon          eActive && t.IsValidTarget())
+            if (FishBoneActive && t.IsValidTarget())
             {
                 var realDistance = GetRealDistance(t);
                 if (Program.Combo && realDistance < GetRealPowPowRange(t) && (Player.Mana < RMANA + 20 || Player.GetAutoAttackDamage(t) * 3 < t.Health))
