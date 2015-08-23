@@ -499,7 +499,7 @@ namespace OneKeyToWin_AIO_Sebby
                     CoreType2 = Core.SkillshotType.SkillshotCircle;
                     aoe2 = true;
                 }
-                if (QWER.Width > 100)
+                if (QWER.Width > 80 && !QWER.Collision)
                     aoe2 = true;
                 var predInput2 = new Core.PredictionInput
                 {
