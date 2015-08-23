@@ -32,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
 
                     FaceName = "Impact",
-                    Height = 36,
+                    Height = 30,
                     Weight = FontWeight.Normal,
                     OutputPrecision = FontPrecision.Default,
                     Quality = FontQuality.Default
@@ -118,12 +118,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             {
                                 if ((int)(Game.Time * 10) % 2 == 0)
                                 {
-                                    DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.01f, SharpDX.Color.OrangeRed);
+                                    DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
                                 }
                             }
                             if (Game.Time - ChampionInfoOne.LastVisableTime >= 7)
                             {
-                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.01f, SharpDX.Color.OrangeRed);
+                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
                             }
                         }
                     }
