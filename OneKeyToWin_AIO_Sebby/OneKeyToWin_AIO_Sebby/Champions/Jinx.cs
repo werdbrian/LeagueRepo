@@ -191,11 +191,11 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast();
                 }
             }
-            else if (!FishBoneActive && Program.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
+            else if (!FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
                 Q.Cast();
-            else if (FishBoneActive && Program.Combo && Player.Mana < RMANA + WMANA + 20)
+            else if (FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.Mana < RMANA + WMANA + 20)
                 Q.Cast();
-            else if (FishBoneActive && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
+            else if (FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
                 Q.Cast();
             else if (FishBoneActive && Program.Farm)
             {
