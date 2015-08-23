@@ -179,9 +179,9 @@ namespace OneKeyToWin_AIO_Sebby
                 lag = Game.Time;
             }
             var t = TargetSelector.GetTarget(bonusRange() + 60, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && Orbwalking.CanAttack())
+            if (t.IsValidTarget() )
             {
-                if (!FishBoneActive && (!Orbwalking.InAutoAttackRange(t) || t.CountEnemiesInRange(250) > 2))
+                if (!FishBoneActive && Orbwalking.CanAttack() && (!Orbwalking.InAutoAttackRange(t) || t.CountEnemiesInRange(250) > 2))
                 {
                     var distance = GetRealDistance(t);
                     if (Program.Combo && (Player.Mana > RMANA + WMANA || Player.GetAutoAttackDamage(t) * 2 > t.Health))
@@ -190,7 +190,7 @@ namespace OneKeyToWin_AIO_Sebby
                         Q.Cast();
                 }
             }
-            else if (!FishBoneActive && Orbwalking.CanAttack() && Program.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
+            else if (!FishBoneActive && Program.Combo && Player.Mana > RMANA + WMANA + 20 && Player.CountEnemiesInRange(2000) > 0)
                 Q.Cast();
             else if (FishBoneActive && Program.Combo && Player.Mana < RMANA + WMANA + 20)
                 Q.Cast();
