@@ -168,6 +168,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Orbwalker.ForceTarget(minion);
                     }
                 }
+                if (Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
+                    ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
 
             if (E.IsReady() && Config.Item("autoE").GetValue<bool>())
