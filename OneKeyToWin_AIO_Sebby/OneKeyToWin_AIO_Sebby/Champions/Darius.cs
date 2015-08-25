@@ -89,7 +89,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
                 if (target.IsValidTarget() && ((Player.UnderTurret(false) && !Player.UnderTurret(true)) || Program.Combo) )
                 {
-                    if (!Orbwalking.InAutoAttackRange(target) && Player.Distance(target.GetWaypoints().Last<Vector2>().To3D()) >= Player.Distance(target.Position))
+                    if (!Orbwalking.InAutoAttackRange(target))
                         E.Cast(target, true);
                 }
             }
