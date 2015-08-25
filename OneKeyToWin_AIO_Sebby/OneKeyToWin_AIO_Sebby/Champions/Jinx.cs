@@ -213,7 +213,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     comboDmg += R.GetDamage(t, 1);
                 }
-                else if (Player.Distance(t.Position) < 1100)
+                else if (Player.Distance(t.Position) < 1000)
                 {
                     comboDmg += (float)Player.GetAutoAttackDamage(t) * 2;
                 }
