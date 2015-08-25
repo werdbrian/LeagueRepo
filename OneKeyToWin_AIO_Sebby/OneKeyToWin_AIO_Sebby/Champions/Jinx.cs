@@ -360,7 +360,7 @@ namespace OneKeyToWin_AIO_Sebby
                 List<Vector2> waypoints = target.GetWaypoints();
                 if ((Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > 400)
                 {
-                    R.Cast(target);
+                    Program.CastSpell(R, target);
                 }
             }
         }
