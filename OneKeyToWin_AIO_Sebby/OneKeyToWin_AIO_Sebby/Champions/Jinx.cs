@@ -27,7 +27,7 @@ namespace OneKeyToWin_AIO_Sebby
             Q = new Spell(SpellSlot.Q);
             W = new Spell(SpellSlot.W, 1500f);
             E = new Spell(SpellSlot.E, 920f);
-            R = new Spell(SpellSlot.R, 2500f);
+            R = new Spell(SpellSlot.R, 3000f);
             
             W.SetSkillshot(0.6f, 60f, 3300f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(1.2f, 1f, 1750f, false, SkillshotType.SkillshotCircle);
@@ -68,7 +68,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rjungle", "R Jungle stealer").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rdragon", "Dragon").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rbaron", "Baron").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("hitchanceR", "Hit Chance R").SetValue(new Slider(2, 3, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "OneKeyToCast R").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Q farm").SetValue(true));
@@ -215,7 +215,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
                 else
                 {
-                    comboDmg += (float)Player.GetAutoAttackDamage(t) * 3;
+                    comboDmg += (float)Player.GetAutoAttackDamage(t) * 2;
                 }
 
                 foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && comboDmg > enemy.Health))
@@ -342,16 +342,27 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void castR(Obj_AI_Hero target)
         {
-            if (Config.Item("hitchanceR").GetValue<bool>())
+            var inx = Config.Item("hitchanceR").GetValue<Slider>().Value;
+            if (inx == 0)
+            {
+                R.Cast(R.GetPrediction(target).CastPosition);
+            }
+            else if (inx == 1)
+            {
+                R.Cast(target);
+            }
+            else if (inx == 2)
+            {
+                Program.CastSpell(R, target);
+            }
+            else if (inx == 3)
             {
                 List<Vector2> waypoints = target.GetWaypoints();
                 if ((Player.Distance(waypoints.Last<Vector2>().To3D()) - Player.Distance(target.Position)) > 400)
                 {
-                    R.Cast(target, true);
+                    R.Cast(target);
                 }
             }
-            else
-                R.Cast(target, true);
         }
 
         public void farmQ()
