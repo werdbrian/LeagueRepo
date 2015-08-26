@@ -859,8 +859,13 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (ShowClicks)
                     {
-                        List<Vector2> waypoints = enemy.GetWaypoints();
-                        drawLine(enemy.Position, waypoints.Last<Vector2>().To3D(), 1, System.Drawing.Color.Red);
+                        var lastWaypoint = enemy.GetWaypoints().Last().To3D();
+                        if (lastWaypoint.IsValid())
+                        {
+                            drawLine(enemy.Position, lastWaypoint, 1, System.Drawing.Color.Red);
+                            if (enemy.GetWaypoints().Count() >1)
+                                drawText(enemy.ChampionName, lastWaypoint, System.Drawing.Color.WhiteSmoke);
+                        }
 
                     }
                 }
@@ -971,14 +976,27 @@ namespace OneKeyToWin_AIO_Sebby
                     wts[1] = wts[1] + 15;
                     if ((int)enemy.HealthPercent > 0)
                         Drawing.DrawLine(wts[0], wts[1], (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
+
                     if ((int)enemy.HealthPercent < 100)
                         Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 12, System.Drawing.Color.White);
+
                     if (Distance > 3500 && enemy.IsVisible)
                         drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
                     else if (!enemy.IsVisible)
-                        drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Gray);
+                    {
+                        if ((int)(Game.Time * 10) % 2 == 0)
+                        {
+                            drawText("SS " + enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Yellow);
+                        }
+                    }
                     else
-                        drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
+                    {
+                        if ((int)(Game.Time * 10) % 2 == 0)
+                        {
+                            drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
+                        }
+                    }
+
                     if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                     {
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
