@@ -136,9 +136,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
 
             Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("autoBuy", "Auto buy blue trinket after lvl 6").SetValue(true));
             Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardBlue", "Auto Blue Trinket").SetValue(true));
             Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
-
+            
             Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix", true).SetValue(true));
             Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
             Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "3 Custome Collision(can drop fps)", true).SetValue(false));
@@ -318,6 +319,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void AutoWard()
         {
+            if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
+                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+
             foreach (var enemy in Enemies.Where(enemy => enemy.IsValid))
             {
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
