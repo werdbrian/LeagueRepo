@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Spell Q, W, E, R;
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
-        private static GameObject QMissile = null;
+        private static GameObject QMissile = null, EMissile = null;
 
         public void LoadOKTW()
         {
@@ -70,9 +70,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 return;
             MissileClient missile = (MissileClient)sender;
 
-            if (missile.IsValid && missile.IsAlly && missile.SData.Name != null && ( missile.SData.Name == "AhriOrbReturn"))
+            if (missile.IsValid && missile.IsAlly && missile.SData.Name != null)
             {
-                QMissile = null;
+                if(missile.SData.Name == "AhriOrbReturn")
+                    QMissile = null;
+                if (missile.SData.Name == "AhriSeduceMissile")
+                    EMissile = null;
             }
         }
 
@@ -83,10 +86,16 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             MissileClient missile = (MissileClient)sender;
 
-            if (missile.IsValid && missile.IsAlly && missile.SData.Name != null && (missile.SData.Name == "AhriOrbMissile" || missile.SData.Name == "AhriOrbReturn"))
+            if (missile.IsValid && missile.IsAlly && missile.SData.Name != null )
             {
-                Program.debug(missile.SData.Name);
-                QMissile = sender;
+                if (missile.SData.Name == "AhriOrbMissile" || missile.SData.Name == "AhriOrbReturn")
+                {
+                    QMissile = sender;
+                }
+                if (missile.SData.Name == "AhriSeduceMissile")
+                {
+                    EMissile = sender;
+                }
             }
         }
 
@@ -182,12 +191,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget())
             {
-                if (Q.GetDamage(t) * 2 > t.Health)
-                    Q.Cast(t, true);
-                else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
-                    Program.CastSpell(Q, t);
-                else if (Program.Farm && Player.Mana > RMANA + WMANA + QMANA + QMANA)
-                    Program.CastSpell(Q, t);
+                if (EMissile == null || !EMissile.IsValid)
+                {
+                    if (Q.GetDamage(t) * 2 > t.Health)
+                        Q.Cast(t, true);
+                    else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
+                        Program.CastSpell(Q, t);
+                    else if (Program.Farm && Player.Mana > RMANA + WMANA + QMANA + QMANA)
+                        Program.CastSpell(Q, t);
+                }
                 if (Player.Mana > RMANA + QMANA )
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
