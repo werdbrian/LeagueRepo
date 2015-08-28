@@ -218,7 +218,7 @@ namespace OneKeyToWin_AIO_Sebby
                     comboDmg += (float)Player.GetAutoAttackDamage(t) * 2;
                 }
 
-                foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range) && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && comboDmg > enemy.Health))
+                foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range + 200) && comboDmg > enemy.Health && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && GetRealDistance(enemy) > bonusRange()))
                 {
                     Program.CastSpell(W, enemy);
                     return;
