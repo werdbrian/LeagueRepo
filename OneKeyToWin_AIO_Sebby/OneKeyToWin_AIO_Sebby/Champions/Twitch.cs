@@ -35,6 +35,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("countQ", "Auto Q if x enemies are going in your direction 0-disable").SetValue(new Slider(3, 5, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q in combo").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "AutoW").SetValue(true));
 
@@ -101,8 +102,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
+
+            if (Config.Item("autoQ").GetValue<bool>() && Program.Combo && Orbwalker.GetTarget().IsValid<Obj_AI_Hero>() && Player.Mana < RMANA + QMANA)
+                Q.Cast();
+
             if (Config.Item("countQ").GetValue<Slider>().Value == 0 || Player.Mana < RMANA + QMANA)
                 return;
+            
             var count = 0;
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(3000)))
             {
