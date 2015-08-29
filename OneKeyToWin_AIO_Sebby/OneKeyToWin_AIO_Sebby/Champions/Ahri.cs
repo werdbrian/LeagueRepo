@@ -139,6 +139,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Player.Distance(Game.CursorPos) < 450)
                 dashPosition = Game.CursorPos;
 
+            if (dashPosition.CountEnemiesInRange(800) > 2)
+                return;
+
             if (Player.HasBuff("AhriTumble"))
             {
                 var BuffTime = OktwCommon.GetPassiveTime(Player, "AhriTumble");
@@ -160,7 +163,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     comboDmg += W.GetDamage(t) + W.GetDamage(t,1);
                 }
-                if (comboDmg > t.Health && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position) && dashPosition.CountEnemiesInRange(800) < 3 && dashPosition.Distance(t.ServerPosition) < 550)
+                if (t.CountAlliesInRange(600) < 2 && comboDmg > t.Health && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position)  && dashPosition.Distance(t.ServerPosition) < 500)
                 {
                     R.Cast(dashPosition);
                 }
