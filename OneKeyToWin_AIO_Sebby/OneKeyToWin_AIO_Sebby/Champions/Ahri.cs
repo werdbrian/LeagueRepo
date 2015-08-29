@@ -226,7 +226,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             var t = Orbwalker.GetTarget() as Obj_AI_Hero;
             if (!t.IsValidTarget())
-                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget())
             {
                 if (Program.Combo && Player.Mana > RMANA + EMANA)
