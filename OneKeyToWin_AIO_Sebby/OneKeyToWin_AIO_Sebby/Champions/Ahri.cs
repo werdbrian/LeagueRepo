@@ -213,7 +213,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
-                if (Qfarm.MinionsHit > 3 || (Q.IsCharging && Qfarm.MinionsHit > 0))
+                if (Qfarm.MinionsHit > 2)
                     Q.Cast(Qfarm.Position);
             }
         }
