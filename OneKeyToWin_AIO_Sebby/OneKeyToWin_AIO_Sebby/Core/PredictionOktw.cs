@@ -441,16 +441,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var pathMinLen = 800;
             double angleMove = 30 + (input.Radius / 10);
 
-            if (input.Type == SkillshotType.SkillshotCircle)
-            {
-                fixRange -= input.Radius / 2;
-            }
-
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
                 pathMinLen = 600;
                 angleMove += 5;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) / 3;
+            }
+
+            if (input.Type == SkillshotType.SkillshotCircle)
+            {
+                fixRange -= input.Radius / 2;
             }
 
             if (input.Type == SkillshotType.SkillshotLine)
