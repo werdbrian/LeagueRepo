@@ -438,17 +438,26 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             var fixRange = (input.Unit.MoveSpeed * totalDelay) / 2;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
+            var pathMinLen = 800;
+            double angleMove = 30 + (input.Radius / 10);
 
             if (input.Type == SkillshotType.SkillshotCircle)
             {
                 fixRange -= input.Radius / 2;
             }
 
+            if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
+            {
+                pathMinLen = 600;
+                angleMove += 5;
+                fixRange = (input.Unit.MoveSpeed * totalDelay) / 3;
+            }
+
             if (input.Type == SkillshotType.SkillshotLine)
             {
                 if (input.Unit.Path.Count() > 0)
                 {
-                    if (GetAngle(input.From, input.Unit) < 36)
+                    if (GetAngle(input.From, input.Unit) < angleMove)
                     {
                         result.Hitchance = HitChance.VeryHigh;
                     }
@@ -474,7 +483,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (LastWaypiont.Distance(input.Unit.ServerPosition) > 800)
+            if (LastWaypiont.Distance(input.Unit.ServerPosition) > pathMinLen)
             {
                     result.Hitchance = HitChance.VeryHigh;
             }
@@ -504,10 +513,17 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (totalDelay > 0.7 && (input.Unit.IsWindingUp || OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d))
+            if (totalDelay > 0.7 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
+
+            if (totalDelay > 1 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            {
+                result.Hitchance = HitChance.Medium;
+            }
+
+            
 
             if (input.Unit.Path.Count() > 1 && input.Type == SkillshotType.SkillshotLine)
             {
