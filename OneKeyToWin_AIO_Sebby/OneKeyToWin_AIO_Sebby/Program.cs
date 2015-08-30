@@ -153,7 +153,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - OKTW Custome Prediction 4"));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("5", "5 - OKTW NewCommon Prediction concept BETA"));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 5 BETA").SetValue(false));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction mode", true).SetValue(new Slider(3, 5, 0)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction mode", true).SetValue(new Slider(5, 5, 0)));
 
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
