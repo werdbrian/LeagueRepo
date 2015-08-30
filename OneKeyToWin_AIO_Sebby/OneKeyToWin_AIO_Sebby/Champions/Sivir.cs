@@ -44,6 +44,18 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("harasW", "Harras W").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras Q").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    var spell = enemy.Spellbook.Spells[i];
+                    if (spell.SData.TargettingType == SpellDataTargetType.Unit)
+                        Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Targeted Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell.SData.Name, spell.Name).SetValue(true));
+                }
+                    
+            }
+
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
@@ -127,6 +139,9 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             
             if (!E.IsReady() || args.Target == null || !sender.IsEnemy || !args.Target.IsMe || !sender.IsValid<Obj_AI_Hero>() || args.SData.Name == "TormentedSoil")
+                return;
+
+            if (Config.Item("spell" + args.SData.Name) != null && !Config.Item("spell" + args.SData.Name).GetValue<bool>())
                 return;
 
             var dmg = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name);
