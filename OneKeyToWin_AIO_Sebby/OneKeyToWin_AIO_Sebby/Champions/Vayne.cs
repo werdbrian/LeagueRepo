@@ -23,7 +23,7 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 670);
             R = new Spell(SpellSlot.R, 3000);
 
-            E.SetTargetted(0f, 3500f);
+            E.SetTargetted(0.2f, 3500f);
 
             LoadMenuOKTW();
 
@@ -94,9 +94,11 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (!unit.IsMe)
                 return;
-            var t = target as Obj_AI_Hero;
-
             var dashPosition = Player.Position.Extend(Game.CursorPos, Q.Range);
+            if (!DashCheck(dashPosition))
+                return;
+
+            var t = target as Obj_AI_Hero;
 
             if (Q.IsReady() && t.IsValidTarget() && GetWStacks(t) == 1 && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position) && dashPosition.CountEnemiesInRange(800) < 3)
             {
@@ -131,7 +133,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (CondemnCheck(Player.Position, target) )
                         E.Cast(target);
-                    else if (Q.IsReady() && !dashPosition.IsWall() && Config.Item("QE").GetValue<bool>() && CondemnCheck(dashPosition, target))
+                    else if (Q.IsReady() && DashCheck(dashPosition) && Config.Item("QE").GetValue<bool>() && CondemnCheck(dashPosition, target))
                     {
                         Q.Cast(dashPosition, true);
                         Program.debug("Q + E");
@@ -145,7 +147,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Q.Cast(dashPosition, true);
                 }
-                if (Program.Combo && !dashPosition.IsWall())
+                if (Program.Combo && DashCheck(dashPosition))
                 {
                     var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
@@ -163,7 +165,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (target.IsValidTarget(270) && target.IsMelee)
                     {
-                        if (Q.IsReady() && !dashPosition.IsWall())
+                        if (Q.IsReady() && DashCheck(dashPosition))
                             Q.Cast(dashPosition, true);
                         else if (E.IsReady() && Player.Health < Player.MaxHealth * 0.5)
                         {
@@ -194,6 +196,17 @@ namespace OneKeyToWin_AIO_Sebby
                         R.Cast();
                 }
             }
+        }
+
+        private bool DashCheck(Vector3 dash)
+        {
+            if (!Player.Position.Extend(dash, Q.Range).IsWall()
+                && !Player.Position.Extend(dash, Q.Range - 100).IsWall()
+                && !Player.Position.Extend(dash, Q.Range - 200).IsWall()
+                && !Player.Position.Extend(dash, Q.Range - 300).IsWall())
+                return true;
+            else
+                return false;
         }
 
         private bool CondemnCheck(Vector3 fromPosition, Obj_AI_Hero target)
