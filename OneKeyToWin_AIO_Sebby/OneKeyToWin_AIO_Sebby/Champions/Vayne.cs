@@ -219,7 +219,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             float pushDistance;
             if (Player.Position == fromPosition)
-                pushDistance = 470;
+                pushDistance = 480;
             else
                 pushDistance = 400 ;
 
