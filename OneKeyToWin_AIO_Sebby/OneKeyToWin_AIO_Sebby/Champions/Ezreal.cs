@@ -195,9 +195,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Items.UseItem(Mur);
             }
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (Player.CountEnemiesInRange(900) == 0)
-                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            else
+            if (Player.CountEnemiesInRange(900) > 0)
                 t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
             if (t.IsValidTarget())
@@ -234,11 +232,12 @@ namespace OneKeyToWin_AIO_Sebby
                 farmQ();
                 lag = Game.Time;
             }
-            else if (Config.Item("stack").GetValue<bool>() && !Player.HasBuff("Recall") && Player.Mana > Player.MaxMana * 0.95 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
+            else if (Config.Item("stack").GetValue<bool>() && !Player.HasBuff("Recall") && Player.Mana > Player.MaxMana * 0.95 && Program.None && (Items.HasItem(Tear) || Items.HasItem(Manamune)))
             {
                 Q.Cast(Player.ServerPosition);
             }
         }
+
         private void LogicW()
         {
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
