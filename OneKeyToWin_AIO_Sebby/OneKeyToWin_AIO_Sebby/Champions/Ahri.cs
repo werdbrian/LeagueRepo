@@ -56,7 +56,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
-
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
 
@@ -194,7 +194,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             else if (Program.LaneClear && !Q.IsReady() && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + WMANA))
             {
                 var allMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
-                if (allMinions != null && allMinions.Count > 1)
+                if (allMinions != null && allMinions.Count > Config.Item("LCminions").GetValue<Slider>().Value)
                     W.Cast();
             }
         }
@@ -219,12 +219,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Q.Cast(enemy, true);
                 }
             }
-            else if ( Program.LaneClear && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA))
+            else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA)
             {
-                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
-                var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
-                if (Qfarm.MinionsHit > 2)
-                    Q.Cast(Qfarm.Position);
+                var minionList = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
+                var farmPosition = Q.GetLineFarmLocation(minionList, Q.Width);
+                if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
+                    Q.Cast(farmPosition.Position);
             }
         }
 
