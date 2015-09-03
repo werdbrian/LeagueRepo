@@ -60,17 +60,14 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("bushW", "Auto W bush").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasEQ", "Harras E + Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("useE", "Dash E HotKeySmartcast").SetValue(new KeyBind('t', KeyBindType.Press)));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Reduce Q use").SetValue(true));
-            
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R KS").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press)));
-
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AGC", "Anti Gapcloser E,W").SetValue(true));
         }
@@ -89,7 +86,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var Target = (Obj_AI_Hero)gapcloser.Sender;
                 if (E.IsReady() && Target.IsValidTarget(E.Range) && Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(800) < 3)
-                    E.Cast(Target);
+                    E.Cast(Target, true);
                 else if (W.IsReady() && Target.IsValidTarget(W.Range))
                     W.Cast(gapcloser.End);
                 return;
@@ -195,10 +192,10 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
                         Q.Cast(enemy, true);
-
+                    
                     if (t.HasBuffOfType(BuffType.Slow))
-                        Q.Cast(t);
-                    else if (Player.Mana > Player.MaxMana * 0.8)
+                        Program.CastSpell(Q, t);
+                    else if (Player.Mana >Player.MaxMana * 0.8 )
                         Program.CastSpell(Q, t);
                 }
 
@@ -207,62 +204,60 @@ namespace OneKeyToWin_AIO_Sebby
                     Q.CastIfWillHit(t, 2, true);
                 }
             }
-            else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA)
+            else if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + EMANA + WMANA)
             {
-                var minionList = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
-                var farmPosition = Q.GetLineFarmLocation(minionList, Q.Width);
-                if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
-                    Q.Cast(farmPosition.Position);
+                var allMinionsQ = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
+                var Qfarm = Q.GetLineFarmLocation(allMinionsQ, 100);
+                if (Qfarm.MinionsHit > 5 )
+                    Q.Cast(Qfarm.Position);
             }
         }
 
         private void LogicE()
         {
-            if (Config.Item("autoE").GetValue<bool>() )
+            var t = TargetSelector.GetTarget(E.Range - 100, TargetSelector.DamageType.Physical);
+
+            var t2 = TargetSelector.GetTarget(1100, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget() && Config.Item("autoE").GetValue<bool>() &&  Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(800) < 3)
             {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() )
+                var eDmg = E.GetDamage(t);
+                float predictedHealth = HealthPrediction.GetHealthPrediction(t, (int)(R.Delay + (Player.Distance(t.ServerPosition) / Q.Speed) * 1000));
+                double Qdmg = Q.GetDamage(t);
+
+                if (Qdmg + eDmg > t.Health
+                    && Qdmg < t.Health && ObjectManager.Player.Mana > EMANA + QMANA && Q.IsReady()
+                    && t.Position.Distance(ObjectManager.Player.ServerPosition) > t.Position.Distance(ObjectManager.Player.Position)
+                    && ObjectManager.Player.Position.Distance(t.ServerPosition) < ObjectManager.Player.Position.Distance(t.Position))
                 {
-                    var positionT = Player.ServerPosition - (t.Position - Player.ServerPosition);
-
-                    if (Q.IsReady() && OktwCommon.IsFaced(t) && Player.Distance(t.Position) < 700 && Player.Position.Extend(positionT, 400).CountEnemiesInRange(700) < 3)
-                    {
-                        var eDmg = E.GetDamage(t);
-                        var qDmg = Q.GetDamage(t);
-                        if (qDmg + eDmg > t.Health && Player.Mana > EMANA + QMANA )
-                        {
-                            Program.CastSpell(E, t);
-                            Program.debug("E + Q FINISH");
-                        }
-                        else if (Program.Farm && Config.Item("harrasEQ").GetValue<bool>() && Player.Mana > EMANA + QMANA + RMANA && Player.Distance(t.Position) > 500)
-                        {
-                            Program.CastSpell(E, t);
-                            Program.debug("E + Q Harras");
-                        }
-                    }
-
-                    if (Player.Mana > RMANA + EMANA )
-                    {
-                        if (GetRealDistance(t) < 500 && Player.Health < Player.MaxHealth * 0.3)
-                            E.Cast(t, true);
-                        if (Player.CountEnemiesInRange(250) > 0)
-                            E.Cast(t, true);
-                    }
-                        
+                    E.Cast(t, true);
+                    Program.debug("E + Q combo");
                 }
+                else if (
+                     ObjectManager.Player.Mana > RMANA + EMANA
+                    && ObjectManager.Player.CountEnemiesInRange(200) > 0
+                    && ObjectManager.Player.Position.Extend(Game.CursorPos, 400).CountEnemiesInRange(500) < 3
+                    && t2.Position.Distance(Game.CursorPos) > t2.Position.Distance(ObjectManager.Player.Position))
+                {
+
+                    var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
+                    E.Cast(position, true);
+                    Program.debug("E mele escape");
+                }
+
+                else if (ObjectManager.Player.Mana > RMANA + EMANA && GetRealDistance(t) < 500 && ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.3)
+                    E.Cast(t, true);
             }
+
             if (Config.Item("useE").GetValue<KeyBind>().Active)
             {
-                var position = Player.ServerPosition - (Game.CursorPos - Player.ServerPosition);
+                var position = ObjectManager.Player.ServerPosition - (Game.CursorPos - ObjectManager.Player.ServerPosition);
                 E.Cast(position, true);
             }
         }
-
         private float GetRealRange(GameObject target)
         {
             return 680f + Player.BoundingRadius + target.BoundingRadius;
         }
-
         private float GetRealDistance(GameObject target)
         {
             return Player.ServerPosition.Distance(target.Position) + ObjectManager.Player.BoundingRadius + target.BoundingRadius;
