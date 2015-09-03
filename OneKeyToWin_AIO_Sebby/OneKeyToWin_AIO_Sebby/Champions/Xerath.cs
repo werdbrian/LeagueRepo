@@ -64,10 +64,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E").SetValue(true));
-
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
+            
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion").SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("autoBuy", "Auto Buy ScryingOrbTrinket after lvl 6").SetValue(true));
 
@@ -223,6 +224,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var qDmg = Q.GetDamage(t);
                 var wDmg = W.GetDamage(t);
+                
                 if (wDmg > t.Health)
                 {
                     Program.CastSpell(W, t);
@@ -239,12 +241,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         W.Cast(enemy, true);
                 }
             }
-            else if (Program.LaneClear && Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)
+            else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + WMANA)
             {
-                var allMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
-                var farmPos = W.GetCircularFarmLocation(allMinions, W.Width);
-                if (farmPos.MinionsHit > 1)
-                    W.Cast(farmPos.Position);
+                var minionList = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
+                var farmPosition = W.GetLineFarmLocation(minionList, W.Width);
+                
+                if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
+                    W.Cast(farmPosition.Position);
             }
         }
 
@@ -259,7 +262,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     if (OktwCommon.GetPassiveTime(Player, "XerathArcanopulseChargeUp") < 2 || t.IsValidTarget(W.Range))
                         Q.Cast(Q.GetPrediction(t).CastPosition);
-
                     else
                     {
                         Program.CastSpell(Q, t);
@@ -283,11 +285,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     }
                 }
             }
-            else if (Q.Range > 1000 && Player.CountEnemiesInRange(1450) == 0 && Program.LaneClear && (Q.IsCharging || (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)))
+            else if (Program.LaneClear && Q.Range > 1000 && Player.CountEnemiesInRange(1450) == 0 && (Q.IsCharging || (Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmQ").GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA)))
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
                 var Qfarm = Q.GetLineFarmLocation(allMinionsQ, Q.Width);
-                if (Qfarm.MinionsHit > 3 || (Q.IsCharging && Qfarm.MinionsHit > 0))
+                if (Qfarm.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value || (Q.IsCharging && Qfarm.MinionsHit > 0))
                     Q.Cast(Qfarm.Position);
             }
         }
