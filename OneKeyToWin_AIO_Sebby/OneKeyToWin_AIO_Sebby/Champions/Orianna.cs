@@ -183,10 +183,13 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicQ();
                 LogicFarm();
             }
+
             if (Program.LagFree(2) && R.IsReady())
                 LogicR();
+
             if (Program.LagFree(3) && W.IsReady() )
                 LogicW();
+
             if (Program.LagFree(4) && E.IsReady())
                 LogicE(best); 
         }
@@ -206,11 +209,13 @@ namespace OneKeyToWin_AIO_Sebby
             var Rturrent = Config.Item("Rturrent").GetValue<bool>();
             var Rks = Config.Item("Rks").GetValue<bool>();
             var Rlifesaver = Config.Item("Rlifesaver").GetValue<bool>();
+            
             foreach (var t in Program.Enemies.Where(t => t.IsValidTarget() && BallPos.Distance(Prediction.GetPrediction(t, R.Delay).CastPosition) < R.Width && BallPos.Distance(t.ServerPosition) < R.Width))
             {
                 if (Rks)
                 {
                     var comboDmg = R.GetDamage(t);
+
                     if (t.IsValidTarget(Q.Range))
                         comboDmg += Q.GetDamage(t);
                     if (W.IsReady())
@@ -229,12 +234,12 @@ namespace OneKeyToWin_AIO_Sebby
                     R.Cast();
                     Program.debug("ls");
                 }
-
             }
+
             int countEnemies=CountEnemiesInRangeDeley(BallPos, R.Width, R.Delay);
+
             if (countEnemies >= Config.Item("rCount").GetValue<Slider>().Value && BallPos.CountEnemiesInRange(R.Width) == countEnemies)
                 R.Cast();
-            
         }
 
         private void LogicW()
@@ -277,6 +282,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
+
         private void LogicFarm()
         {
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
@@ -303,13 +309,13 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
             }
+
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
-                && (Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value || (Player.UnderTurret(false) && !Player.UnderTurret(true) && Player.ManaPercent > 20)))
+                && (Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value || (Player.UnderTurret(false) && !Player.UnderTurret(true) && Player.ManaPercent > 20)))
             {
-
                 var Qfarm = Q.GetCircularFarmLocation(allMinions, 100);
-
                 var QWfarm = Q.GetCircularFarmLocation(allMinions, W.Width);
+
                 if (Qfarm.MinionsHit + QWfarm.MinionsHit == 0)
                     return;
                 if (Config.Item("clearQ").GetValue<bool>())
@@ -329,15 +335,12 @@ namespace OneKeyToWin_AIO_Sebby
                     if (!W.IsReady() && E.IsReady() && minion.Distance(BallPos) < E.Width && Config.Item("clearE").GetValue<bool>())
                         E.CastOnUnit(Player);
                 }
-                
             }
         }
 
         private void CastQ(Obj_AI_Hero target)
         {
-
             float distance = Vector3.Distance(BallPos, target.ServerPosition);
-
             float delay = (distance / Q.Speed + Q.Delay);
 
             if (E.IsReady() && Player.Mana > RMANA + QMANA + WMANA + EMANA && distance > Player.Distance(target.ServerPosition) + 300)
@@ -354,23 +357,20 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (prepos5.CastPosition.Distance(prepos5.CastPosition) < Q.Range)
                     {
-
                         Q.Cast(prepos5.CastPosition);
-
                     }
                 }
-
             }
-
-            var prepos = Prediction.GetPrediction(target, delay);
-            
-            if ((int)prepos.Hitchance > 4)
+            else
             {
-                if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
+                var prepos = Prediction.GetPrediction(target, delay);
+
+                if ((int)prepos.Hitchance > 4)
                 {
-                    
-                    Q.Cast(prepos.CastPosition);
-                    
+                    if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
+                    {
+                        Q.Cast(prepos.CastPosition);
+                    }
                 }
             }
         }
@@ -381,7 +381,6 @@ namespace OneKeyToWin_AIO_Sebby
             if (sender.IsMe && args.SData.Name == "OrianaIzunaCommand")
                 BallPos = args.End;
 
-            
              if (args.Target == null 
                 || !args.Target.IsValid 
                 || !sender.IsEnemy 
@@ -397,8 +396,6 @@ namespace OneKeyToWin_AIO_Sebby
                 double HpLeft = ally.Health - dmg;
                 if (E.IsReady())
                 {
-                    
-                    
                     double HpPercentage = (dmg * 100) / ally.Health;
                     double shieldValue = 60 + E.Level * 40 + 0.4 * Player.FlatMagicDamageMod;
                     if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
@@ -421,6 +418,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             return count;
         }
+
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
         {
             if (obj.IsValid && obj.IsAlly && obj.Name == "TheDoomBall")
