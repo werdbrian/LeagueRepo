@@ -13,13 +13,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
         private Spell E, Q, R2, R1, W;
-
         private float QMANA, WMANA, EMANA, RMANA;
-
-        private bool passRdy = false;
-
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
@@ -91,11 +86,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 SetMana();
                 farm();
             }
-            if (Program.LagFree(1) && Q.IsReady() && Sheen() && !Player.IsWindingUp)
+            if (Program.LagFree(1) && Q.IsReady() && !Player.IsWindingUp && Sheen())
                 LogicQ();
-            if (Program.LagFree(2) && W.IsReady() && Program.Combo)
+            if (Program.LagFree(2) && Program.Combo && W.IsReady())
                 LogicW();
-            if (Program.LagFree(4) && R1.IsReady() && Sheen() && !Player.IsWindingUp)
+            if (Program.LagFree(4) && R1.IsReady() && !Player.IsWindingUp && Sheen() && !Player.IsWindingUp)
                 LogicR();
         }
 

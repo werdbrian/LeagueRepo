@@ -80,7 +80,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                 if (t.CountEnemiesInRange(450) >= Config.Item("countR").GetValue<Slider>().Value && 0 != Config.Item("countR").GetValue<Slider>().Value)
                     R.Cast();
-
             }
         }
 
