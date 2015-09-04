@@ -513,12 +513,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (totalDelay > 1 && input.Unit.IsWindingUp)
+            if (totalDelay > 0.9 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
 
-            if (totalDelay < 1 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 0.9 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
