@@ -60,7 +60,13 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack += BeforeAttack;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
-            Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
+            Interrupter2.OnInterruptableTarget +=Interrupter2_OnInterruptableTarget;
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (Config.Item("autoRinter").GetValue<bool>() && R.IsReady() && sender.IsValidTarget(R.Range))
+                R.Cast(sender);
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -79,12 +85,6 @@ namespace OneKeyToWin_AIO_Sebby
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
             LogicQ();
-        }
-
-        private void Interrupter_OnPossibleToInterrupt(Obj_AI_Hero unit, InterruptableSpell spell)
-        {
-            if (Config.Item("autoRinter").GetValue<bool>() && R.IsReady() && unit.IsValidTarget(R.Range))
-                R.Cast(unit);
         }
 
         private void Game_OnUpdate(EventArgs args)
