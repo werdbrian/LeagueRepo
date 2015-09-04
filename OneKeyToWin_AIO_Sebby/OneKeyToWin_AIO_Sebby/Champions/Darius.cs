@@ -31,6 +31,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Orbwalking.BeforeAttack += BeforeAttack;
+            Orbwalking.AfterAttack += afterAttack;
             Interrupter.OnPossibleToInterrupt += OnInterruptableSpell;
         }
 
@@ -41,11 +42,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("haras", "Harras Q").SetValue(true));
+            
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("haras", "Harras Q").SetValue(true));
+            
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("autoR", "Auto R").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
-
+            
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Farm W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q").SetValue(true));
         }
 
         private void OnInterruptableSpell(Obj_AI_Hero unit, InterruptableSpell spell)
@@ -54,10 +58,39 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 E.Cast(unit);
         }
 
+
+        private void afterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (Player.Mana < RMANA + WMANA || !W.IsReady() || !unit.IsMe)
+                return;
+
+            var t = target as Obj_AI_Hero;
+
+            if (t.IsValidTarget())
+                W.Cast();
+            else if (Config.Item("farmW").GetValue<bool>())
+            {
+                var minions = MinionManager.GetMinions(Player.Position, Player.AttackRange, MinionTypes.All);
+
+                if (minions == null || minions.Count == 0)
+                    return;
+
+                int countMinions = 0;
+
+                foreach (var minion in minions.Where(minion => minion.Health < W.GetDamage(minion)))
+                {
+                    countMinions++;
+                }
+
+                if (countMinions > 0)
+                    W.Cast();
+            }
+        }
+
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (W.IsReady() && args.Target.IsValid<Obj_AI_Hero>() && Player.Mana > RMANA + WMANA)
-                W.Cast();
+           
+            
         }
 
         private void Game_OnGameUpdate(EventArgs args)
@@ -123,22 +156,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             foreach (var target in Program.Enemies.Where(target => Program.ValidUlt(target) && target.IsValidTarget(R.Range) ))
             {
-                if (R.GetDamage(target) - target.Level > target.Health)
+                var dmgR = R.GetDamage(target);
+                if (target.HasBuff("dariushemo"))
+                    dmgR += R.GetDamage(target) * target.GetBuff("dariushemo").Count * 0.2f;
+
+                if (dmgR > target.Health + target.HPRegenRate)
                 {
-                    R.Cast(target, true);
-                }
-                else
-                {
-                    foreach (var buff in target.Buffs)
-                    {
-                        if (buff.Name == "dariushemo")
-                        {
-                            if (R.GetDamage(target) * (1 + (float)buff.Count / 5) - 1 > target.Health)
-                                R.CastOnUnit(target, true);
-                            else if (Player.Health < Player.MaxHealth * 0.4 && Player.GetSpellDamage(target, SpellSlot.R, 1) * 1.2 * ((1 + buff.Count / 5) - 1) > target.Health)
-                                R.CastOnUnit(target, true);
-                        }
-                    }
+                    R.Cast(target);
                 }
             }
         }
