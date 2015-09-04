@@ -127,6 +127,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     R.Cast(target, true);
                 }
+                else
+                {
+                    foreach (var buff in target.Buffs)
+                    {
+                        if (buff.Name == "dariushemo")
+                        {
+                            if (R.GetDamage(target) * (1 + (float)buff.Count / 5) - 1 > target.Health)
+                                R.CastOnUnit(target, true);
+                            else if (Player.Health < Player.MaxHealth * 0.4 && Player.GetSpellDamage(target, SpellSlot.R, 1) * 1.2 * ((1 + buff.Count / 5) - 1) > target.Health)
+                                R.CastOnUnit(target, true);
+                        }
+                    }
+                }
             }
         }
 
