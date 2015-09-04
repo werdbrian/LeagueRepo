@@ -443,14 +443,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
-                pathMinLen = 500;
-                angleMove += 5;
+                pathMinLen = 0;
+                angleMove += 30;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) / 3;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
             {
                 fixRange -= input.Radius / 2;
+            }
+
+            if (input.Unit.HasBuffOfType(BuffType.Slow))
+            {
+                result.Hitchance = HitChance.VeryHigh;
             }
 
             if (input.Type == SkillshotType.SkillshotLine)
@@ -478,11 +483,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
             
 
-            if (input.Unit.HasBuffOfType(BuffType.Slow) || input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 250)
-            {
-                result.Hitchance = HitChance.VeryHigh;
-            }
-
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > pathMinLen)
             {
                     result.Hitchance = HitChance.VeryHigh;
@@ -509,21 +509,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.Unit.Distance(LastWaypiont) < BackToFront && PathTracker.GetCurrentPath(input.Unit).Time > 0.1d)
                 {
-                    result.Hitchance = HitChance.Medium;
+                    //result.Hitchance = HitChance.Medium;
                 }
             }
 
-            if (totalDelay > 0.7 && input.Unit.IsWindingUp)
+            if (totalDelay > 1 && input.Unit.IsWindingUp)
             {
                 result.Hitchance = HitChance.Medium;
             }
 
-            if (totalDelay > 1 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
-                result.Hitchance = HitChance.Medium;
+                result.Hitchance = HitChance.VeryHigh;
             }
-
-            
 
             if (input.Unit.Path.Count() > 1 && input.Type == SkillshotType.SkillshotLine)
             {
