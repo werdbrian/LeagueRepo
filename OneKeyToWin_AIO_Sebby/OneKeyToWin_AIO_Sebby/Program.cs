@@ -806,9 +806,10 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-            return;
+            
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
+            
             var debugPred = Config.Item("debugPred").GetValue<bool>();
             if (debugPred && HitChanceNum == 5 && Game.Time - DrawSpellTime < 0.5)
             {
@@ -819,7 +820,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 drawText("Aiming " + DrawSpellPos.Hitchance, Player.Position.Extend(DrawSpellPos.CastPosition, 400), System.Drawing.Color.Gray);
             }
-
+            
             if (Config.Item("timer").GetValue<bool>() && jungler != null)
             {
                 if (jungler == Player)
@@ -862,6 +863,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var enemy in Enemies)
             {
+                
                 if (enemy.IsValidTarget())
                 {
                     if (ShowClicks)
@@ -876,7 +878,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                     }
                 }
-
+                
                 if (HpBar && enemy.IsHPBarRendered && Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
                 {
 
@@ -919,6 +921,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                     for (int i = 0; i < differenceInHP; i++)
                     {
+                        
                         if (Q.IsReady() && i < QdmgDraw * differenceInHP)
                             Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Cyan);
                         else if (W.IsReady() && i < (QdmgDraw + WdmgDraw) * differenceInHP)
@@ -929,7 +932,7 @@ namespace OneKeyToWin_AIO_Sebby
                             Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.YellowGreen);
                     }
                 }
-
+                
                 var kolor = System.Drawing.Color.GreenYellow;
 
                 if (enemy.IsDead)
@@ -945,9 +948,10 @@ namespace OneKeyToWin_AIO_Sebby
                     kolorHP = System.Drawing.Color.Red;
                 else if ((int)enemy.HealthPercent < 60)
                     kolorHP = System.Drawing.Color.Orange;
-
+                
                 if (championInfo)
                 {
+                    /*
                     positionDraw += 15;
                     foreach (RecallInfo rerecall in RecallInfos)
                     {
@@ -971,56 +975,59 @@ namespace OneKeyToWin_AIO_Sebby
                     Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName);
 
                     Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
-
+                     * */
                 }
+                
                 var Distance = Player.Distance(enemy.Position);
-                if (GankAlert && !enemy.IsDead && Distance > 1200)
-                {
+               if (GankAlert && !enemy.IsDead && Distance > 1200)
+               {
 
-                    var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
+                   var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
 
-                    wts[0] = wts[0] - (enemy.ChampionName.Count<char>()) * 5;
-                    wts[1] = wts[1] + 15;
-                    if ((int)enemy.HealthPercent > 0)
-                        Drawing.DrawLine(wts[0], wts[1], (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
+                   wts[0] = wts[0] - (enemy.ChampionName.Count<char>()) * 5;
+                   wts[1] = wts[1] + 15;
+                   if ((int)enemy.HealthPercent > 0)
+                       Drawing.DrawLine(wts[0], wts[1], (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
 
-                    if ((int)enemy.HealthPercent < 100)
-                        Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 12, System.Drawing.Color.White);
+                   if ((int)enemy.HealthPercent < 100)
+                       Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 12, System.Drawing.Color.White);
 
-                    if (Distance > 3500 && enemy.IsVisible)
-                        drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
-                    else if (!enemy.IsVisible)
-                    {
-                        if ((int)(Game.Time * 10) % 2 == 0)
-                        {
-                            drawText("SS " + enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Yellow);
-                        }
-                    }
-                    else
-                    {
-                        if ((int)(Game.Time * 10) % 2 == 0)
-                        {
-                            drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
-                        }
-                    }
+                   if (Distance > 3500 && enemy.IsVisible)
+                       drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
+                   else if (!enemy.IsVisible)
+                   {
+                       if ((int)(Game.Time * 10) % 2 == 0)
+                       {
+                           drawText("SS " + enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Yellow);
+                       }
+                   }
+                   else
+                   {
+                       if ((int)(Game.Time * 10) % 2 == 0)
+                       {
+                           drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
+                       }
+                   }
 
-                    if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
-                    {
-                        drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
+                   if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
+                   {
+                       drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
 
-                    }
-                    else if (Distance < 3500 && !enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
-                    {
-                        var need=VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
-                        if (need != null && Game.Time - need.time < 5)
-                        {
-                            drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.Gray);
-                        }
-                    }
-                }
-                positionGang = positionGang + 100;
+                   }
+                   else if (Distance < 3500 && !enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
+                   {
+                       var need=VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
+                       if (need != null && Game.Time - need.time < 5)
+                       {
+                           drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.Gray);
+                       }
+                   }
+               }
+               positionGang = positionGang + 100;
+               
+
             }
-
+                
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
                 if (Player.HealthPercentage() > 60)
