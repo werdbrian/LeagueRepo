@@ -507,7 +507,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             float BackToFront = ((input.Unit.MoveSpeed * totalDelay));
             if (input.Unit.Path.Count() > 0)
             {
-                if (input.Unit.Distance(LastWaypiont) < BackToFront)
+                if (input.Unit.Distance(LastWaypiont) < BackToFront && PathTracker.GetCurrentPath(input.Unit).Time > 0.1d)
                 {
                     result.Hitchance = HitChance.Medium;
                 }
