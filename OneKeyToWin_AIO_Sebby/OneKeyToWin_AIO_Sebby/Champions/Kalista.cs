@@ -177,9 +177,9 @@ namespace OneKeyToWin_AIO_Sebby
                 if (wCount == 0)
                 {
                     Vector3 dragonPos;
-                    dragonPos.X = 9774;
-                    dragonPos.Y = 4432;
-                    dragonPos.Z = 0;
+                    dragonPos.X = 9919f;
+                    dragonPos.Y = 4475f;
+                    dragonPos.Z = 0f;
                     if (Player.Distance(dragonPos) < 5000)
                         W.Cast(dragonPos);
                     else
