@@ -951,7 +951,6 @@ namespace OneKeyToWin_AIO_Sebby
                 
                 if (championInfo)
                 {
-                    
                     positionDraw += 15;
                     foreach (RecallInfo rerecall in RecallInfos)
                     {
@@ -976,10 +975,7 @@ namespace OneKeyToWin_AIO_Sebby
                     */
 
                     Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName);
-                    
                     Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
-                     
-
                 }
                 
                 var Distance = Player.Distance(enemy.Position);
