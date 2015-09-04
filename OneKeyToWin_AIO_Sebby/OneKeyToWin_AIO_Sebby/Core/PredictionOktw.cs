@@ -518,7 +518,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.Medium;
             }
 
-            if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 1 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
