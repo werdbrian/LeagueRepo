@@ -509,7 +509,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.Unit.Distance(LastWaypiont) < BackToFront && PathTracker.GetCurrentPath(input.Unit).Time > 0.1d)
                 {
-                    //result.Hitchance = HitChance.Medium;
+                    result.Hitchance = HitChance.Medium;
                 }
             }
 
