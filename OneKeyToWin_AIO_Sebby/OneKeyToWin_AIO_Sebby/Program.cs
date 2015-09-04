@@ -806,6 +806,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
+            return;
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
             var debugPred = Config.Item("debugPred").GetValue<bool>();
