@@ -332,7 +332,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-            if (result.Hitchance > HitChance.Medium)
+            if (result.Hitchance > HitChance.Medium && result.Hitchance < HitChance.Dashing)
                 WayPointAnalysis(result, input);
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
