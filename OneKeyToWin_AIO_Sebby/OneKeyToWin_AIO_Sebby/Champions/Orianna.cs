@@ -349,7 +349,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             }
 
-            if (Config.Item("Hit", true).GetValue<Slider>().Value == 5)
+            if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1)
             {
                 var prepos5 = Core.Prediction.GetPrediction(target, delay);
 
@@ -365,7 +365,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var prepos = Prediction.GetPrediction(target, delay);
 
-                if ((int)prepos.Hitchance > 4)
+                if ((int)prepos.Hitchance > 5)
                 {
                     if (prepos.CastPosition.Distance(prepos.CastPosition) < Q.Range)
                     {

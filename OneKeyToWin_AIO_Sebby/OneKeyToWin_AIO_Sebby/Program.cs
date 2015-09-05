@@ -135,20 +135,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("HpBar", "Dmg indicators BAR OKTW© style").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
 
-            Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("RangeFix", "1 MaxRange Fix", true).SetValue(true));
-            Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("FastMode", "2 Fast Cast Mode", true).SetValue(true));
-            Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("ColFix", "3 Custome Collision(can drop fps)", true).SetValue(false));
-            Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("NewWay", "4 Cast only on new pathway", true).SetValue(false));
-            Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("tryAA", "5 Cast if target autoattacking", true).SetValue(true));
-            Config.SubMenu("Prediction OKTW©").SubMenu("Custome Prediction 4").AddItem(new MenuItem("IgnoreNoMove", "6 Ignore Not-Moving targets", true).SetValue(false));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("0", "0 - common normal"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("1", "1 - common high"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("2", "2 - common high + max range fix"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("3", "3 - OKTW + max range fix + waypionts analyzer "));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("4", "4 - OKTW Custome Prediction 4"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("5", "5 - OKTW NewCommon Prediction concept BETA"));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming 5 BETA").SetValue(false));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("Hit", "Prediction mode", true).SetValue(new Slider(5, 5, 0)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("PredictionMODE", "Prediction MODE", true).SetValue(new StringList(new[] { "Common prediction", "OKTW© PREDICTION" }, 1)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
 
             new Summoners().LoadOKTW();
             new Activator().LoadOKTW();
@@ -295,18 +284,10 @@ namespace OneKeyToWin_AIO_Sebby
             if (tickIndex > 4)
                 tickIndex = 0;
 
-            if (LagFree(0))
-            {
-                //tickSkip = Config.Item("pre").GetValue<bool>();
-                HitChanceNum = Config.Item("Hit", true).GetValue<Slider>().Value;
-                IgnoreNoMove = Config.Item("IgnoreNoMove", true).GetValue<bool>();
-                RangeFix = Config.Item("RangeFix", true).GetValue<bool>();
-                FastMode = Config.Item("FastMode", true).GetValue<bool>();
-                ColFix = Config.Item("ColFix", true).GetValue<bool>();
-                NewWay = Config.Item("NewWay", true).GetValue<bool>();
-                tryAA = Config.Item("tryAA", true).GetValue<bool>();
-                JunglerTimer();
-            }
+            if (!LagFree(0))
+                return;
+
+            JunglerTimer();
         }
 
         public static void JunglerTimer()
@@ -383,7 +364,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static void CastSpell(Spell QWER, Obj_AI_Base target)
         {
-            if (HitChanceNum == 5)
+            if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1)
             {
                 Core.SkillshotType CoreType2 = Core.SkillshotType.SkillshotLine;
                 bool aoe2 = false;
@@ -417,216 +398,42 @@ namespace OneKeyToWin_AIO_Sebby
                 }
 
                 DrawSpellPos = poutput2;
-                if(poutput2.Hitchance == Core.HitChance.VeryHigh)
-                    QWER.Cast(poutput2.CastPosition);
-                return;
-            }
 
-            if (target.Path.Count() > 1)
-                return;
-            
-            var poutput = QWER.GetPrediction(target);
-            
-            //var poutput2 = QWER.GetPrediction(target);
-            if (Game.Time - DrawSpellTime > 0.5)
-            {
-                DrawSpell = QWER;
-                DrawSpellTime = Game.Time;
-                
-            }
-            
-            //DrawSpellPos = poutput;
-            if (ColFix  && HitChanceNum == 4)
-            {
-                if (QWER.Collision && OktwCommon.GetCollision(target, QWER, false, true))
-                    return;
-            }
-            else
-            {
-                var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
-                if (col > 0)
+                if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0 )
                 {
+                    if (poutput2.Hitchance >= Core.HitChance.VeryHigh)
+                        QWER.Cast(poutput2.CastPosition);
+                    return;
+                }
+                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1)
+                {
+                    if (poutput2.Hitchance >= Core.HitChance.High)
+                        QWER.Cast(poutput2.CastPosition);
+                    return;
+                }
+                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 2)
+                {
+                    if (poutput2.Hitchance >= Core.HitChance.Medium)
+                        QWER.Cast(poutput2.CastPosition);
                     return;
                 }
             }
-
-            if ((int)poutput.Hitchance > 4 && target.HasBuffOfType(BuffType.Slow))
+            else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0)
             {
-                QWER.Cast(poutput.CastPosition);
-                return;
-            }
-
-            if (target.HasBuff("Recall") || poutput.Hitchance == HitChance.Immobile )
-            {
-                QWER.Cast(poutput.CastPosition);
-                return;
-            }
-
-            if (poutput.Hitchance == HitChance.Dashing && QWER.Delay < 0.30f)
-            {
-                QWER.Cast(poutput.CastPosition);
-                return;
-            }
-            
-            if (HitChanceNum == 4)
-            {
-                if ((int)poutput.Hitchance < 5)
-                    return;
-
-                if (NewWay && (int)poutput.Hitchance < 6)
-                    return;             
-
-                float fixRange;
-                
-                if (RangeFix)
-                    fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 2;
-                else
-                    fixRange = 0;
-
-                if (target.IsWindingUp)
+                if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0)
                 {
-                    
-                    if (!tryAA)
-                        return;
-                    debug("IsWinding: ");
-                    if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                    {
-                        if (FastMode)
-                            QWER.Cast(poutput.CastPosition);
-                        else
-                            QWER.Cast(target);                        
-                    }
-                    
+                    QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh);
                     return;
                 }
-                else if (target.Path.Count() == 0 && target.Position == target.ServerPosition )
+                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1)
                 {
-                    
-                    if (IgnoreNoMove)
-                        return;
-                    debug("NotMove");
-                    if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                    {
-                        if (FastMode)
-                            QWER.Cast(poutput.CastPosition);
-                        else
-                            QWER.Cast(target);
-                    }
-
+                    QWER.CastIfHitchanceEquals(target, HitChance.High);
                     return;
                 }
-
-                var LastWaypiont = target.GetWaypoints().Last().To3D();
-
-                if (target.ServerPosition.Distance(Player.ServerPosition) < LastWaypiont.Distance(Player.ServerPosition) - fixRange)
+                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 2)
                 {
-                    if (FastMode)
-                        QWER.Cast(poutput.CastPosition);
-                    else
-                        QWER.Cast(target);
-
-                    debug("Run" );
-                }
-                else if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                {
-                    float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                    float SiteToSite = (BackToFront * 2) - QWER.Width;
-
-                    if ((target.ServerPosition.Distance(LastWaypiont) > SiteToSite
-                        || Math.Abs(Player.Distance(LastWaypiont) - Player.Distance(target.ServerPosition)) > BackToFront)
-                        || Player.Distance(target.ServerPosition) < SiteToSite + target.BoundingRadius * 2
-                        || Player.Distance(LastWaypiont) < BackToFront)
-                    {
-                        if (FastMode)
-                            QWER.Cast(poutput.CastPosition);
-                        else
-                            QWER.Cast(target);
-
-                        debug("good 2");
-                    }
-                    else
-                        debug("ignore 2");
-                }
-                else
-                    debug("fixed " + fixRange);
-            }
-            else if (HitChanceNum == 3)
-            {
-                if ((int)poutput.Hitchance < 5)
+                    QWER.CastIfHitchanceEquals(target, HitChance.Medium);
                     return;
-                if ( QWER.Delay > 0.4)
-                {
-                    if ((int)poutput.Hitchance < 6 || target.IsWindingUp)
-                        return;
-                }
-                var fixRange = (target.MoveSpeed * (Player.ServerPosition.Distance(target.ServerPosition) / QWER.Speed + QWER.Delay)) / 2;
-                if (QWER.Delay < 0.3 && (QWER.Speed > 1500 || QWER.Type == SkillshotType.SkillshotCircle) && (target.IsWindingUp || (int)poutput.Hitchance == 6))
-                {
-                    if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                    {
-                        QWER.Cast(poutput.CastPosition);
-                    }
-                    return;
-                }
-
-                if (target.Path.Count() == 0 && target.Position == target.ServerPosition && !target.IsWindingUp)
-                {
-                    if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                    {
-
-                        QWER.Cast(poutput.CastPosition);
-                    }
-                    return;
-                }
-                var waypoints = target.GetWaypoints().Last<Vector2>().To3D();
-
-                float BackToFront = ((target.MoveSpeed * QWER.Delay) + (Player.Distance(target.ServerPosition) / QWER.Speed));
-                float SiteToSite = (BackToFront * 2) - QWER.Width;
-
-                if ((target.ServerPosition.Distance(waypoints) > SiteToSite
-                    || Math.Abs(Player.Distance(waypoints) - Player.Distance(target.Position)) > BackToFront)
-                    || Player.Distance(target.Position) < SiteToSite + target.BoundingRadius * 2
-                    || Player.Distance(waypoints) < BackToFront
-                    )
-                {
-                    
-                    if (waypoints.Distance(Player.Position) <= target.Distance(Player.Position))
-                    {
-                        if (Player.Distance(target.ServerPosition) < QWER.Range - fixRange)
-                        {
-                            QWER.Cast(poutput.CastPosition);
-                        }
-                    }
-                    else
-                    {
-                        QWER.Cast(poutput.CastPosition);
-                    }
-                }
-
-            }
-            else if (HitChanceNum == 0)
-                QWER.Cast(target, true);
-            else if (HitChanceNum == 1)
-            {
-                if ((int)poutput.Hitchance > 4)
-                    QWER.Cast(poutput.CastPosition);
-            }
-            else if (HitChanceNum == 2)
-            {
-                List<Vector2> waypoints = target.GetWaypoints();
-                if (waypoints.Last<Vector2>().To3D().Distance(poutput.CastPosition) > QWER.Width && (int)poutput.Hitchance > 4)
-                {
-                    if (waypoints.Last<Vector2>().To3D().Distance(Player.Position) <= target.Distance(Player.Position) || (target.Path.Count() == 0 && target.Position == target.ServerPosition))
-                    {
-                        if (Player.Distance(target.ServerPosition) < QWER.Range - (poutput.CastPosition.Distance(target.ServerPosition) + target.BoundingRadius))
-                        {
-                            QWER.Cast(poutput.CastPosition);
-                        }
-                    }
-                    else if ((int)poutput.Hitchance == 5)
-                    {
-                        QWER.Cast(poutput.CastPosition);
-                    }
                 }
             }
         }
@@ -694,8 +501,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
             
-            var debugPred = Config.Item("debugPred").GetValue<bool>();
-            if (debugPred && HitChanceNum == 5 && Game.Time - DrawSpellTime < 0.5)
+            if (Config.Item("debugPred").GetValue<bool>() && Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1 && Game.Time - DrawSpellTime < 0.5)
             {
                 if (DrawSpell.Type == SkillshotType.SkillshotLine)
                     OktwCommon.DrawLineRectangle(DrawSpellPos.CastPosition, Player.Position, (int)DrawSpell.Width, 1, System.Drawing.Color.DimGray);
