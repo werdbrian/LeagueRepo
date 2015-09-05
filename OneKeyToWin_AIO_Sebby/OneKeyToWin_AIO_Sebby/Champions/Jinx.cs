@@ -125,8 +125,6 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (unit.IsMe )
             {
-                if (args.SData.Name == "JinxQ")
-                    Orbwalking.ResetAutoAttackTimer();
                 if (args.SData.Name == "JinxWMissile")
                     WCastTime = Game.Time;
             }
