@@ -14,7 +14,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private Menu Config = Program.Config;
         private bool rengar = false;
-        Obj_AI_Hero Vayne=null;
+        Obj_AI_Hero Vayne = null;
         private static Spell Q, W, E, R;
 
         private Items.Item
@@ -28,14 +28,15 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         public void LoadOKTW()
         {
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWard", "Auto Ward").SetValue(true));
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("autoBuy", "Auto buy blue trinket after lvl 6").SetValue(true));
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardBlue", "Auto Blue Trinket").SetValue(true));
+            Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardCombo", "Only combo mode").SetValue(true));
             Config.SubMenu("AutoWard OKTW©").AddItem(new MenuItem("AutoWardPink", "Auto VisionWard, OracleLens").SetValue(true));
-            Game.OnUpdate += Game_OnUpdate;
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            GameObject.OnCreate +=GameObject_OnCreate;
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-                if ( hero.IsEnemy)
+                if (hero.IsEnemy)
                 {
                     if (hero.ChampionName == "Rengar")
                         rengar = true;
@@ -43,6 +44,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         Vayne = hero;
                 }
             }
+
+            Game.OnUpdate += Game_OnUpdate;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            GameObject.OnCreate +=GameObject_OnCreate; 
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -50,100 +55,106 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (!Program.LagFree(0) || Player.IsRecalling())
                 return;
 
+            if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
+                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+
             if(rengar && Player.HasBuff("rengarralertsound"))
                 CastVisionWards(Player.ServerPosition);
+            
             if (Vayne != null && Vayne.IsValidTarget(1000) && Vayne.HasBuff("vaynetumblefade"))
                 CastVisionWards(Vayne.ServerPosition);
 
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
+            AutoWardLogic();
+        }
+
+        private void AutoWardLogic()
+        {
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid && !enemy.IsVisible && !enemy.IsDead))
             {
-                if (!enemy.IsVisible && !enemy.IsDead)
+                var need = OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+
+                if (need == null || need.PredictedPos == null)
+                    return;
+
+                if (Player.ChampionName == "Quinn" && W.IsReady() && Game.Time - need.LastVisableTime > 0.5 && Game.Time - need.LastVisableTime < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
                 {
-                    var need = OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+                    W.Cast();
+                    return;
+                }
 
-                    if (need == null || need.PredictedPos == null)
+                if (Player.ChampionName == "Ashe" && E.IsReady() && Player.Spellbook.GetSpell(SpellSlot.E).Ammo > 1 && Player.CountEnemiesInRange(800) == 0 && Game.Time - need.LastVisableTime > 3 && Game.Time - need.LastVisableTime < 1 && Config.Item("autoE").GetValue<bool>())
+                {
+                    if (need.PredictedPos.Distance(Player.Position) < 3000)
+                    {
+                        E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
+                        return;
+                    }
+                }
+
+                if (Player.ChampionName == "MissFortune" && E.IsReady() && Game.Time - need.LastVisableTime > 0.5 && Game.Time - need.LastVisableTime < 2 && Program.Combo && Player.Mana > 200f)
+                {
+                    if (need.PredictedPos.Distance(Player.Position) < 800)
+                    {
+                        E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
+                        return;
+                    }
+                }
+
+                if (Player.ChampionName == "Kalista" && W.IsReady() && Game.Time - need.LastVisableTime > 3 && Game.Time - need.LastVisableTime < 4 && !Program.Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
+                {
+                    if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
+                    {
+                        W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
+                        return;
+                    }
+                }
+
+                if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.LastVisableTime < 2 && Player.Mana > 200f && !Player.IsWindingUp && Config.Item("bushW").GetValue<bool>())
+                {
+                    if (need.PredictedPos.Distance(Player.Position) < 800)
+                    {
+                        W.Cast(need.PredictedPos);
+                        return;
+                    }
+                }
+
+                if (Game.Time - need.LastVisableTime < 4)
+                {
+                    if (Config.Item("AutoWardCombo").GetValue<bool>() && !Program.Combo)
                         return;
 
-                    if (Player.ChampionName == "Quinn" && W.IsReady() && Game.Time - need.LastVisableTime > 0.5 && Game.Time - need.LastVisableTime < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
+                    if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
                     {
-                        W.Cast();
-                        return;
-                    }
-
-                    if (Player.ChampionName == "Ashe" && E.IsReady() && Player.Spellbook.GetSpell(SpellSlot.E).Ammo > 1 && Player.CountEnemiesInRange(800) == 0 && Game.Time - need.LastVisableTime > 3 && Game.Time - need.LastVisableTime < 1 && Config.Item("autoE").GetValue<bool>())
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) < 3000)
+                        if (need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
                         {
-                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
-                            return;
-                        }
-                    }
-
-                    if (Player.ChampionName == "MissFortune" && E.IsReady() && Game.Time - need.LastVisableTime > 0.5 && Game.Time - need.LastVisableTime < 2 && Program.Combo && Player.Mana > 200f)
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) < 800)
-                        {
-                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
-                            return;
-                        }
-                    }
-
-                    if (Player.ChampionName == "Kalista" && W.IsReady() && Game.Time - need.LastVisableTime > 3 && Game.Time - need.LastVisableTime < 4 && !Program.Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
-                        {
-                            W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
-                            return;
-                        }
-                    }
-
-                    if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.LastVisableTime < 2 && Player.Mana > 200f && !Player.IsWindingUp && Config.Item("bushW").GetValue<bool>())
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) < 800)
-                        {
-                            W.Cast(need.PredictedPos);
-                            return;
-                        }
-                    }
-
-                    if (Game.Time - need.LastVisableTime < 4)
-                    {
-                        if (Config.Item("AutoWardCombo").GetValue<bool>() && !Program.Combo)
-                            return;
-
-                        if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
-                        {
-                            if (need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
+                            if (TrinketN.IsReady())
                             {
-                                if (TrinketN.IsReady())
-                                {
-                                    TrinketN.Cast(need.PredictedPos);
-                                    need.LastVisableTime = Game.Time - 5;
-                                }
-                                else if (SightStone.IsReady())
-                                {
-                                    SightStone.Cast(need.PredictedPos);
-                                    need.LastVisableTime = Game.Time - 5;
-                                }
-                                else if (WardN.IsReady())
-                                {
-                                    WardN.Cast(need.PredictedPos);
-                                    need.LastVisableTime = Game.Time - 5;
-                                }
+                                TrinketN.Cast(need.PredictedPos);
+                                need.LastVisableTime = Game.Time - 5;
                             }
-
-                            if (need.PredictedPos.Distance(Player.Position) < 1400 && Config.Item("AutoWardBlue").GetValue<bool>())
+                            else if (SightStone.IsReady())
                             {
-                                if (FarsightOrb.IsReady())
-                                {
-                                    FarsightOrb.Cast(need.PredictedPos);
-                                    need.LastVisableTime = Game.Time - 5;
-                                }
-                                else if (ScryingOrb.IsReady())
-                                {
-                                    ScryingOrb.Cast(need.PredictedPos);
-                                    need.LastVisableTime = Game.Time - 5;
-                                }
+                                SightStone.Cast(need.PredictedPos);
+                                need.LastVisableTime = Game.Time - 5;
+                            }
+                            else if (WardN.IsReady())
+                            {
+                                WardN.Cast(need.PredictedPos);
+                                need.LastVisableTime = Game.Time - 5;
+                            }
+                        }
+
+                        if (need.PredictedPos.Distance(Player.Position) < 1400 && Config.Item("AutoWardBlue").GetValue<bool>())
+                        {
+                            if (FarsightOrb.IsReady())
+                            {
+                                FarsightOrb.Cast(need.PredictedPos);
+                                need.LastVisableTime = Game.Time - 5;
+                            }
+                            else if (ScryingOrb.IsReady())
+                            {
+                                ScryingOrb.Cast(need.PredictedPos);
+                                need.LastVisableTime = Game.Time - 5;
                             }
                         }
                     }
