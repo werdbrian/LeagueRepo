@@ -436,7 +436,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
                 totalDelay =  input.Delay;
 
-            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.7;
+            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
             float pathMinLen = 700f;
             double angleMove = 30 + (input.Radius / 10);
@@ -444,19 +444,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
-                pathMinLen = BackToFront * 2 ;
+                pathMinLen = BackToFront * 2;
                 angleMove += 15;
-                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.5;
+                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
             {
                 fixRange -= input.Radius / 2;
-            }
-
-            if (input.Unit.MoveSpeed < 290f)
-            {
-                result.Hitchance = HitChance.VeryHigh;
             }
 
             if (input.Type == SkillshotType.SkillshotLine)
@@ -481,7 +476,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
                 else if (totalDelay < 1.1 && PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
-            }   
+            }
+
+            if (input.Unit.MoveSpeed < 250f)
+            {
+                result.Hitchance = HitChance.VeryHigh;
+            }
 
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > pathMinLen)
             {
