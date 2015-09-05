@@ -206,6 +206,15 @@ namespace OneKeyToWin_AIO_Sebby
             return 0;
         }
 
+        public static int CountEnemyMinions(Obj_AI_Base target, float range)
+        {
+            var allMinions = MinionManager.GetMinions(target.Position, range, MinionTypes.All);
+            if (allMinions != null)
+                return allMinions.Count;
+            else
+                return 0;
+        }
+
 
         public static float GetPassiveTime(Obj_AI_Base target, String buffName)
         {

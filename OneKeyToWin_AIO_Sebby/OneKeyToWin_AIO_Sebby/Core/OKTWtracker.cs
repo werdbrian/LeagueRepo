@@ -18,11 +18,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public Vector3 PredictedPos { get; set; }
     }
 
-    class OneKeyToBrain
+    class OKTWtracker
     {
         private Menu Config = Program.Config;
-        public Font Text, TextBold;
-        public List<ChampionInfo> ChampionInfoList = new List<ChampionInfo>();
+        private Font Text, TextBold;
+        public static List<ChampionInfo> ChampionInfoList = new List<ChampionInfo>();
 
         public void LoadOKTW()
         {
@@ -58,15 +58,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!Program.LagFree(3))
                 return;
+
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
             {
                 var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
                 if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
                 {
-
                     var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
 
-                    
                     if (ChampionInfoOne == null)
                     {
                         ChampionInfoList.Add(new ChampionInfo() { NetworkId = enemy.NetworkId, LastVisablePos = enemy.Position, LastVisableTime = Game.Time, PredictedPos = prepos });
@@ -78,15 +77,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         ChampionInfoOne.LastVisableTime = Game.Time;
                         ChampionInfoOne.PredictedPos = prepos;
                     }
-                    
                 }
                 if (enemy.IsDead)
                 {
                     if (ChampionInfoOne != null)
                     {
-           
                         ChampionInfoOne.NetworkId = enemy.NetworkId;
-                        ChampionInfoOne.LastVisablePos = enemy.Position;
+                        ChampionInfoOne.LastVisablePos = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy).Position;
                         ChampionInfoOne.LastVisableTime = Game.Time;
                     }
                 }

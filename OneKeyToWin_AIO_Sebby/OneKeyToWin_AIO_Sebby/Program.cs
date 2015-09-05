@@ -50,8 +50,6 @@ namespace OneKeyToWin_AIO_Sebby
             IgnoreNoMove = true;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
-
-        public static List<VisableInfo> VisableInfo = new List<VisableInfo>();
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
         public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
@@ -160,7 +158,7 @@ namespace OneKeyToWin_AIO_Sebby
             new Core.OKTWward().LoadOKTW();
             new Core.AutoLvlUp().LoadOKTW();
             new OktwCommon().LoadOKTW();
-            new Core.OneKeyToBrain().LoadOKTW();
+            new Core.OKTWtracker().LoadOKTW();
 
             //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
@@ -310,118 +308,7 @@ namespace OneKeyToWin_AIO_Sebby
                 ColFix = Config.Item("ColFix", true).GetValue<bool>();
                 NewWay = Config.Item("NewWay", true).GetValue<bool>();
                 tryAA = Config.Item("tryAA", true).GetValue<bool>();
-
                 JunglerTimer();
-                if (!Player.IsRecalling())
-                    AutoWard();
-            }
-        }
-
-        public static void AutoWard()
-        {
-            if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
-                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
-
-            foreach (var enemy in Enemies.Where(enemy => enemy.IsValid))
-            {
-                if (enemy.IsVisible && !enemy.IsDead && enemy != null && enemy.IsValidTarget())
-                {
-                    if (Prediction.GetPrediction(enemy, 0.4f).CastPosition != null)
-                    {
-                        var prepos = Prediction.GetPrediction(enemy, 0.4f).CastPosition;
-                        VisableInfo.RemoveAll(x => x.VisableID == enemy.NetworkId);
-                        VisableInfo.Add(new VisableInfo() { VisableID = enemy.NetworkId, LastPosition = enemy.Position, time = Game.Time, PredictedPos = prepos });
-                    }
-                }
-                else if (enemy.IsDead)
-                {
-                    VisableInfo.RemoveAll(x => x.VisableID == enemy.NetworkId);
-                }
-                else if (!enemy.IsDead)
-                {
-                    var need = VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
-                    if (need == null || need.PredictedPos == null)
-                        return;
-
-                    if (Player.ChampionName == "Quinn" && W.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 4 && need.PredictedPos.Distance(Player.Position) < 1500 && Config.Item("autoW").GetValue<bool>())
-                    {
-                        W.Cast();
-                        return;
-                    }
-                    if (Player.ChampionName == "Ashe" && E.IsReady() && Player.Spellbook.GetSpell(SpellSlot.E).Ammo > 1 && Player.CountEnemiesInRange(800) == 0 && Game.Time - need.time > 3 && Game.Time - need.time < 1 && Config.Item("autoE").GetValue<bool>())
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) < 3000)
-                        {
-                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5000));
-                            return;
-                        }
-
-                    }
-                    if (Player.ChampionName == "MissFortune" && E.IsReady() && Game.Time - need.time > 0.5 && Game.Time - need.time < 2 && Combo && Player.Mana > 200f)
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) < 800)
-                        {
-                            E.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 800));
-                            return;
-                        }
-                    }
-                    if (Player.ChampionName == "Kalista" && W.IsReady() && Game.Time - need.time > 3 && Game.Time - need.time < 4 && !Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
-                        {
-                            W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
-                            return;
-                        }
-
-                    }
-                    if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.time < 2 && Player.Mana > 200f && !Player.IsWindingUp && Config.Item("bushW").GetValue<bool>())
-                    {
-                        if (need.PredictedPos.Distance(Player.Position) < 800)
-                        {
-                            W.Cast(need.PredictedPos);
-                            return;
-                        }
-                    }
-                    if (Game.Time - need.time < 4 )
-                    {
-                        if (Config.Item("AutoWardCombo").GetValue<bool>() && !Combo)
-                            return;
-                        if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
-                        {
-                            if (need.PredictedPos.Distance(Player.Position) < 600 && Config.Item("AutoWard").GetValue<bool>())
-                            {
-                                if (TrinketN.IsReady())
-                                {
-                                    TrinketN.Cast(need.PredictedPos);
-                                    need.time = Game.Time - 5;
-                                }
-                                else if (SightStone.IsReady())
-                                {
-                                    SightStone.Cast(need.PredictedPos);
-                                    need.time = Game.Time - 5;
-                                }
-                                else if (WardN.IsReady())
-                                {
-                                    WardN.Cast(need.PredictedPos);
-                                    need.time = Game.Time - 5;
-                                }
-                            }
-                            if (need.PredictedPos.Distance(Player.Position) < 1400 && Config.Item("AutoWardBlue").GetValue<bool>())
-                            {
-                                if (FarsightOrb.IsReady())
-                                {
-                                    FarsightOrb.Cast(need.PredictedPos);
-                                    need.time = Game.Time - 5;
-                                }
-                                else if (ScryingOrb.IsReady())
-                                {
-                                    ScryingOrb.Cast(need.PredictedPos);
-                                    need.time = Game.Time - 5;
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
 
@@ -1016,8 +903,8 @@ namespace OneKeyToWin_AIO_Sebby
                    }
                    else if (Distance < 3500 && !enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                    {
-                       var need=VisableInfo.Find(x => x.VisableID == enemy.NetworkId);
-                       if (need != null && Game.Time - need.time < 5)
+                       var need = Core.OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+                       if (need != null && Game.Time - need.LastVisableTime < 5)
                        {
                            drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.Gray);
                        }
@@ -1030,7 +917,7 @@ namespace OneKeyToWin_AIO_Sebby
                 
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
-                if (Player.HealthPercentage() > 60)
+                if (Player.HealthPercent > 60)
                     Utility.DrawCircle(ObjectManager.Player.Position, Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
                 else if (Player.HealthPercentage() > 30)
                     Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);

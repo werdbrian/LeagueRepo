@@ -92,7 +92,7 @@
     <Compile Include="Core\OKTWfarmLogic.cs" />
     <Compile Include="Core\OKTWlab.cs" />
     <Compile Include="Core\OKTWward.cs" />
-    <Compile Include="Core\OneKeyToBrain.cs" />
+    <Compile Include="Core\OKTWtracker.cs" />
     <Compile Include="Core\PredictionOktw.cs" />
     <Compile Include="Core\Summoners.cs" />
     <Compile Include="Champions\MissFortune.cs" />
