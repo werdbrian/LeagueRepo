@@ -113,6 +113,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (!Solari.IsReady() && !FaceOfTheMountain.IsReady() && !Seraph.IsReady() && !Zhonya.IsReady())
+                return;
+            
             if (!sender.IsEnemy || !sender.IsValidTarget(1500))
                 return;
 

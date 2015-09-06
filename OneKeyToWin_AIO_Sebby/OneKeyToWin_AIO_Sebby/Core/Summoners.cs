@@ -118,13 +118,11 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!CanUse(barrier) && !CanUse(heal))
+            if (!CanUse(barrier) && !CanUse(heal) && !CanUse(exhaust))
                 return;
 
             if (!sender.IsEnemy || !sender.IsValidTarget(1500))
                 return;
-
-            
 
             foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
             {
