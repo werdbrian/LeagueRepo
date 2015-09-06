@@ -38,6 +38,7 @@ namespace OneKeyToWin_AIO_Sebby
             Youmuus = new Items.Item(3142, 650f),
             Hydra = new Items.Item(3074, 440f),
             Hydra2 = new Items.Item(3077, 440f),
+            HydraTitanic = new Items.Item(3748, 150f),
             Hextech = new Items.Item(3146, 700f),
             //def
 
@@ -69,6 +70,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("Youmuus").AddItem(new MenuItem("YoumuusCombo", "Youmuus always in combo").SetValue(false));
 
             Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("Hydra").AddItem(new MenuItem("Hydra", "Hydra").SetValue(true));
+            Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("HydraTitanic").AddItem(new MenuItem("HydraTitanic", "Hydra Titanic").SetValue(true));
 
             Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("Muramana").AddItem(new MenuItem("Muramana", "Muramana").SetValue(true));
 
@@ -93,10 +95,21 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Blind", "Blind").SetValue(true));
             Game.OnUpdate += Game_OnGameUpdate;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
+            Orbwalking.AfterAttack += Orbwalking_AfterAttack;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             //Drawing.OnDraw += Drawing_OnDraw;
         }
+
+        private void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (Config.Item("HydraTitanic").GetValue<bool>() && Program.Combo && HydraTitanic.IsReady() && target.IsValid<Obj_AI_Hero>())
+            {
+                HydraTitanic.Cast();
+                Orbwalking.ResetAutoAttackTimer();
+            }
+        }
+
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (!sender.IsEnemy || !sender.IsValidTarget(1500))
