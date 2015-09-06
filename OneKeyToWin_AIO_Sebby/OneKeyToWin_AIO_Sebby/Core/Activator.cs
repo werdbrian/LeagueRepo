@@ -40,11 +40,12 @@ namespace OneKeyToWin_AIO_Sebby
             Hydra2 = new Items.Item(3077, 440f),
             HydraTitanic = new Items.Item(3748, 150f),
             Hextech = new Items.Item(3146, 700f),
+            
             //def
-
             FaceOfTheMountain = new Items.Item(3401, 600f),
             Zhonya = new Items.Item(3157, 0),
             Seraph = new Items.Item(3040, 0),
+            Solari = new Items.Item(3190, 600f),
             Randuin = new Items.Item(3143, 500f);
         
         public void LoadOKTW()
@@ -79,7 +80,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("FaceOfTheMountain", "FaceOfTheMountain").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Zhonya", "Zhonya").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Seraph", "Seraph").SetValue(true));
-
+            Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Solari", "Solari").SetValue(true));
             // CLEANSERS 
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
@@ -130,15 +131,20 @@ namespace OneKeyToWin_AIO_Sebby
                         dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
 
-                if (Config.Item("FaceOfTheMountain").GetValue<bool>() && Player.Distance(ally.ServerPosition) < FaceOfTheMountain.Range)
+                if (Config.Item("Solari").GetValue<bool>() && Solari.IsReady() && Player.Distance(ally.ServerPosition) < Solari.Range)
                 {
-                    if (FaceOfTheMountain.IsReady())
-                    {
-                        if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                            FaceOfTheMountain.Cast(ally);
-                        else if (ally.Health - dmg < ally.Level * 10)
-                            FaceOfTheMountain.Cast(ally);
-                    }
+                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                        Solari.Cast();
+                    else if (ally.Health - dmg < ally.Level * 10)
+                        Solari.Cast();
+                }
+
+                if (Config.Item("FaceOfTheMountain").GetValue<bool>() && FaceOfTheMountain.IsReady() && Player.Distance(ally.ServerPosition) < FaceOfTheMountain.Range)
+                {
+                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                        FaceOfTheMountain.Cast(ally);
+                    else if (ally.Health - dmg < ally.Level * 10)
+                        FaceOfTheMountain.Cast(ally);
                 }
 
                 if (Config.Item("Seraph").GetValue<bool>())
