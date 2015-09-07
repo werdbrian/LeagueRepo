@@ -191,11 +191,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 else if (Program.Farm && Player.Mana > RMANA + QMANA + WMANA && Config.Item("harrasW").GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>())
                     W.Cast();
             }
-            else if (Program.LaneClear && !Q.IsReady() && (Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + WMANA))
+            else if (Program.LaneClear && QMissile == null && (Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + WMANA))
             {
-                var allMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
-                if (allMinions != null && allMinions.Count > Config.Item("LCminions").GetValue<Slider>().Value)
+                var minionList = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                foreach (var minion in minionList.Where(minion =>  minion.Health < W.GetDamage(minion)))
+                {
                     W.Cast();
+                }
             }
         }
 
