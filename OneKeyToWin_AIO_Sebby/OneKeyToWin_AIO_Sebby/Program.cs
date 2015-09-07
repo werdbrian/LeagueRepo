@@ -399,19 +399,19 @@ namespace OneKeyToWin_AIO_Sebby
 
                 DrawSpellPos = poutput2;
 
-                if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0 )
+                if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 0)
                 {
                     if (poutput2.Hitchance >= Core.HitChance.VeryHigh)
                         QWER.Cast(poutput2.CastPosition);
                     return;
                 }
-                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1)
+                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 1)
                 {
                     if (poutput2.Hitchance >= Core.HitChance.High)
                         QWER.Cast(poutput2.CastPosition);
                     return;
                 }
-                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 2)
+                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 2)
                 {
                     if (poutput2.Hitchance >= Core.HitChance.Medium)
                         QWER.Cast(poutput2.CastPosition);
@@ -420,17 +420,17 @@ namespace OneKeyToWin_AIO_Sebby
             }
             else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0)
             {
-                if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0)
+                if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 0)
                 {
                     QWER.CastIfHitchanceEquals(target, HitChance.VeryHigh);
                     return;
                 }
-                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1)
+                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 1)
                 {
                     QWER.CastIfHitchanceEquals(target, HitChance.High);
                     return;
                 }
-                else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 2)
+                else if (Config.Item("HitChance ", true).GetValue<StringList>().SelectedIndex == 2)
                 {
                     QWER.CastIfHitchanceEquals(target, HitChance.Medium);
                     return;
