@@ -490,7 +490,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 0.7 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
@@ -519,7 +519,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (totalDelay > 0.7 && input.Unit.IsWindingUp)
+            if (totalDelay > 0.7 + (input.Radius / 500) && input.Unit.IsWindingUp)
             { 
                 result.Hitchance = HitChance.Medium;
             }
