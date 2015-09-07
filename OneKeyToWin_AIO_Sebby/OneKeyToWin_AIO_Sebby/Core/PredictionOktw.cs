@@ -438,7 +438,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
                 totalDelay =  input.Delay;
 
-            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
+            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.7;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
             float pathMinLen = 800f;
             double angleMove = 30 + (input.Radius / 10);
@@ -494,7 +494,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) > 0.1d)
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
