@@ -20,7 +20,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 900);
+            Q = new Spell(SpellSlot.Q, 895);
             W = new Spell(SpellSlot.W, 580);
             E = new Spell(SpellSlot.E, 920);
             R = new Spell(SpellSlot.R, 600);
@@ -254,7 +254,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Program.LaneClear && Player.Mana > QMANA + RMANA)
             {
-                var mobs = MinionManager.GetMinions(Player.ServerPosition, 500, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 600, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                 if (mobs.Count > 0)
                 {
                     var mob = mobs[0];
