@@ -70,47 +70,46 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
            
-            if(Program.LagFree(4) )
+        if(!Program.LagFree(0))
+
+            if (CanUse(ignite) && Config.Item("Ignite").GetValue<bool>())
             {
-                if (CanUse(ignite) && Config.Item("Ignite").GetValue<bool>())
+                foreach(var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(600)))
                 {
-                    foreach(var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(600)))
+                    var IgnDmg = Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+                    if (enemy.Health <= IgnDmg && Player.Distance(enemy.ServerPosition) > 500 && enemy.CountAlliesInRange(500) < 2)
+                        Player.Spellbook.CastSpell(ignite, enemy);
+
+                    if (enemy.Health <= 2 * IgnDmg )
                     {
-                        var IgnDmg = Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-                        if (enemy.Health <= IgnDmg && Player.Distance(enemy.ServerPosition) > 500 && enemy.CountAlliesInRange(500) < 2)
+                        if (enemy.PercentLifeStealMod > 10)
                             Player.Spellbook.CastSpell(ignite, enemy);
 
-                        if (enemy.Health <= 2 * IgnDmg )
-                        {
-                            if (enemy.PercentLifeStealMod > 10)
-                                Player.Spellbook.CastSpell(ignite, enemy);
+                        if (enemy.HasBuff("RegenerationPotion") || enemy.HasBuff("ItemMiniRegenPotion") || enemy.HasBuff("ItemCrystalFlask"))
+                            Player.Spellbook.CastSpell(ignite, enemy);
 
-                            if (enemy.HasBuff("RegenerationPotion") || enemy.HasBuff("ItemMiniRegenPotion") || enemy.HasBuff("ItemCrystalFlask"))
-                                Player.Spellbook.CastSpell(ignite, enemy);
+                        if (enemy.Health > Player.Health)
+                            Player.Spellbook.CastSpell(ignite, enemy);
+                    } 
+                }
+            }
 
-                            if (enemy.Health > Player.Health)
-                                Player.Spellbook.CastSpell(ignite, enemy);
-                        } 
+            if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() )
+            {
+                if (Config.Item("Exhaust1").GetValue<bool>())
+                {
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(650) && enemy.IsChannelingImportantSpell()))
+                    {
+                        Player.Spellbook.CastSpell(exhaust, enemy);
                     }
                 }
 
-                if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() )
+                if (Config.Item("Exhaust2").GetValue<bool>() && Program.Combo)
                 {
-                    if (Config.Item("Exhaust1").GetValue<bool>())
+                    var t = TargetSelector.GetTarget(650, TargetSelector.DamageType.Physical);
+                    if (t.IsValidTarget() )
                     {
-                        foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(650) && enemy.IsChannelingImportantSpell()))
-                        {
-                            Player.Spellbook.CastSpell(exhaust, enemy);
-                        }
-                    }
-
-                    if (Config.Item("Exhaust2").GetValue<bool>() && Program.Combo)
-                    {
-                        var t = TargetSelector.GetTarget(650, TargetSelector.DamageType.Physical);
-                        if (t.IsValidTarget() )
-                        {
-                            Player.Spellbook.CastSpell(exhaust, t);
-                        }
+                        Player.Spellbook.CastSpell(exhaust, t);
                     }
                 }
             }
