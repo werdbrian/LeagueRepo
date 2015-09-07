@@ -438,7 +438,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
                 totalDelay =  input.Delay;
 
-            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.5;
+            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
             float pathMinLen = 700f;
             double angleMove = 30 + (input.Radius / 10);
@@ -448,7 +448,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 pathMinLen = BackToFront;
                 angleMove += 15;
-                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.3;
+                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
