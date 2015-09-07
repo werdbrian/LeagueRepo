@@ -83,7 +83,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Config.Item("showgrab").GetValue<bool>() && grab > 0)
             {
-                Drawing.DrawText(Drawing.Width * 0f, Drawing.Height * 0.4f, System.Drawing.Color.YellowGreen, " grab: " + grab + " grab successful: " + grabS + " grab successful % : " + ((grabS / grab) * 100) + "%");
+                Drawing.DrawText(Drawing.Width * 0f, Drawing.Height * 0.4f, System.Drawing.Color.YellowGreen, " grab: " + grab + " grab successful: " + grabS + " grab successful % : " + (((float)grabS / (float)grab) * 100f) + "%");
             }
             if (Config.Item("qRange").GetValue<bool>())
             {
