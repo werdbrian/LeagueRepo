@@ -81,9 +81,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("showgrab").GetValue<bool>() && grab > 0)
+            if (Config.Item("showgrab").GetValue<bool>())
             {
-                Drawing.DrawText(Drawing.Width * 0f, Drawing.Height * 0.4f, System.Drawing.Color.YellowGreen, " grab: " + grab + " grab successful: " + grabS + " grab successful % : " + (((float)grabS / (float)grab) * 100f) + "%");
+                var percent = 0f;
+                if (grab > 0)
+                    percent = ((float)grabS / (float)grab) * 100f;
+                Drawing.DrawText(Drawing.Width * 0f, Drawing.Height * 0.4f, System.Drawing.Color.YellowGreen, " grab: " + grab + " grab successful: " + grabS + " grab successful % : " + percent + "%");
             }
             if (Config.Item("qRange").GetValue<bool>())
             {
