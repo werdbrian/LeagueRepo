@@ -223,12 +223,17 @@ namespace OneKeyToWin_AIO_Sebby
             else
                 pushDistance = 400 ;
 
-            var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
+            
+            var finalPosition2 = prepos.CastPosition.Extend(fromPosition, -250);
+            var points2 = CirclePoint(8, 70, finalPosition2);
+            foreach (var point in points2.Where(point => point.IsWall()))
+                return true;
 
+            var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
             var points = CirclePoint(8, 70, finalPosition);
 
+
             bool cast = true;
-            
             foreach (var point in points.Where(point => !point.IsWall()))
                 cast = false;
 
