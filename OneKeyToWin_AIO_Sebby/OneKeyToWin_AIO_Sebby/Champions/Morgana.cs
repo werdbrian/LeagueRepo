@@ -56,10 +56,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         var spell = Damage.Spells[enemy.ChampionName].FirstOrDefault(s => s.Slot == spell2.Slot);
                         if (spell != null)
                         {
-                            if (spell.DamageType == Damage.DamageType.Magical || (spell.DamageType != Damage.DamageType.Physical && spell.DamageType != Damage.DamageType.True))
-                                Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name, true).SetValue(true));
+                            if (spell.DamageType == Damage.DamageType.Physical || spell.DamageType == Damage.DamageType.True)
+                                Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name, true).SetValue(false));
                             else
-                                Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name,true).SetValue(false));
+                                Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name,true).SetValue(true));
                         }
                     }
                 }
