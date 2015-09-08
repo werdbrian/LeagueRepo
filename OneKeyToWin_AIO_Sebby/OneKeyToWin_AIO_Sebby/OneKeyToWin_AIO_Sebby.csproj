@@ -68,6 +68,7 @@
     <Compile Include="Champions\Draven.cs" />
     <Compile Include="Champions\Evelynn.cs" />
     <Compile Include="Champions\Kayle.cs" />
+    <Compile Include="Champions\Morgana.cs" />
     <Compile Include="Champions\Syndra.cs" />
     <Compile Include="Champions\Thresh.cs" />
     <Compile Include="Champions\Tristana.cs" />

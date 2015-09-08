@@ -256,6 +256,9 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Brand":
                         new Champions.Brand().LoadOKTW();
                         break;
+                    case "Morgana":
+                        new Champions.Morgana().LoadOKTW();
+                        break;
                 }
             }
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
