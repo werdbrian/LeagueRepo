@@ -18,10 +18,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private float QMANA, WMANA, EMANA, RMANA;
 
-        private int grab = 0, grabS = 0;
-
-        private float grabW = 0;
-
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
@@ -36,7 +32,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts2", "OFF - all grab-able targets"));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts2", "OFF - all targets"));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("qCC", "Auto Q cc & dash enemy").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
