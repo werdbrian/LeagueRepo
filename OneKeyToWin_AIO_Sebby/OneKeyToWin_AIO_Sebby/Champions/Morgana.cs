@@ -124,6 +124,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Game_OnGameUpdate(EventArgs args)
         {
+            if (Program.LagFree(0))
+                SetMana();
             if (Program.LagFree(1) && Q.IsReady())
                 LogicQ();
             if (Program.LagFree(2) && R.IsReady())
@@ -133,7 +135,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Program.LagFree(4) && E.IsReady())
                 LogicE();
         }
-
 
         private void LogicE()
         {
@@ -224,6 +225,26 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             else
                 return false;
+        }
+
+        private void SetMana()
+        {
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
+
+            if (!R.IsReady())
+                RMANA = QMANA - Player.Level * 2;
+            else
+                RMANA = R.Instance.ManaCost;
+
+            if (Player.Health < Player.MaxHealth * 0.2)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                EMANA = 0;
+                RMANA = 0;
+            }
         }
 
         private void Drawing_OnDraw(EventArgs args)
