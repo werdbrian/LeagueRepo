@@ -13,11 +13,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-
         private Spell E, Q, R, W;
-
         private float QMANA, WMANA, EMANA, RMANA;
-
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
@@ -61,6 +58,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                             else
                                 Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name,true).SetValue(true));
                         }
+                        else
+                            Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name, true).SetValue(true));
                     }
                 }
             }
@@ -94,7 +93,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-
             if (!E.IsReady() || args.SData.IsAutoAttack() || !sender.IsEnemy || !sender.IsValid<Obj_AI_Hero>() || Player.Distance(sender.ServerPosition) > 2000)
                 return;
 
@@ -108,6 +106,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (Config.Item("targeted" + ally.ChampionName).GetValue<bool>() && args.Target != null && args.Target.NetworkId == ally.NetworkId)
                 {
                     E.CastOnUnit(ally);
+                    return;
                     //dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
                 else if (Config.Item("skillshot" + ally.ChampionName).GetValue<bool>())
@@ -119,6 +118,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         
                     //dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                     E.CastOnUnit(ally);
+                    return;
                 }
             }   
         }
