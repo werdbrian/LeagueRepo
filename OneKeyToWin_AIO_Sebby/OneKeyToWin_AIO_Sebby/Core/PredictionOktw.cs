@@ -431,7 +431,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private static PredictionOutput WayPointAnalysis(PredictionOutput result, PredictionInput input)
         {
             if (!input.Unit.IsValid<Obj_AI_Hero>())
+            {
+                result.Hitchance = HitChance.VeryHigh;
                 return result;
+            }
 
             var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
 
@@ -447,7 +450,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
                 pathMinLen = BackToFront;
-                angleMove += 20;
+                angleMove += 15;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
