@@ -22,7 +22,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1300);
+            Q = new Spell(SpellSlot.Q, 1100);
             W = new Spell(SpellSlot.W, 1000);
             E = new Spell(SpellSlot.E, 750);
             R = new Spell(SpellSlot.R, 600);
