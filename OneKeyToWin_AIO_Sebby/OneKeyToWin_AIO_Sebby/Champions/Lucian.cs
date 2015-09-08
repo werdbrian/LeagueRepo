@@ -138,7 +138,7 @@ namespace OneKeyToWin_AIO_Sebby
                 LogicE();
             if (Program.LagFree(4))
             {
-                if (R.IsReady() && Game.Time - castR > 5)
+                if (R.IsReady() && Game.Time - castR > 5 && Config.Item("autoR").GetValue<bool>())
                     LogicR();
 
                 if (!passRdy && !SpellLock)
