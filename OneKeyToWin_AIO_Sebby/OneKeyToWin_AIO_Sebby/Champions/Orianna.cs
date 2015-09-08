@@ -390,19 +390,20 @@ namespace OneKeyToWin_AIO_Sebby
                 || args.Target.Position.Distance(Player.Position) > E.Range)
                 return;
 
+             if (!E.IsReady())
+                 return;
             foreach (var ally in Program.Allies.Where(ally => ally.IsValid && ally.NetworkId == args.Target.NetworkId))
             {
                 var dmg = sender.GetSpellDamage(ally, args.SData.Name);
                 double HpLeft = ally.Health - dmg;
-                if (E.IsReady())
-                {
-                    double HpPercentage = (dmg * 100) / ally.Health;
-                    double shieldValue = 60 + E.Level * 40 + 0.4 * Player.FlatMagicDamageMod;
-                    if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
-                        E.CastOnUnit(ally);
-                    else if (dmg > shieldValue)
-                        E.CastOnUnit(ally);
-                }
+                
+                double HpPercentage = (dmg * 100) / ally.Health;
+                double shieldValue = 60 + E.Level * 40 + 0.4 * Player.FlatMagicDamageMod;
+                if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
+                    E.CastOnUnit(ally);
+                else if (dmg > shieldValue)
+                    E.CastOnUnit(ally);
+                
                 //Game.PrintChat("" + HpPercentage);
             }   
         }

@@ -48,7 +48,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 4; i++)
                 {
                     var spell = enemy.Spellbook.Spells[i];
                     if (spell.SData.TargettingType == SpellDataTargetType.Unit)
@@ -136,9 +136,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!E.IsReady() || !sender.IsEnemy)
-                return;
-            
             if (!E.IsReady() || args.Target == null || !sender.IsEnemy || !args.Target.IsMe || !sender.IsValid<Obj_AI_Hero>() || args.SData.Name == "TormentedSoil")
                 return;
 
