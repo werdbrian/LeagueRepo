@@ -52,8 +52,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     if (enemy.Spellbook.Spells[i] != null)
                     {
-                        var spell = enemy.Spellbook.Spells[i];
-                        Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell.SData.Name, spell.Name).SetValue(true));
+                        var spell2 = enemy.Spellbook.Spells[i];
+                        var spell = Damage.Spells[enemy.ChampionName].FirstOrDefault(s => s.Slot == spell2.Slot);
+                        if (spell != null)
+                        {
+                            if (spell.DamageType == Damage.DamageType.Magical)
+                                Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name, true).SetValue(true));
+                            else
+                                Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell2.SData.Name, spell2.Name,true).SetValue(false));
+                        }
                     }
                 }
             }
@@ -90,8 +97,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (!E.IsReady() || args.SData.IsAutoAttack() || !sender.IsEnemy || !sender.IsValid<Obj_AI_Hero>() || Player.Distance(sender.ServerPosition) > 2000)
                 return;
-            
-            if (Config.Item("spell" + args.SData.Name) != null && !Config.Item("spell" + args.SData.Name).GetValue<bool>())
+
+            if (Config.Item("spell" + args.SData.Name, true) != null && !Config.Item("spell" + args.SData.Name, true).GetValue<bool>())
                 return;
             
             foreach (var ally in Program.Allies.Where(ally => ally.IsValid  && Player.Distance(ally.ServerPosition) < E.Range))
@@ -108,7 +115,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     var castArea = ally.Distance(args.End) * (args.End - ally.ServerPosition).Normalized() + ally.ServerPosition;
                     if (castArea.Distance(ally.ServerPosition) > ally.BoundingRadius / 2)
                         continue;
-                    
+
+                        
                     //dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                     E.CastOnUnit(ally);
                 }
