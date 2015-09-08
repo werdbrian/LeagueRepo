@@ -34,9 +34,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Q.SetSkillshot(0.25f, 75f, 1200f, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.50f, 200f, 2200f, false, SkillshotType.SkillshotCircle);
 
-            
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("showgrab", "Show statistics").SetValue(true));
-
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts1", "ON - only one target"));
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts2", "OFF - all grab-able targets"));
@@ -51,8 +48,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if enemies in range").SetValue(new Slider(3, 0, 5)));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rKs", "R ks").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("inter", "OnPossibleToInterrupt")).SetValue(true);
-            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Gap", "OnEnemyGapcloser")).SetValue(true);
-            
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("Gap", "OnEnemyGapcloser")).SetValue(true);    
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
@@ -62,7 +58,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         var spell = enemy.Spellbook.Spells[i];
                         Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").SubMenu("Spell Manager").SubMenu(enemy.ChampionName).AddItem(new MenuItem("spell" + spell.SData.Name, spell.Name).SetValue(true));
-
                     }
                 }
             }
@@ -139,14 +134,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicR();
             if (Program.LagFree(3) && W.IsReady() && Config.Item("autoW").GetValue<bool>())
                 LogicW();
-            if (Program.LagFree(4) && E.IsReady() )
+            if (Program.LagFree(4) && E.IsReady())
                 LogicE();
         }
 
 
         private void LogicE()
         {
-            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && ally.Distance(Player.Position) < E.Range))
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && ally.Distance(Player.Position) < E.Range))
             {
                 if (Config.Item("HardCC" + ally.ChampionName).GetValue<bool>() && HardCC(ally))
                 {
