@@ -15,6 +15,7 @@ namespace OneKeyToWin_AIO_Sebby
         public Spell Q, W, E, R;
         public float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+        Vector3 CursorPosition = Vector3.Zero;
 
         public int FarmId;
         public bool attackNow = true;
@@ -58,6 +59,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("AGC", "AntiGapcloserE").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("smartE", "SmartCast E key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("smartEW", "SmartCast E + W key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEwall", "Try E over wall BETA").SetValue(false));
 
@@ -154,11 +156,22 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Config.Item("smartE").GetValue<KeyBind>().Active)
                     Esmart = true;
+                if (Config.Item("smartEW").GetValue<KeyBind>().Active && W.IsReady())
+                {
+                    CursorPosition = Game.CursorPos;
+                    W.Cast(CursorPosition);
+                }
                 if (Esmart && Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 4)
                     E.Cast(Player.Position.Extend(Game.CursorPos, E.Range), true);
+                
+                if (!CursorPosition.IsZero)
+                    E.Cast(Player.Position.Extend(CursorPosition, E.Range), true);
             }
             else
+            {
+                CursorPosition = Vector3.Zero;
                 Esmart = false;
+            }
 
             if (Program.LagFree(1) && E.IsReady() && Config.Item("autoE").GetValue<bool>() && Program.Combo )
                 LogicE();
