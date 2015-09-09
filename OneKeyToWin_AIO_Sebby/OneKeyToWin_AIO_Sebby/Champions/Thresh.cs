@@ -241,7 +241,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             else
             {
-                E.Cast(Player.Position.Extend(target.Position, -300));
+                var position = Player.ServerPosition - (eCastPosition - Player.ServerPosition);
+                E.Cast(position);
             }
         }
 
