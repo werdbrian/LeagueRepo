@@ -108,13 +108,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("26", "Ahri "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("27", "Draven "));
 
-            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("disableDraws", "Disable Utility draws").SetValue(false));
-            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("disableChampion", "Disable AIO champion (utility mode only) need F5").SetValue(false));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("OrbDraw", "Draw AAcirlce OKTW© style").SetValue(false));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("orb", "Orbwalker target OKTW© style").SetValue(true));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
-
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
@@ -145,6 +138,7 @@ namespace OneKeyToWin_AIO_Sebby
             new Core.AutoLvlUp().LoadOKTW();
             new OktwCommon().LoadOKTW();
             new Core.OKTWtracker().LoadOKTW();
+            new Core.OKTWdraws().LoadOKTW();
 
             //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
@@ -152,8 +146,9 @@ namespace OneKeyToWin_AIO_Sebby
                 new Core.OKTWlab().LoadOKTW();
             }
 
-            if (!Config.Item("disableChampion").GetValue<bool>())
-            {
+            //if (!Config.Item("disableChampion").GetValue<bool>())
+            
+            
                 var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
                 TargetSelector.AddToMenu(targetSelectorMenu);
                 Config.AddSubMenu(targetSelectorMenu);
@@ -259,7 +254,7 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Morgana":
                         new Champions.Morgana().LoadOKTW();
                         break;
-                }
+                
             }
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -483,6 +478,7 @@ namespace OneKeyToWin_AIO_Sebby
             var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] + weight, color, msg);
         }
+
         public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
         {
             var wts1 = Drawing.WorldToScreen(pos1);
@@ -490,6 +486,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
         }
+
         public static void debug(string msg)
         {
             if (Config.Item("debug").GetValue<bool>())
@@ -509,7 +506,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (DrawSpell.Type == SkillshotType.SkillshotLine)
                     OktwCommon.DrawLineRectangle(DrawSpellPos.CastPosition, Player.Position, (int)DrawSpell.Width, 1, System.Drawing.Color.DimGray);
                 if (DrawSpell.Type == SkillshotType.SkillshotCircle)
-                    Utility.DrawCircle(DrawSpellPos.CastPosition, DrawSpell.Width, System.Drawing.Color.DimGray, 4, 1);
+                    Render.Circle.DrawCircle(DrawSpellPos.CastPosition, DrawSpell.Width, System.Drawing.Color.DimGray, 1);
 
                 drawText("Aiming " + DrawSpellPos.Hitchance, Player.Position.Extend(DrawSpellPos.CastPosition, 400), System.Drawing.Color.Gray);
             }
@@ -533,216 +530,6 @@ namespace OneKeyToWin_AIO_Sebby
                         timer = timer - 1;
                         JungleTime = Game.Time;
                     }
-                }
-            }
-            var HpBar = Config.Item("HpBar").GetValue<bool>();
-
-            var championInfo = Config.Item("championInfo").GetValue<bool>();
-            var GankAlert = Config.Item("GankAlert").GetValue<bool>();
-            var ShowKDA = Config.Item("ShowKDA").GetValue<bool>();
-            var ShowClicks = Config.Item("ShowClicks").GetValue<bool>();
-            float posY = ((float)Config.Item("posY").GetValue<Slider>().Value * 0.01f) * Drawing.Height;
-            float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
-            float positionDraw = 0;
-            float positionGang = 500;
-
-            int Width = 103;
-            int Height = 8;
-            int XOffset = 10;
-            int YOffset = 20;
-
-            var FillColor = System.Drawing.Color.GreenYellow;
-            var Color = System.Drawing.Color.Azure;
-
-            foreach (var enemy in Enemies)
-            {
-                
-                if (enemy.IsValidTarget())
-                {
-                    if (ShowClicks)
-                    {
-                        var lastWaypoint = enemy.GetWaypoints().Last().To3D();
-                        if (lastWaypoint.IsValid())
-                        {
-                            drawLine(enemy.Position, lastWaypoint, 1, System.Drawing.Color.Red);
-                            if (enemy.GetWaypoints().Count() >1)
-                                drawText(enemy.ChampionName, lastWaypoint, System.Drawing.Color.WhiteSmoke);
-                        }
-
-                    }
-                }
-                
-                if (HpBar && enemy.IsHPBarRendered && Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
-                {
-
-                    var barPos = enemy.HPBarPosition;
-
-                    float QdmgDraw = 0, WdmgDraw = 0, EdmgDraw = 0, RdmgDraw = 0, damage = 0; ;
-
-                    if (Q.IsReady())
-                        damage = damage + Q.GetDamage(enemy);
-
-                    if (W.IsReady() && Player.ChampionName != "Kalista")
-                        damage = damage + W.GetDamage(enemy);
-
-                    if (E.IsReady())
-                        damage = damage + E.GetDamage(enemy);
-
-                    if (R.IsReady())
-                        damage = damage + R.GetDamage(enemy);
-
-                    if (Q.IsReady())
-                        QdmgDraw = (Q.GetDamage(enemy) / damage);
-
-                    if (W.IsReady() && Player.ChampionName != "Kalista")
-                        WdmgDraw = (W.GetDamage(enemy) / damage);
-
-                    if (E.IsReady())
-                        EdmgDraw = (E.GetDamage(enemy) / damage);
-
-                    if (R.IsReady())
-                        RdmgDraw = (R.GetDamage(enemy) / damage);
-
-                    var percentHealthAfterDamage = Math.Max(0, enemy.Health - damage) / enemy.MaxHealth;
-
-                    var yPos = barPos.Y + YOffset;
-                    var xPosDamage = barPos.X + XOffset + Width * percentHealthAfterDamage;
-                    var xPosCurrentHp = barPos.X + XOffset + Width * enemy.Health / enemy.MaxHealth;
-
-                    float differenceInHP = xPosCurrentHp - xPosDamage;
-                    var pos1 = barPos.X + XOffset + (107 * percentHealthAfterDamage);
-
-                    for (int i = 0; i < differenceInHP; i++)
-                    {
-                        
-                        if (Q.IsReady() && i < QdmgDraw * differenceInHP)
-                            Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Cyan);
-                        else if (W.IsReady() && i < (QdmgDraw + WdmgDraw) * differenceInHP)
-                            Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Orange);
-                        else if (E.IsReady() && i < (QdmgDraw + WdmgDraw + EdmgDraw) * differenceInHP)
-                            Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.Yellow);
-                        else if (R.IsReady() && i < (QdmgDraw + WdmgDraw + EdmgDraw + RdmgDraw) * differenceInHP)
-                            Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, System.Drawing.Color.YellowGreen);
-                    }
-                }
-                
-                var kolor = System.Drawing.Color.GreenYellow;
-
-                if (enemy.IsDead)
-                    kolor = System.Drawing.Color.Gray;
-                else if (!enemy.IsVisible)
-                    kolor = System.Drawing.Color.OrangeRed;
-
-                var kolorHP = System.Drawing.Color.GreenYellow;
-
-                if (enemy.IsDead)
-                    kolorHP = System.Drawing.Color.GreenYellow;
-                else if ((int)enemy.HealthPercent < 30)
-                    kolorHP = System.Drawing.Color.Red;
-                else if ((int)enemy.HealthPercent < 60)
-                    kolorHP = System.Drawing.Color.Orange;
-                
-                if (championInfo)
-                {
-                    positionDraw += 15;
-                    foreach (RecallInfo rerecall in RecallInfos)
-                    {
-                        if (rerecall.RecallID == enemy.NetworkId && Game.Time - rerecall.RecallStart < 8)
-                        {
-                            var time = (Game.Time - rerecall.RecallStart) * 10;
-                            if (rerecall.RecallNum == 2)
-                                Drawing.DrawText(posX + 150, posY + positionDraw, System.Drawing.Color.GreenYellow, "rerecall finish");
-                            else if (rerecall.RecallNum == 1)
-                                Drawing.DrawText(posX + 150, posY + positionDraw, System.Drawing.Color.Yellow, "rerecall stop");
-                            else if (rerecall.RecallNum == 0)
-                            {
-                                Drawing.DrawLine(posX + 150, posY + positionDraw, posX + 230 - time, posY + positionDraw, 12, System.Drawing.Color.Red);
-                                Drawing.DrawLine(posX + 230 - time, posY + positionDraw, posX + 230, posY + positionDraw, 12, System.Drawing.Color.Black);
-                            }
-                        }
-                    }
-
-                    /*
-                    if (ShowKDA)
-                        Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
-                    */
-
-                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName);
-                    Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
-                }
-                
-                var Distance = Player.Distance(enemy.Position);
-               if (GankAlert && !enemy.IsDead && Distance > 1200)
-               {
-
-                   var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
-
-                   wts[0] = wts[0] - (enemy.ChampionName.Count<char>()) * 5;
-                   wts[1] = wts[1] + 15;
-                   if ((int)enemy.HealthPercent > 0)
-                       Drawing.DrawLine(wts[0], wts[1], (wts[0] + ((int)enemy.HealthPercent) / 2) + 1, wts[1], 12, kolorHP);
-
-                   if ((int)enemy.HealthPercent < 100)
-                       Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 12, System.Drawing.Color.White);
-
-                   if (Distance > 3500 && enemy.IsVisible)
-                       drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
-                   else if (!enemy.IsVisible)
-                   {
-                       if ((int)(Game.Time * 10) % 2 == 0)
-                       {
-                           drawText("SS " + enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Yellow);
-                       }
-                   }
-                   else
-                   {
-                       if ((int)(Game.Time * 10) % 2 == 0)
-                       {
-                           drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Red);
-                       }
-                   }
-
-                   if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
-                   {
-                       drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
-
-                   }
-                   else if (Distance < 3500 && !enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
-                   {
-                       var need = Core.OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
-                       if (need != null && Game.Time - need.LastVisableTime < 5)
-                       {
-                           drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.Gray);
-                       }
-                   }
-               }
-               positionGang = positionGang + 100;
-               
-
-            }
-                
-            if (Config.Item("OrbDraw").GetValue<bool>())
-            {
-                if (Player.HealthPercent > 60)
-                    Utility.DrawCircle(ObjectManager.Player.Position, Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 2, 1);
-                else if (Player.HealthPercentage() > 30)
-                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 3, 1);
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 4, 1);
-            }
-
-            if (Config.Item("orb").GetValue<bool>() && !Config.Item("disableChampion").GetValue<bool>())
-            {
-                var orbT = Orbwalker.GetTarget();
-
-                if (orbT.IsValidTarget())
-                {
-                    if (orbT.Health > orbT.MaxHealth * 0.6)
-                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 5, 1);
-                    else if (orbT.Health > orbT.MaxHealth * 0.3)
-                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 5, 1);
-                    else
-                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 5, 1);
                 }
             }
         }

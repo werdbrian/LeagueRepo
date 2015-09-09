@@ -90,6 +90,7 @@
     <Compile Include="Core\AfkMode.cs" />
     <Compile Include="Core\AutoLvlUp.cs" />
     <Compile Include="Core\OktwCommon.cs" />
+    <Compile Include="Core\OKTWdraws.cs" />
     <Compile Include="Core\OKTWfarmLogic.cs" />
     <Compile Include="Core\OKTWlab.cs" />
     <Compile Include="Core\OKTWward.cs" />
