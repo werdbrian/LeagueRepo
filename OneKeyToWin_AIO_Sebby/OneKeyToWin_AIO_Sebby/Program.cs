@@ -271,7 +271,7 @@ namespace OneKeyToWin_AIO_Sebby
             //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
-            Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
+            
             Drawing.OnDraw += OnDraw;
         }
 
@@ -432,43 +432,6 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     QWER.CastIfHitchanceEquals(target, HitChance.Medium);
                     return;
-                }
-            }
-        }
-
-        private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
-        {
-            
-            var unit = sender as Obj_AI_Hero;
-
-            if (unit == null || !unit.IsValid || unit.IsAlly)
-                return;
-            
-            var recall = Packet.S2C.Teleport.Decoded(unit, args);
-
-            if (recall.Type == Packet.S2C.Teleport.Type.Recall)
-            {
-                switch (recall.Status)
-                {
-                    case Packet.S2C.Teleport.Status.Start:
-                        RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
-                        RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 0 });
-
-                        break;
-                    case Packet.S2C.Teleport.Status.Abort:
-                        RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
-                        RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 1 });
-
-                        break;
-                    case Packet.S2C.Teleport.Status.Finish:
-                        RecallInfos.RemoveAll(x => x.RecallID == sender.NetworkId);
-                        if (jungler.NetworkId == sender.NetworkId)
-                        {
-                            enemySpawn = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy);
-                            timer = (int)(enemySpawn.Position.Distance(ObjectManager.Player.Position) / 370);
-                        }
-                        RecallInfos.Add(new RecallInfo() { RecallID = sender.NetworkId, RecallStart = Game.Time, RecallNum = 2 });
-                        break;
                 }
             }
         }
