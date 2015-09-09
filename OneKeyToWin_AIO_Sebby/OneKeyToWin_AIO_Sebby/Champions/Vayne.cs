@@ -219,7 +219,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             float pushDistance;
             if (Player.Position == fromPosition)
-                pushDistance = 480;
+                pushDistance = 490;
             else
                 pushDistance = 400 ;
 
@@ -229,7 +229,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return true;
 
             var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
-            var points = CirclePoint(8, 80, finalPosition);
+            var points = CirclePoint(10, 80, finalPosition);
 
 
             bool cast = true;
