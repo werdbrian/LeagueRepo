@@ -13,9 +13,22 @@ namespace OneKeyToWin_AIO_Sebby.Core
     class ChampionInfo
     {
         public int NetworkId { get; set; }
+
         public Vector3 LastVisablePos { get; set; }
         public float LastVisableTime { get; set; }
         public Vector3 PredictedPos { get; set; }
+
+        public float StartRecallTime { get; set; }
+        public float AbortRecallTime { get; set; }
+        public float FinishRecallTime { get; set; }
+
+        public ChampionInfo()
+        {
+            LastVisableTime = 0;
+            StartRecallTime = 0;
+            AbortRecallTime = 0;
+            FinishRecallTime = 0;
+        }
     }
 
     class OKTWtracker
@@ -30,7 +43,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 Drawing.Direct3DDevice,
                 new FontDescription
                 {
-
                     FaceName = "Impact",
                     Height = 30,
                     Weight = FontWeight.Normal,
@@ -50,8 +62,45 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
 
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (hero.IsEnemy)
+                    ChampionInfoList.Add(new ChampionInfo() { NetworkId = hero.NetworkId, LastVisablePos = hero.Position });
+            }
+
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
+            Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
+        }
+
+
+        private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
+        {
+            var unit = sender as Obj_AI_Hero;
+
+            if (unit == null || !unit.IsValid || unit.IsAlly)
+                return;
+
+            var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == sender.NetworkId);
+
+            var recall = Packet.S2C.Teleport.Decoded(unit, args);
+
+            if (recall.Type == Packet.S2C.Teleport.Type.Recall)
+            {
+                switch (recall.Status)
+                {
+                    case Packet.S2C.Teleport.Status.Start:
+                        ChampionInfoOne.StartRecallTime = Game.Time;
+                        break;
+                    case Packet.S2C.Teleport.Status.Abort:
+                        ChampionInfoOne.AbortRecallTime = Game.Time;
+                        break;
+                    case Packet.S2C.Teleport.Status.Finish:
+                        ChampionInfoOne.FinishRecallTime = Game.Time;
+                        ChampionInfoOne.LastVisablePos = ObjectManager.Get<Obj_SpawnPoint>().FirstOrDefault(x => x.IsEnemy).Position;
+                        break;
+                }
+            }
         }
 
         private void OnUpdate(EventArgs args)
@@ -111,12 +160,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
                         if (ChampionInfoOne != null && enemy != Program.jungler)
                         {
-                            if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
+                            if ((int)(Game.Time * 10) % 2 == 0 && Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
                             {
-                                if ((int)(Game.Time * 10) % 2 == 0)
-                                {
-                                    DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
-                                }
+                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
                             }
                             if (Game.Time - ChampionInfoOne.LastVisableTime >= 7)
                             {
