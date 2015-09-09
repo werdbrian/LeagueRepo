@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         public ChampionInfo()
         {
-            LastVisableTime = 0;
+            LastVisableTime = Game.Time;
             StartRecallTime = 0;
             AbortRecallTime = 0;
             FinishRecallTime = 0;
@@ -36,6 +36,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private Menu Config = Program.Config;
         private Font Text, TextBold;
         public static List<ChampionInfo> ChampionInfoList = new List<ChampionInfo>();
+
+        public static Obj_AI_Hero jungler;
 
         public void LoadOKTW()
         {
@@ -65,7 +67,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                 if (hero.IsEnemy)
+                {
                     ChampionInfoList.Add(new ChampionInfo() { NetworkId = hero.NetworkId, LastVisablePos = hero.Position });
+                    if (IsJungler(hero))
+                        jungler = hero;
+                }
             }
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -108,6 +114,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (!Program.LagFree(3))
                 return;
 
+
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
             {
                 var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
@@ -144,6 +151,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
+        private bool IsJungler(Obj_AI_Hero hero) { return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite")); }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("disableDraws").GetValue<bool>())
@@ -173,5 +182,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
         }
+
     }
 }
