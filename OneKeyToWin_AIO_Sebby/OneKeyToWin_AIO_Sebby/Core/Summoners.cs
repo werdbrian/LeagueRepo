@@ -130,12 +130,16 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
-                else if ( Player.Distance(args.End) <= 300f)
+                else
                 {
-                    if (!OktwCommon.CanMove(ally) || ally.Distance(sender.Position) < 300f)
-                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
-                    else if (Player.Distance(args.End) < 100f)
-                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                    var castArea = ally.Distance(args.End) * (args.End - ally.ServerPosition).Normalized() + ally.ServerPosition;
+                    if (castArea.Distance(ally.ServerPosition) < ally.BoundingRadius / 2)
+                    {
+                        if (!OktwCommon.CanMove(ally) || ally.Distance(sender.Position) < 300f)
+                            dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                        else if (Player.Distance(args.End) < 100f)
+                            dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                    }
                 }
 
                 if (CanUse(barrier) && Config.Item("Barrier").GetValue<bool>() && ally.IsMe)
