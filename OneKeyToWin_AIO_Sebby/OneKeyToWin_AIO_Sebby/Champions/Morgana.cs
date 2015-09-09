@@ -43,6 +43,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("autoW", "Auto W").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W config").AddItem(new MenuItem("autoWcc", "Auto W only CC enemy").SetValue(false));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W").SetValue(true));
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
             {
                 for (int i = 0; i < 4; i++)
@@ -132,7 +138,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void Game_OnGameUpdate(EventArgs args)
         {
             if (Program.LagFree(0))
+            {
                 SetMana();
+                Jungle();
+            }
             if (Program.LagFree(1) && Q.IsReady())
                 LogicQ();
             if (Program.LagFree(2) && R.IsReady())
@@ -203,13 +212,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (!Config.Item("autoWcc").GetValue<bool>() && !Q.IsReady())
                 {
-                    var qDmg = Q.GetDamage(t);
-                    var wDmg = W.GetDamage(t);
-                    if (wDmg > t.Health)
-                    {
-                        Program.CastSpell(W, t);
-                    }
-                    else if (wDmg + qDmg > t.Health && Q.IsReady())
+                    if (W.GetDamage(t) > t.Health)
                         Program.CastSpell(W, t);
                     else if (Program.Combo && Player.Mana > RMANA + WMANA + EMANA + QMANA)
                         Program.CastSpell(W, t);
@@ -217,6 +220,36 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                     W.Cast(enemy, true);
+            }
+            else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmW").GetValue<bool>() && Player.Mana > RMANA + WMANA)
+            {
+                var minionList = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
+                var farmPosition = W.GetLineFarmLocation(minionList, W.Width);
+
+                if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
+                    W.Cast(farmPosition.Position);
+            }
+        }
+
+        private void Jungle()
+        {
+            if (Program.LaneClear && Player.Mana > RMANA + WMANA + RMANA + WMANA)
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 600, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    if (W.IsReady() && Config.Item("jungleW").GetValue<bool>())
+                    {
+                        W.Cast(mob.ServerPosition);
+                        return;
+                    }
+                    if (Q.IsReady() && Config.Item("jungleQ").GetValue<bool>())
+                    {
+                        Q.Cast(mob.ServerPosition);
+                        return;
+                    }
+                }
             }
         }
 
