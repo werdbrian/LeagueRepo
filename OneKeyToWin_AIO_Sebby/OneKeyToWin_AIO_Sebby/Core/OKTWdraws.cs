@@ -258,11 +258,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
                 if (Player.HealthPercent > 60)
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 1);
+                    Utility.DrawCircle(ObjectManager.Player.Position, Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.GreenYellow, 1, 1);
                 else if (Player.HealthPercent > 30)
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 1);
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Orange, 1, 1);
                 else
-                    Render.Circle.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 1);
+                    Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 1, 1);
             }
         }
 
@@ -274,11 +274,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 if (orbT.IsValidTarget())
                 {
                     if (orbT.Health > orbT.MaxHealth * 0.6)
-                        Render.Circle.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 1);
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.GreenYellow, 1, 1);
                     else if (orbT.Health > orbT.MaxHealth * 0.3)
-                        Render.Circle.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 1);
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Orange, 1, 1);
                     else
-                        Render.Circle.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 1);
+                        Utility.DrawCircle(orbT.Position, orbT.BoundingRadius, System.Drawing.Color.Red, 1, 1);
                 }
             }
         }
