@@ -16,7 +16,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private Menu Config = Program.Config;
         private Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell Q, W, E, R, DrawSpell;
-
         private static Font Tahoma13, Tahoma13B;
 
         public void LoadOKTW()
@@ -33,7 +32,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             Tahoma13 = new Font( Drawing.Direct3DDevice, new FontDescription
                 { FaceName = "Tahoma", Height = 14, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
-
 
             Q = new Spell(SpellSlot.Q);
             E = new Spell(SpellSlot.E);
@@ -78,9 +76,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
+            
+            bool blink = true;
+
+            if ((int)(Game.Time * 10) % 2 == 0)
+                blink = false;
 
             var HpBar = Config.Item("HpBar").GetValue<bool>();
-
             var championInfo = Config.Item("championInfo").GetValue<bool>();
             var GankAlert = Config.Item("GankAlert").GetValue<bool>();
             var ShowKDA = Config.Item("ShowKDA").GetValue<bool>();
@@ -100,23 +102,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             foreach (var enemy in Program.Enemies)
             {
-                if (enemy.IsValidTarget())
+                if (enemy.IsValidTarget() && ShowClicks)
                 {
-                    if (ShowClicks)
+                    var lastWaypoint = enemy.GetWaypoints().Last().To3D();
+                    if (lastWaypoint.IsValid())
                     {
-                        var lastWaypoint = enemy.GetWaypoints().Last().To3D();
-                        if (lastWaypoint.IsValid())
-                        {
-                            drawLine(enemy.Position, lastWaypoint, 1, System.Drawing.Color.Red);
-                            if (enemy.GetWaypoints().Count() > 1)
-                                DrawFontTextMap(Tahoma13, enemy.ChampionName, lastWaypoint, SharpDX.Color.WhiteSmoke);
-                        }
+                        drawLine(enemy.Position, lastWaypoint, 1, System.Drawing.Color.Red);
+                            
+                        if (enemy.GetWaypoints().Count() > 1)
+                            DrawFontTextMap(Tahoma13, enemy.ChampionName, lastWaypoint, SharpDX.Color.WhiteSmoke);
                     }
                 }
 
                 if (HpBar && enemy.IsHPBarRendered && Render.OnScreen(Drawing.WorldToScreen(enemy.Position)))
                 {
-
                     var barPos = enemy.HPBarPosition;
 
                     float QdmgDraw = 0, WdmgDraw = 0, EdmgDraw = 0, RdmgDraw = 0, damage = 0; ;
@@ -190,7 +189,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (ShowKDA)
                         Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                     */
-
                     Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName);
                     Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
                 }
@@ -198,7 +196,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 var Distance = Player.Distance(enemy.Position);
                 if (GankAlert && !enemy.IsDead && Distance > 1200)
                 {
-
                     var wts = Drawing.WorldToScreen(ObjectManager.Player.Position.Extend(enemy.Position, positionGang));
 
                     wts[0] = wts[0];
@@ -213,20 +210,15 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (Distance > 3500 && enemy.IsVisible)
                     {
                         DrawFontTextMap(Tahoma13, enemy.ChampionName,Player.Position.Extend(enemy.Position, positionGang) , SharpDX.Color.White);
-                        //drawText(enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.GreenYellow);
                     }
                     else if (!enemy.IsVisible)
                     {
                         var ChampionInfoOne = Core.OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
                         if (ChampionInfoOne != null )
                         {
-                            if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
+                            if (blink && Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
                             {
-                                if ((int)(Game.Time * 10) % 2 == 0)
-                                {
-                                    //drawText("SS " + enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), System.Drawing.Color.Yellow);
                                     DrawFontTextMap(Tahoma13, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Player.Position.Extend(enemy.Position, positionGang), SharpDX.Color.Yellow);
-                                }
                             }
                             else
                             {
@@ -236,19 +228,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         else
                             DrawFontTextMap(Tahoma13, "SS " + enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), SharpDX.Color.Yellow);
                     }
-                    else
+                    else if (blink)
                     {
-                        if ((int)(Game.Time * 10) % 2 == 0)
-                        {
-                            DrawFontTextMap(Tahoma13B, enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), SharpDX.Color.OrangeRed);
-                        }
+                        DrawFontTextMap(Tahoma13B, enemy.ChampionName, Player.Position.Extend(enemy.Position, positionGang), SharpDX.Color.OrangeRed);
                     }
 
                     if (Distance < 3500 && enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                     {
-                        
                         drawLine(Player.Position.Extend(enemy.Position, 100), Player.Position.Extend(enemy.Position, positionGang - 100), (int)((3500 - Distance) / 300), System.Drawing.Color.OrangeRed);
-
                     }
                     else if (Distance < 3500 && !enemy.IsVisible && !Render.OnScreen(Drawing.WorldToScreen(Player.Position.Extend(enemy.Position, Distance + 500))))
                     {
@@ -262,6 +249,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 positionGang = positionGang + 100;
             }
 
+            DrawOrbwalkerRange();
+            DrawOrbwalkerTarget();
+        }
+
+        private void DrawOrbwalkerRange()
+        {
             if (Config.Item("OrbDraw").GetValue<bool>())
             {
                 if (Player.HealthPercent > 60)
@@ -271,8 +264,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 else
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius * 2, System.Drawing.Color.Red, 1);
             }
-
-            DrawOrbwalkerTarget();
         }
 
         private void DrawOrbwalkerTarget()
