@@ -12,7 +12,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
 {
     class OKTWdraws
     {
-        
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
@@ -106,17 +105,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
             float posX = ((float)Config.Item("posX").GetValue<Slider>().Value * 0.01f) * Drawing.Width;
             float positionDraw = 0;
             float positionGang = 500;
-
             int Width = 103;
             int Height = 8;
             int XOffset = 10;
             int YOffset = 20;
-
             var FillColor = System.Drawing.Color.GreenYellow;
             var Color = System.Drawing.Color.Azure;
-
             float offset = 0;
-
+                
             foreach (var enemy in Program.Enemies)
             {
                 if (Config.Item("SS").GetValue<bool>())
@@ -124,8 +120,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     offset += 0.15f;
                     if (!enemy.IsVisible && !enemy.IsDead)
                     {
-                        
-
                         var ChampionInfoOne = OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
                         if (ChampionInfoOne != null && enemy != Program.jungler)
                         {
@@ -253,10 +247,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     else if (!enemy.IsVisible)
                     {
                         var ChampionInfoOne = Core.OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
-
-
-
-
                         if (ChampionInfoOne != null )
                         {
                             if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)

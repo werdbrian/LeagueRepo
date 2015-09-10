@@ -48,7 +48,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-
             Config.SubMenu("Orbwalking").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
                 
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
@@ -163,16 +162,16 @@ namespace OneKeyToWin_AIO_Sebby
                 case "Morgana":
                     new Champions.Morgana().LoadOKTW();
                     break;
-                
             }
+
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-                if (IsJungler(hero) && hero.IsEnemy)
+                if ( hero.IsEnemy)
                 {
-                    jungler = hero;
-                }
-                if (hero.IsEnemy)
                     Enemies.Add(hero);
+                    if (IsJungler(hero))
+                        jungler = hero;
+                } 
                 if (hero.IsAlly)
                     Allies.Add(hero);
             }
@@ -426,7 +425,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
-            
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
             
