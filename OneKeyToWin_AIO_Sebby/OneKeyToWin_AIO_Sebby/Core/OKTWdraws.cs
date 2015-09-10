@@ -28,7 +28,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("ShowKDA", "Show KDA").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("ShowKDA", "Show flash and R info").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("GankAlert", "Gank Alert").SetValue(true));
 
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
@@ -218,36 +218,37 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 if (championInfo)
                 {
                     positionDraw += 15;
-                    /*
-                    if (ShowKDA)
-                        Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
-                    */
+  
+                    
+      
 
                     DrawFontTextScreen(Tahoma13, "" + enemy.Level, posX - 25, posY + positionDraw, SharpDX.Color.White);
                     DrawFontTextScreen(Tahoma13, enemy.ChampionName, posX, posY + positionDraw, SharpDX.Color.White);
 
-                    var fSlot = enemy.Spellbook.Spells[4];
-                    if (fSlot.Name != "summonerflash")
-                        fSlot = enemy.Spellbook.Spells[5];
+                    if (ShowKDA)
+                    {
+                        var fSlot = enemy.Spellbook.Spells[4];
+                        if (fSlot.Name != "summonerflash")
+                            fSlot = enemy.Spellbook.Spells[5];
+
+                        if (fSlot.Name == "summonerflash")
+                        {
+                            var fT = fSlot.CooldownExpires - Game.Time;
+                            if (fT < 0)
+                                DrawFontTextScreen(Tahoma13, "F rdy", posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
+                            else
+                                DrawFontTextScreen(Tahoma13, "F " + (int)fT, posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
+                        }
 
 
-                    var fT = fSlot.CooldownExpires - Game.Time;
+                        var rSlot = enemy.Spellbook.Spells[3];
+                        var t = rSlot.CooldownExpires - Game.Time;
 
-                    if (fT < 0)
-                        DrawFontTextScreen(Tahoma13, "F rdy", posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
-                    else
-                        DrawFontTextScreen(Tahoma13, "F " + (int)fT, posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
-                       
-                    
-                    
-                    var rSlot = enemy.Spellbook.Spells[3];
-                    var t = rSlot.CooldownExpires - Game.Time;
-                    
-                    if (t < 0)
-                        DrawFontTextScreen(Tahoma13, "R rdy", posX + 145, posY + positionDraw, SharpDX.Color.GreenYellow);
-                    else
-                        Drawing.DrawText(posX + 145, posY + positionDraw, System.Drawing.Color.Yellow, "R " + (int)t);
-                    
+                        if (t < 0)
+                            DrawFontTextScreen(Tahoma13, "R rdy", posX + 145, posY + positionDraw, SharpDX.Color.GreenYellow);
+                        else
+                            Drawing.DrawText(posX + 145, posY + positionDraw, System.Drawing.Color.Yellow, "R " + (int)t);
+                    }
                     
                     //Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
                 }
