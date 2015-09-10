@@ -17,7 +17,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public Spell Q, W, E, R, DrawSpell;
-        private static Font Tahoma13, Tahoma13B;
+        private static Font Tahoma13, Tahoma13B, TextBold;
 
         public void LoadOKTW()
         {
@@ -28,11 +28,25 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("1", "pls disable Orbwalking > Drawing > AAcirlce"));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("Draw AAcirlce OKTW© style").AddItem(new MenuItem("2", "My HP: 0-30 red, 30-60 orange,60-100 green"));
 
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("ShowKDA", "Show KDA").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("GankAlert", "Gank Alert").SetValue(true));
+
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
+
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("HpBar", "Dmg indicators BAR OKTW© style").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
+
             Tahoma13B = new Font( Drawing.Direct3DDevice, new FontDescription
                { FaceName = "Tahoma", Height = 14, Weight = FontWeight.Bold, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
 
             Tahoma13 = new Font( Drawing.Direct3DDevice, new FontDescription
                 { FaceName = "Tahoma", Height = 14, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType });
+
+            TextBold = new Font(Drawing.Direct3DDevice, new FontDescription
+                {FaceName = "Impact", Height = 30, Weight = FontWeight.Normal, OutputPrecision = FontPrecision.Default, Quality = FontQuality.ClearType});
 
             Q = new Spell(SpellSlot.Q);
             E = new Spell(SpellSlot.E);
@@ -101,8 +115,32 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var FillColor = System.Drawing.Color.GreenYellow;
             var Color = System.Drawing.Color.Azure;
 
+            float offset = 0;
+
             foreach (var enemy in Program.Enemies)
             {
+                if (Config.Item("SS").GetValue<bool>())
+                {
+                    offset += 0.15f;
+                    if (!enemy.IsVisible && !enemy.IsDead)
+                    {
+                        
+
+                        var ChampionInfoOne = OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+                        if (ChampionInfoOne != null && enemy != Program.jungler)
+                        {
+                            if ((int)(Game.Time * 10) % 2 == 0 && Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
+                            {
+                                DrawFontTextScreen(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
+                            }
+                            if (Game.Time - ChampionInfoOne.LastVisableTime >= 7)
+                            {
+                                DrawFontTextScreen(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
+                            }
+                        }
+                    }
+                }
+                
                 if (enemy.IsValidTarget() && ShowClicks)
                 {
                     var lastWaypoint = enemy.GetWaypoints().Last().To3D();
@@ -215,6 +253,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     else if (!enemy.IsVisible)
                     {
                         var ChampionInfoOne = Core.OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+
+
+
+
                         if (ChampionInfoOne != null )
                         {
                             if (Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)

@@ -34,36 +34,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
     class OKTWtracker
     {
         private Menu Config = Program.Config;
-        private Font Text, TextBold;
         public static List<ChampionInfo> ChampionInfoList = new List<ChampionInfo>();
 
         public static Obj_AI_Hero jungler;
 
         public void LoadOKTW()
         {
-            TextBold = new Font(
-                Drawing.Direct3DDevice,
-                new FontDescription
-                {
-                    FaceName = "Impact",
-                    Height = 30,
-                    Weight = FontWeight.Normal,
-                    OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.Default
-                });
-
-            Text = new Font(
-                Drawing.Direct3DDevice,
-                new FontDescription
-                {
-                    FaceName = "Calibri",
-                    Height = 16,
-                    OutputPrecision = FontPrecision.Default,
-                    Quality = FontQuality.ClearType
-                });
-
-            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
-
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                 if (hero.IsEnemy)
@@ -74,7 +50,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
         }
@@ -152,36 +127,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         }
 
         private bool IsJungler(Obj_AI_Hero hero) { return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite")); }
-
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            if (Config.Item("disableDraws").GetValue<bool>())
-                return;
-
-            float offset = 0;
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
-            {
-                offset += 0.15f;
-                if (!enemy.IsVisible && !enemy.IsDead)
-                {
-                    if (Config.Item("SS").GetValue<bool>())
-                    {
-                        var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
-                        if (ChampionInfoOne != null && enemy != Program.jungler)
-                        {
-                            if ((int)(Game.Time * 10) % 2 == 0 && Game.Time - ChampionInfoOne.LastVisableTime > 3 && Game.Time - ChampionInfoOne.LastVisableTime < 7)
-                            {
-                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
-                            }
-                            if (Game.Time - ChampionInfoOne.LastVisableTime >= 7)
-                            {
-                                DrawText(TextBold, "SS " + enemy.ChampionName + " " + (int)(Game.Time - ChampionInfoOne.LastVisableTime), Drawing.Width * offset, Drawing.Height * 0.02f, SharpDX.Color.OrangeRed);
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
     }
 }
