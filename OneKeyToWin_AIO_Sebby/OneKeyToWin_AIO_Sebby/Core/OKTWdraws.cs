@@ -222,8 +222,34 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (ShowKDA)
                         Drawing.DrawText(posX - 30, posY + positionDraw, kolor, " " + enemy.ChampionsKilled + "/" + enemy.Deaths + "/" + enemy.Assists + " " + enemy.MinionsKilled);
                     */
-                    Drawing.DrawText(posX + 60, posY + positionDraw, kolor, enemy.ChampionName);
-                    Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
+
+                    DrawFontTextScreen(Tahoma13, "" + enemy.Level, posX - 25, posY + positionDraw, SharpDX.Color.White);
+                    DrawFontTextScreen(Tahoma13, enemy.ChampionName, posX, posY + positionDraw, SharpDX.Color.White);
+
+                    var fSlot = enemy.Spellbook.Spells[4];
+                    if (fSlot.Name != "summonerflash")
+                        fSlot = enemy.Spellbook.Spells[5];
+
+
+                    var fT = fSlot.CooldownExpires - Game.Time;
+
+                    if (fT < 0)
+                        DrawFontTextScreen(Tahoma13, "F rdy", posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
+                    else
+                        DrawFontTextScreen(Tahoma13, "F " + (int)fT, posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
+                       
+                    
+                    
+                    var rSlot = enemy.Spellbook.Spells[3];
+                    var t = rSlot.CooldownExpires - Game.Time;
+                    
+                    if (t < 0)
+                        DrawFontTextScreen(Tahoma13, "R rdy", posX + 145, posY + positionDraw, SharpDX.Color.GreenYellow);
+                    else
+                        Drawing.DrawText(posX + 145, posY + positionDraw, System.Drawing.Color.Yellow, "R " + (int)t);
+                    
+                    
+                    //Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
                 }
 
                 var Distance = Player.Distance(enemy.Position);
