@@ -202,37 +202,35 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
+            if (Game.Time - QCastTime > 0.6 && Player.CountEnemiesInRange(400) == 0)
+            {
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && !Orbwalking.InAutoAttackRange(enemy) ))
+                {
+                    var comboDmg = W.GetDamage(enemy);
+                    if (R.IsReady() && Player.Mana > RMANA + WMANA)
+                    {
+                        comboDmg += R.GetDamage(enemy, 1);
+                    }
+                    if (comboDmg > enemy.Health)
+                    {
+                        Program.CastSpell(W, enemy);
+                        return;
+                    }
+                }
+            }
+
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-
-                var comboDmg = W.GetDamage(t);
-                if (R.IsReady() && Player.Mana > RMANA + WMANA)
-                {
-                    comboDmg += R.GetDamage(t, 1);
-                }
-                else if (Player.Distance(t.Position) < 1000)
-                {
-                    comboDmg += (float)Player.GetAutoAttackDamage(t) * 2;
-                }
-
-                foreach (var enemy in Program.Enemies.Where(enemy => Game.Time - QCastTime > 0.6 && enemy.IsValidTarget(W.Range + 200) && comboDmg > enemy.Health && Player.CountEnemiesInRange(400) == 0 && !Orbwalking.InAutoAttackRange(enemy) && GetRealDistance(enemy) > bonusRange()))
-                {
-                    Program.CastSpell(W, enemy);
-                    return;
-                }
-
-                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0 && !Orbwalking.InAutoAttackRange(t))
+                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && GetRealDistance(t) > bonusRange() - 50 && GetRealDistance(t) > bonusRange() - 50)
                 {
                     Program.CastSpell(W, t);
                 }
-
                 else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + WMANA + 40 && !Player.UnderTurret(true) && Player.CountEnemiesInRange(bonusRange()) == 0 && OktwCommon.CanHarras())
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
                         Program.CastSpell(W, enemy);
-                }
-
+                }   
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + WMANA && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
