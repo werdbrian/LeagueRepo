@@ -443,13 +443,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
-            float pathMinLen = 400f;
+            float pathMinLen = 600f;
             double angleMove = 30 + (input.Radius / 10);
             float BackToFront = input.Unit.MoveSpeed * totalDelay;
 
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
-                pathMinLen = 500f;
+                pathMinLen = BackToFront * 2;
                 angleMove += 10;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
