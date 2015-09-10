@@ -11,19 +11,7 @@ using System.Drawing;
 
 namespace OneKeyToWin_AIO_Sebby
 {
-    class RecallInfo
-    {
-        public int RecallID { get; set; }
-        public float RecallStart { get; set; }
-        public int RecallNum { get; set; }
-    }
-    class VisableInfo
-    {
-        public int VisableID { get; set; }
-        public Vector3 LastPosition { get; set; }
-        public float time { get; set; }
-        public Vector3 PredictedPos { get; set; }
-    }
+
 
     class champions { public Obj_AI_Hero Player; }
 
@@ -38,8 +26,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
         public static Core.PredictionOutput DrawSpellPos;
-
-        public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
         public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
@@ -55,12 +41,166 @@ namespace OneKeyToWin_AIO_Sebby
             R = new Spell(SpellSlot.R);
 
             Config = new Menu("OneKeyToWin AIO", "OneKeyToWin_AIO" + ObjectManager.Player.ChampionName, true);
+
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            Config.AddSubMenu(targetSelectorMenu);
+
+            Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+
+            Config.SubMenu("Orbwalking").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
+                
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
+
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
+
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("ShowKDA", "Show KDA").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("GankAlert", "Gank Alert").SetValue(true));
+
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
+
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("HpBar", "Dmg indicators BAR OKTW© style").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
+
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("PredictionMODE", "Prediction MODE", true).SetValue(new StringList(new[] { "Common prediction", "OKTW© PREDICTION" }, 1)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
+
+            switch (Player.ChampionName)
+            {
+                case "Jinx":
+                    new Jinx().LoadOKTW();
+                    break;
+                case "Sivir":
+                    new Sivir().LoadOKTW();
+                    break;
+                case "Ezreal":
+                    new Ezreal().LoadOKTW();
+                    break;
+                case "KogMaw":
+                    new KogMaw().LoadOKTW();
+                    break;
+                case "Annie":
+                    new Annie().LoadOKTW();
+                    break;
+                case "Ashe":
+                    new Ashe().LoadOKTW();
+                    break;
+                case "MissFortune":
+                    new MissFortune().LoadOKTW();
+                    break;
+                case "Quinn":
+                    new Quinn().LoadOKTW();
+                    break;
+                case "Kalista":
+                    new Kalista().LoadOKTW();
+                    break;
+                case "Caitlyn":
+                    new Caitlyn().LoadOKTW();
+                    break;
+                case "Graves":
+                    new Graves().LoadOKTW();
+                    break;
+                case "Urgot":
+                    new Urgot().LoadOKTW();
+                    break;
+                case "Anivia":
+                    new Anivia().LoadOKTW();
+                    break;
+                case "Orianna":
+                    new Orianna().LoadOKTW();
+                    break;
+                case "Ekko":
+                    new Ekko().LoadOKTW();
+                    break;
+                case "Vayne":
+                    new Vayne().LoadOKTW();
+                    break;
+                case "Lucian":
+                    new Lucian().LoadOKTW();
+                    break;
+                case "Darius":
+                    new Champions.Darius().LoadOKTW();
+                    break;
+                case "Blitzcrank":
+                    new Champions.Blitzcrank().LoadOKTW();
+                    break;
+                case "Corki":
+                    new Champions.Corki().LoadOKTW();
+                    break;
+                case "Varus":
+                    new Champions.Varus().LoadOKTW();
+                    break;
+                case "Twitch":
+                    new Champions.Twitch().LoadOKTW();
+                    break;
+                case "Tristana":
+                    new Champions.Tristana().LoadMenuOKTW();
+                    break;
+                case "Xerath":
+                    new Champions.Xerath().LoadOKTW();
+                    break;
+                case "Syndra":
+                    new Champions.Syndra().LoadOKTW();
+                    break;
+                case "Kayle":
+                    new Champions.Kayle().LoadOKTW();
+                    break;
+                case "Thresh":
+                    new Champions.Thresh().LoadOKTW();
+                    break;
+                case "Draven":
+                    new Champions.Draven().LoadOKTW();
+                    break;
+                case "Evelynn":
+                    new Champions.Evelynn().LoadOKTW();
+                    break;
+                case "Ahri":
+                    new Champions.Ahri().LoadOKTW();
+                    break;
+                case "Brand":
+                    new Champions.Brand().LoadOKTW();
+                    break;
+                case "Morgana":
+                    new Champions.Morgana().LoadOKTW();
+                    break;
+                
+            }
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                if (IsJungler(hero) && hero.IsEnemy)
+                {
+                    jungler = hero;
+                }
+                if (hero.IsEnemy)
+                    Enemies.Add(hero);
+                if (hero.IsAlly)
+                    Allies.Add(hero);
+            }
+
+            new Summoners().LoadOKTW();
+            new Activator().LoadOKTW();
+            new Core.OKTWward().LoadOKTW();
+            new Core.AutoLvlUp().LoadOKTW();
+            new OktwCommon().LoadOKTW();
+            new Core.OKTWtracker().LoadOKTW();
+            new Core.OKTWdraws().LoadOKTW();
+
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
             //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));
             //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("1", "ON - increase fps"));
-           // Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
+            // Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("2", "OFF - normal mode"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("0", "OneKeyToWin© by Sebby"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("1", "visit joduska.me"));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("2", "DONATE: kaczor.sebastian@gmail.com"));
@@ -91,168 +231,24 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("26", "Ahri "));
             Config.SubMenu("About OKTW©").SubMenu("Supported champions:").AddItem(new MenuItem("27", "Draven "));
 
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
-
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
-                Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
-
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("4", "CYAN jungler dead - take objectives"));
-
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("championInfo", "Game Info").SetValue(true));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("ShowKDA", "Show KDA").SetValue(true));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("GankAlert", "Gank Alert").SetValue(true));
-
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posX", "posX").SetValue(new Slider(20, 100, 0)));
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("ChampionInfo").AddItem(new MenuItem("posY", "posY").SetValue(new Slider(10, 100, 0)));
-
-            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("HpBar", "Dmg indicators BAR OKTW© style").SetValue(true));
-            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
-
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("PredictionMODE", "Prediction MODE", true).SetValue(new StringList(new[] { "Common prediction", "OKTW© PREDICTION" }, 1)));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
-
             if (Config.Item("debug").GetValue<bool>())
             {
                 new Core.OKTWlab().LoadOKTW();
             }
-            
-            
-                var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-                TargetSelector.AddToMenu(targetSelectorMenu);
-                Config.AddSubMenu(targetSelectorMenu);
-
-                Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-                Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
-
-                switch (Player.ChampionName)
-                {
-                    case "Jinx":
-                        new Jinx().LoadOKTW();
-                        break;
-                    case "Sivir":
-                        new Sivir().LoadOKTW();
-                        break;
-                    case "Ezreal":
-                        new Ezreal().LoadOKTW();
-                        break;
-                    case "KogMaw":
-                        new KogMaw().LoadOKTW();
-                        break;
-                    case "Annie":
-                        new Annie().LoadOKTW();
-                        break;
-                    case "Ashe":
-                        new Ashe().LoadOKTW();
-                        break;
-                    case "MissFortune":
-                        new MissFortune().LoadOKTW();
-                        break;
-                    case "Quinn":
-                        new Quinn().LoadOKTW();
-                        break;
-                    case "Kalista":
-                        new Kalista().LoadOKTW();
-                        break;
-                    case "Caitlyn":
-                        new Caitlyn().LoadOKTW();
-                        break;
-                    case "Graves":
-                        new Graves().LoadOKTW();
-                        break;
-                    case "Urgot":
-                        new Urgot().LoadOKTW();
-                        break;
-                    case "Anivia":
-                        new Anivia().LoadOKTW();
-                        break;
-                    case "Orianna":
-                        new Orianna().LoadOKTW();
-                        break;
-                    case "Ekko":
-                        new Ekko().LoadOKTW();
-                        break;
-                    case "Vayne":
-                        new Vayne().LoadOKTW();
-                        break;
-                    case "Lucian":
-                        new Lucian().LoadOKTW();
-                        break;
-                    case "Darius":
-                        new Champions.Darius().LoadOKTW();
-                        break;
-                    case "Blitzcrank":
-                        new Champions.Blitzcrank().LoadOKTW();
-                        break;
-                    case "Corki":
-                        new Champions.Corki().LoadOKTW();
-                        break;
-                    case "Varus":
-                        new Champions.Varus().LoadOKTW();
-                        break;
-                    case "Twitch":
-                        new Champions.Twitch().LoadOKTW();
-                        break;
-                    case "Tristana":
-                        new Champions.Tristana().LoadMenuOKTW();
-                        break;
-                    case "Xerath":
-                        new Champions.Xerath().LoadOKTW();
-                        break;
-                    case "Syndra":
-                        new Champions.Syndra().LoadOKTW();
-                        break;
-                    case "Kayle":
-                        new Champions.Kayle().LoadOKTW();
-                        break;
-                    case "Thresh":
-                        new Champions.Thresh().LoadOKTW();
-                        break;
-                    case "Draven":
-                        new Champions.Draven().LoadOKTW();
-                        break;
-                    case "Evelynn":
-                        new Champions.Evelynn().LoadOKTW();
-                        break;
-                    case "Ahri":
-                        new Champions.Ahri().LoadOKTW();
-                        break;
-                    case "Brand":
-                        new Champions.Brand().LoadOKTW();
-                        break;
-                    case "Morgana":
-                        new Champions.Morgana().LoadOKTW();
-                        break;
-                
-            }
-            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (IsJungler(hero) && hero.IsEnemy)
-                {
-                    jungler = hero;
-                }
-                if (hero.IsEnemy)
-                    Enemies.Add(hero);
-                if (hero.IsAlly)
-                    Allies.Add(hero);
-            }
-
-            new Summoners().LoadOKTW();
-            new Activator().LoadOKTW();
-            new Core.OKTWward().LoadOKTW();
-            new Core.AutoLvlUp().LoadOKTW();
-            new OktwCommon().LoadOKTW();
-            new Core.OKTWtracker().LoadOKTW();
-            new Core.OKTWdraws().LoadOKTW();
 
             //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
-            
+            Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += OnDraw;
+        }
+
+        private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
+        {
+            if (Config.Item("supportMode",true).GetValue<bool>() && (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
+            {
+                if (((Obj_AI_Base)Orbwalker.GetTarget()).IsMinion) args.Process = false;
+            }
         }
 
         private static void OnUpdate(EventArgs args)
