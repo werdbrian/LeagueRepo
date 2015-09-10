@@ -218,10 +218,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 if (championInfo)
                 {
                     positionDraw += 15;
-  
-                    
-      
-
                     DrawFontTextScreen(Tahoma13, "" + enemy.Level, posX - 25, posY + positionDraw, SharpDX.Color.White);
                     DrawFontTextScreen(Tahoma13, enemy.ChampionName, posX, posY + positionDraw, SharpDX.Color.White);
 

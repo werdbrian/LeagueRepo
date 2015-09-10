@@ -33,9 +33,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
     class OKTWtracker
     {
-        private Menu Config = Program.Config;
         public static List<ChampionInfo> ChampionInfoList = new List<ChampionInfo>();
-
         public static Obj_AI_Hero jungler;
 
         public void LoadOKTW()
@@ -53,7 +51,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Game.OnUpdate += OnUpdate;
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
         }
-
 
         private static void Obj_AI_Base_OnTeleport(GameObject sender, GameObjectTeleportEventArgs args)
         {
@@ -89,7 +86,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (!Program.LagFree(3))
                 return;
 
-
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValid))
             {
                 var ChampionInfoOne = ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
@@ -121,12 +117,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
         }
 
-        public void DrawText(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
-        {
-            vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
-        }
-
         private bool IsJungler(Obj_AI_Hero hero) { return hero.Spellbook.Spells.Any(spell => spell.Name.ToLower().Contains("smite")); }
-
     }
 }
