@@ -31,7 +31,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E = new Spell(SpellSlot.E, 450);
             R = new Spell(SpellSlot.R, 430);
 
-            Q.SetSkillshot(0.5f, 70, 1900f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.5f, 80, 1900f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 200, float.MaxValue, false, SkillshotType.SkillshotLine);  
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q option").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
