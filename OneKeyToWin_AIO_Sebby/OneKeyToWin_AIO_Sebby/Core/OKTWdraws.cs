@@ -12,9 +12,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
 {
     class OKTWdraws
     {
-        private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+        
         private Menu Config = Program.Config;
-        private Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
+        public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
+        private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public Spell Q, W, E, R, DrawSpell;
         private static Font Tahoma13, Tahoma13B;
 
@@ -271,7 +272,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (Config.Item("orb").GetValue<bool>())
             {
-                var orbT = Program.Orbwalker.GetTarget();
+                var orbT = Orbwalker.GetTarget();
                 if (orbT.IsValidTarget())
                 {
                     if (orbT.Health > orbT.MaxHealth * 0.6)

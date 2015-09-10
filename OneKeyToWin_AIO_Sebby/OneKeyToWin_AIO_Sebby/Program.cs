@@ -132,14 +132,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
 
-            new Summoners().LoadOKTW();
-            new Activator().LoadOKTW();
-            new Core.OKTWward().LoadOKTW();
-            new Core.AutoLvlUp().LoadOKTW();
-            new OktwCommon().LoadOKTW();
-            new Core.OKTWtracker().LoadOKTW();
-            new Core.OKTWdraws().LoadOKTW();
-
             //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
             {
@@ -267,6 +259,14 @@ namespace OneKeyToWin_AIO_Sebby
                 if (hero.IsAlly)
                     Allies.Add(hero);
             }
+
+            new Summoners().LoadOKTW();
+            new Activator().LoadOKTW();
+            new Core.OKTWward().LoadOKTW();
+            new Core.AutoLvlUp().LoadOKTW();
+            new OktwCommon().LoadOKTW();
+            new Core.OKTWtracker().LoadOKTW();
+            new Core.OKTWdraws().LoadOKTW();
 
             //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
