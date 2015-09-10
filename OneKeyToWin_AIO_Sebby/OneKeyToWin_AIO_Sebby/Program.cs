@@ -31,38 +31,21 @@ namespace OneKeyToWin_AIO_Sebby
     {
         public static Menu Config;
         public static Orbwalking.Orbwalker Orbwalker;
-
         public static Spell Q, W, E, R, DrawSpell;
-
         public static string championMsg;
         public static float JungleTime, DrawSpellTime=0;
         public static Obj_AI_Hero jungler = ObjectManager.Player;
         public static int timer, HitChanceNum = 4, tickNum = 4, tickIndex = 0;
         public static Obj_SpawnPoint enemySpawn;
         public static Core.PredictionOutput DrawSpellPos;
-        public static bool 
-            tickSkip = true,
-            RangeFix = true,
-            FastMode = true,
-            ColFix = true,
-            NewWay = true,
-            tryAA = true,
-            IgnoreNoMove = true;
 
         public static List<RecallInfo> RecallInfos = new List<RecallInfo>();
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>();
         public static List<Obj_AI_Hero> Allies = new List<Obj_AI_Hero>();
 
-        public static Items.Item 
-            WardN = new Items.Item(2044, 600f),
-            TrinketN = new Items.Item(3340, 600f),
-            SightStone = new Items.Item(2049, 600f),
-            FarsightOrb = new Items.Item(3342, 4000f),
-            ScryingOrb = new Items.Item(3363, 3500f);
+        private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
-
-        private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         private static void GameOnOnGameLoad(EventArgs args)
         {
@@ -132,13 +115,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
 
-            //new Core.OKTWfarmLogic().LoadOKTW();
             if (Config.Item("debug").GetValue<bool>())
             {
                 new Core.OKTWlab().LoadOKTW();
             }
-
-            //if (!Config.Item("disableChampion").GetValue<bool>())
             
             
                 var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
