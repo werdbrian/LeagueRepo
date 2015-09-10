@@ -67,12 +67,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] + weight, color, msg);
         }
 
-        private void DrawFontTextScreen(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
+        public void DrawFontTextScreen(Font vFont, string vText, float vPosX, float vPosY, ColorBGRA vColor)
         {
             vFont.DrawText(null, vText, (int)vPosX, (int)vPosY, vColor);
         }
 
-        private void DrawFontTextMap(Font vFont, string vText, Vector3 Pos, ColorBGRA vColor)
+        public void DrawFontTextMap(Font vFont, string vText, Vector3 Pos, ColorBGRA vColor)
         {
             var wts = Drawing.WorldToScreen(Pos);
             vFont.DrawText(null, vText, (int)wts[0] , (int)wts[1], vColor);
@@ -233,7 +233,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             if (fT < 0)
                                 DrawFontTextScreen(Tahoma13, "F rdy", posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
                             else
-                                DrawFontTextScreen(Tahoma13, "F " + (int)fT, posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
+                                DrawFontTextScreen(Tahoma13, "F " + (int)fT, posX + 110, posY + positionDraw, SharpDX.Color.Yellow);
                         }
 
                         if (enemy.Level > 5)
@@ -244,7 +244,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             if (t < 0)
                                 DrawFontTextScreen(Tahoma13, "R rdy", posX + 145, posY + positionDraw, SharpDX.Color.GreenYellow);
                             else
-                                Drawing.DrawText(posX + 145, posY + positionDraw, System.Drawing.Color.Yellow, "R " + (int)t);
+                                DrawFontTextScreen(Tahoma13, "R " + (int)t, posX + 145, posY + positionDraw, SharpDX.Color.Yellow);
                         }
                         else
                             DrawFontTextScreen(Tahoma13, "R ", posX + 145, posY + positionDraw, SharpDX.Color.Yellow);
