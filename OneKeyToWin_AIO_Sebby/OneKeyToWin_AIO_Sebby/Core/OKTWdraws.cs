@@ -240,14 +240,18 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 DrawFontTextScreen(Tahoma13, "F " + (int)fT, posX + 110, posY + positionDraw, SharpDX.Color.GreenYellow);
                         }
 
+                        if (enemy.Level > 5)
+                        {
+                            var rSlot = enemy.Spellbook.Spells[3];
+                            var t = rSlot.CooldownExpires - Game.Time;
 
-                        var rSlot = enemy.Spellbook.Spells[3];
-                        var t = rSlot.CooldownExpires - Game.Time;
-
-                        if (t < 0)
-                            DrawFontTextScreen(Tahoma13, "R rdy", posX + 145, posY + positionDraw, SharpDX.Color.GreenYellow);
+                            if (t < 0)
+                                DrawFontTextScreen(Tahoma13, "R rdy", posX + 145, posY + positionDraw, SharpDX.Color.GreenYellow);
+                            else
+                                Drawing.DrawText(posX + 145, posY + positionDraw, System.Drawing.Color.Yellow, "R " + (int)t);
+                        }
                         else
-                            Drawing.DrawText(posX + 145, posY + positionDraw, System.Drawing.Color.Yellow, "R " + (int)t);
+                            DrawFontTextScreen(Tahoma13, "R ", posX + 145, posY + positionDraw, SharpDX.Color.Yellow);
                     }
                     
                     //Drawing.DrawText(posX - 70, posY + positionDraw, kolor, enemy.Level + " lvl");
