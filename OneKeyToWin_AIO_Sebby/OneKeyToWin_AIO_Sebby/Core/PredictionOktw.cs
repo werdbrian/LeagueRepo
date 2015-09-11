@@ -449,7 +449,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
-                pathMinLen = BackToFront * 2;
+                //pathMinLen = BackToFront * 2;
                 angleMove += 5;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
