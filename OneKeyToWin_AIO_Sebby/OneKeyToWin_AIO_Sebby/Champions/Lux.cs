@@ -13,18 +13,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-        private Spell E, Q, R, W;
+        private Spell E, Q, R, W, Qcol;
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         public void LoadOKTW()
         {
             Q = new Spell(SpellSlot.Q, 1175);
+            Qcol = new Spell(SpellSlot.Q, 1175);
             W = new Spell(SpellSlot.W, 1075);
             E = new Spell(SpellSlot.E, 1075);
             R = new Spell(SpellSlot.R, 3000);
 
-            Q.SetSkillshot(0.25f, 70f, 1200f, true, SkillshotType.SkillshotLine);
+            Qcol.SetSkillshot(0.25f, 70f, 1200f, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.25f, 70f, 1200f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.25f, 110f, 1200f, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 280f, 1300f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(1.25f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
@@ -127,7 +129,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
                 if (t.IsValidTarget())
-                    R.Cast(t);
+                    Program.CastSpell(R, t);
             }
 
             if (Program.LagFree(0))
@@ -163,34 +165,43 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
+            
             if (Program.Combo && Config.Item("ts").GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
                 if (t.IsValidTarget(Q.Range) && !t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && Config.Item("grab" + t.ChampionName).GetValue<bool>())
-                    Program.CastSpell(Q, t);
+                    CastQ(t);
             }
             foreach (var t in Program.Enemies.Where(t => t.IsValidTarget(Q.Range) && Config.Item("grab" + t.ChampionName).GetValue<bool>()))
             {
                 if (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield))
                 {
                     if (Program.Combo && !Config.Item("ts").GetValue<bool>())
-                        Program.CastSpell(Q, t);
+                        CastQ(t);
 
                     if (Config.Item("qCC").GetValue<bool>())
                     {
                         if (!OktwCommon.CanMove(t))
                             Q.Cast(t, true);
-                        Q.CastIfHitchanceEquals(t, HitChance.Dashing);
-                        Q.CastIfHitchanceEquals(t, HitChance.Immobile);
+                        Qcol.CastIfHitchanceEquals(t, HitChance.Dashing);
+                        Qcol.CastIfHitchanceEquals(t, HitChance.Immobile);
                     }
                 }
             }
         }
+        private void CastQ(Obj_AI_Base t)
+        {
+            var poutput = Qcol.GetPrediction(t);
+            
+            var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
+            if ( col < 4)
+                Program.CastSpell(Q, t);
+        }
 
         private void LogicR()
         {
-            if (Config.Item("autoR").GetValue<bool>() && Player.CountEnemiesInRange(700) == 0 )
+            if (Config.Item("autoR").GetValue<bool>() )
             {
                 foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
                 {
@@ -244,13 +255,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicE()
         {
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() )
+            if (t.IsValidTarget() && Player.Mana > RMANA + EMANA)
             {
                 if (!Config.Item("autoEcc").GetValue<bool>() && !Q.IsReady())
                 {
                     if (E.GetDamage(t) > t.Health)
                         Program.CastSpell(E, t);
-                    else if (Program.Combo && Player.Mana > RMANA + WMANA + EMANA + QMANA)
+                    else if (Program.Combo)
                         Program.CastSpell(E, t);
                 }
 
@@ -311,7 +322,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             EMANA = E.Instance.ManaCost;
 
             if (!R.IsReady())
-                RMANA = QMANA - Player.Level * 2;
+                RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
 
