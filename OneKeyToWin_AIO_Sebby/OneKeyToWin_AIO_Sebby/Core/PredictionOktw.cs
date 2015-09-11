@@ -461,11 +461,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (input.Type == SkillshotType.SkillshotLine)
             {
-                if (input.Unit.Path.Count() > 1)
-                {
-                    result.Hitchance = HitChance.Medium;
-                }
-                else if (input.Unit.Path.Count() > 0)
+                if (input.Unit.Path.Count() > 0)
                 {
                     if (GetAngle(input.From, input.Unit) < angleMove)
                     {
