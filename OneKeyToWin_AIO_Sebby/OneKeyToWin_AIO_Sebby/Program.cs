@@ -49,7 +49,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.SubMenu("Orbwalking").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
-                
+            Config.SubMenu("Orbwalking").AddItem(new MenuItem("OrbwalkingMode", "OrbwalkingMode", true).SetValue(new StringList(new[] { "None" }, 0)));
+
+            Config.Item("OrbwalkingMode", true).Show(false);
+            Config.Item("OrbwalkingMode", true).Permashow(true, "OKTW MODE ");
+
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
@@ -162,6 +166,9 @@ namespace OneKeyToWin_AIO_Sebby
                 case "Morgana":
                     new Champions.Morgana().LoadOKTW();
                     break;
+                case "Lux":
+                    new Champions.Lux().LoadOKTW();
+                    break;
             }
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
@@ -228,8 +235,24 @@ namespace OneKeyToWin_AIO_Sebby
             //new AfkMode().LoadOKTW();
             Config.AddToMainMenu();
             Game.OnUpdate += OnUpdate;
+            //Game.OnWndProc +=Game_OnWndProc;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += OnDraw;
+        }
+
+        private static void Game_OnWndProc(WndEventArgs args)
+        {
+            debug("" + args.Msg);
+            
+            if (args.Msg == 522)
+            {
+                debug("DUPA " + args.Msg);
+            }
+
+            if (args.Msg == 520)
+            {
+                debug("DUPA5 " + args.Msg);
+            }
         }
 
         private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -249,7 +272,17 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (!LagFree(0))
                 return;
-
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "Combo" }, 0));
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
+                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "Mixed" }, 0));
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
+                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "LastHit" }, 0));
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "Lane Clear" }, 0));
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None)
+                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "None" }, 0));
+            
             JunglerTimer();
         }
 
@@ -425,6 +458,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnDraw(EventArgs args)
         {
+
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
             
