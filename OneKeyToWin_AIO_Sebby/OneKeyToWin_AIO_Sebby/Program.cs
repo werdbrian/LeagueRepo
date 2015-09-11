@@ -49,10 +49,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             Config.SubMenu("Orbwalking").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
-            Config.SubMenu("Orbwalking").AddItem(new MenuItem("OrbwalkingMode", "OrbwalkingMode", true).SetValue(new StringList(new[] { "None" }, 0)));
-
-            Config.Item("OrbwalkingMode", true).Show(false);
-            Config.Item("OrbwalkingMode", true).Permashow(true, "OKTW MODE ");
 
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
 
@@ -272,16 +268,6 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (!LagFree(0))
                 return;
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "Combo" }, 0));
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
-                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "Mixed" }, 0));
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
-                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "LastHit" }, 0));
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
-                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "Lane Clear" }, 0));
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None)
-                Config.Item("OrbwalkingMode", true).SetValue(new StringList(new[] { "None" }, 0));
             
             JunglerTimer();
         }
