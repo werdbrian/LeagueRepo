@@ -194,7 +194,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             var poutput = Qcol.GetPrediction(t);
             
-            var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);
+            var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);      
             if ( col < 4)
                 Program.CastSpell(Q, t);
         }
