@@ -449,8 +449,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
+<<<<<<< HEAD
                 pathMinLen = 650f;
                 angleMove += 5;
+=======
+                pathMinLen = BackToFront;
+                angleMove += 15;
+>>>>>>> parent of f34d776... Prediction
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
