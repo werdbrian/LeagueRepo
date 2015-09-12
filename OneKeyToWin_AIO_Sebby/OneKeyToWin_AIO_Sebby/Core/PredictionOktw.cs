@@ -499,20 +499,18 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (totalDelay < 0.7 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+
+            if (totalDelay < 0.6 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
-            }
-
-            if (input.Unit.IsWindingUp && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) > 0.1d)
-            {
-                result.Hitchance = HitChance.Medium;
             }
 
             if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
+                else
+                    result.Hitchance = HitChance.VeryHigh;
             }
             else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
             {
@@ -520,6 +518,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
                     result.Hitchance = HitChance.Medium;
                 }
+            }
+
+            if (input.Unit.IsWindingUp && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) > 0.1d)
+            {
+                result.Hitchance = HitChance.Medium;
             }
 
             if (input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 250 || input.Unit.MoveSpeed < 200f)
