@@ -37,21 +37,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("ts", "Use common TargetSelector").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("ts1", "ON - only one target"));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("ts2", "OFF - all targets"));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("qCC", "Auto Q cc & dash enemy").SetValue(true));
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("Q config").SubMenu("Use on").AddItem(new MenuItem("grab" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harrasQ", "Harras Q").SetValue(true));
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                Config.SubMenu(Player.ChampionName).SubMenu("Q Config").SubMenu("Use on:").AddItem(new MenuItem("Qon" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEcc", "Auto E only CC enemy").SetValue(false));
-
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmE", "Lane clear E").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp").SetValue(new Slider(10, 100, 0)));
             foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team == Player.Team))
@@ -67,6 +60,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("hitchanceR", "Hit Chance R").SetValue(new Slider(2, 3, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space   
+
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmE", "Lane clear E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E").SetValue(true));
 
             Game.OnUpdate += Game_OnGameUpdate;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
@@ -137,7 +139,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 SetMana();
                 Jungle();
             }
-            if (Program.LagFree(1) && Q.IsReady())
+            if (Program.LagFree(1) && Q.IsReady() && Config.Item("autoQ").GetValue<bool>())
                 LogicQ();
             if (Program.LagFree(2) && E.IsReady() && Config.Item("autoE").GetValue<bool>())
                 LogicE();
@@ -165,29 +167,22 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-            
-            if (Program.Combo && Config.Item("ts").GetValue<bool>())
-            {
-                var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-                if (t.IsValidTarget(Q.Range) && !t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield) && Config.Item("grab" + t.ChampionName).GetValue<bool>())
-                    CastQ(t);
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) > enemy.Health))
+            {
+                CastQ(enemy);
             }
-            foreach (var t in Program.Enemies.Where(t => t.IsValidTarget(Q.Range) && Config.Item("grab" + t.ChampionName).GetValue<bool>()))
+            var t = Orbwalker.GetTarget() as Obj_AI_Hero;
+            if (!t.IsValidTarget())
+                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            if (t.IsValidTarget() && Config.Item("Qon" + t.ChampionName).GetValue<bool>())
             {
-                if (!t.HasBuffOfType(BuffType.SpellImmunity) && !t.HasBuffOfType(BuffType.SpellShield))
-                {
-                    if (Program.Combo && !Config.Item("ts").GetValue<bool>())
-                        CastQ(t);
-
-                    if (Config.Item("qCC").GetValue<bool>())
-                    {
-                        if (!OktwCommon.CanMove(t))
-                            Q.Cast(t, true);
-                        Qcol.CastIfHitchanceEquals(t, HitChance.Dashing);
-                        Qcol.CastIfHitchanceEquals(t, HitChance.Immobile);
-                    }
-                }
+                if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    CastQ(t);
+                if (Program.Farm && Config.Item("harrasQ").GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
+                    CastQ(t);
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
+                    CastQ(enemy);
             }
         }
         private void CastQ(Obj_AI_Base t)
