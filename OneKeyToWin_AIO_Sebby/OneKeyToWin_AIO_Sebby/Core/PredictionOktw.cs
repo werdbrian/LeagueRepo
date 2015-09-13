@@ -433,6 +433,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
         }
         private static PredictionOutput WayPointAnalysis(PredictionOutput result, PredictionInput input)
         {
+            result.Hitchance = HitChance.Medium;
             if (!input.Unit.IsValid<Obj_AI_Hero>())
             {
                 result.Hitchance = HitChance.VeryHigh;
@@ -444,7 +445,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
                 totalDelay = input.Delay;
 
-            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
+            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.7;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
             float pathMinLen = 650f;
             double angleMove = 30 + (input.Radius / 10);
@@ -454,7 +455,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 pathMinLen = 750f;
                 //angleMove += 5;
-                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
+                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.5;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
@@ -478,13 +479,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
                 else if (input.Unit.Path.Count() > 0)
                 {
-                    if (GetAngle(input.From, input.Unit) < angleMove)
+                    if (GetAngle(input.From, input.Unit) < angleMove)    
                     {
                         result.Hitchance = HitChance.VeryHigh;
                     }
                     else
                         result.Hitchance = HitChance.High;
-
                 }
             }
             else if (input.Type == SkillshotType.SkillshotCircle)
@@ -505,13 +505,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.VeryHigh;
             }
 
-
-            if (totalDelay < 0.5 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 0.5 + (input.Radius / 1000) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
+
                 result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
+            if ((   input.Unit.Path.Count() == 0 || input.Unit.Position == input.Unit.ServerPosition) && !input.Unit.IsWindingUp)
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
@@ -526,7 +526,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (input.Unit.IsWindingUp && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) > 0.1d)
+            if (OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.3d && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) > 0d && input.Type == SkillshotType.SkillshotLine)
             {
                 result.Hitchance = HitChance.Medium;
             }
