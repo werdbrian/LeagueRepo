@@ -505,7 +505,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                 {
-                    result.Hitchance = HitChance.High;
+                    result.Hitchance = HitChance.Medium;
                 }
             }
 
