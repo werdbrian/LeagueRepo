@@ -453,7 +453,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
                 pathMinLen = 750f;
-                angleMove += 5;
+                //angleMove += 5;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
@@ -506,7 +506,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
 
-            if (totalDelay < 0.6 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 0.5 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
