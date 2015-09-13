@@ -228,7 +228,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         {
                             DrawFontTextScreen(Tahoma13, "FINISH" , posX - 90, posY + positionDraw, SharpDX.Color.GreenYellow);
                         }
-                        else if (ChampionInfoOne.StartRecallTime < ChampionInfoOne.AbortRecallTime && Game.Time - ChampionInfoOne.AbortRecallTime < 4)
+                        else if (ChampionInfoOne.StartRecallTime <= ChampionInfoOne.AbortRecallTime && Game.Time - ChampionInfoOne.AbortRecallTime < 4)
                         {
                             DrawFontTextScreen(Tahoma13, "ABORT", posX - 90, posY + positionDraw, SharpDX.Color.Yellow);
                         }
