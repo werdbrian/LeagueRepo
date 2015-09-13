@@ -332,8 +332,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-            if (result.Hitchance > HitChance.Medium && result.Hitchance < HitChance.Dashing)
-                result = WayPointAnalysis(result, input);
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
@@ -343,6 +341,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
+
+            if (result.Hitchance > HitChance.Medium && result.Hitchance < HitChance.Dashing)
+                result = WayPointAnalysis(result, input);
+
             return result;
         }
 
