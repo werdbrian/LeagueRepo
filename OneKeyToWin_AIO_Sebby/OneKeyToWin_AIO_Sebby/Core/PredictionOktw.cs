@@ -1015,16 +1015,15 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 {
                                     var minionPrediction = Prediction.GetPrediction(input, true, false);
 
-                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 20 + minion.Path.Count() * minion.BoundingRadius), 2))
+                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 25 + minion.Path.Count() * minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
                                 }
                                 else
                                 {
-                                    if (minion.ServerPosition.To2D()
-                                            .Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                        Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
+                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <=
+                                        Math.Pow((input.Radius + 18 + minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
