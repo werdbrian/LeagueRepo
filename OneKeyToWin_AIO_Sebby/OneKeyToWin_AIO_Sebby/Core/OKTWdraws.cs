@@ -221,6 +221,31 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     DrawFontTextScreen(Tahoma13, "" + enemy.Level, posX - 25, posY + positionDraw, SharpDX.Color.White);
                     DrawFontTextScreen(Tahoma13, enemy.ChampionName, posX, posY + positionDraw, SharpDX.Color.White);
 
+                    if (true)
+                    {
+                        var ChampionInfoOne = Core.OKTWtracker.ChampionInfoList.Find(x => x.NetworkId == enemy.NetworkId);
+                        if (Game.Time - ChampionInfoOne.FinishRecallTime < 4 )
+                        {
+                            DrawFontTextScreen(Tahoma13, "FINISH" , posX - 90, posY + positionDraw, SharpDX.Color.GreenYellow);
+                        }
+                        else if (ChampionInfoOne.StartRecallTime < ChampionInfoOne.AbortRecallTime && Game.Time - ChampionInfoOne.AbortRecallTime < 4)
+                        {
+                            DrawFontTextScreen(Tahoma13, "ABORT", posX - 90, posY + positionDraw, SharpDX.Color.Yellow);
+                        }
+                        else if (Game.Time - ChampionInfoOne.StartRecallTime < 8)
+                        {
+                            int recallPercent = (int)(((Game.Time - ChampionInfoOne.StartRecallTime) / 8) * 100);
+                            float recallX1 = posX - 90;
+                            float recallY1 = posY + positionDraw + 3;
+                            float recallX2 = (recallX1 + ((int)recallPercent / 2)) + 1;
+                            float recallY2 = posY + positionDraw + 3;
+                            Drawing.DrawLine(recallX1, recallY1, recallX1 + 50, recallY2, 8, System.Drawing.Color.Red);
+                            Drawing.DrawLine(recallX1, recallY1, recallX2, recallY2, 8, System.Drawing.Color.White);
+                        }
+                    }
+                    //if ((int)enemy.HealthPercent < 100)
+                       // Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 8, System.Drawing.Color.White);
+
                     if (ShowKDA)
                     {
                         var fSlot = enemy.Spellbook.Spells[4];
