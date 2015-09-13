@@ -234,17 +234,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         }
                         else if (Game.Time - ChampionInfoOne.StartRecallTime < 8)
                         {
-                            int recallPercent = (int)(((Game.Time - ChampionInfoOne.StartRecallTime) / 8) * 100);
-                            float recallX1 = posX - 90;
-                            float recallY1 = posY + positionDraw + 3;
-                            float recallX2 = (recallX1 + ((int)recallPercent / 2)) + 1;
-                            float recallY2 = posY + positionDraw + 3;
-                            Drawing.DrawLine(recallX1, recallY1, recallX1 + 50, recallY2, 8, System.Drawing.Color.Red);
-                            Drawing.DrawLine(recallX1, recallY1, recallX2, recallY2, 8, System.Drawing.Color.White);
+
+                                int recallPercent = (int)(((Game.Time - ChampionInfoOne.StartRecallTime) / 8) * 100);
+                                float recallX1 = posX - 90;
+                                float recallY1 = posY + positionDraw + 3;
+                                float recallX2 = (recallX1 + ((int)recallPercent / 2)) + 1;
+                                float recallY2 = posY + positionDraw + 3;
+                                Drawing.DrawLine(recallX1, recallY1, recallX1 + 50, recallY2, 8, System.Drawing.Color.Red);
+                                Drawing.DrawLine(recallX1, recallY1, recallX2, recallY2, 8, System.Drawing.Color.White);
                         }
                     }
-                    //if ((int)enemy.HealthPercent < 100)
-                       // Drawing.DrawLine((wts[0] + ((int)enemy.HealthPercent) / 2), wts[1], wts[0] + 50, wts[1], 8, System.Drawing.Color.White);
 
                     if (ShowKDA)
                     {
