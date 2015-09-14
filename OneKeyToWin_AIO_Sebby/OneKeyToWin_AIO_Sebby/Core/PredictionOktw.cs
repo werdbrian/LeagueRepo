@@ -347,89 +347,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             return result;
         }
 
-        internal static PredictionOutput GetDashingPrediction(PredictionInput input)
-        {
-            var dashData = input.Unit.GetDashInfo();
-            var result = new PredictionOutput { Input = input };
-            input.Delay += 0.1f;
-            //Normal dashes.
-            if (!dashData.IsBlink)
-            {
-                //Mid air:
-                var dashPred = GetPositionOnPath(
-                    input, new List<Vector2> { input.Unit.ServerPosition.To2D(), dashData.Path.Last() }, dashData.Speed);
-                if (dashPred.Hitchance >= HitChance.High)
-                {
-                    dashPred.CastPosition = dashPred.UnitPosition;
-                    dashPred.Hitchance = HitChance.Dashing;
-                    return dashPred;
-                }
-
-                //At the end of the dash:
-                if (dashData.Path.PathLength() > 200)
-                {
-                    var endP = dashData.Path.Last();
-                    var timeToPoint = input.Delay + input.From.To2D().Distance(endP) / input.Speed;
-                    if (timeToPoint <=
-                        input.Unit.Distance(endP) / dashData.Speed + input.RealRadius / input.Unit.MoveSpeed)
-                    {
-                        return new PredictionOutput
-                        {
-                            CastPosition = endP.To3D(),
-                            UnitPosition = endP.To3D(),
-                            Hitchance = HitChance.Dashing
-                        };
-                    }
-                }
-
-                result.CastPosition = dashData.Path.Last().To3D();
-                result.UnitPosition = result.CastPosition;
-
-                //Figure out where the unit is going.
-            }
-
-            return result;
-        }
-
-        internal static PredictionOutput GetImmobilePrediction(PredictionInput input, double remainingImmobileT)
-        {
-            var timeToReachTargetPosition = input.Delay + input.Unit.Distance(input.From) / input.Speed;
-
-            if (timeToReachTargetPosition <= remainingImmobileT + input.RealRadius / input.Unit.MoveSpeed)
-            {
-                return new PredictionOutput
-                {
-                    CastPosition = input.Unit.ServerPosition,
-                    UnitPosition = input.Unit.Position,
-                    Hitchance = HitChance.Immobile
-                };
-            }
-
-            return new PredictionOutput
-            {
-                Input = input,
-                CastPosition = input.Unit.ServerPosition,
-                UnitPosition = input.Unit.ServerPosition,
-                Hitchance = HitChance.High
-                /*timeToReachTargetPosition - remainingImmobileT + input.RealRadius / input.Unit.MoveSpeed < 0.4d ? HitChance.High : HitChance.Medium*/
-            };
-        }
-
-        internal static PredictionOutput GetStandardPrediction(PredictionInput input)
-        {
-            var speed = input.Unit.MoveSpeed;
-
-            if (input.Unit.Distance(input.From, true) < 200 * 200)
-            {
-                //input.Delay /= 2;
-                speed /= 1.5f;
-            }
-
-            var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
-
-            return result;
-        }
-        private static PredictionOutput WayPointAnalysis(PredictionOutput result, PredictionInput input)
+        internal static PredictionOutput WayPointAnalysis(PredictionOutput result, PredictionInput input)
         {
             if (!input.Unit.IsValid<Obj_AI_Hero>())
             {
@@ -445,11 +363,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
             float pathMinLen = 650f;
-            double angleMove = 30 + (input.Radius / 10);
-            float BackToFront = input.Unit.MoveSpeed * totalDelay;
+            double angleMove = 30 + (input.Radius / 15);
+            float BackToFront = input.Unit.MoveSpeed * totalDelay * 1.5f;
 
             if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
             {
+                BackToFront = input.Unit.MoveSpeed * totalDelay;
                 pathMinLen = 550f;
                 angleMove += 5;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
@@ -533,7 +452,89 @@ namespace OneKeyToWin_AIO_Sebby.Core
             return result;
         }
 
-        private static double GetAngle(Vector3 from, Obj_AI_Base target)
+        internal static PredictionOutput GetDashingPrediction(PredictionInput input)
+        {
+            var dashData = input.Unit.GetDashInfo();
+            var result = new PredictionOutput { Input = input };
+            input.Delay += 0.1f;
+            //Normal dashes.
+            if (!dashData.IsBlink)
+            {
+                //Mid air:
+                var dashPred = GetPositionOnPath(
+                    input, new List<Vector2> { input.Unit.ServerPosition.To2D(), dashData.Path.Last() }, dashData.Speed);
+                if (dashPred.Hitchance >= HitChance.High)
+                {
+                    dashPred.CastPosition = dashPred.UnitPosition;
+                    dashPred.Hitchance = HitChance.Dashing;
+                    return dashPred;
+                }
+
+                //At the end of the dash:
+                if (dashData.Path.PathLength() > 200)
+                {
+                    var endP = dashData.Path.Last();
+                    var timeToPoint = input.Delay + input.From.To2D().Distance(endP) / input.Speed;
+                    if (timeToPoint <=
+                        input.Unit.Distance(endP) / dashData.Speed + input.RealRadius / input.Unit.MoveSpeed)
+                    {
+                        return new PredictionOutput
+                        {
+                            CastPosition = endP.To3D(),
+                            UnitPosition = endP.To3D(),
+                            Hitchance = HitChance.Dashing
+                        };
+                    }
+                }
+                result.CastPosition = dashData.Path.Last().To3D();
+                result.UnitPosition = result.CastPosition;
+
+                //Figure out where the unit is going.
+            }
+
+            return result;
+        }
+
+        internal static PredictionOutput GetImmobilePrediction(PredictionInput input, double remainingImmobileT)
+        {
+            var timeToReachTargetPosition = input.Delay + input.Unit.Distance(input.From) / input.Speed;
+
+            if (timeToReachTargetPosition <= remainingImmobileT + input.RealRadius / input.Unit.MoveSpeed)
+            {
+                return new PredictionOutput
+                {
+                    CastPosition = input.Unit.ServerPosition,
+                    UnitPosition = input.Unit.Position,
+                    Hitchance = HitChance.Immobile
+                };
+            }
+
+            return new PredictionOutput
+            {
+                Input = input,
+                CastPosition = input.Unit.ServerPosition,
+                UnitPosition = input.Unit.ServerPosition,
+                Hitchance = HitChance.High
+                /*timeToReachTargetPosition - remainingImmobileT + input.RealRadius / input.Unit.MoveSpeed < 0.4d ? HitChance.High : HitChance.Medium*/
+            };
+        }
+
+        internal static PredictionOutput GetStandardPrediction(PredictionInput input)
+        {
+            var speed = input.Unit.MoveSpeed;
+
+            if (input.Unit.Distance(input.From, true) < 200 * 200)
+            {
+                //input.Delay /= 2;
+                speed /= 1.5f;
+            }
+
+            var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
+
+            return result;
+        }
+
+        internal static double GetAngle(Vector3 from, Obj_AI_Base target)
         {
             var C = target.ServerPosition.To2D();
             var A = target.GetWaypoints().Last();
@@ -549,6 +550,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             return Math.Cos((AB + BC - AC) / (2 * Math.Sqrt(AB) * Math.Sqrt(BC))) * 180 / Math.PI;
         }
+
         internal static double UnitIsImmobileUntil(Obj_AI_Base unit)
         {
             var result =
