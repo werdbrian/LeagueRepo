@@ -332,9 +332,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-
-            if (result.Hitchance > HitChance.Medium && result.Hitchance < HitChance.Dashing)
-                result = WayPointAnalysis(result, input);
+            
+           
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
@@ -344,7 +343,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
-            
+
+            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
+                result = WayPointAnalysis(result, input);                         
+
             return result;
         }
 
@@ -356,6 +358,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 return result;
             }
 
+            result.Hitchance = HitChance.High;
+
             var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
 
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
@@ -363,29 +367,22 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
             var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
-            float pathMinLen = 650f;
+            
             double angleMove = 30 + (input.Radius / 15);
             float BackToFront = input.Unit.MoveSpeed * totalDelay * 1.5f;
-
+            float pathMinLen = 550f + BackToFront;
+            
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
                 BackToFront = input.Unit.MoveSpeed * totalDelay;
-                pathMinLen = 550f;
                 angleMove += 5;
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
+
             if (input.Type == SkillshotType.SkillshotCircle)
             {
                 fixRange -= input.Radius / 2;
-            }
-
-            if (input.Unit.Path.Count() > 0)
-            {
-                if (input.Unit.Distance(LastWaypiont) < BackToFront)
-                {
-                    result.Hitchance = HitChance.Medium;
-                }
             }
 
             if (input.Type == SkillshotType.SkillshotLine)
@@ -400,6 +397,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     {
                         result.Hitchance = HitChance.VeryHigh;
                     }
+                    else
+                        result.Hitchance = HitChance.High;
                 }
             }
             else if (input.Type == SkillshotType.SkillshotCircle)
@@ -416,12 +415,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > pathMinLen)
-            {
-                result.Hitchance = HitChance.VeryHigh;
-            }
-
-
-            if (totalDelay < 0.6 + (input.Radius / 500) && UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
@@ -452,10 +445,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (input.Unit.Path.Count() > 0 && input.Unit.Position == input.Unit.ServerPosition)
                 result.Hitchance = HitChance.Medium;
 
+            if (input.Unit.Path.Count() > 0)
+            {
+                if (input.Unit.Distance(LastWaypiont) < BackToFront)
+                {
+                    result.Hitchance = HitChance.Medium;
+                }
+            }
+
             if (input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 250 || input.Unit.MoveSpeed < 200f)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
+            Program.debug(result.Hitchance + " " +input.Unit.SkinName ); 
             return result;
         }
 
@@ -498,7 +500,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
                 //Figure out where the unit is going.
             }
-
+            
             return result;
         }
 
