@@ -1173,7 +1173,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         public static double GetLastAutoAttackTime(Obj_AI_Base unit)
         {
-            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.Netwo rkId);
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
 
             if (TrackerUnit == null)
                 return double.MaxValue;
