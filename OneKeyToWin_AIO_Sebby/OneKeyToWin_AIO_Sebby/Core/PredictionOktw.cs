@@ -332,7 +332,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-            
+
+            if (result.Hitchance > HitChance.Medium && result.Hitchance < HitChance.Dashing)
+                result = WayPointAnalysis(result, input);
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
@@ -342,8 +344,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
-            if (result.Hitchance > HitChance.Medium && result.Hitchance < HitChance.Dashing)
-                result = WayPointAnalysis(result, input);
+            
             return result;
         }
 
@@ -366,7 +367,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             double angleMove = 30 + (input.Radius / 15);
             float BackToFront = input.Unit.MoveSpeed * totalDelay * 1.5f;
 
-            if (PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
+            if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
                 BackToFront = input.Unit.MoveSpeed * totalDelay;
                 pathMinLen = 550f;
@@ -403,9 +404,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
             else if (input.Type == SkillshotType.SkillshotCircle)
             {
-                if (totalDelay < 0.7 && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+                if (totalDelay < 0.7 && UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
-                else if (totalDelay < 1.1 && PathTracker.GetCurrentPath(input.Unit).Time < 0.1d)
+                else if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
@@ -420,7 +421,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
 
-            if (totalDelay < 0.6 + (input.Radius / 500) && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) < 0.1d)
+            if (totalDelay < 0.6 + (input.Radius / 500) && UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
@@ -440,10 +441,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (input.Unit.IsWindingUp && OnProcessSpellDetection.GetLastAutoAttackTime(input.Unit) > 0.1d)
+            if (input.Unit.IsWindingUp && UnitTracker.GetLastAutoAttackTime(input.Unit) > 0.1d)
             {
                 result.Hitchance = HitChance.Medium;
             }
+
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
+                result.Hitchance = HitChance.Medium;
+
+            if (input.Unit.Path.Count() > 0 && input.Unit.Position == input.Unit.ServerPosition)
+                result.Hitchance = HitChance.Medium;
 
             if (input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 250 || input.Unit.MoveSpeed < 200f)
             {
@@ -1021,7 +1028,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 {
                                     if (minion.ServerPosition.To2D()
                                             .Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                        Math.Pow((input.Radius + 15 + minion.BoundingRadius), 2))
+                                        Math.Pow((input.Radius + 17 + minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
@@ -1111,175 +1118,78 @@ namespace OneKeyToWin_AIO_Sebby.Core
         }
     }
 
-    internal class StoredAutoAttackTime
+    internal class UnitTrackerInfo
     {
-        public int Tick { get; set; }
         public int NetworkId { get; set; }
-        public double Time { get { return (Utils.TickCount - Tick) / 1000d; } }
+        public int AaTick { get; set; }
+        public int NewPathTick { get; set; }
     }
 
-    internal class StoredDashes
+    internal static class UnitTracker
     {
+        public static List<UnitTrackerInfo> UnitTrackerInfoList = new List<UnitTrackerInfo>();
 
-    }
-
-    internal static class OnProcessSpellDetection
-    {
-        public static List<StoredAutoAttackTime> StoredAutoAttackTimeList = new List<StoredAutoAttackTime>();
-
-        static OnProcessSpellDetection()
+        static UnitTracker()
         {
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-        }
-
-        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (!(sender is Obj_AI_Hero)) { return; }
-
-
-            if (args.SData.IsAutoAttack())
-            {
-                var FindTime = StoredAutoAttackTimeList.Find(x => x.NetworkId == sender.NetworkId);
-                if (FindTime == null)
-                {
-                    StoredAutoAttackTimeList.Add(new StoredAutoAttackTime() { NetworkId = sender.NetworkId, Tick = Utils.TickCount });
-                }
-                else
-                {
-                    FindTime.Tick = Utils.TickCount;
-                }
-            }
-        }
-        public static double GetLastAutoAttackTime(Obj_AI_Base unit)
-        {
-            var FindTime = StoredAutoAttackTimeList.Find(x => x.NetworkId == unit.NetworkId);
-
-            if (FindTime == null)
-                return 1;
-            else
-                return FindTime.Time;
-        }
-    }
-    internal class StoredPath
-    {
-        public List<Vector2> Path;
-        public int Tick;
-
-        public double Time
-        {
-            get { return (Utils.TickCount - Tick) / 1000d; }
-        }
-
-        public int WaypointCount
-        {
-            get { return Path.Count; }
-        }
-
-        public Vector2 StartPoint
-        {
-            get { return Path.FirstOrDefault(); }
-        }
-
-        public Vector2 EndPoint
-        {
-            get { return Path.LastOrDefault(); }
-        }
-    }
-
-    internal static class PathTracker
-    {
-        private const double MaxTime = 1.5d;
-        private static readonly Dictionary<int, List<StoredPath>> StoredPaths = new Dictionary<int, List<StoredPath>>();
-
-        static PathTracker()
-        {
             Obj_AI_Base.OnNewPath += Obj_AI_Hero_OnNewPath;
+            Game.OnUpdate += Game_OnGameUpdate;
+        }
+
+        private static void Game_OnGameUpdate(EventArgs args)
+        {
+
         }
 
         private static void Obj_AI_Hero_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
         {
-            if (!(sender is Obj_AI_Hero))
+            if (!(sender is Obj_AI_Hero)) { return; }
+
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId);
+            if (TrackerUnit == null)
             {
-                return;
-            }
-
-            if (!StoredPaths.ContainsKey(sender.NetworkId))
-            {
-                StoredPaths.Add(sender.NetworkId, new List<StoredPath>());
-            }
-
-            var newPath = new StoredPath { Tick = Utils.TickCount, Path = args.Path.ToList().To2D() };
-            StoredPaths[sender.NetworkId].Add(newPath);
-
-            if (StoredPaths[sender.NetworkId].Count > 50)
-            {
-                StoredPaths[sender.NetworkId].RemoveRange(0, 40);
-            }
-        }
-
-        public static List<StoredPath> GetStoredPaths(Obj_AI_Base unit, double maxT)
-        {
-            return StoredPaths.ContainsKey(unit.NetworkId)
-                ? StoredPaths[unit.NetworkId].Where(p => p.Time < maxT).ToList()
-                : new List<StoredPath>();
-        }
-
-        public static StoredPath GetCurrentPath(Obj_AI_Base unit)
-        {
-            return StoredPaths.ContainsKey(unit.NetworkId)
-                ? StoredPaths[unit.NetworkId].LastOrDefault()
-                : new StoredPath();
-        }
-
-        public static Vector3 GetTendency(Obj_AI_Base unit)
-        {
-            var paths = GetStoredPaths(unit, MaxTime);
-            var result = new Vector2();
-
-            foreach (var path in paths)
-            {
-                var k = 1; //(MaxTime - path.Time);
-                result = result + k * (path.EndPoint - unit.ServerPosition.To2D() /*path.StartPoint*/).Normalized();
-            }
-
-            result /= paths.Count;
-
-            return result.To3D();
-        }
-
-        public static double GetMeanSpeed(Obj_AI_Base unit, double maxT)
-        {
-            var paths = GetStoredPaths(unit, MaxTime);
-            var distance = 0d;
-            if (paths.Count > 0)
-            {
-                //Assume that the unit was moving for the first path:
-                distance += (maxT - paths[0].Time) * unit.MoveSpeed;
-
-                for (var i = 0; i < paths.Count - 1; i++)
-                {
-                    var currentPath = paths[i];
-                    var nextPath = paths[i + 1];
-
-                    if (currentPath.WaypointCount > 0)
-                    {
-                        distance += Math.Min(
-                            (currentPath.Time - nextPath.Time) * unit.MoveSpeed, currentPath.Path.PathLength());
-                    }
-                }
-
-                //Take into account the last path:
-                var lastPath = paths.Last();
-                if (lastPath.WaypointCount > 0)
-                {
-                    distance += Math.Min(lastPath.Time * unit.MoveSpeed, lastPath.Path.PathLength());
-                }
+                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = sender.NetworkId, NewPathTick = Utils.TickCount });
             }
             else
             {
-                return unit.MoveSpeed;
+                TrackerUnit.NewPathTick = Utils.TickCount;
             }
-            return distance / maxT;
+        }
+
+        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (!(sender is Obj_AI_Hero) || !args.SData.IsAutoAttack()) { return; }
+
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId);
+            if (TrackerUnit == null)
+            {
+                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = sender.NetworkId, AaTick = Utils.TickCount });
+            }
+            else
+            {
+                TrackerUnit.AaTick = Utils.TickCount;
+            }
+        }
+
+        public static double GetLastAutoAttackTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.Netwo rkId);
+
+            if (TrackerUnit == null)
+                return double.MaxValue;
+            else
+                return (Utils.TickCount - TrackerUnit.AaTick) / 1000d;
+        }
+
+        public static double GetLastNewPathTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            if (TrackerUnit == null)
+                return double.MaxValue;
+            else
+                return (Utils.TickCount - TrackerUnit.NewPathTick) / 1000d;
         }
     }
+
 }
