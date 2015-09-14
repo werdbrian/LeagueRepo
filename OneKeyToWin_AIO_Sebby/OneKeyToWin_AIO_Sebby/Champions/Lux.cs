@@ -16,6 +16,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Spell E, Q, R, W, Qcol;
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+        private Vector3 Epos = Vector3.Zero;
 
         public void LoadOKTW()
         {
@@ -75,8 +76,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+
             
         }
+
+
 
         private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
@@ -86,6 +90,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            if (sender.IsMe && args.SData.Name == "LuxLightStrikeKugel")
+            {
+                Program.debug(args.SData.Name);
+                Epos = args.End;
+            }
+
             if (!W.IsReady() || !sender.IsEnemy || Player.Distance(sender.ServerPosition) > 2000)
                 return;
             
@@ -249,27 +259,34 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicE()
         {
-            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && Player.Mana > RMANA + EMANA)
+            if (Player.HasBuff("LuxLightStrikeKugel") && !Program.None)
             {
-                if (!Config.Item("autoEcc").GetValue<bool>() && !Q.IsReady())
-                {
-                    if (E.GetDamage(t) > t.Health)
-                        Program.CastSpell(E, t);
-                    else if (Program.Combo)
-                        Program.CastSpell(E, t);
-                }
-
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
-                    E.Cast(enemy, true);
+                E.Cast();
             }
-            else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmE").GetValue<bool>() && Player.Mana > RMANA + WMANA)
+            else
             {
-                var minionList = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All);
-                var farmPosition = E.GetCircularFarmLocation(minionList, E.Width);
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget() && Player.Mana > RMANA + EMANA)
+                {
+                    if (!Config.Item("autoEcc").GetValue<bool>() && !Q.IsReady())
+                    {
+                        if (E.GetDamage(t) > t.Health)
+                            Program.CastSpell(E, t);
+                        else if (Program.Combo)
+                            Program.CastSpell(E, t);
+                    }
 
-                if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
-                    E.Cast(farmPosition.Position);
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
+                        E.Cast(enemy, true);
+                }
+                else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmE").GetValue<bool>() && Player.Mana > RMANA + WMANA)
+                {
+                    var minionList = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All);
+                    var farmPosition = E.GetCircularFarmLocation(minionList, E.Width);
+
+                    if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
+                        E.Cast(farmPosition.Position);
+                }
             }
         }
 
@@ -332,6 +349,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Drawing_OnDraw(EventArgs args)
         {
+
             if (Config.Item("qRange").GetValue<bool>())
             {
                 if (Config.Item("onlyRdy").GetValue<bool>())
