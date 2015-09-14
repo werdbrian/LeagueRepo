@@ -11,8 +11,6 @@ using System.Drawing;
 
 namespace OneKeyToWin_AIO_Sebby
 {
-
-
     class champions { public Obj_AI_Hero Player; }
 
     internal class Program
@@ -261,6 +259,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
+            
             tickIndex++;
 
             if (tickIndex > 4)
@@ -372,33 +371,32 @@ namespace OneKeyToWin_AIO_Sebby
                 var poutput2 = Core.Prediction.GetPrediction(predInput2);
 
                 //var poutput2 = QWER.GetPrediction(target);
+                
+
+                if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 0)
+                {
+                    if (poutput2.Hitchance >= Core.HitChance.VeryHigh)
+                        QWER.Cast(poutput2.CastPosition);
+
+                }
+                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 1)
+                {
+                    if (poutput2.Hitchance >= Core.HitChance.High)
+                        QWER.Cast(poutput2.CastPosition);
+
+                }
+                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 2)
+                {
+                    if (poutput2.Hitchance >= Core.HitChance.Medium)
+                        QWER.Cast(poutput2.CastPosition);
+                }
                 if (Game.Time - DrawSpellTime > 0.5)
                 {
                     DrawSpell = QWER;
                     DrawSpellTime = Game.Time;
 
                 }
-
                 DrawSpellPos = poutput2;
-
-                if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 0)
-                {
-                    if (poutput2.Hitchance >= Core.HitChance.VeryHigh)
-                        QWER.Cast(poutput2.CastPosition);
-                    return;
-                }
-                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 1)
-                {
-                    if (poutput2.Hitchance >= Core.HitChance.High)
-                        QWER.Cast(poutput2.CastPosition);
-                    return;
-                }
-                else if (Config.Item("HitChance", true).GetValue<StringList>().SelectedIndex == 2)
-                {
-                    if (poutput2.Hitchance >= Core.HitChance.Medium)
-                        QWER.Cast(poutput2.CastPosition);
-                    return;
-                }
             }
             else if (Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 0)
             {
