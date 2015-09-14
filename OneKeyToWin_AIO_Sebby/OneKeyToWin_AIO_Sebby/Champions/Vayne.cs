@@ -49,6 +49,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Q farm helper").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("QE", "try Q + E ").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("Qonly", "Q only after AA").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapQ", "Q").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("GapCloser").AddItem(new MenuItem("gapE", "E").SetValue(true));
@@ -147,7 +148,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Q.Cast(dashPosition, true);
                 }
-                if (Program.Combo && DashCheck(dashPosition))
+                if (Program.Combo && DashCheck(dashPosition) && !Config.Item("Qonly").GetValue<bool>())
                 {
                     var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
