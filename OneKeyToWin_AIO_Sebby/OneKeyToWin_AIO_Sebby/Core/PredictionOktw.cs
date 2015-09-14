@@ -379,7 +379,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
             }
 
-
             if (input.Type == SkillshotType.SkillshotCircle)
             {
                 fixRange -= input.Radius / 2;
@@ -457,7 +456,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
-            Program.debug(result.Hitchance + " " +input.Unit.SkinName ); 
+
             return result;
         }
 
