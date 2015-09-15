@@ -344,6 +344,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
 
+            //Set hit chance
             if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
                 result = WayPointAnalysis(result, input);                         
 
@@ -360,23 +361,29 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             result.Hitchance = HitChance.High;
 
-            var totalDelay = input.From.Distance(input.Unit.ServerPosition) / input.Speed + input.Delay;
+            var lastWaypiont = input.Unit.GetWaypoints().Last().To3D();
+            var distanceUnitToWaypoint = lastWaypiont.Distance(input.Unit.ServerPosition);
+            var distanceFromToUnit = input.From.Distance(input.Unit.ServerPosition);
+            var distanceFromToWaypoint = lastWaypiont.Distance(input.From);
+
+            float totalDelay;
 
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
                 totalDelay = input.Delay;
-
-            var fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.6;
-            var LastWaypiont = input.Unit.GetWaypoints().Last().To3D();
+            else
+                totalDelay = distanceFromToUnit / input.Speed + input.Delay;
             
+            float moveArea = input.Unit.MoveSpeed * totalDelay;
+            float fixRange = moveArea * 0.6f;
             double angleMove = 30 + (input.Radius / 15);
-            float BackToFront = input.Unit.MoveSpeed * totalDelay * 1.5f;
-            float pathMinLen = 500f + BackToFront;
+            float backToFront = moveArea * 1.5f;
+            float pathMinLen = 500f + backToFront;
             
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
-                BackToFront = input.Unit.MoveSpeed * totalDelay;
+                backToFront = moveArea;
                 angleMove += 5;
-                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4;
+                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.4f;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
@@ -384,16 +391,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 fixRange -= input.Radius / 2;
             }
 
-            if (input.Type == SkillshotType.SkillshotLine)
+            if (distanceUnitToWaypoint > pathMinLen)
+            {
+                result.Hitchance = HitChance.VeryHigh;
+            }
+            else if (input.Type == SkillshotType.SkillshotLine)
             {
                 if (input.Unit.Path.Count() > 1)
-                {
                     result.Hitchance = HitChance.Medium;
-                }
                 else if (input.Unit.Path.Count() > 0)
                 {
                     if (GetAngle(input.From, input.Unit) < angleMove)
                     {
+                        backToFront = moveArea;
                         result.Hitchance = HitChance.VeryHigh;
                     }
                     else
@@ -408,33 +418,26 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (LastWaypiont.Distance(input.Unit.ServerPosition) > pathMinLen)
-            {
-                result.Hitchance = HitChance.VeryHigh;
-            }
-
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp )
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
             {
                 if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.4d)
-                {
                     result.Hitchance = HitChance.High;
-                }
-                else if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
+                else if (distanceFromToUnit > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.VeryHigh;
             }
-            else if (LastWaypiont.Distance(input.From) <= input.Unit.Distance(input.From))
+            else if (distanceFromToWaypoint <= input.Unit.Distance(input.From))
             {
-                if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
-                {
+                if (distanceFromToUnit > input.Range - fixRange)
                     result.Hitchance = HitChance.Medium;
-                }
             }
 
             if (UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
-                if (totalDelay < 0.7)
+                if (input.Type == SkillshotType.SkillshotLine && totalDelay < 0.8)
+                    result.Hitchance = HitChance.VeryHigh;
+                else if (totalDelay < 0.7)
                     result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.Medium;
@@ -443,27 +446,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (result.Hitchance != HitChance.Medium)
             {
                 if (input.Unit.IsWindingUp && UnitTracker.GetLastAutoAttackTime(input.Unit) > 0.1d)
-                {
                     result.Hitchance = HitChance.Medium;
-                }
-                if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
+                else if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
                     result.Hitchance = HitChance.Medium;
-
-                if (input.Unit.Path.Count() > 0)
+                else if (input.Unit.Path.Count() > 0)
                 {
-                    if (input.Unit.Distance(LastWaypiont) < BackToFront || input.Unit.Position == input.Unit.ServerPosition)
-                    {
+                    if (distanceUnitToWaypoint < backToFront || input.Unit.Position == input.Unit.ServerPosition)
                         result.Hitchance = HitChance.Medium;
-                    }
                 }
             }
 
-            if (input.Unit.Distance(input.From) < 300 || LastWaypiont.Distance(input.From) < 250 || input.Unit.MoveSpeed < 200f)
-            {
+            if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 250 || input.Unit.MoveSpeed < 200f)
                 result.Hitchance = HitChance.VeryHigh;
-            }
             
-
             return result;
         }
 
