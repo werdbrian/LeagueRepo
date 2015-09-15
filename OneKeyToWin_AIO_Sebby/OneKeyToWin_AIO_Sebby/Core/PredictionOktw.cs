@@ -413,9 +413,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp)
+            if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition && !input.Unit.IsWindingUp )
             {
-                if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
+                if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.4d)
+                {
+                    result.Hitchance = HitChance.Medium;
+                }
+                else if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.VeryHigh;
@@ -459,6 +463,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
+            
 
             return result;
         }
@@ -1129,14 +1134,20 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public int NetworkId { get; set; }
         public int AaTick { get; set; }
         public int NewPathTick { get; set; }
+        public int StopMoveTick { get; set; }
     }
 
     internal static class UnitTracker
     {
         public static List<UnitTrackerInfo> UnitTrackerInfoList = new List<UnitTrackerInfo>();
-
+        private static List<Obj_AI_Hero> Champion = new List<Obj_AI_Hero>();
         static UnitTracker()
         {
+            foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
+            {
+                Champion.Add(hero);
+                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = hero.NetworkId, AaTick = Utils.TickCount, StopMoveTick = Utils.TickCount, NewPathTick = Utils.TickCount });
+            }
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnNewPath += Obj_AI_Hero_OnNewPath;
             Game.OnUpdate += Game_OnGameUpdate;
@@ -1144,57 +1155,43 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-
+            foreach (var hero in Champion.Where(hero => hero.IsValid && hero.IsVisible && hero.Path.Count() > 0))
+            {
+                UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).StopMoveTick = Utils.TickCount;   
+            }
         }
 
         private static void Obj_AI_Hero_OnNewPath(Obj_AI_Base sender, GameObjectNewPathEventArgs args)
         {
             if (!(sender is Obj_AI_Hero)) { return; }
+            UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).NewPathTick = Utils.TickCount;
 
-            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId);
-            if (TrackerUnit == null)
-            {
-                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = sender.NetworkId, NewPathTick = Utils.TickCount });
-            }
-            else
-            {
-                TrackerUnit.NewPathTick = Utils.TickCount;
-            }
         }
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (!(sender is Obj_AI_Hero) || !args.SData.IsAutoAttack()) { return; }
+            UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).AaTick = Utils.TickCount;
 
-            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId);
-            if (TrackerUnit == null)
-            {
-                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = sender.NetworkId, AaTick = Utils.TickCount });
-            }
-            else
-            {
-                TrackerUnit.AaTick = Utils.TickCount;
-            }
         }
 
         public static double GetLastAutoAttackTime(Obj_AI_Base unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
-
-            if (TrackerUnit == null)
-                return double.MaxValue;
-            else
-                return (Utils.TickCount - TrackerUnit.AaTick) / 1000d;
+            return (Utils.TickCount - TrackerUnit.AaTick) / 1000d;
         }
 
         public static double GetLastNewPathTime(Obj_AI_Base unit)
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+            return (Utils.TickCount - TrackerUnit.NewPathTick) / 1000d;
+        }
 
-            if (TrackerUnit == null)
-                return double.MaxValue;
-            else
-                return (Utils.TickCount - TrackerUnit.NewPathTick) / 1000d;
+        public static double GetLastStopMoveTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+            
+            return (Utils.TickCount - TrackerUnit.StopMoveTick) / 1000d;
         }
     }
 
