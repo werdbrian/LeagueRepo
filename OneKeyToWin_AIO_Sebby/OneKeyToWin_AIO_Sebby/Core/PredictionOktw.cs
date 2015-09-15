@@ -418,6 +418,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.VeryHigh;
+
             }
             else if (distanceFromToWaypoint <= input.Unit.Distance(input.From))
             {
@@ -464,14 +465,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             var dashData = input.Unit.GetDashInfo();
             var result = new PredictionOutput { Input = input };
-            input.Delay += 0.1f;
             //Normal dashes.
             if (!dashData.IsBlink)
             {
                 //Mid air:
+                var endP = dashData.Path.Last();
                 var dashPred = GetPositionOnPath(
-                    input, new List<Vector2> { input.Unit.ServerPosition.To2D(), dashData.Path.Last() }, dashData.Speed);
-                if (dashPred.Hitchance >= HitChance.High)
+                    input, new List<Vector2> { input.Unit.ServerPosition.To2D(), endP }, dashData.Speed);
+                if (dashPred.Hitchance >= HitChance.High && dashPred.UnitPosition.To2D().Distance(input.Unit.Position.To2D(), endP, true) < 200 )
                 {
                     dashPred.CastPosition = dashPred.UnitPosition;
                     dashPred.Hitchance = HitChance.Dashing;
@@ -481,8 +482,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 //At the end of the dash:
                 if (dashData.Path.PathLength() > 200)
                 {
-                    var endP = dashData.Path.Last();
-                    var timeToPoint = input.Delay + input.From.To2D().Distance(endP) / input.Speed;
+                    var timeToPoint = input.Delay / 2f + input.From.To2D().Distance(endP) / input.Speed - 0.25f;
                     if (timeToPoint <=
                         input.Unit.Distance(endP) / dashData.Speed + input.RealRadius / input.Unit.MoveSpeed)
                     {
