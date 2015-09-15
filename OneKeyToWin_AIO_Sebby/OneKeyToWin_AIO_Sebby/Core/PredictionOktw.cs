@@ -402,7 +402,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
                     if (GetAngle(input.From, input.Unit) < angleMove)
                     {
-                        backToFront = moveArea;
+                        backToFront = moveArea / 2 ;
                         result.Hitchance = HitChance.VeryHigh;
                     }
                     else
@@ -454,7 +454,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 250 || input.Unit.MoveSpeed < 200f)
+            if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 400 || input.Unit.MoveSpeed < 200f)
                 result.Hitchance = HitChance.VeryHigh;
             
             return result;
