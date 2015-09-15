@@ -370,7 +370,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             
             double angleMove = 30 + (input.Radius / 15);
             float BackToFront = input.Unit.MoveSpeed * totalDelay * 1.5f;
-            float pathMinLen = 550f + BackToFront;
+            float pathMinLen = 500f + BackToFront;
             
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
@@ -408,11 +408,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
             }
 
-            if (input.Unit.MoveSpeed < 250f)
-            {
-                result.Hitchance = HitChance.VeryHigh;
-            }
-
             if (LastWaypiont.Distance(input.Unit.ServerPosition) > pathMinLen)
             {
                 result.Hitchance = HitChance.VeryHigh;
@@ -433,22 +428,30 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (input.Unit.IsWindingUp && UnitTracker.GetLastAutoAttackTime(input.Unit) > 0.1d)
+            if (UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
-                result.Hitchance = HitChance.Medium;
+                if (totalDelay < 0.7)
+                    result.Hitchance = HitChance.High;
+                else
+                    result.Hitchance = HitChance.Medium;
             }
 
-            if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
-                result.Hitchance = HitChance.Medium;
-
-            if (input.Unit.Path.Count() > 0 && input.Unit.Position == input.Unit.ServerPosition)
-                result.Hitchance = HitChance.Medium;
-
-            if (input.Unit.Path.Count() > 0)
+            if (result.Hitchance != HitChance.Medium)
             {
-                if (input.Unit.Distance(LastWaypiont) < BackToFront)
+                if (input.Unit.IsWindingUp && UnitTracker.GetLastAutoAttackTime(input.Unit) > 0.1d)
                 {
                     result.Hitchance = HitChance.Medium;
+                }
+
+                if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
+                    result.Hitchance = HitChance.Medium;
+
+                if (input.Unit.Path.Count() > 0)
+                {
+                    if (input.Unit.Distance(LastWaypiont) < BackToFront || input.Unit.Position == input.Unit.ServerPosition)
+                    {
+                        result.Hitchance = HitChance.Medium;
+                    }
                 }
             }
 
@@ -1027,9 +1030,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                                 }
                                 else
                                 {
-                                    if (minion.ServerPosition.To2D()
-                                            .Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                        Math.Pow((input.Radius + 17 + minion.BoundingRadius), 2))
+                                    var bonus = 20;
+                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D()) < input.Radius/2)
+                                        bonus = 40;
+                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <=
+                                        Math.Pow((input.Radius + bonus + minion.BoundingRadius), 2))
                                     {
                                         result.Add(minion);
                                     }
