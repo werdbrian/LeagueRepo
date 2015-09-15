@@ -383,7 +383,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 backToFront = moveArea;
                 angleMove += 5;
-                fixRange = (input.Unit.MoveSpeed * totalDelay) * 0.5f;
+
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
