@@ -372,7 +372,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 totalDelay = distanceFromToUnit / input.Speed + input.Delay;
             
             float moveArea = input.Unit.MoveSpeed * totalDelay;
-            float fixRange = moveArea * 0.7f;
+            float fixRange = moveArea * 0.6f;
             double angleMove = 30 + (input.Radius / 15);
             float backToFront = moveArea * 1.5f;
             float pathMinLen = 500f + backToFront;
@@ -380,7 +380,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
                 pathMinLen = 550f;
-                fixRange = moveArea * 0.5f;
+                fixRange = moveArea * 0.4f;
                 backToFront = moveArea;
                 angleMove += 5;
             }
