@@ -332,8 +332,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-            
-           
+
+            //Set hit chance
+            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
+                result = WayPointAnalysis(result, input);       
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
@@ -342,11 +344,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects = Collision.GetCollision(positions, input);
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
-            }
-
-            //Set hit chance
-            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
-                result = WayPointAnalysis(result, input);                         
+            }               
 
             return result;
         }
@@ -410,13 +408,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         result.Hitchance = HitChance.High;
                 }
             }
-            else if (input.Type == SkillshotType.SkillshotCircle)
-            {
-                if (totalDelay < 0.7 && UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
-                    result.Hitchance = HitChance.VeryHigh;
-                else if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
-                    result.Hitchance = HitChance.VeryHigh;
-            }
 
             if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
             {
@@ -441,6 +432,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.Medium;
+            }
+
+            if (input.Type == SkillshotType.SkillshotCircle)
+            {
+                if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
+                    result.Hitchance = HitChance.VeryHigh;
             }
 
             if (result.Hitchance != HitChance.Medium)
