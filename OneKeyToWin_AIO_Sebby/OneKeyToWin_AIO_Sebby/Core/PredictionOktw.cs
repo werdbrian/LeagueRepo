@@ -332,10 +332,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-
             //Set hit chance
             if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
-                result = WayPointAnalysis(result, input);       
+                result = WayPointAnalysis(result, input);  
+                 
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
