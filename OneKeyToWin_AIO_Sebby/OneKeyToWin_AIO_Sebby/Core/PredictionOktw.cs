@@ -417,7 +417,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.4d)
                 {
-                    result.Hitchance = HitChance.Medium;
+                    result.Hitchance = HitChance.High;
                 }
                 else if (input.From.Distance(input.Unit.ServerPosition) > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
@@ -446,7 +446,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
                     result.Hitchance = HitChance.Medium;
                 }
-
                 if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
                     result.Hitchance = HitChance.Medium;
 
