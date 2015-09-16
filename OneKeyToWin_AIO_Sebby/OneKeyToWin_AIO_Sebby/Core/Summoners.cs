@@ -135,10 +135,7 @@ namespace OneKeyToWin_AIO_Sebby
                     var castArea = ally.Distance(args.End) * (args.End - ally.ServerPosition).Normalized() + ally.ServerPosition;
                     if (castArea.Distance(ally.ServerPosition) < ally.BoundingRadius / 2)
                     {
-                        if (!OktwCommon.CanMove(ally) || ally.Distance(sender.Position) < 300f)
-                            dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
-                        else if (Player.Distance(args.End) < 100f)
-                            dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                     }
                 }
 
@@ -170,6 +167,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
+
         private bool CanUse(SpellSlot sum)
         {
             if (sum != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(sum) == SpellState.Ready)

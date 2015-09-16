@@ -126,12 +126,12 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
-                else if (Player.Distance(args.End) <= 300f)
+                else
                 {
-                    if (!OktwCommon.CanMove(ally) || ally.Distance(sender.Position) < 300f)
+                    var castArea = ally.Distance(args.End) * (args.End - ally.ServerPosition).Normalized() + ally.ServerPosition;
+                    if (castArea.Distance(ally.ServerPosition) < ally.BoundingRadius / 2)
                         dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
-                    else if (Player.Distance(args.End) < 100f)
-                        dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
+                  
                 }
 
                 if (Config.Item("Solari").GetValue<bool>() && Solari.IsReady() && Player.Distance(ally.ServerPosition) < Solari.Range)
