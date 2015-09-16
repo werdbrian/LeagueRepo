@@ -17,6 +17,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private float QMANA, WMANA, EMANA, RMANA;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private Vector3 Epos = Vector3.Zero;
+        private float DragonDmg = 0;
+        private double DragonTime = 0;
 
         public void LoadOKTW()
         {
@@ -46,6 +48,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEcc", "Auto E only CC enemy").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEslow", "Auto E slow logic detonate").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEdet", "Only detonate if target in E ").SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp").SetValue(new Slider(10, 100, 0)));
             foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team == Player.Team))
@@ -61,6 +65,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("Raoe", "R aoe").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("hitchanceR", "Hit Chance R").SetValue(new Slider(2, 3, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("useR", "Semi-manual cast R key").SetValue(new KeyBind('t', KeyBindType.Press))); //32 == space   
+
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rjungle", "R Jungle stealer").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rdragon", "Dragon").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rbaron", "Baron").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rred", "Red").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rblue", "Blue").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rally", "Ally stealer").SetValue(false));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -178,6 +189,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     CastQ(enemy);
             }
         }
+        
         private void CastQ(Obj_AI_Base t)
         {
             var poutput = Qcol.GetPrediction(t);
@@ -185,6 +197,57 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);      
             if ( col < 4)
                 Program.CastSpell(Q, t);
+        }
+
+        private void LogicE()
+        {
+            if (Player.HasBuff("LuxLightStrikeKugel") && !Program.None)
+            {
+                int eBig = Epos.CountEnemiesInRange(300);
+                if (Config.Item("autoEslow").GetValue<bool>())
+                {
+                    
+                    int detonate = eBig - Epos.CountEnemiesInRange(150);
+
+                    if (detonate > 0 || eBig > 1)
+                        E.Cast();
+                }
+
+                if (Config.Item("autoEdet").GetValue<bool>())
+                {
+                    if (eBig > 0)
+                        E.Cast();
+                }
+                else
+                {
+                    E.Cast();
+                }
+            }
+            else
+            {
+                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                if (t.IsValidTarget() && Player.Mana > RMANA + EMANA)
+                {
+                    if (!Config.Item("autoEcc").GetValue<bool>())
+                    {
+                        if (E.GetDamage(t) > t.Health)
+                            Program.CastSpell(E, t);
+                        else if (Program.Combo)
+                            Program.CastSpell(E, t);
+                    }
+
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
+                        E.Cast(enemy, true);
+                }
+                else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmE").GetValue<bool>() && Player.Mana > RMANA + WMANA)
+                {
+                    var minionList = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All);
+                    var farmPosition = E.GetCircularFarmLocation(minionList, E.Width);
+
+                    if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
+                        E.Cast(farmPosition.Position);
+                }
+            }
         }
 
         private void LogicR()
@@ -240,39 +303,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
-        private void LogicE()
-        {
-            if (Player.HasBuff("LuxLightStrikeKugel") && !Program.None)
-            {
-                E.Cast();
-            }
-            else
-            {
-                var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() && Player.Mana > RMANA + EMANA)
-                {
-                    if (!Config.Item("autoEcc").GetValue<bool>() && !Q.IsReady())
-                    {
-                        if (E.GetDamage(t) > t.Health)
-                            Program.CastSpell(E, t);
-                        else if (Program.Combo)
-                            Program.CastSpell(E, t);
-                    }
-
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && !OktwCommon.CanMove(enemy)))
-                        E.Cast(enemy, true);
-                }
-                else if (Program.LaneClear && Player.ManaPercent > Config.Item("Mana").GetValue<Slider>().Value && Config.Item("farmE").GetValue<bool>() && Player.Mana > RMANA + WMANA)
-                {
-                    var minionList = MinionManager.GetMinions(Player.ServerPosition, E.Range, MinionTypes.All);
-                    var farmPosition = E.GetCircularFarmLocation(minionList, E.Width);
-
-                    if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
-                        E.Cast(farmPosition.Position);
-                }
-            }
-        }
-
         private void Jungle()
         {
             if (Program.LaneClear && Player.Mana > RMANA + WMANA + RMANA + WMANA)
@@ -295,6 +325,54 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
             }
         }
+
+        private void KsJungle()
+        {
+            var mobs = MinionManager.GetMinions(Player.ServerPosition, R.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+            foreach (var mob in mobs)
+            {
+                //debug(mob.SkinName);
+                if (((mob.SkinName == "SRU_Dragon" && Config.Item("Rdragon").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Baron" && Config.Item("Rbaron").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Red" && Config.Item("Rred").GetValue<bool>())
+                    || (mob.SkinName == "SRU_Blue" && Config.Item("Rblue").GetValue<bool>()))
+                    && (mob.CountAlliesInRange(1000) == 0 || Config.Item("Rally").GetValue<bool>())
+                    && mob.Health < mob.MaxHealth
+                    && mob.Distance(Player.Position) > 1000
+                    )
+                {
+                    if (DragonDmg == 0)
+                        DragonDmg = mob.Health;
+
+                    if (Game.Time - DragonTime > 3)
+                    {
+                        if (DragonDmg - mob.Health > 0)
+                        {
+                            DragonDmg = mob.Health;
+                        }
+                        DragonTime = Game.Time;
+                    }
+                    else
+                    {
+                        var DmgSec = (DragonDmg - mob.Health) * (Math.Abs(DragonTime - Game.Time) / 3);
+                        //Program.debug("DS  " + DmgSec);
+                        if (DragonDmg - mob.Health > 0)
+                        {
+                            var timeTravel = R.Delay;
+                            var timeR = (mob.Health - R.GetDamage(mob)) / (DmgSec / 3);
+                            //Program.debug("timeTravel " + timeTravel + "timeR " + timeR + "d " + R.GetDamage(mob));
+                            if (timeTravel > timeR)
+                                R.Cast(mob.Position);
+                        }
+                        else
+                            DragonDmg = mob.Health;
+
+                        //Program.debug("" + GetUltTravelTime(ObjectManager.Player, R.Speed, R.Delay, mob.Position));
+                    }
+                }
+            }
+        }
+
 
         private bool HardCC(Obj_AI_Hero target)
         {
