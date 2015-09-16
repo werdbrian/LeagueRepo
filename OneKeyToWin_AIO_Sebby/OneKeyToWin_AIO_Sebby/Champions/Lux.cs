@@ -41,6 +41,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("gapQ", "Auto Q Gap Closer").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harrasQ", "Harras Q").SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
@@ -85,6 +86,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+        }
+
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+
+            if (Q.IsReady() && gapcloser.Sender.IsValidTarget(Q.Range) && Config.Item("gapQ").GetValue<bool>())
+                Q.Cast();
         }
 
 
@@ -131,12 +140,23 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void Game_OnGameUpdate(EventArgs args)
         {
 
-            if (R.IsReady() && Config.Item("useR").GetValue<KeyBind>().Active)
+            if (R.IsReady() )
             {
-                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-                if (t.IsValidTarget())
-                    Program.CastSpell(R, t);
+                if (Config.Item("Rjungle").GetValue<bool>())
+                {
+                    KsJungle();
+                }
+                
+                if (Config.Item("useR").GetValue<KeyBind>().Active)
+                {
+                    var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
+                    if (t.IsValidTarget())
+                        R.Cast(t, true, true);
+                }
             }
+            else
+                DragonTime = 0; 
+
 
             if (Program.LagFree(0))
             {
@@ -206,14 +226,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 int eBig = Epos.CountEnemiesInRange(300);
                 if (Config.Item("autoEslow").GetValue<bool>())
                 {
-                    
                     int detonate = eBig - Epos.CountEnemiesInRange(150);
 
                     if (detonate > 0 || eBig > 1)
                         E.Cast();
                 }
-
-                if (Config.Item("autoEdet").GetValue<bool>())
+                else if (Config.Item("autoEdet").GetValue<bool>())
                 {
                     if (eBig > 0)
                         E.Cast();
