@@ -279,13 +279,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     double Rdmg = R.GetDamage(target);
-                    if (Rdmg > predictedHealth && target.CountAlliesInRange(400) == 0)
+                    if (Rdmg > predictedHealth && target.CountAlliesInRange(700) < 2)
                     {
                         castR(target);
                         Program.debug("R normal");
                     }
                     else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() &&
-                        target.IsValidTarget(Q.Range + E.Range) && Rdmg + E.GetDamage(target)> predictedHealth)
+                        target.IsValidTarget(E.Range) && Rdmg + E.GetDamage(target)> predictedHealth)
                     {
                         R.CastIfWillHit(target, 2, true);
                         R.Cast(target, true);
