@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             W.SetSkillshot(0.25f, 110f, 1200f, false, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 280f, 1300f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(1.25f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
-
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
@@ -48,11 +48,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 Config.SubMenu(Player.ChampionName).SubMenu("Q Config").SubMenu("Use on:").AddItem(new MenuItem("Qon" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoE", "Auto E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("harrasE", "Harras E").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEcc", "Auto E only CC enemy").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEslow", "Auto E slow logic detonate").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("autoEdet", "Only detonate if target in E ").SetValue(false));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp").SetValue(new Slider(10, 100, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").AddItem(new MenuItem("Wdmg", "W dmg % hp").SetValue(new Slider(10, 100, 0)));
             foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team == Player.Team))
             {
                 Config.SubMenu(Player.ChampionName).SubMenu("W Shield Config").SubMenu("Shield ally").SubMenu(ally.ChampionName).AddItem(new MenuItem("skillshot" + ally.ChampionName, "skillshot").SetValue(true));
@@ -191,7 +192,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) > enemy.Health))
             {
                 CastQ(enemy);
@@ -244,13 +244,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             else
             {
                 var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (t.IsValidTarget() && Player.Mana > RMANA + EMANA)
+                if (t.IsValidTarget() )
                 {
                     if (!Config.Item("autoEcc").GetValue<bool>())
                     {
                         if (E.GetDamage(t) > t.Health)
                             Program.CastSpell(E, t);
-                        else if (Program.Combo)
+                        else if (Program.Combo && Player.Mana > RMANA + EMANA)
+                            Program.CastSpell(E, t);
+                        else if (Config.Item("harrasE").GetValue<bool>() && Player.Mana > RMANA + EMANA + EMANA + RMANA && Program.Farm)
                             Program.CastSpell(E, t);
                     }
 
@@ -426,6 +428,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
 
@@ -468,6 +478,16 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else
                     Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
+            }
+            if (R.IsReady() && Config.Item("noti").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+
+                if ( t.IsValidTarget() && R.GetDamage(t) > t.Health)
+                {
+                    Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
+                    drawLine(t.Position, Player.Position, 5, System.Drawing.Color.Red);
+                }
             }
         }
     }
