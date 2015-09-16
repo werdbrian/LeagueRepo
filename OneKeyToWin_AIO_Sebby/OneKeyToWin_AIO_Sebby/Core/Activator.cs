@@ -40,6 +40,7 @@ namespace OneKeyToWin_AIO_Sebby
             Hydra2 = new Items.Item(3077, 440f),
             HydraTitanic = new Items.Item(3748, 150f),
             Hextech = new Items.Item(3146, 700f),
+            FrostQueen = new Items.Item(3092, 850f),
             
             //def
             FaceOfTheMountain = new Items.Item(3401, 600f),
@@ -74,6 +75,8 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("HydraTitanic").AddItem(new MenuItem("HydraTitanic", "Hydra Titanic").SetValue(true));
 
             Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("Muramana").AddItem(new MenuItem("Muramana", "Muramana").SetValue(true));
+
+            Config.SubMenu("Activator OKTW©").SubMenu("Offensives").SubMenu("FrostQueen").AddItem(new MenuItem("FrostQueen", "FrostQueen").SetValue(true));
 
             // DEF
             Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Randuin", "Randuin").SetValue(true));
@@ -302,6 +305,31 @@ namespace OneKeyToWin_AIO_Sebby
                         Hextech.Cast(t);
                     if (Config.Item("HextechCombo").GetValue<bool>() && Program.Combo)
                         Hextech.Cast(t);
+                }
+            }
+
+
+            if (Program.Combo && FrostQueen.IsReady() && Config.Item("FrostQueen").GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(FrostQueen.Range, TargetSelector.DamageType.Magical);
+                if (t.IsValidTarget())
+                {
+                    var predInput2 = new Core.PredictionInput
+                    {
+                        Aoe = true,
+                        Collision = false,
+                        Speed = 1200,
+                        Delay = 0.25f,
+                        Range = FrostQueen.Range,
+                        From = Player.ServerPosition,
+                        Radius = 200,
+                        Unit = t,
+                        Type = Core.SkillshotType.SkillshotCircle
+                    };
+                    var poutput2 = Core.Prediction.GetPrediction(predInput2);
+
+                    if (poutput2.Hitchance >= Core.HitChance.High)
+                        FrostQueen.Cast(poutput2.CastPosition);
                 }
             }
 
