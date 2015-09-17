@@ -83,9 +83,8 @@ namespace OneKeyToWin_AIO_Sebby
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
                 target.HasBuffOfType(BuffType.Charm) || target.HasBuffOfType(BuffType.Fear) || target.HasBuffOfType(BuffType.Knockback) ||
                 target.HasBuffOfType(BuffType.Taunt) || target.HasBuffOfType(BuffType.Suppression) ||
-                target.IsStunned || target.IsChannelingImportantSpell())
+                target.IsStunned || target.IsChannelingImportantSpell() || target.MoveSpeed < 50f)
             {
-                Program.debug("!canMov" + target.ChampionName);
                 return false;
             }
             else
