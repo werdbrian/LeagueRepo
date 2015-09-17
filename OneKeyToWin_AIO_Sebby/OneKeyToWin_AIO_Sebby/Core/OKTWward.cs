@@ -125,7 +125,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
                 if (Game.Time - need.LastVisableTime < 4)
                 {
-                    if (Config.Item("AutoWardCombo").GetValue<bool>() && !Program.Combo)
+                    if (Config.Item("AutoWardCombo").GetValue<bool>() && !Config.Item("onlyUtility", true).GetValue<bool>() && !Program.Combo)
                         return;
 
                     if (NavMesh.IsWallOfGrass(need.PredictedPos, 0))
