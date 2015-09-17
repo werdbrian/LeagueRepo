@@ -192,10 +192,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) > enemy.Health))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) + BonusDmg(enemy) > enemy.Health))
             {
                 CastQ(enemy);
+                return;
             }
+
             var t = Orbwalker.GetTarget() as Obj_AI_Hero;
             if (!t.IsValidTarget())
                 t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
@@ -274,21 +276,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Config.Item("autoR").GetValue<bool>() )
             {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && target.CountAlliesInRange(700) < 2 && Program.ValidUlt(target)))
                 {
 
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     double Rdmg = R.GetDamage(target);
-                    if (Rdmg > predictedHealth && target.CountAlliesInRange(700) < 2)
+                    if (Rdmg > predictedHealth )
                     {
                         castR(target);
                         Program.debug("R normal");
                     }
-                    else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() &&
-                        target.IsValidTarget(E.Range) && Rdmg + E.GetDamage(target)> predictedHealth)
+                    else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() && target.IsValidTarget(E.Range) && Rdmg + E.GetDamage(target) + BonusDmg(target) > predictedHealth)
                     {
-                        R.CastIfWillHit(target, 2, true);
-                        R.Cast(target, true);
+                        R.CastIfWillHit(target, 2);
+                        R.Cast(target);
                     }
                     else if (Program.Combo && Config.Item("Raoe").GetValue<bool>())
                     {
@@ -296,6 +297,17 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     }
                 }
             }
+        }
+
+        private double BonusDmg(Obj_AI_Hero target)
+        {
+            double damage = 10 + (Player.Level) * 8 + 0.2f * Player.FlatMagicDamageMod;
+            if (Player.HasBuff("lichbane"))
+            {
+                damage += (Player.BaseAttackDamage * 0.75) + ((Player.BaseAbilityDamage + Player.FlatMagicDamageMod) * 0.5);
+            }
+
+            return Player.GetAutoAttackDamage(target) + Player.CalcDamage(target, Damage.DamageType.Magical, damage);
         }
 
         private void castR(Obj_AI_Hero target)
