@@ -334,8 +334,15 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 positionGang = positionGang + 100;
             }
 
-            DrawOrbwalkerRange();
-            DrawOrbwalkerTarget();
+            if (!Config.Item("onlyUtility", true).GetValue<bool>())
+            {
+                DrawOrbwalkerRange();
+                DrawOrbwalkerTarget();
+            }
+            else
+            {
+                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 1f, System.Drawing.Color.Cyan, "OKTW AIO only utility mode ON");
+            }
         }
 
         private void DrawOrbwalkerRange()
