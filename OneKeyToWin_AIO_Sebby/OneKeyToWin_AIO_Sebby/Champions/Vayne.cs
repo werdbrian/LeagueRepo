@@ -23,7 +23,7 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 670);
             R = new Spell(SpellSlot.R, 3000);
 
-            E.SetTargetted(0.2f, 3500f);
+            E.SetTargetted(0.27f, 3500f);
 
             LoadMenuOKTW();
 
