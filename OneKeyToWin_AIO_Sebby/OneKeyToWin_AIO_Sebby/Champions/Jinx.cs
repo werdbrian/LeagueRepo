@@ -222,7 +222,7 @@ namespace OneKeyToWin_AIO_Sebby
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget()  && Player.CountEnemiesInRange(bonusRange()) == 0)
             {
-                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && GetRealDistance(t) > bonusRange() - 50 && GetRealDistance(t) > bonusRange() - 50)
+                if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && GetRealDistance(t) > bonusRange() - 50)
                 {
                     Program.CastSpell(W, t);
                 }
