@@ -126,15 +126,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     dmg = sender.GetSpellDamage(Player, args.SData.Name);
                 }
 
-                double HpLeft = ally.Health - dmg;
+                if (dmg > 0)
+                {
+                    double HpLeft = ally.Health - dmg;
 
-                double HpPercentage = (dmg * 100) / ally.Health;
-                double shieldValue = 65 + W.Level * 25 + 0.35 * Player.FlatMagicDamageMod;
-                if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
-                    W.Cast(W.GetPrediction(ally).CastPosition);
-                else if (dmg > shieldValue)
-                    W.Cast(W.GetPrediction(ally).CastPosition);
+                    double HpPercentage = (dmg * 100) / ally.Health;
+                    double shieldValue = 65 + W.Level * 25 + 0.35 * Player.FlatMagicDamageMod;
 
+                    if (HpPercentage >= Config.Item("Wdmg").GetValue<Slider>().Value)
+                        W.Cast(W.GetPrediction(ally).CastPosition);
+                    else if (dmg > shieldValue)
+                        W.Cast(W.GetPrediction(ally).CastPosition);
+                }
             }   
         }
 
@@ -215,8 +218,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void CastQ(Obj_AI_Base t)
         {
             var poutput = Qcol.GetPrediction(t);
-            
-            var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead);      
+            var col = poutput.CollisionObjects.Count(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead); 
+     
             if ( col < 4)
                 Program.CastSpell(Q, t);
         }
@@ -278,7 +281,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && target.CountAlliesInRange(700) < 2 && Program.ValidUlt(target)))
                 {
-
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     double Rdmg = R.GetDamage(target);
 
@@ -359,7 +361,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         E.Cast(mob.ServerPosition);
                         return;
                     }
-                    
                 }
             }
         }
