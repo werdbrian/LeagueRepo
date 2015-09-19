@@ -38,6 +38,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRangeMini", "R range minimap").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw when skill rdy").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
@@ -86,6 +87,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += Drawing_OnEndScene;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
         }
@@ -472,6 +474,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var wts2 = Drawing.WorldToScreen(pos2);
 
             Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
+        private void Drawing_OnEndScene(EventArgs args)
+        {
+            if (Config.Item("rRangeMini").GetValue<bool>())
+            {
+                if (R.IsReady())
+                    Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Aqua, 1, 20, true);
+            }
+            else
+                Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Aqua, 1, 20, true);
+
+
         }
 
         private void Drawing_OnDraw(EventArgs args)

@@ -43,6 +43,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRangeMini", "R range minimap").SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q").SetValue(true));
 
@@ -75,12 +76,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene +=Drawing_OnEndScene;
             Orbwalking.BeforeAttack +=Orbwalking_BeforeAttack;
             Orbwalking.AfterAttack +=Orbwalking_AfterAttack;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
-
+     
         private void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
             if (unit.IsMe)
@@ -183,6 +185,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
+
+            
             R.Range = 2000 + R.Level * 1200;
             if (!IsCastingR)
                 R.Range = R.Range - Config.Item("MaxRangeR").GetValue<Slider>().Value;
@@ -367,6 +371,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+            }
+        }
+
+        private void Drawing_OnEndScene(EventArgs args)
+        {
+            if (Config.Item("rRangeMini").GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy").GetValue<bool>())
+                {
+                    if (R.IsReady())
+                        Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Aqua, 1, 20,true);
+                }
+                else
+                    Utility.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Aqua, 1, 20,true);
             }
         }
 
