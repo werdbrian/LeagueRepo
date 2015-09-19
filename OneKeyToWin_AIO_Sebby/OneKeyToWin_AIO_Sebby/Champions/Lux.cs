@@ -31,7 +31,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Qcol.SetSkillshot(0.25f, 80f, 1200f, true, SkillshotType.SkillshotLine);
             Q.SetSkillshot(0.25f, 80f, 1200f, false, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.25f, 110f, 1200f, false, SkillshotType.SkillshotLine);
-            E.SetSkillshot(0.25f, 280f, 1300f, false, SkillshotType.SkillshotCircle);
+            E.SetSkillshot(0.25f, 250f, 1300f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(1.25f, 150f, float.MaxValue, false, SkillshotType.SkillshotLine);
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification").SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
@@ -228,7 +228,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Player.HasBuff("LuxLightStrikeKugel") && !Program.None)
             {
-                int eBig = Epos.CountEnemiesInRange(300);
+                int eBig = Epos.CountEnemiesInRange(330);
                 if (Config.Item("autoEslow").GetValue<bool>())
                 {
                     int detonate = eBig - Epos.CountEnemiesInRange(150);
