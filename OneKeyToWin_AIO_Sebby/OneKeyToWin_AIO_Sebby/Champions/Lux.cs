@@ -294,7 +294,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         castR(target);
                         Program.debug("R normal");
                     }
-                    else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() && target.IsValidTarget(E.Range) && Rdmg + E.GetDamage(target) + BonusDmg(target) > predictedHealth)
+                    else if (!OktwCommon.CanMove(target) && Config.Item("Rcc").GetValue<bool>() && target.IsValidTarget(900) && Rdmg + E.GetDamage(target) + BonusDmg(target) > predictedHealth)
                     {
                         R.CastIfWillHit(target, 2);
                         R.Cast(target);
