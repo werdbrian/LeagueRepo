@@ -224,7 +224,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (t.IsValidTarget())
             {
                 var qDmg = Q.GetDamage(t);
-                var wDmg = W.GetDamage(t);
+                var wDmg = W.GetDamage(t) + OktwCommon.GetEchoLudenDamage(t);
                 
                 if (wDmg > t.Health)
                 {
@@ -271,7 +271,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
                 else if (t.IsValidTarget(Q.Range - 300))
                 {
-                    if (Program.Combo && Player.Mana > EMANA + QMANA)
+                    if(t.Health < Q.GetDamage(t) + OktwCommon.GetEchoLudenDamage(t))
+                        Q.StartCharging();
+                    else if (Program.Combo && Player.Mana > EMANA + QMANA)
                     {
                         Q.StartCharging();
                     }
@@ -297,7 +299,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicE()
         {
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) + W.GetDamage(enemy) > enemy.Health))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) + W.GetDamage(enemy) + OktwCommon.GetEchoLudenDamage(enemy) > enemy.Health))
             {
                 Program.CastSpell(E, enemy);
             }

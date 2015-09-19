@@ -47,6 +47,20 @@ namespace OneKeyToWin_AIO_Sebby
             
         }
 
+        public static float GetEchoLudenDamage(Obj_AI_Hero target)
+        {
+            float totalDamage = 0;
+
+            if (Player.HasBuff("itemmagicshankcharge"))
+            {
+                if (Player.GetBuff("itemmagicshankcharge").Count == 100)
+                {
+                    totalDamage += (float)Player.CalcDamage(target, Damage.DamageType.Magical, 100 + 0.1 * Player.FlatMagicDamageMod);
+                }
+            }
+            return totalDamage; 
+        }
+
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
             if (blockSpells)

@@ -208,7 +208,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (EMissile == null || !EMissile.IsValid)
                 {
-                    if (Q.GetDamage(t) * 2 > t.Health)
+                    if (Q.GetDamage(t) * 2 + OktwCommon.GetEchoLudenDamage(t) > t.Health)
                         Q.Cast(t, true);
                     else if (Program.Combo && ObjectManager.Player.Mana > RMANA + QMANA)
                         Program.CastSpell(Q, t);
@@ -232,7 +232,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicE()
         {
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) + W.GetDamage(enemy) > enemy.Health))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) + W.GetDamage(enemy) + OktwCommon.GetEchoLudenDamage(enemy) > enemy.Health))
             {
                 Program.CastSpell(E, enemy);
             }
