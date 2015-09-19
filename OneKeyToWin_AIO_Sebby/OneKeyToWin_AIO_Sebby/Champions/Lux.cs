@@ -95,7 +95,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             if (Q.IsReady() && gapcloser.Sender.IsValidTarget(Q.Range) && Config.Item("gapQ").GetValue<bool>())
-                Q.Cast();
+                Q.Cast(gapcloser.Sender);
         }
 
 
