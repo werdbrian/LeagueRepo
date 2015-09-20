@@ -298,9 +298,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (result == null)
             {
                 result = GetStandardPrediction(input);
-                //Set hit chance
-                if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
-                    result = WayPointAnalysis(result, input);
             }
 
             //Check if the unit position is in range
@@ -345,7 +342,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
-
+            //Set hit chance
+            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
+            {
+                result = WayPointAnalysis(result, input);
+                //Program.debug(input.Unit.BaseSkinName + result.Hitchance);
+            }
             return result;
         }
 
