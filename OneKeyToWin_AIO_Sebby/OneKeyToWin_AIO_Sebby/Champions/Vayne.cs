@@ -74,7 +74,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             if (E.IsReady() && Config.Item("gapE").GetValue<bool>() )
                 E.Cast(target);
-            if (Q.IsReady() && Config.Item("gapQ").GetValue<bool>() )
+            if ((!E.IsReady() || !Config.Item("gapE").GetValue<bool>()) && Q.IsReady() && Config.Item("gapQ").GetValue<bool>() )
                 Q.Cast();
             return;
         }
