@@ -308,7 +308,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         float dmgCombo = Rdmg;
 
                         if (E.IsReady())
-                            dmgCombo += E.GetDamage(target);
+                        {
+                            var eDmg = E.GetDamage(target);
+                            
+                            if (eDmg > predictedHealth)
+                                return;
+                            else
+                                dmgCombo += eDmg;
+                        }
 
                         if (target.IsValidTarget(800))
                             dmgCombo += BonusDmg(target);
