@@ -298,6 +298,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (result == null)
             {
                 result = GetStandardPrediction(input);
+                //Set hit chance
+                if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
+                    result = WayPointAnalysis(result, input);
             }
 
             //Check if the unit position is in range
@@ -332,10 +335,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
             }
-            //Set hit chance
-            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
-                result = WayPointAnalysis(result, input);  
-                 
+
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
@@ -344,7 +344,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.CollisionObjects = Collision.GetCollision(positions, input);
                 result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
-            }               
+            }
 
             return result;
         }
@@ -379,10 +379,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
-                pathMinLen = 550f;
+                pathMinLen = backToFront;
                 fixRange = moveArea * 0.4f;
                 backToFront = moveArea;
-                angleMove += 5;
+                angleMove += 15;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
@@ -415,10 +415,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.3d)
                     result.Hitchance = HitChance.High;
                 else if (distanceFromToUnit > input.Range - fixRange)
-                    result.Hitchance = HitChance.High;
+                    result.Hitchance = HitChance.Medium;
                 else
                     result.Hitchance = HitChance.VeryHigh;
-
             }
             else if (distanceFromToWaypoint <= input.Unit.Distance(input.From))
             {
@@ -430,8 +429,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.Type == SkillshotType.SkillshotLine && totalDelay < 0.8)
                     result.Hitchance = HitChance.VeryHigh;
-                else if (totalDelay < 0.7)
-                    result.Hitchance = HitChance.High;
+                else if (totalDelay < 0.6)
+                    result.Hitchance = HitChance.VeryHigh;
                 else
                     result.Hitchance = HitChance.Medium;
             }
@@ -583,7 +582,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     Input = input,
                     UnitPosition = input.Unit.ServerPosition,
                     CastPosition = input.Unit.ServerPosition,
-                    Hitchance = HitChance.High
+                    Hitchance = HitChance.VeryHigh
                 };
             }
 
@@ -638,11 +637,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
 
                 path = path.CutPath(d);
-
-                var distanceToTarget = input.From.Distance(input.Unit.ServerPosition);
-                var m = distanceToTarget > input.Unit.BoundingRadius ? distanceToTarget / (distanceToTarget - input.Unit.BoundingRadius) : 1;
-                var sp = m * input.Speed;
-
                 var tT = 0f;
                 for (var i = 0; i < path.Count - 1; i++)
                 {
@@ -651,20 +645,22 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     var tB = a.Distance(b) / speed;
                     var direction = (b - a).Normalized();
                     a = a - speed * tT * direction;
-                    var sol = Geometry.VectorMovementCollision(a, b, speed, input.From.To2D(), sp, tT);
+                    var sol = Geometry.VectorMovementCollision(a, b, speed, input.From.To2D(), input.Speed, tT);
                     var t = (float)sol[0];
                     var pos = (Vector2)sol[1];
 
                     if (pos.IsValid() && t >= tT && t <= tT + tB)
                     {
+                        if (pos.Distance(b, true) < 20)
+                            break;
                         var p = pos + input.RealRadius * direction;
 
                         if (input.Type == SkillshotType.SkillshotLine && false)
                         {
                             var alpha = (input.From.To2D() - p).AngleBetween(a - b);
-                            if (alpha > 50 && alpha < 180 - 50)
+                            if (alpha > 30 && alpha < 180 - 30)
                             {
-                                var beta = (float)Math.Asin(input.RealRadius * 0.85f / p.Distance(input.From));
+                                var beta = (float)Math.Asin(input.RealRadius / p.Distance(input.From));
                                 var cp1 = input.From.To2D() + (p - input.From.To2D()).Rotated(beta);
                                 var cp2 = input.From.To2D() + (p - input.From.To2D()).Rotated(-beta);
 
@@ -693,6 +689,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 Hitchance = HitChance.Medium
             };
         }
+
+
     }
 
     internal static class AoePrediction
