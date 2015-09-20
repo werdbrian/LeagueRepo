@@ -17,7 +17,7 @@ namespace OneKeyToWin_AIO_Sebby
         public float QMANA, WMANA, EMANA, RMANA;
 
         private int count = 0 , countE = 0 , wCount = 0;
-        private float grabTime = Game.Time;
+        private float grabTime = Game.Time, lastecast = 0f;
 
         private static Obj_AI_Hero AllyR;
 
@@ -50,6 +50,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
                 {
+                    lastecast = Game.ClockTime;
                     Orbwalking.ResetAutoAttackTimer();
                 }
                 if (args.SData.Name == "kalistaw")
@@ -83,7 +84,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (Player.Health - dmg < (Player.CountEnemiesInRange(600) * Player.Level * 10 ) + (Player.Level * 10))
                 {
-                     E.Cast();
+                     CastE();
                 }
             }
         }
@@ -126,7 +127,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (ObjectManager.Player.HasBuff("Recall"))
                 return;
-
             if (E.IsReady())
             {
                 farm();
@@ -163,7 +163,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
-            if (Config.Item("Wdragon").GetValue<bool>() &&  !Orbwalker.GetTarget().IsValidTarget() && !Program.Combo)
+            if (Config.Item("Wdragon").GetValue<bool>() &&  !Orbwalker.GetTarget().IsValidTarget() && !Program.Combo && Player.CountEnemiesInRange(800)==0)
             {
                 if (wCount > 0)
                 {
@@ -240,15 +240,13 @@ namespace OneKeyToWin_AIO_Sebby
                 }
 
                 if (mob.Health < dmg)
-                    E.Cast();
+                    CastE();
             }
         }
         private void LogicQ()
         {
-
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
 
-           
             if (t.IsValidTarget())
             {
                 var poutput = Q.GetPrediction(t);
@@ -283,10 +281,23 @@ namespace OneKeyToWin_AIO_Sebby
 
         private float GetEdmg( Obj_AI_Base t)
         {
-            return (E.GetDamage(t) * 0.01f * (float)Config.Item("Edmg").GetValue<Slider>().Value) - t.HPRegenRate;
+            var defuffer = 1f;
+            if (Player.HasBuff("summonerexhaust"))
+                defuffer *= .4f;
+            return (defuffer * E.GetDamage(t) * 0.01f * (float)Config.Item("Edmg").GetValue<Slider>().Value) - t.HPRegenRate;
         }
 
-        private void castQ(bool cast, Obj_AI_Base t)
+        private void CastE()
+        {
+            if (Game.ClockTime - lastecast < 0.300)
+            {
+                return;
+            }
+            
+            E.Cast();
+        }
+
+        void castQ(bool cast, Obj_AI_Base t)
         {
             if (cast)
                 Program.CastSpell(Q2, t);
@@ -300,12 +311,12 @@ namespace OneKeyToWin_AIO_Sebby
                 var Edmg = GetEdmg(target);
                 if (target.Health  < Edmg)
                 {
-                    E.Cast();
+                    CastE();
                     return;
                 }
                 if (0 < Edmg && count > 0)
                 {
-                    E.Cast();
+                    CastE();
                     return;
                 }
                 
@@ -314,13 +325,13 @@ namespace OneKeyToWin_AIO_Sebby
                     && Player.Mana > RMANA + QMANA + EMANA + WMANA
                     && Player.CountEnemiesInRange(800) == 0)
                 {
-                    E.Cast();
+                    CastE();
                     return;
                 }
             }
             if (Program.LaneClear && (count >= Config.Item("farmE").GetValue<Slider>().Value  || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
             {
-                E.Cast();
+                CastE();
                 return;
             }
         }
@@ -369,7 +380,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
             if (Program.Farm && outRange > 0)
             {
-                E.Cast();
+                CastE();
                 return 0;
             }
             return count;
