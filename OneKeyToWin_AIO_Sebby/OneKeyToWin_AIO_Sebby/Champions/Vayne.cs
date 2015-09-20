@@ -23,7 +23,7 @@ namespace OneKeyToWin_AIO_Sebby
             E = new Spell(SpellSlot.E, 670);
             R = new Spell(SpellSlot.R, 3000);
 
-            E.SetTargetted(0.37f, float.MaxValue);
+            E.SetTargetted(0.35f, float.MaxValue);
 
             LoadMenuOKTW();
 
@@ -223,15 +223,13 @@ namespace OneKeyToWin_AIO_Sebby
                 pushDistance = 490;
             else
                 pushDistance = 400 ;
-
             
             var finalPosition2 = prepos.CastPosition.Extend(fromPosition, -250);
             if (finalPosition2.IsWall())
                 return true;
 
             var finalPosition = prepos.CastPosition.Extend(fromPosition, -pushDistance);
-            var points = CirclePoint(10, 80, finalPosition);
-
+            var points = CirclePoint(10, 90, finalPosition);
 
             bool cast = true;
             foreach (var point in points.Where(point => !point.IsWall()))
@@ -293,8 +291,6 @@ namespace OneKeyToWin_AIO_Sebby
                         Render.Circle.DrawCircle(finalPosition, 40, System.Drawing.Color.Red);
                     else
                         Render.Circle.DrawCircle(finalPosition, 40, System.Drawing.Color.YellowGreen);
-
-
                 }
             }
         }
