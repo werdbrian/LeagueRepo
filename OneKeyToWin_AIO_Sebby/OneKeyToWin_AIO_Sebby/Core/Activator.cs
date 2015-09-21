@@ -215,6 +215,8 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             Cleansers();
+            ZhonyaCast();
+
             if (!Program.LagFree(0))
                 return;
 
@@ -223,6 +225,32 @@ namespace OneKeyToWin_AIO_Sebby
 
             Offensive();
             Defensive();
+        }
+
+        private void ZhonyaCast()
+        {
+            if (Config.Item("Zhonya").GetValue<bool>() && Zhonya.IsReady())
+            {
+                float time = 10;
+                if (Player.HasBuff("zedulttargetmark"))
+                {
+                    time = OktwCommon.GetPassiveTime(Player, "zedulttargetmark");
+                }
+                if (Player.HasBuff("FizzMarinerDoom"))
+                {
+                    time = OktwCommon.GetPassiveTime(Player, "FizzMarinerDoom");
+                }
+                if (Player.HasBuff("MordekaiserChildrenOfTheGrave"))
+                {
+                    time = OktwCommon.GetPassiveTime(Player, "MordekaiserChildrenOfTheGrave");
+                }
+                if (Player.HasBuff("VladimirHemoplague"))
+                {
+                    time = OktwCommon.GetPassiveTime(Player, "VladimirHemoplague");
+                }
+                if (time < 1 && time > 0)
+                    Zhonya.Cast();
+            }
         }
 
         private void Cleansers()
