@@ -75,6 +75,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (sender.IsMe && args.SData.Name == "RocketGrabMissile")
             {
+                Utility.DelayAction.Add(500, Orbwalking.ResetAutoAttackTimer);
                 grab++;
             }
         }
