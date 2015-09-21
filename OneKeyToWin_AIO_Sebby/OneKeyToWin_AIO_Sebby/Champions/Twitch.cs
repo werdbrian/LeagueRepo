@@ -28,24 +28,24 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R, 975);
 
             W.SetSkillshot(0.25f, 100f, 1410f, false, SkillshotType.SkillshotCircle);
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("countQ", "Auto Q if x enemies are going in your direction 0-disable").SetValue(new Slider(3, 5, 0)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q in combo").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("countQ", "Auto Q if x enemies are going in your direction 0-disable", true).SetValue(new Slider(3, 5, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q in combo", true).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "AutoW").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "AutoW", true).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Eks", "E ks").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if x stacks & out range AA").SetValue(new Slider(6, 6, 0)));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("5e", "Always E if 6 stacks").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Eks", "E ks", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if x stacks & out range AA", true).SetValue(new Slider(6, 6, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("5e", "Always E if 6 stacks", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E", true).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("Rks", "R KS out range AA").SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("countR", "Auto R if x enemies (combo)").SetValue(new Slider(3, 5, 0)));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("Rks", "R KS out range AA", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("countR", "Auto R if x enemies (combo)", true).SetValue(new Slider(3, 5, 0)));
            
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
@@ -75,10 +75,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget() )
             {
-                if (!Orbwalking.InAutoAttackRange(t) && Config.Item("Rks").GetValue<bool>() && Player.GetAutoAttackDamage(t) * 4 > t.Health)
+                if (!Orbwalking.InAutoAttackRange(t) && Config.Item("Rks", true).GetValue<bool>() && Player.GetAutoAttackDamage(t) * 4 > t.Health)
                     R.Cast();
 
-                if (t.CountEnemiesInRange(450) >= Config.Item("countR").GetValue<Slider>().Value && 0 != Config.Item("countR").GetValue<Slider>().Value)
+                if (t.CountEnemiesInRange(450) >= Config.Item("countR", true).GetValue<Slider>().Value && 0 != Config.Item("countR", true).GetValue<Slider>().Value)
                     R.Cast();
             }
         }
@@ -102,10 +102,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicQ()
         {
 
-            if (Config.Item("autoQ").GetValue<bool>() && Program.Combo && Orbwalker.GetTarget().IsValid<Obj_AI_Hero>() && Player.Mana < RMANA + QMANA)
+            if (Config.Item("autoQ", true).GetValue<bool>() && Program.Combo && Orbwalker.GetTarget().IsValid<Obj_AI_Hero>() && Player.Mana < RMANA + QMANA)
                 Q.Cast();
 
-            if (Config.Item("countQ").GetValue<Slider>().Value == 0 || Player.Mana < RMANA + QMANA)
+            if (Config.Item("countQ", true).GetValue<Slider>().Value == 0 || Player.Mana < RMANA + QMANA)
                 return;
             
             var count = 0;
@@ -116,7 +116,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (Player.Distance( waypoints.Last<Vector2>().To3D()) < 600)
                     count++;
             }
-            if (count >= Config.Item("countQ").GetValue<Slider>().Value)
+            if (count >= Config.Item("countQ", true).GetValue<Slider>().Value)
                 Q.Cast();
         }
 
@@ -124,14 +124,14 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && enemy.HasBuff("twitchdeadlyvenom")))
             {
-                if (Config.Item("Eks").GetValue<bool>() && E.GetDamage(enemy) + passiveDmg(enemy) > enemy.Health)
+                if (Config.Item("Eks", true).GetValue<bool>() && E.GetDamage(enemy) + passiveDmg(enemy) > enemy.Health)
                     E.Cast();
                 if (Player.Mana > RMANA + EMANA)
                 {
                     int buffsNum = OktwCommon.GetBuffCount(enemy, "twitchdeadlyvenom");
-                    if (Config.Item("5e").GetValue<bool>() && buffsNum == 6 )
+                    if (Config.Item("5e", true).GetValue<bool>() && buffsNum == 6 )
                          E.Cast();
-                    if (!Orbwalking.InAutoAttackRange(enemy) && 0 < Config.Item("countE").GetValue<Slider>().Value && buffsNum >= Config.Item("countE").GetValue<Slider>().Value)
+                    if (!Orbwalking.InAutoAttackRange(enemy) && 0 < Config.Item("countE", true).GetValue<Slider>().Value && buffsNum >= Config.Item("countE", true).GetValue<Slider>().Value)
                         E.Cast();
                 }
             }
@@ -155,7 +155,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void JungleE()
         {
-            if (!Config.Item("jungleE").GetValue<bool>() || Player.Mana < RMANA + EMANA)
+            if (!Config.Item("jungleE", true).GetValue<bool>() || Player.Mana < RMANA + EMANA)
                 return;
 
             var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -203,7 +203,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         }
         private void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("notif").GetValue<bool>())
+            if (Config.Item("notif", true).GetValue<bool>())
             {
                 if (Player.HasBuff("TwitchHideInShadows"))
                     drawText2("Q:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "TwitchHideInShadows")), Player.Position, System.Drawing.Color.Yellow);
@@ -219,9 +219,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     drawText("IS DEAD", enemy, System.Drawing.Color.Yellow);
             }
 
-            if (Config.Item("qRange").GetValue<bool>())
+            if (Config.Item("qRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (Q.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
@@ -230,9 +230,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
             }
 
-            if (Config.Item("eRange").GetValue<bool>())
+            if (Config.Item("eRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (E.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
@@ -241,9 +241,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
             }
 
-            if (Config.Item("rRange").GetValue<bool>())
+            if (Config.Item("rRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (R.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);

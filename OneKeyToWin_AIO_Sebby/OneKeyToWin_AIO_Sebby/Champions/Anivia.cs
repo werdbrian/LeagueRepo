@@ -47,14 +47,14 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (Config.Item("inter").GetValue<bool>() && W.IsReady() && sender.IsValidTarget(W.Range))
+            if (Config.Item("inter", true).GetValue<bool>() && W.IsReady() && sender.IsValidTarget(W.Range))
                 W.Cast(sender);
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
             var Target = (Obj_AI_Hero)gapcloser.Sender;
-            if (Q.IsReady() && Config.Item("AGCQ").GetValue<bool>())
+            if (Q.IsReady() && Config.Item("AGCQ", true).GetValue<bool>())
             {
                 if (Target.IsValidTarget(Q.Range))
                 {
@@ -62,7 +62,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Program.debug("AGC Q");
                 }
             }
-            else if (W.IsReady() && Config.Item("AGCW").GetValue<bool>())
+            else if (W.IsReady() && Config.Item("AGCW", true).GetValue<bool>())
             {
                 if (Target.IsValidTarget(W.Range))
                 {
@@ -73,25 +73,25 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LoadMenuOKTW()
         {
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCE", "Lane clear E").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmR", "Lane clear R").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana").SetValue(new Slider(60, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCE", "Lane clear E", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmR", "Lane clear R", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(60, 100, 30)));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCQ", "Q").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCW", "W").SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCQ", "Q", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("AntiGapcloser").AddItem(new MenuItem("AGCW", "W", true).SetValue(false));
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("inter", "OnPossibleToInterrupt W")).SetValue(true);
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Haras Q").AddItem(new MenuItem("haras" + enemy.BaseSkinName, enemy.BaseSkinName).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range").SetValue(false));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells").SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("wRange", "W range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
 
 
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "Disable AA if can use E").SetValue(true));
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("AACombo", "Disable AA if can use E", true).SetValue(true));
         }
 
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
@@ -124,7 +124,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (Program.Combo && Config.Item("AACombo").GetValue<bool>())
+            if (Program.Combo && Config.Item("AACombo", true).GetValue<bool>())
             {
                 if (!E.IsReady())
                     Orbwalking.Attack = true;
@@ -194,8 +194,8 @@ namespace OneKeyToWin_AIO_Sebby
             var Rfarm = R.GetCircularFarmLocation(allMinionsQ, R.Width);
 
             if (RMissile == null
-                && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value
-                && Config.Item("farmR").GetValue<bool>() && Player.Mana > QMANA + EMANA
+                && ObjectManager.Player.ManaPercentage() > Config.Item("Mana", true).GetValue<Slider>().Value
+                && Config.Item("farmR", true).GetValue<bool>() && Player.Mana > QMANA + EMANA
                 && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear
                 && Rfarm.MinionsHit > 2)
             {
@@ -286,7 +286,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void farmE()
         {
-            if (Config.Item("LCE").GetValue<bool>() && ObjectManager.Player.Mana > QMANA + EMANA + WMANA && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana").GetValue<Slider>().Value)
+            if (Config.Item("LCE", true).GetValue<bool>() && ObjectManager.Player.Mana > QMANA + EMANA + WMANA && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && ObjectManager.Player.ManaPercentage() > Config.Item("Mana", true).GetValue<Slider>().Value)
             {
 
                 var mobs = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -331,14 +331,14 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("watermark").GetValue<bool>())
+            if (Config.Item("watermark", true).GetValue<bool>())
             {
                 Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
             }
 
-            if (Config.Item("qRange").GetValue<bool>())
+            if (Config.Item("qRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (Q.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
@@ -346,9 +346,9 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
             }
-            if (Config.Item("wRange").GetValue<bool>())
+            if (Config.Item("wRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (W.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
@@ -356,9 +356,9 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, W.Range, System.Drawing.Color.Orange, 1, 1);
             }
-            if (Config.Item("eRange").GetValue<bool>())
+            if (Config.Item("eRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (E.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
@@ -366,9 +366,9 @@ namespace OneKeyToWin_AIO_Sebby
                 else
                     Utility.DrawCircle(ObjectManager.Player.Position, E.Range, System.Drawing.Color.Yellow, 1, 1);
             }
-            if (Config.Item("rRange").GetValue<bool>())
+            if (Config.Item("rRange", true).GetValue<bool>())
             {
-                if (Config.Item("onlyRdy").GetValue<bool>())
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
                 {
                     if (R.IsReady())
                         Utility.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.Gray, 1, 1);
