@@ -280,10 +280,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("watermark", true).GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
-            }
+
             if (Config.Item("eInfo", true).GetValue<bool>())
             {
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(2000)))

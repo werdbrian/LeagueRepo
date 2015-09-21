@@ -192,7 +192,6 @@ namespace OneKeyToWin_AIO_Sebby
             new Core.OKTWtracker().LoadOKTW();
             new Core.OKTWdraws().LoadOKTW();
 
-            Config.SubMenu("About OKTW©").AddItem(new MenuItem("watermark", "Watermark").SetValue(true));
             Config.SubMenu("About OKTW©").AddItem(new MenuItem("debug", "Debug").SetValue(false));
             //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("pre", "OneSpellOneTick©").SetValue(true));
             //Config.SubMenu("About OKTW©").SubMenu("Performance OKTW©").AddItem(new MenuItem("0", "OneSpellOneTick© is tick management"));

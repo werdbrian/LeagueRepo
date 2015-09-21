@@ -464,10 +464,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Drawing_OnDraw(EventArgs args)
         {
-            if (Config.Item("watermark", true).GetValue<bool>())
-            {
-                Drawing.DrawText(Drawing.Width * 0.2f, Drawing.Height * 0f, System.Drawing.Color.Cyan, "OneKeyToWin AIO - " + Player.ChampionName + " by Sebby");
-            }
             if (BallPos.IsValid())
             {
                 if (Config.Item("wRange", true).GetValue<bool>())
