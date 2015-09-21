@@ -23,10 +23,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 750);
 
-            R.SetTargetted(0.25f,2000f);
-
             Q.SetSkillshot(0.25f, 50f, 1600f, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(1.15f, 230f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            R.SetTargetted(0.25f, 2000f);
 
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
@@ -85,11 +84,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (Program.LagFree(1) && E.IsReady() && Config.Item("autoE", true).GetValue<bool>())
                 LogicE();
-            if (Program.LagFree(2) && W.IsReady()  && Config.Item("autoW", true).GetValue<bool>())
-                LogicW();
-            
-            if (Program.LagFree(3) && Q.IsReady() && Config.Item("autoQ", true).GetValue<bool>())
+            if (Program.LagFree(2) && Q.IsReady() && Config.Item("autoQ", true).GetValue<bool>())
                 LogicQ();
+            if (Program.LagFree(3) && W.IsReady()  && Config.Item("autoW", true).GetValue<bool>())
+                LogicW();
             if (Program.LagFree(4) && R.IsReady() && Config.Item("autoR", true).GetValue<bool>())
                 LogicR();
         }
@@ -100,11 +98,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t2 = TargetSelector.GetTarget(R.Range + bounceRange, TargetSelector.DamageType.Magical);
             if (t2.IsValidTarget())
             {
-
                 var prepos = R.GetPrediction(t2).CastPosition;
-
-
                 var dmgR = R.GetDamage(t2);
+
                 if (t2.Health < dmgR * 3)
                 {
                     var totalDmg = dmgR ;
@@ -112,7 +108,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                     if (t2.IsValidTarget(R.Range))
                     {
-
                         if (prepos.CountEnemiesInRange(bounceRange) > 1 )
                         {
                             if (minionCount > 2)
