@@ -149,8 +149,12 @@ namespace OneKeyToWin_AIO_Sebby
                         Program.debug("Q + E");
                     }
 
-                    if (Config.Item("Eks", true).GetValue<bool>() && (E.GetDamage(target) > target.Health || (GetWStacks(target) == 1 && E.GetDamage(target) + Wdmg(target) > target.Health)))
-                        ksTarget = target;
+                    if (Config.Item("Eks", true).GetValue<bool>())
+                    {
+                        var dmgE = E.GetDamage(target);
+                        if (dmgE > target.Health || (GetWStacks(target) == 1 && dmgE + Wdmg(target) > target.Health))
+                            ksTarget = target;
+                    } 
                 }
 
                 if(ksTarget != Player)
