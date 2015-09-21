@@ -23,6 +23,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 750);
 
+            R.SetTargetted(0.25f,2000f);
+
             Q.SetSkillshot(0.25f, 50f, 1600f, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(1.15f, 230f, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
@@ -98,16 +100,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t2 = TargetSelector.GetTarget(R.Range + bounceRange, TargetSelector.DamageType.Magical);
             if (t2.IsValidTarget())
             {
+
+                var prepos = R.GetPrediction(t2).CastPosition;
+
+
                 var dmgR = R.GetDamage(t2);
                 if (t2.Health < dmgR * 3)
                 {
                     var totalDmg = dmgR ;
-                    var minionCount = CountMinionsInRange(bounceRange, t2.Position);
+                    var minionCount = CountMinionsInRange(bounceRange, prepos);
 
                     if (t2.IsValidTarget(R.Range))
                     {
 
-                        if (t2.CountEnemiesInRange(bounceRange) > 1 )
+                        if (prepos.CountEnemiesInRange(bounceRange) > 1 )
                         {
                             if (minionCount > 2)
                                 totalDmg = dmgR * 2;
@@ -144,7 +150,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         if (Player.CountEnemiesInRange(R.Range) > 0)
                         {
-                            foreach (var t in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && enemy.Distance(t2.Position) < bounceRange))
+                            foreach (var t in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && enemy.Distance(prepos) < bounceRange))
                             {
                                 R.CastOnUnit(t);
                             }
@@ -152,7 +158,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         else
                         {
                             var minions = MinionManager.GetMinions(Player.Position, R.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-                            foreach (var minion in minions.Where(minion => minion.IsValidTarget(R.Range) && minion.Distance(t2.Position) < bounceRange))
+                            foreach (var minion in minions.Where(minion => minion.IsValidTarget(R.Range) && minion.Distance(prepos) < bounceRange))
                             {
                                 R.CastOnUnit(minion);
                             }
