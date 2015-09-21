@@ -44,7 +44,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasE", "Harras E", true).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R 2 x dmg R", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R", true).SetValue(true));
            
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -174,16 +174,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         }
         private void LogicE()
         {
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) > enemy.Health))
+            if (Program.Combo && Player.Mana > RMANA + EMANA)
             {
-                E.CastOnUnit(enemy);
-                return;
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) > enemy.Health))
+                {
+                    E.CastOnUnit(enemy);
+                    return;
+                }
             }
 
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                if (Program.Combo && Player.Mana > RMANA + QMANA)
+                if (Program.Combo && Player.Mana > RMANA + EMANA)
                     E.CastOnUnit(t);
                 if (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
                     E.CastOnUnit(t);
@@ -192,9 +195,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) > enemy.Health))
+            if (Program.Combo && Player.Mana > RMANA + QMANA)
             {
-                Program.CastSpell(Q, enemy);
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) > enemy.Health))
+                {
+                    Program.CastSpell(Q, enemy);
+                }
             }
             var t = Orbwalker.GetTarget() as Obj_AI_Hero;
             if (!t.IsValidTarget())
