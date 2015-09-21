@@ -129,7 +129,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private float Wdmg(Obj_AI_Base target)
         {
-            var dmg = (W.Level * 10 + 10) + (0.03 * target.MaxHealth * W.Level * 0.01);
+            var dmg = (W.Level * 10 + 10) + ((0.03 + (W.Level * 0.01)) * target.MaxHealth );
             return (float)dmg;
 
         }
@@ -153,8 +153,11 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Config.Item("Eks", true).GetValue<bool>())
                     {
                         var dmgE = E.GetDamage(target);
-                        if (dmgE > target.Health || (GetWStacks(target) == 1 && dmgE + Wdmg(target) > target.Health))
+                        if (dmgE > target.Health || (GetWStacks(target) == 2 && dmgE + Wdmg(target) > target.Health))
+                        {
                             ksTarget = target;
+                            
+                        }  
                     } 
                 }
 
