@@ -441,6 +441,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
+                else if (distanceFromToUnit < input.Range - fixRange)
+                    result.Hitchance = HitChance.VeryHigh;
             }
 
             if (result.Hitchance != HitChance.Medium)
