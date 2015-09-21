@@ -18,7 +18,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1045);
+            Q = new Spell(SpellSlot.Q, 900);
             W = new Spell(SpellSlot.W, 920);
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 750);
@@ -94,19 +94,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            var t2 = TargetSelector.GetTarget(R.Range + 500, TargetSelector.DamageType.Magical);
+            var bounceRange = 500;
+            var t2 = TargetSelector.GetTarget(R.Range + bounceRange, TargetSelector.DamageType.Magical);
             if (t2.IsValidTarget())
             {
                 var dmgR = R.GetDamage(t2);
                 if (t2.Health < dmgR * 3)
                 {
                     var totalDmg = dmgR ;
-                    var minionCount = CountMinionsInRange(500, t2.Position);
+                    var minionCount = CountMinionsInRange(bounceRange, t2.Position);
 
                     if (t2.IsValidTarget(R.Range))
                     {
 
-                        if (t2.CountEnemiesInRange(450) > 1 )
+                        if (t2.CountEnemiesInRange(bounceRange) > 1 )
                         {
                             if (minionCount > 2)
                                 totalDmg = dmgR * 2;
@@ -143,7 +144,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     {
                         if (Player.CountEnemiesInRange(R.Range) > 0)
                         {
-                            foreach (var t in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && enemy.Distance(t2.Position) < 500))
+                            foreach (var t in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && enemy.Distance(t2.Position) < bounceRange))
                             {
                                 R.CastOnUnit(t);
                             }
@@ -151,7 +152,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         else
                         {
                             var minions = MinionManager.GetMinions(Player.Position, R.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-                            foreach (var minion in minions.Where(minion => minion.IsValidTarget(R.Range) && minion.Distance(t2.Position) < 500))
+                            foreach (var minion in minions.Where(minion => minion.IsValidTarget(R.Range) && minion.Distance(t2.Position) < bounceRange))
                             {
                                 R.CastOnUnit(minion);
                             }
@@ -198,7 +199,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = Orbwalker.GetTarget() as Obj_AI_Hero;
             if (!t.IsValidTarget())
                 t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget() && (!W.IsReady() || t.HasBuff("brandablaze")))
+            if (t.IsValidTarget() && t.HasBuff("brandablaze"))
             {
                 if (Program.Combo && Player.Mana > RMANA + QMANA)
                     Program.CastSpell(Q, t);
