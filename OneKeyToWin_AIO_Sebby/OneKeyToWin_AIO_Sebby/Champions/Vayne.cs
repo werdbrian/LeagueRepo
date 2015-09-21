@@ -229,7 +229,7 @@ namespace OneKeyToWin_AIO_Sebby
                 && !Player.Position.Extend(dash, Q.Range - 100).IsWall()
                 && !Player.Position.Extend(dash, Q.Range - 200).IsWall()
                 && !Player.Position.Extend(dash, Q.Range - 300).IsWall()
-                && dash.UnderTurret(true))
+                && (!dash.UnderTurret(true) || Program.Combo))
                 return true;
             else
                 return false;
