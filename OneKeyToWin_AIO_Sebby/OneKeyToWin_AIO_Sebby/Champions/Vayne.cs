@@ -64,6 +64,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Config.SubMenu(Player.ChampionName).SubMenu("E config").SubMenu("Use E ").AddItem(new MenuItem("stun" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("useE", "OneKeyToCast E closest person", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))); //32 == space
 
+            Config.SubMenu(Player.ChampionName).SubMenu("E config").AddItem(new MenuItem("Eks", "E KS", true).SetValue(true));
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -125,22 +126,35 @@ namespace OneKeyToWin_AIO_Sebby
             }
         }
 
+        private float Wdmg(Obj_AI_Base target)
+        {
+            var dmg = (W.Level * 10 + 10) + (0.03 * target.MaxHealth * W.Level * 0.01);
+            return (float)dmg;
+
+        }
         private void Game_OnGameUpdate(EventArgs args)
         {
             var dashPosition = Player.Position.Extend(Game.CursorPos, Q.Range);
 
             if (E.IsReady())
             {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.Path.Count() < 2 && Config.Item("stun" + target.ChampionName).GetValue<bool>()))
+                var ksTarget = Player;
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.Path.Count() < 2 ))
                 {
-                    if (CondemnCheck(Player.Position, target) )
+                    if (CondemnCheck(Player.Position, target) && Config.Item("stun" + target.ChampionName).GetValue<bool>() )
                         E.Cast(target);
                     else if (Q.IsReady() && DashCheck(dashPosition) && Config.Item("QE", true).GetValue<bool>() && CondemnCheck(dashPosition, target))
                     {
                         Q.Cast(dashPosition, true);
                         Program.debug("Q + E");
                     }
+
+                    if (Config.Item("Eks", true).GetValue<bool>() && (E.GetDamage(target) > target.Health || (GetWStacks(target) == 1 && E.GetDamage(target) + Wdmg(target) > target.Health)))
+                        ksTarget = target;
                 }
+
+                if(ksTarget != Player)
+                    E.Cast(ksTarget);
             }
 
             if (Program.LagFree(1) && Q.IsReady())
