@@ -21,6 +21,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             Q = new Spell(SpellSlot.Q, 300);
             E = new Spell(SpellSlot.E, 670);
+            W = new Spell(SpellSlot.E, 670);
             R = new Spell(SpellSlot.R, 3000);
 
             E.SetTargetted(0.35f, float.MaxValue);
