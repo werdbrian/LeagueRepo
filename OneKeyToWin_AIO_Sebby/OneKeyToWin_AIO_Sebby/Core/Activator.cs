@@ -215,7 +215,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             Cleansers();
-            ZhonyaCast();
+            
 
             if (!Program.LagFree(0))
                 return;
@@ -225,6 +225,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Offensive();
             Defensive();
+            ZhonyaCast();
         }
 
         private void ZhonyaCast()
