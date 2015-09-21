@@ -81,7 +81,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (Config.Item("visibleR", true).GetValue<bool>() && Player.HasBuff("vaynetumblefade") && Player.CountEnemiesInRange(800)>1)
+            if (Config.Item("visibleR", true).GetValue<bool>() && Player.HasBuff("vaynetumblefade") && Player.CountEnemiesInRange(800) > 1)
                 args.Process = false;
 
             foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(800) && GetWStacks(target) >= 0))
