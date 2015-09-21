@@ -128,6 +128,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             var dashPosition = Player.Position.Extend(Game.CursorPos, Q.Range);
+
             if (E.IsReady())
             {
                 foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.Path.Count() < 2 && Config.Item("stun" + target.ChampionName).GetValue<bool>()))
@@ -144,7 +145,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Program.LagFree(1) && Q.IsReady())
             {
-                if (Config.Item("autoQR", true).GetValue<bool>() && Player.HasBuff("vayneinquisition") && Player.CountEnemiesInRange(1500) > 0 && Player.CountEnemiesInRange(670) != 1)
+                if (Config.Item("autoQR", true).GetValue<bool>() && Player.HasBuff("vayneinquisition") && DashCheck(dashPosition) && Player.CountEnemiesInRange(1500) > 0 && Player.CountEnemiesInRange(670) != 1)
                 {
                     Q.Cast(dashPosition, true);
                 }
@@ -201,10 +202,12 @@ namespace OneKeyToWin_AIO_Sebby
 
         private bool DashCheck(Vector3 dash)
         {
-            if (!Player.Position.Extend(dash, Q.Range).IsWall()
+            if (
+                !Player.Position.Extend(dash, Q.Range).IsWall()
                 && !Player.Position.Extend(dash, Q.Range - 100).IsWall()
                 && !Player.Position.Extend(dash, Q.Range - 200).IsWall()
-                && !Player.Position.Extend(dash, Q.Range - 300).IsWall())
+                && !Player.Position.Extend(dash, Q.Range - 300).IsWall()
+                && dash.UnderTurret(true))
                 return true;
             else
                 return false;
