@@ -381,10 +381,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
-                pathMinLen = backToFront;
+                pathMinLen = backToFront * 1.5f;
                 fixRange = moveArea * 0.4f;
                 backToFront = moveArea;
-                angleMove += 15;
+                angleMove += 10;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
