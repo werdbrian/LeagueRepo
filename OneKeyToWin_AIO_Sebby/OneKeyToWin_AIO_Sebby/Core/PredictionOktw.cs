@@ -336,10 +336,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
-                var positions = new List<Vector3> { result.CastPosition };
-                var originalUnit = input.Unit;
+                var positions = new List<Vector3> { result.CastPosition , input.Unit.ServerPosition};
+
                 result.CollisionObjects = Collision.GetCollision(positions, input);
-                result.CollisionObjects.RemoveAll(x => x.NetworkId == originalUnit.NetworkId);
+                result.CollisionObjects.RemoveAll(x => x.NetworkId == input.Unit.NetworkId);
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
             //Set hit chance
