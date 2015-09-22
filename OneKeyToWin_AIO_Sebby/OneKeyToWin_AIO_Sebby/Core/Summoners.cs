@@ -12,10 +12,9 @@ namespace OneKeyToWin_AIO_Sebby
     class Summoners
     {
         private Menu Config = Program.Config;
-        private SpellSlot heal, barrier, ignite, smite, exhaust, flash;
+        private SpellSlot heal, barrier, ignite, exhaust, flash;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; }}
-        private int smiteHero = 0;
-        private bool TryUse = false;
+
 
         public void LoadOKTW()
         {
@@ -69,12 +68,13 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-           
-        if(!Program.LagFree(0))
+            if (!Program.LagFree(0))
+                return;
 
-            if (CanUse(ignite) && Config.Item("Ignite").GetValue<bool>())
+            if (Config.Item("Ignite").GetValue<bool>() && CanUse(ignite))
             {
-                foreach(var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(600)))
+                var enemy = TargetSelector.GetTarget(600, TargetSelector.DamageType.True);
+                if(enemy.IsValidTarget())
                 {
                     var IgnDmg = Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
                     if (enemy.Health <= IgnDmg && Player.Distance(enemy.ServerPosition) > 500 && enemy.CountAlliesInRange(500) < 2)
@@ -94,7 +94,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
 
-            if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() )
+            if (Config.Item("Exhaust").GetValue<bool>() && CanUse(exhaust))
             {
                 if (Config.Item("Exhaust1").GetValue<bool>())
                 {
