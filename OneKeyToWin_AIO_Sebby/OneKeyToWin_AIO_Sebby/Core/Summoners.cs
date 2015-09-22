@@ -94,7 +94,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
 
-            if (Config.Item("Exhaust").GetValue<bool>() && CanUse(exhaust))
+            if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() )
             {
                 if (Config.Item("Exhaust1").GetValue<bool>())
                 {
