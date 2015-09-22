@@ -49,19 +49,44 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("separate", "Separate laneclear from harras", true).SetValue(false));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("spellFarm", "OKTW SPELLS FARM (°)", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E", true).SetValue(true));
-
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion", true).SetValue(true));
 
+
+            Config.Item("spellFarm",true).Permashow(true);
+
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Game.OnWndProc += Game_OnWndProc; ;
         }
+
+        private void Game_OnWndProc(WndEventArgs args)
+        {
+            if (args.Msg == 520)
+            {
+                if (!Config.Item("spellFarm", true).GetValue<bool>())
+                {
+                    Config.Item("spellFarm", true).SetValue<bool>(true);
+                    Config.Item("farmQ", true).SetValue<bool>(true);
+                    Config.Item("farmW", true).SetValue<bool>(true);
+                }
+                else
+                {
+                    Config.Item("spellFarm", true).SetValue<bool>(false);
+                    Config.Item("farmQ", true).SetValue<bool>(false);
+                    Config.Item("farmW", true).SetValue<bool>(false);
+                }
+            }
+        }
+
         private void Game_OnGameUpdate(EventArgs args)
         {
             if (Program.Combo)
@@ -246,7 +271,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var allMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All);
                 var farmPos = W.GetCircularFarmLocation(allMinions, W.Width);
-                if (farmPos.MinionsHit > 1)
+                if (farmPos.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
                     W.Cast(farmPos.Position);
             }
         }
