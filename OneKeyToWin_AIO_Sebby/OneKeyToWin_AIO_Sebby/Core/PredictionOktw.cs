@@ -317,7 +317,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
 
                 /* This does not need to be handled for the updated predictions, but left as a reference.*/
-
                 if (input.RangeCheckFrom.Distance(result.CastPosition, true) > Math.Pow(input.Range, 2))
                 {
                     if (result.Hitchance != HitChance.OutOfRange)
@@ -349,9 +348,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (result.CollisionObjects.Count > 0)
                         result.Hitchance = HitChance.Collision;
                 }
-
-                
             }
+
             //Set hit chance
             if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
             {
@@ -424,7 +422,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (input.Unit.Path.Count() == 0 && input.Unit.Position == input.Unit.ServerPosition)
             {
-                if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.6d)
+                if (UnitTracker.GetLastStopMoveTime(input.Unit) < 0.4d)
                     result.Hitchance = HitChance.High;
                 else if (distanceFromToUnit > input.Range - fixRange)
                     result.Hitchance = HitChance.Medium;
