@@ -335,19 +335,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
-                result.CollisionObjects = Collision.GetCollision(result.CastPosition, input);
-                result.CollisionObjects.RemoveAll(x => x.NetworkId == input.Unit.NetworkId);
-
-                if (result.CollisionObjects.Count > 0)
-                    result.Hitchance = HitChance.Collision;
-                else
-                {
-                    result.CollisionObjects = Collision.GetCollision(input.Unit.ServerPosition, input);
-                    result.CollisionObjects.RemoveAll(x => x.NetworkId == input.Unit.NetworkId);
-
-                    if (result.CollisionObjects.Count > 0)
-                        result.Hitchance = HitChance.Collision;
-                }
+                var positions = new List<Vector3> { result.CastPosition, result.UnitPosition };
+                
+                result.CollisionObjects = Collision.GetCollision(positions, input);
+                result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
 
             //Set hit chance
@@ -361,7 +352,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         internal static PredictionOutput WayPointAnalysis(PredictionOutput result, PredictionInput input)
         {
-            if (!input.Unit.IsValid<Obj_AI_Hero>())
+            if (!input.Unit.IsValid<Obj_AI_Hero>() )
+            {
+                result.Hitchance = HitChance.VeryHigh;
+                return result;
+            }
+
+            if (UnitTracker.GetSpecialSpellEndTime(input.Unit) > 0)
             {
                 result.Hitchance = HitChance.VeryHigh;
                 return result;
@@ -374,13 +371,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var distanceFromToUnit = input.From.Distance(input.Unit.ServerPosition);
             var distanceFromToWaypoint = lastWaypiont.Distance(input.From);
 
-            float totalDelay;
+            float speedDelay = distanceFromToUnit / input.Speed;
 
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
-                totalDelay = input.Delay;
+                speedDelay = 0;
             else
-                totalDelay = distanceFromToUnit / input.Speed + input.Delay;
-            
+                speedDelay = distanceFromToUnit / input.Speed;
+
+            float totalDelay = speedDelay + input.Delay;
             float moveArea = input.Unit.MoveSpeed * totalDelay;
             float fixRange = moveArea * 0.6f;
             double angleMove = 30 + (input.Radius / 15);
@@ -389,10 +387,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
-                pathMinLen = backToFront * 1.5f;
-                fixRange = moveArea * 0.4f;
+                pathMinLen = backToFront * (1f + input.Delay);
+                fixRange = moveArea * (0.2f + input.Delay);
                 backToFront = moveArea;
-                angleMove += 10;
+                angleMove += 5 + (input.Radius / 10);
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
@@ -464,6 +462,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (distanceUnitToWaypoint < backToFront || input.Unit.Position == input.Unit.ServerPosition)
                         result.Hitchance = HitChance.Medium;
                 }
+            }
+
+            if (UnitTracker.GetLastVisableTime(input.Unit) < 0.05d)
+            {
+                result.Hitchance = HitChance.Medium;
             }
 
             if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 400 || input.Unit.MoveSpeed < 200f)
@@ -1021,120 +1024,128 @@ namespace OneKeyToWin_AIO_Sebby.Core
         /// <summary>
         ///     Returns the list of the units that the skillshot will hit before reaching the set positions.
         /// </summary>
-        public static List<Obj_AI_Base> GetCollision(Vector3 position, PredictionInput input)
+        public static List<Obj_AI_Base> GetCollision(List<Vector3> positions, PredictionInput input)
         {
             var result = new List<Obj_AI_Base>();
-
-            foreach (var objectType in input.CollisionObjects)
-            {
-                switch (objectType)
+            foreach (var position in positions)
+            { 
+                foreach (var objectType in input.CollisionObjects)
                 {
-                    case CollisionableObjects.Minions:
-                        foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion =>
-                                        minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.From)))
-                        {
-                            input.Unit = minion;
-                            if (minion.Path.Count() > 0)
+                    switch (objectType)
+                    {
+                        case CollisionableObjects.Minions:
+                            foreach (var minion in ObjectManager.Get<Obj_AI_Minion>().Where(minion =>
+                                            minion.IsValidTarget(Math.Min(input.Range + input.Radius + 100, 2000), true, input.From)))
                             {
-                                var minionPrediction = Prediction.GetPrediction(input, true, false);
-
-                                if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 20 + minion.Path.Count() * minion.BoundingRadius), 2))
+                                input.Unit = minion;
+                                if (minion.Path.Count() > 0)
                                 {
-                                    result.Add(minion);
+                                    var minionPrediction = Prediction.GetPrediction(input, true, false);
+
+                                    if (minionPrediction.CastPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <= Math.Pow((input.Radius + 20 + minion.Path.Count() * minion.BoundingRadius), 2))
+                                    {
+                                        result.Add(minion);
+                                    }
+                                }
+                                else
+                                {
+                                    var bonus = 20;
+                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D()) < input.Radius/2)
+                                        bonus = 40;
+                                    if (minion.ServerPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <=
+                                        Math.Pow((input.Radius + bonus + minion.BoundingRadius), 2))
+                                    {
+                                        result.Add(minion);
+                                    }
                                 }
                             }
-                            else
+                            break;
+                        case CollisionableObjects.Heroes:
+                            foreach (var hero in
+                                HeroManager.Enemies.FindAll(
+                                    hero =>
+                                        hero.IsValidTarget(
+                                            Math.Min(input.Range + input.Radius + 100, 2000), true, input.RangeCheckFrom))
+                                )
                             {
-                                var bonus = 20;
-                                if (minion.ServerPosition.To2D().Distance(input.From.To2D()) < input.Radius/2)
-                                    bonus = 40;
-                                if (minion.ServerPosition.To2D().Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                    Math.Pow((input.Radius + bonus + minion.BoundingRadius), 2))
+                                input.Unit = hero;
+                                var prediction = Prediction.GetPrediction(input, false, false);
+                                if (
+                                    prediction.UnitPosition.To2D()
+                                        .Distance(input.From.To2D(), position.To2D(), true, true) <=
+                                    Math.Pow((input.Radius + 50 + hero.BoundingRadius), 2))
                                 {
-                                    result.Add(minion);
+                                    result.Add(hero);
                                 }
                             }
-                        }
-                        break;
-                    case CollisionableObjects.Heroes:
-                        foreach (var hero in
-                            HeroManager.Enemies.FindAll(
-                                hero =>
-                                    hero.IsValidTarget(
-                                        Math.Min(input.Range + input.Radius + 100, 2000), true, input.RangeCheckFrom))
-                            )
-                        {
-                            input.Unit = hero;
-                            var prediction = Prediction.GetPrediction(input, false, false);
-                            if (
-                                prediction.UnitPosition.To2D()
-                                    .Distance(input.From.To2D(), position.To2D(), true, true) <=
-                                Math.Pow((input.Radius + 50 + hero.BoundingRadius), 2))
-                            {
-                                result.Add(hero);
-                            }
-                        }
-                        break;
-
-                    case CollisionableObjects.Walls:
-                        var step = position.Distance(input.From) / 20;
-                        for (var i = 0; i < 20; i++)
-                        {
-                            var p = input.From.To2D().Extend(position.To2D(), step * i);
-                            if (NavMesh.GetCollisionFlags(p.X, p.Y).HasFlag(CollisionFlags.Wall))
-                            {
-                                result.Add(ObjectManager.Player);
-                            }
-                        }
-                        break;
-
-                    case CollisionableObjects.YasuoWall:
-
-                        if (Utils.TickCount - _wallCastT > 4000)
-                        {
                             break;
-                        }
 
-                        GameObject wall = null;
-                        foreach (var gameObject in
-                            ObjectManager.Get<GameObject>()
-                                .Where(
-                                    gameObject =>
-                                        gameObject.IsValid &&
-                                        Regex.IsMatch(
-                                            gameObject.Name, "_w_windwall_enemy_0.\\.troy", RegexOptions.IgnoreCase))
-                            )
-                        {
-                            wall = gameObject;
-                        }
-                        if (wall == null)
-                        {
-                            break;
-                        }
-                        var level = wall.Name.Substring(wall.Name.Length - 6, 1);
-                        var wallWidth = (300 + 50 * Convert.ToInt32(level));
-
-                        var wallDirection =
-                            (wall.Position.To2D() - _yasuoWallCastedPos).Normalized().Perpendicular();
-                        var wallStart = wall.Position.To2D() + wallWidth / 2f * wallDirection;
-                        var wallEnd = wallStart - wallWidth * wallDirection;
-
-                        if (wallStart.Intersection(wallEnd, position.To2D(), input.From.To2D()).Intersects)
-                        {
-                            var t = Utils.TickCount +
-                                    (wallStart.Intersection(wallEnd, position.To2D(), input.From.To2D())
-                                        .Point.Distance(input.From) / input.Speed + input.Delay) * 1000;
-                            if (t < _wallCastT + 4000)
+                        case CollisionableObjects.Walls:
+                            var step = position.Distance(input.From) / 20;
+                            for (var i = 0; i < 20; i++)
                             {
-                                result.Add(ObjectManager.Player);
+                                var p = input.From.To2D().Extend(position.To2D(), step * i);
+                                if (NavMesh.GetCollisionFlags(p.X, p.Y).HasFlag(CollisionFlags.Wall))
+                                {
+                                    result.Add(ObjectManager.Player);
+                                }
                             }
-                        }
+                            break;
 
-                        break;
+                        case CollisionableObjects.YasuoWall:
+
+                            if (Utils.TickCount - _wallCastT > 4000)
+                            {
+                                break;
+                            }
+
+                            GameObject wall = null;
+                            foreach (var gameObject in
+                                ObjectManager.Get<GameObject>()
+                                    .Where(
+                                        gameObject =>
+                                            gameObject.IsValid &&
+                                            Regex.IsMatch(
+                                                gameObject.Name, "_w_windwall_enemy_0.\\.troy", RegexOptions.IgnoreCase))
+                                )
+                            {
+                                wall = gameObject;
+                            }
+                            if (wall == null)
+                            {
+                                break;
+                            }
+                            var level = wall.Name.Substring(wall.Name.Length - 6, 1);
+                            var wallWidth = (300 + 50 * Convert.ToInt32(level));
+
+                            var wallDirection =
+                                (wall.Position.To2D() - _yasuoWallCastedPos).Normalized().Perpendicular();
+                            var wallStart = wall.Position.To2D() + wallWidth / 2f * wallDirection;
+                            var wallEnd = wallStart - wallWidth * wallDirection;
+
+                            if (wallStart.Intersection(wallEnd, position.To2D(), input.From.To2D()).Intersects)
+                            {
+                                var t = Utils.TickCount +
+                                        (wallStart.Intersection(wallEnd, position.To2D(), input.From.To2D())
+                                            .Point.Distance(input.From) / input.Speed + input.Delay) * 1000;
+                                if (t < _wallCastT + 4000)
+                                {
+                                    result.Add(ObjectManager.Player);
+                                }
+                            }
+
+                            break;
+                    }
                 }
             }
             return result.Distinct().ToList();
         }
+    }
+
+    internal class Spells
+    {
+        public string name { get; set; }
+        public double duration { get; set; }
     }
 
     internal class UnitTrackerInfo
@@ -1143,18 +1154,44 @@ namespace OneKeyToWin_AIO_Sebby.Core
         public int AaTick { get; set; }
         public int NewPathTick { get; set; }
         public int StopMoveTick { get; set; }
+        public int LastInvisableTick { get; set; }
+        public int SpecialSpellFinishTick { get; set; }
     }
 
     internal static class UnitTracker
     {
         public static List<UnitTrackerInfo> UnitTrackerInfoList = new List<UnitTrackerInfo>();
         private static List<Obj_AI_Hero> Champion = new List<Obj_AI_Hero>();
+        private static List<Spells> spells = new List<Spells>();
+
         static UnitTracker()
         {
+            spells.Add(new Spells() { name = "katarinar", duration = 1 }); //Katarinas R
+            spells.Add(new Spells() { name = "drain", duration = 1 }); //Fiddle W
+            spells.Add(new Spells() { name = "crowstorm", duration = 1 }); //Fiddle R
+            spells.Add(new Spells() { name = "consume", duration = 0.5 }); //Nunu Q
+            spells.Add(new Spells() { name = "absolutezero", duration = 1 }); //Nunu R
+            spells.Add(new Spells() { name = "staticfield", duration = 0.5 }); //Blitzcrank R
+            spells.Add(new Spells() { name = "cassiopeiapetrifyinggaze", duration = 0.5 }); //Cassio's R
+            spells.Add(new Spells() { name = "ezrealtrueshotbarrage", duration = 1 }); //Ezreal's R
+            spells.Add(new Spells() { name = "galioidolofdurand", duration = 1 }); //Ezreal's R                                                                   
+            spells.Add(new Spells() { name = "luxmalicecannon", duration = 1 }); //Lux R
+            spells.Add(new Spells() { name = "reapthewhirlwind", duration = 1 }); //Jannas R
+            spells.Add(new Spells() { name = "jinxw", duration = 0.6 }); //jinxW
+            spells.Add(new Spells() { name = "jinxr", duration = 0.6 }); //jinxR
+            spells.Add(new Spells() { name = "missfortunebullettime", duration = 1 }); //MissFortuneR
+            spells.Add(new Spells() { name = "shenstandunited", duration = 1 }); //ShenR
+            spells.Add(new Spells() { name = "threshe", duration = 0.4 }); //ThreshE
+            spells.Add(new Spells() { name = "threshrpenta", duration = 0.75 }); //ThreshR
+            spells.Add(new Spells() { name = "threshq", duration = 0.75 }); //ThreshQ
+            spells.Add(new Spells() { name = "infiniteduress", duration = 1 }); //Warwick R
+            spells.Add(new Spells() { name = "meditate", duration = 1 }); //yi W
+            spells.Add(new Spells() { name = "alzaharnethergrasp", duration = 1 }); //Malza R
+
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
                 Champion.Add(hero);
-                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = hero.NetworkId, AaTick = Utils.TickCount, StopMoveTick = Utils.TickCount, NewPathTick = Utils.TickCount });
+                UnitTrackerInfoList.Add(new UnitTrackerInfo() { NetworkId = hero.NetworkId, AaTick = Utils.TickCount, StopMoveTick = Utils.TickCount, NewPathTick = Utils.TickCount, SpecialSpellFinishTick = Utils.TickCount, LastInvisableTick = Utils.TickCount });
             }
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Obj_AI_Base.OnNewPath += Obj_AI_Hero_OnNewPath;
@@ -1163,9 +1200,17 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private static void Game_OnGameUpdate(EventArgs args)
         {
-            foreach (var hero in Champion.Where(hero => hero.IsValid && hero.IsVisible && hero.Path.Count() > 0))
+            foreach (var hero in Champion)
             {
-                UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).StopMoveTick = Utils.TickCount;   
+                if(hero.IsVisible)
+                {
+                    if (hero.Path.Count() > 0)
+                        UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).StopMoveTick = Utils.TickCount;
+                }
+                else
+                {
+                    UnitTrackerInfoList.Find(x => x.NetworkId == hero.NetworkId).LastInvisableTick = Utils.TickCount;
+                }
             }
         }
 
@@ -1173,14 +1218,27 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!(sender is Obj_AI_Hero)) { return; }
             UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).NewPathTick = Utils.TickCount;
-
         }
 
         private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!(sender is Obj_AI_Hero) || !args.SData.IsAutoAttack()) { return; }
-            UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).AaTick = Utils.TickCount;
+            if (!(sender is Obj_AI_Hero) ) { return; }
+            if( args.SData.IsAutoAttack())
+                UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).AaTick = Utils.TickCount;
+            else
+            {
+                var foundSpell = spells.Find(x => args.SData.Name.ToLower() == x.name.ToLower());
+                if (foundSpell != null)
+                {
+                    UnitTrackerInfoList.Find(x => x.NetworkId == sender.NetworkId).SpecialSpellFinishTick = Utils.TickCount + (int)(foundSpell.duration * 1000);
+                }
+            }
+        }
 
+        public static double GetSpecialSpellEndTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+            return (TrackerUnit.SpecialSpellFinishTick - Utils.TickCount) / 1000d;
         }
 
         public static double GetLastAutoAttackTime(Obj_AI_Base unit)
@@ -1193,6 +1251,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
             return (Utils.TickCount - TrackerUnit.NewPathTick) / 1000d;
+        }
+
+        public static double GetLastVisableTime(Obj_AI_Base unit)
+        {
+            var TrackerUnit = UnitTrackerInfoList.Find(x => x.NetworkId == unit.NetworkId);
+
+            return (Utils.TickCount - TrackerUnit.LastInvisableTick) / 1000d;
         }
 
         public static double GetLastStopMoveTime(Obj_AI_Base unit)
