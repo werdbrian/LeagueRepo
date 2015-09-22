@@ -71,7 +71,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (!Program.LagFree(0))
                 return;
 
-            if (Config.Item("Ignite").GetValue<bool>() && CanUse(ignite))
+            if ( CanUse(ignite) && Config.Item("Ignite").GetValue<bool>() )
             {
                 var enemy = TargetSelector.GetTarget(600, TargetSelector.DamageType.True);
                 if(enemy.IsValidTarget())
