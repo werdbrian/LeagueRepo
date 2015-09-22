@@ -143,6 +143,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (!target.HasBuff("twitchdeadlyvenom"))
                 return 0;
             float dmg = 6;
+            if (Player.Level < 17)
+                dmg = 5;
             if (Player.Level < 13)
                 dmg = 4;
             if (Player.Level < 9)
