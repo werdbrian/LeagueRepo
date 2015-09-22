@@ -11,8 +11,6 @@ using System.Drawing;
 
 namespace OneKeyToWin_AIO_Sebby
 {
-    class champions { public Obj_AI_Hero Player; }
-
     internal class Program
     {
         public static Menu Config;
@@ -24,8 +22,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static Obj_SpawnPoint enemySpawn;
         public static Core.PredictionOutput DrawSpellPos;
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>() , Allies = new List<Obj_AI_Hero>();
-
-
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
@@ -51,11 +47,10 @@ namespace OneKeyToWin_AIO_Sebby
                 Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
             }
 
-            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
-
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").SubMenu("Custome jungler (select one)").AddItem(new MenuItem("ro" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
 
+            Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("timer", "GankTimer").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("1", "RED - be careful"));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("2", "ORANGE - you have time"));
             Config.SubMenu("Utility, Draws OKTW©").SubMenu("GankTimer").AddItem(new MenuItem("3", "GREEN - jungler visable"));
@@ -65,9 +60,9 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true).DontSave());
 
-            Config.SubMenu("Other settings").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
-            Config.SubMenu("Other settings").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
-            Config.SubMenu("Other settings").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
 
             Config.Item("manaDisable", true).SetValue(false);
             Config.Item("comboDisableMode", true).SetValue(false);
@@ -371,7 +366,7 @@ namespace OneKeyToWin_AIO_Sebby
                     Speed = QWER.Speed,
                     Delay = QWER.Delay,
                     Range = QWER.Range,
-                    From = Player.Position,
+                    From = Player.ServerPosition,
                     Radius = QWER.Width,
                     Unit = target,
                     Type = CoreType2
