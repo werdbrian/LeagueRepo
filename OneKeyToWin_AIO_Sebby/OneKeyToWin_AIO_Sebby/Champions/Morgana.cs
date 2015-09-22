@@ -156,11 +156,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             foreach (var ally in Program.Allies.Where(ally => ally.IsValid && ally.Distance(Player.Position) < E.Range))
             {
-                if (Config.Item("HardCC" + ally.ChampionName).GetValue<bool>() && HardCC(ally))
+                if (Config.Item("HardCC" + ally.ChampionName, true).GetValue<bool>() && HardCC(ally))
                 {
                     E.CastOnUnit(ally);
                 }
-                else if (Config.Item("Poison" + ally.ChampionName).GetValue<bool>() && ally.HasBuffOfType(BuffType.Poison))
+                else if (Config.Item("Poison" + ally.ChampionName, true).GetValue<bool>() && ally.HasBuffOfType(BuffType.Poison))
                 {
                     E.CastOnUnit(ally);
                 }
