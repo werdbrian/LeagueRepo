@@ -109,13 +109,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 //double dmg = 0;
 
-                if (Config.Item("targeted" + ally.ChampionName).GetValue<bool>() && args.Target != null && args.Target.NetworkId == ally.NetworkId)
+                if (Config.Item("targeted" + ally.ChampionName, true).GetValue<bool>() && args.Target != null && args.Target.NetworkId == ally.NetworkId)
                 {
                     E.CastOnUnit(ally);
                     return;
                     //dmg = dmg + sender.GetSpellDamage(ally, args.SData.Name);
                 }
-                else if (Config.Item("skillshot" + ally.ChampionName).GetValue<bool>())
+                else if (Config.Item("skillshot" + ally.ChampionName ,true).GetValue<bool>())
                 {
                     var castArea = ally.Distance(args.End) * (args.End - ally.ServerPosition).Normalized() + ally.ServerPosition;
                     if (castArea.Distance(ally.ServerPosition) > ally.BoundingRadius / 2)

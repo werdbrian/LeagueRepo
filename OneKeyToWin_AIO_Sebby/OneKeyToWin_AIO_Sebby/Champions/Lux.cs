@@ -114,12 +114,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 double dmg = 0;
 
-                if (Config.Item("targeted" + ally.ChampionName).GetValue<bool>() && args.Target != null && args.Target.NetworkId == ally.NetworkId)
+                if (Config.Item("targeted" + ally.ChampionName, true).GetValue<bool>() && args.Target != null && args.Target.NetworkId == ally.NetworkId)
                 {
                     
                     dmg = sender.GetSpellDamage(Player, args.SData.Name);
                 }
-                else if (Config.Item("skillshot" + ally.ChampionName).GetValue<bool>())
+                else if (Config.Item("skillshot" + ally.ChampionName, true).GetValue<bool>())
                 {
                     var castArea = ally.Distance(args.End) * (args.End - ally.ServerPosition).Normalized() + ally.ServerPosition;
                     if (castArea.Distance(ally.ServerPosition) > ally.BoundingRadius / 2)
@@ -181,13 +181,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW()
         {
-            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && ally.Distance(Player.Position) < W.Range))
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && ally.Distance(Player.Position) < W.Range))
             {
-                if (Config.Item("HardCC" + ally.ChampionName).GetValue<bool>() && HardCC(ally))
+                if (Config.Item("HardCC" + ally.ChampionName,true).GetValue<bool>() && HardCC(ally))
                 {
                     W.CastOnUnit(ally);
                 }
-                else if (Config.Item("Poison" + ally.ChampionName).GetValue<bool>() && ally.HasBuffOfType(BuffType.Poison))
+                else if (Config.Item("Poison" + ally.ChampionName, true).GetValue<bool>() && ally.HasBuffOfType(BuffType.Poison))
                 {
                     W.CastOnUnit(ally);
                 }

@@ -99,7 +99,7 @@ namespace OneKeyToWin_AIO_Sebby
                 || target.IsZombie
                 || target.HasBuffOfType(BuffType.Invulnerability)
                 || target.HasBuffOfType(BuffType.SpellShield)
-                || !target.HasBuff("deathdefiedbuff"))
+                || target.HasBuff("deathdefiedbuff"))
                 return false;
             else
                 return true;
