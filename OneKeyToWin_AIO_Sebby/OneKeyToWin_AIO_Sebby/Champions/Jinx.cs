@@ -492,7 +492,7 @@ namespace OneKeyToWin_AIO_Sebby
                 return;
             }
 
-            QMANA = Q.Instance.ManaCost;
+            QMANA = 10;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
 
