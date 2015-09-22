@@ -15,7 +15,7 @@ namespace OneKeyToWin_AIO_Sebby
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell Q, W, E, R;
-        public float QMANA, WMANA, EMANA, RMANA;
+        public float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
 
         public double lag = 0, WCastTime = 0, QCastTime = 0, DragonTime = 0, grabTime = 0;
         public float DragonDmg = 0;
@@ -204,7 +204,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Game.Time - QCastTime > 0.6 && Player.CountEnemiesInRange(400) == 0)
             {
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && !Orbwalking.InAutoAttackRange(enemy) ))
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && GetRealDistance(enemy) > bonusRange()))
                 {
                     var comboDmg = W.GetDamage(enemy);
                     if (R.IsReady() && Player.Mana > RMANA + WMANA)
@@ -483,22 +483,23 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            QMANA = 10;
-            WMANA = W.Level * 10 + 40;
-            EMANA = 50;
-
-            if (!R.IsReady())
-                RMANA = WMANA - Player.PARRegenRate * 6;
-            else
-                RMANA = 100; 
-
-            if (Player.Health < Player.MaxHealth * 0.2)
+            if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
             {
                 QMANA = 0;
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+                return;
             }
+
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
+
+            if (!R.IsReady())
+                RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
+            else
+                RMANA = R.Instance.ManaCost;
         }
 
         public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)

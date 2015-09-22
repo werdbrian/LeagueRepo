@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private Spell E, Q, R, W;
 
-        private float QMANA, WMANA, EMANA, RMANA;
+        private float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
         private float RCastTime = 0;
         private static GameObject QMissile, RMissile;
         private int FarmId;
@@ -309,9 +309,10 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
+
         private void SetMana()
         {
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            if ((Config.Item("manaDisable").GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20 )
             {
                 QMANA = 0;
                 WMANA = 0;
@@ -319,16 +320,17 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = 0;
                 return;
             }
+
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
+
             if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
+                RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
-
-            
         }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("qRange", true).GetValue<bool>())

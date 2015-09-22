@@ -14,7 +14,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell Q, W, E, R;
-        public float QMANA, WMANA, EMANA, RMANA;
+        public float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; }}
 
         public void LoadMenuOKTW()
@@ -248,6 +248,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void SetMana()
         {
+            if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                EMANA = 0;
+                RMANA = 0;
+                return;
+            }
+
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
@@ -256,14 +265,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 RMANA = WMANA - Player.PARRegenRate * W.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
-
-            if (Player.Health < Player.MaxHealth * 0.3)
-            {
-                QMANA = 0;
-                WMANA = 0;
-                EMANA = 0;
-                RMANA = 0;
-            }
         }
 
         public static void drawText2(string msg, Vector3 Hero, System.Drawing.Color color)

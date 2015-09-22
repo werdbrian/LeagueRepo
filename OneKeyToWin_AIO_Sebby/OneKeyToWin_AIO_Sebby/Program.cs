@@ -63,11 +63,15 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("PredictionMODE", "Prediction MODE", true).SetValue(new StringList(new[] { "Common prediction", "OKTW© PREDICTION" }, 1)));
             Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("HitChance", "Hit Chance", true).SetValue(new StringList(new[] { "Very High", "High", "Medium" }, 0)));
-            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true));
+            Config.SubMenu("Prediction OKTW©").AddItem(new MenuItem("debugPred", "Draw Aiming OKTW© PREDICTION").SetValue(true).DontSave());
 
-            Config.SubMenu("Other settings").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false).DontSave());
-            Config.SubMenu("Other settings").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false).DontSave());
-            Config.SubMenu("Other settings").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false).DontSave());
+            Config.SubMenu("Other settings").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
+            Config.SubMenu("Other settings").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
+            Config.SubMenu("Other settings").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
+
+            Config.Item("manaDisable", true).SetValue(false);
+            Config.Item("comboDisableMode", true).SetValue(false);
+            Config.Item("supportMode", true).SetValue(false);
 
             #region LOAD CHAMPIONS
 

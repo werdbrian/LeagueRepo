@@ -14,7 +14,7 @@ namespace OneKeyToWin_AIO_Sebby
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         public Spell Q, W, E, R;
-        public float QMANA, WMANA, EMANA, RMANA;
+        public float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
 
         public GameObject Tibbers;
         public float TibbersTimer = 0;
@@ -210,23 +210,25 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            QMANA = Q.Instance.ManaCost;
-            WMANA = W.Instance.ManaCost;
-            EMANA = E.Instance.ManaCost;
-
-            if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
-            else
-                RMANA = R.Instance.ManaCost; ;
-
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
             {
                 QMANA = 0;
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+                return;
             }
+
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
+
+            if (!R.IsReady())
+                RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
+            else
+                RMANA = R.Instance.ManaCost;
         }
+
         private void LoadMenuOKTW()
         {
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("ComboInfo", "Combo Info", true).SetValue(true));

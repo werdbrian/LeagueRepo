@@ -15,7 +15,7 @@ namespace OneKeyToWin_AIO_Sebby
         private Menu Config = Program.Config;
         private static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
         private Spell Q, Q2, W, E, R;
-        private float QMANA, WMANA, EMANA, RMANA;
+        private float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
         private double OverFarm = 0, lag = 0;
         private int FarmId;
 
@@ -282,7 +282,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void SetMana()
         {
-            if (Player.Health < Player.MaxHealth * 0.2)
+            if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
             {
                 QMANA = 0;
                 WMANA = 0;

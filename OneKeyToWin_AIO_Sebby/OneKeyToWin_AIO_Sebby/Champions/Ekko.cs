@@ -17,7 +17,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private Spell E, Q, Q1,  R, W;
         private Obj_AI_Hero Player { get { return ObjectManager.Player; } }
-        private float QMANA, WMANA, EMANA, RMANA, Wtime = 0, Wtime2 = 0;
+        private float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0, Wtime = 0, Wtime2 = 0;
         private static GameObject RMissile, WMissile2, WMissile, QMissile = null;
         public void LoadOKTW()
         {
@@ -293,22 +293,23 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void SetMana()
         {
-            QMANA = Q.Instance.ManaCost;
-            WMANA = W.Instance.ManaCost;
-            EMANA = E.Instance.ManaCost;
-
-            if (!R.IsReady())
-                RMANA = QMANA - ObjectManager.Player.Level * 2;
-            else
-                RMANA = R.Instance.ManaCost; ;
-
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
+            if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
             {
                 QMANA = 0;
                 WMANA = 0;
                 EMANA = 0;
                 RMANA = 0;
+                return;
             }
+
+            QMANA = Q.Instance.ManaCost;
+            WMANA = W.Instance.ManaCost;
+            EMANA = E.Instance.ManaCost;
+
+            if (!R.IsReady())
+                RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
+            else
+                RMANA = R.Instance.ManaCost;
         }
 
         private double GetQdmg( Obj_AI_Base t)

@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private Spell E, Q, Q1, R, R1, W, W1;
 
-        private float QMANA, WMANA, EMANA, RMANA;
+        private float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
         private bool passRdy = false;
         private float castR = Game.Time;
         public Obj_AI_Hero Player {get { return ObjectManager.Player; }}
@@ -357,8 +357,18 @@ namespace OneKeyToWin_AIO_Sebby
                     return false;
             }
         }
+
         private void SetMana()
         {
+            if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
+            {
+                QMANA = 0;
+                WMANA = 0;
+                EMANA = 0;
+                RMANA = 0;
+                return;
+            }
+
             QMANA = Q.Instance.ManaCost;
             WMANA = W.Instance.ManaCost;
             EMANA = E.Instance.ManaCost;
@@ -367,20 +377,14 @@ namespace OneKeyToWin_AIO_Sebby
                 RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
-
-            if (ObjectManager.Player.Health < ObjectManager.Player.MaxHealth * 0.2)
-            {
-                QMANA = 0;
-                WMANA = 0;
-                EMANA = 0;
-                RMANA = 0;
-            }
         }
+
         public static void drawText(string msg, Vector3 Hero, System.Drawing.Color color)
         {
             var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
         }
+
         private void Drawing_OnDraw(EventArgs args)
         {
 

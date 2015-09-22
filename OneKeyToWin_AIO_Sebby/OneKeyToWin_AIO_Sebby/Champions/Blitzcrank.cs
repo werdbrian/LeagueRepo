@@ -16,7 +16,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private Spell E, Q, R, W;
 
-        private float QMANA, WMANA, EMANA, RMANA;
+        private float QMANA = 0, WMANA = 0, EMANA = 0, RMANA = 0;
 
         private int grab = 0 , grabS = 0;
 
