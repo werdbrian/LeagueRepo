@@ -306,7 +306,7 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LogicE()
         {
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && Program.ValidUlt(target)))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && OktwCommon.ValidUlt(target)))
             {
                 var Edmg = GetEdmg(target);
                 if (target.Health  < Edmg)

@@ -232,7 +232,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            if (t.IsValidTarget(R.Range) && t.CountAlliesInRange(500) == 0 && Program.ValidUlt(t) && !Orbwalking.InAutoAttackRange(t))
+            if (t.IsValidTarget(R.Range) && t.CountAlliesInRange(500) == 0 && OktwCommon.ValidUlt(t) && !Orbwalking.InAutoAttackRange(t))
             {
                 var rDmg = R.GetDamage(t,1) * NumShots();
 

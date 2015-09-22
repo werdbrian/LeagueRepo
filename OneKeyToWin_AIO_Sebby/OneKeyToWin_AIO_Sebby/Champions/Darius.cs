@@ -154,7 +154,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            foreach (var target in Program.Enemies.Where(target => Program.ValidUlt(target) && target.IsValidTarget(R.Range) ))
+            foreach (var target in Program.Enemies.Where(target => OktwCommon.ValidUlt(target) && target.IsValidTarget(R.Range) ))
             {
                 var dmgR = R.GetDamage(target);
                 if (target.HasBuff("dariushemo"))

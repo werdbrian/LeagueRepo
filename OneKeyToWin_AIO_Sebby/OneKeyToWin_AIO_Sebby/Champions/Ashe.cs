@@ -117,7 +117,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("autoR", true).GetValue<bool>())
             {
                 bool cast = false;
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target)))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && OktwCommon.ValidUlt(target)))
                 {
                     if (Config.Item("autoRinter", true).GetValue<bool>() && target.IsChannelingImportantSpell())
                         R.Cast(target);

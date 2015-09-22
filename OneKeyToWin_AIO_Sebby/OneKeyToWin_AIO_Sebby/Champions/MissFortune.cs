@@ -253,7 +253,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 var rDmg = R.GetDamage(t) + (W.GetDamage(t) * 4);
 
-                if (Player.CountEnemiesInRange(700) == 0 && t.CountAlliesInRange(400) == 0 && Program.ValidUlt(t))
+                if (Player.CountEnemiesInRange(700) == 0 && t.CountAlliesInRange(400) == 0 && OktwCommon.ValidUlt(t))
                 {
                     var tDis = Player.Distance(t.ServerPosition);
                     if (rDmg * 7 > t.Health && tDis < 800)

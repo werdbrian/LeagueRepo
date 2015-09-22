@@ -18,26 +18,26 @@ namespace OneKeyToWin_AIO_Sebby
         public void LoadOKTW()
         {
             Game.OnUpdate += Game_OnGameUpdate;
-            Config.SubMenu("AfkMode").AddItem(new MenuItem("AfkMode", "AfkMode BETA").SetValue(false));
+            Config.SubMenu("AfkMode").AddItem(new MenuItem("AfkMode", "AfkMode BETA", true).SetValue(false));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team == Player.Team))
                 Config.SubMenu("AfkMode").SubMenu("Fallow").AddItem(new MenuItem("ally" + enemy.ChampionName, enemy.ChampionName).SetValue(false));
             
-            Config.SubMenu("AfkMode").SubMenu("Mode").AddItem(new MenuItem("laneclear", "leaneclear").SetValue(true));
-            Config.SubMenu("AfkMode").SubMenu("Mode").AddItem(new MenuItem("mixed", "Mixed").SetValue(false));
-            Config.SubMenu("AfkMode").SubMenu("Mode").AddItem(new MenuItem("combo", "Combo").SetValue(false));
+            Config.SubMenu("AfkMode").SubMenu("Mode").AddItem(new MenuItem("laneclear", "leaneclear", true).SetValue(true));
+            Config.SubMenu("AfkMode").SubMenu("Mode").AddItem(new MenuItem("mixed", "Mixed", true).SetValue(false));
+            Config.SubMenu("AfkMode").SubMenu("Mode").AddItem(new MenuItem("combo", "Combo", true).SetValue(false));
         }
 
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (Config.Item("AfkMode").GetValue<bool>())
+            if (Config.Item("AfkMode", true).GetValue<bool>())
             {
 
                 Orbwalking.OrbwalkingMode ActiveMode = Orbwalking.OrbwalkingMode.LaneClear;
-                if (Config.Item("laneclear").GetValue<bool>())
+                if (Config.Item("laneclear", true).GetValue<bool>())
                     ActiveMode = Orbwalking.OrbwalkingMode.LaneClear;
-                else if (Config.Item("mixed").GetValue<bool>())
+                else if (Config.Item("mixed", true).GetValue<bool>())
                     ActiveMode = Orbwalking.OrbwalkingMode.Mixed;
-                else if (Config.Item("combo").GetValue<bool>())
+                else if (Config.Item("combo", true).GetValue<bool>())
                     ActiveMode = Orbwalking.OrbwalkingMode.Combo;
 
                 Obj_AI_Hero fallow = Player;

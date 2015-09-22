@@ -283,7 +283,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             bool cast = false;
             double secoundDmgR = 0.80;
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R1.Range) && Program.ValidUlt(target)))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R1.Range) && OktwCommon.ValidUlt(target)))
             {
 
                 float predictedHealth = target.Health + target.HPRegenRate ;

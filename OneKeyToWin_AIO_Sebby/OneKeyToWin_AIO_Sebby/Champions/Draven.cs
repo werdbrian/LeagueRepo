@@ -250,7 +250,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             if (Config.Item("autoR", true).GetValue<bool>())
             {
-                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target) && target.CountAlliesInRange(500) == 0))
+                foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && OktwCommon.ValidUlt(target) && target.CountAlliesInRange(500) == 0))
                 {
                     float predictedHealth = target.Health;
                     double Rdmg = CalculateR(target) ;

@@ -128,7 +128,7 @@ namespace OneKeyToWin_AIO_Sebby
         {
             bool cast = false;
 
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && Program.ValidUlt(target) && target.CountEnemiesInRange(500) == 1 && target.CountAlliesInRange(500) == 0))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && OktwCommon.ValidUlt(target) && target.CountEnemiesInRange(500) == 1 && target.CountAlliesInRange(500) == 0))
             {
                 float predictedHealth = target.Health + target.HPRegenRate * 2;
                 var Rdmg = R.GetDamage(target);

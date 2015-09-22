@@ -98,7 +98,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 R.Range = 800 + 300 * ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R).Level;
                 var target = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
-                if (target.IsValidTarget(R.Range) && Program.ValidUlt(target))
+                if (target.IsValidTarget(R.Range) && OktwCommon.ValidUlt(target))
                 {
                     if (Config.Item("Raa", true).GetValue<bool>() && Orbwalking.InAutoAttackRange(target))
                         return;

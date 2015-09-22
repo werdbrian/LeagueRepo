@@ -92,6 +92,19 @@ namespace OneKeyToWin_AIO_Sebby
             return false;
         }
 
+        public static bool ValidUlt(Obj_AI_Hero target)
+        {
+            if (target.HasBuffOfType(BuffType.PhysicalImmunity)
+                || target.HasBuffOfType(BuffType.SpellImmunity)
+                || target.IsZombie
+                || target.HasBuffOfType(BuffType.Invulnerability)
+                || target.HasBuffOfType(BuffType.SpellShield)
+                || !target.HasBuff("deathdefiedbuff"))
+                return false;
+            else
+                return true;
+        }
+
         public static bool CanMove(Obj_AI_Hero target)
         {
             if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) || target.HasBuffOfType(BuffType.Knockup) ||
@@ -101,15 +114,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 return false;
             }
-            else
-                return true;
-        }
-
-        public static bool ValidUlt(Obj_AI_Hero target)
-        {
-            if (target.HasBuffOfType(BuffType.PhysicalImmunity) || target.HasBuffOfType(BuffType.SpellImmunity)
-            || target.IsZombie || target.HasBuffOfType(BuffType.Invulnerability) || target.HasBuffOfType(BuffType.SpellShield) || !target.HasBuff("deathdefiedbuff"))
-                return false;
             else
                 return true;
         }
