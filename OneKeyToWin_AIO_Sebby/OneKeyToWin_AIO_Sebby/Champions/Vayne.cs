@@ -24,7 +24,7 @@ namespace OneKeyToWin_AIO_Sebby
             W = new Spell(SpellSlot.E, 670);
             R = new Spell(SpellSlot.R, 3000);
 
-            E.SetTargetted(0.35f, float.MaxValue);
+            E.SetTargetted(0.30f, float.MaxValue);
 
             LoadMenuOKTW();
 
@@ -103,7 +103,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var t = target as Obj_AI_Hero;
 
-            if (Q.IsReady() && t.IsValidTarget() && (GetWStacks(t) == 1 || Player.HasBuff("vayneinquisition")) && t.Position.Distance(Game.CursorPos) < t.Position.Distance(Player.Position) && dashPosition.CountEnemiesInRange(800) < 3)
+            if (Q.IsReady() && t.IsValidTarget() && (GetWStacks(t) == 1 || Player.HasBuff("vayneinquisition")) && t.Position.Distance(dashPosition) < 600 && dashPosition.CountEnemiesInRange(800) < 3)
             {
                 Q.Cast(dashPosition, true);
                 Program.debug("" + t.Name + GetWStacks(t));
