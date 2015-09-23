@@ -1189,7 +1189,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             spells.Add(new Spells() { name = "alzaharnethergrasp", duration = 1 }); //Malza R
             spells.Add(new Spells() { name = "lucianq", duration = 0.5 }); //Lucian Q
             spells.Add(new Spells() { name = "caitlynpiltoverpeacemaker", duration = 0.5 }); //Caitlyn Q
-            spells.Add(new Spells() { name = "velkozr", duration = 0.5 }); //Caitlyn Q
+            spells.Add(new Spells() { name = "velkozr", duration = 0.5 }); //Velkoz R 
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
