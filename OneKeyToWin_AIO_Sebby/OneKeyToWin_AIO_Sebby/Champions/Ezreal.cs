@@ -288,7 +288,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (t.IsValidTarget() && Player.HealthPercent > 40 && !Player.UnderTurret(true) && (Game.Time - OverKill > 0.3) && dashPosition.CountEnemiesInRange(700) < 3)
             {
-                if ( t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(Player.Position) && !Orbwalking.InAutoAttackRange(t))
+                if ( t.Distance(Game.CursorPos) + 300 < t.Position.Distance(Player.Position) && !Orbwalking.InAutoAttackRange(t))
                 {
                     var dmgCombo = 0f;
 
