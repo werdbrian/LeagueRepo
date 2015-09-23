@@ -102,7 +102,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicQ()
         {
 
-            if (Config.Item("autoQ", true).GetValue<bool>() && Program.Combo && Orbwalker.GetTarget().IsValid<Obj_AI_Hero>() && Player.Mana < RMANA + QMANA)
+            if (Config.Item("autoQ", true).GetValue<bool>() && Program.Combo && Orbwalker.GetTarget().IsValid<Obj_AI_Hero>() && Player.Mana > RMANA + QMANA)
                 Q.Cast();
 
             if (Config.Item("countQ", true).GetValue<Slider>().Value == 0 || Player.Mana < RMANA + QMANA)
