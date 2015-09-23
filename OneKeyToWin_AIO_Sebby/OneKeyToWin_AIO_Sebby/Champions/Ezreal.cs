@@ -106,7 +106,6 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
             return;
-            
         }
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
@@ -139,12 +138,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 SetMana();
             }
-            var tr = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
 
-            if (Config.Item("useR", true).GetValue<KeyBind>().Active && tr.IsValidTarget())
-            {
-                R.CastIfWillHit(tr, 2, true);
-            }
             if (R.IsReady() && Config.Item("Rjungle", true).GetValue<bool>())
             {
                 KsJungle();
@@ -154,6 +148,9 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (E.IsReady())
             {
+                if (Program.LagFree(1) && Config.Item("autoE", true).GetValue<bool>() && Program.Combo)
+                    LogicE();
+
                 if (Config.Item("smartE", true).GetValue<KeyBind>().Active)
                     Esmart = true;
                 if (Config.Item("smartEW", true).GetValue<KeyBind>().Active && W.IsReady())
@@ -173,16 +170,13 @@ namespace OneKeyToWin_AIO_Sebby
                 Esmart = false;
             }
 
-            if (Program.LagFree(1) && E.IsReady() && Config.Item("autoE", true).GetValue<bool>() && Program.Combo )
-                LogicE();
-
             if (Program.LagFree(2) && Q.IsReady())
                 LogicQ();
 
             if (Program.LagFree(3) && W.IsReady() && (Game.Time - QCastTime > 0.6))
                 LogicW();
 
-            if (Program.LagFree(4) && R.IsReady())
+            if ( R.IsReady())
             {
                 if (Config.Item("useR", true).GetValue<KeyBind>().Active)
                 {
@@ -190,7 +184,9 @@ namespace OneKeyToWin_AIO_Sebby
                     if (t.IsValidTarget())
                         R.Cast(t, true, true);
                 }
-                LogicR();
+
+                if (Program.LagFree(4))
+                    LogicR();
             }
         }
 
@@ -280,63 +276,45 @@ namespace OneKeyToWin_AIO_Sebby
         }
         private void LogicE()
         {
+            var t = TargetSelector.GetTarget(1300, TargetSelector.DamageType.Physical);
+            var dashPosition = Player.Position.Extend(Game.CursorPos, E.Range);
 
-            var t2 = TargetSelector.GetTarget(950, TargetSelector.DamageType.Physical);
-            var t = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
-
-            if (E.IsReady() && Player.Mana > RMANA + EMANA
-                && Player.CountEnemiesInRange(260) > 0
-                && Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(500) < 3
-                && t.Position.Distance(Game.CursorPos) > t.Position.Distance(Player.Position))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(270) && target.IsMelee))
             {
                 if (Config.Item("autoEwall", true).GetValue<bool>())
                     FindWall();
-                E.Cast(Player.Position.Extend(Game.CursorPos, E.Range), true);
+                E.Cast(dashPosition);
             }
-            else if (Player.Health > Player.MaxHealth * 0.4
-                && !Player.UnderTurret(true)
-                && (Game.Time - OverKill > 0.4)
-                && Player.Position.Extend(Game.CursorPos, E.Range).CountEnemiesInRange(700) < 3)
+
+            if (t.IsValidTarget() && Player.HealthPercent > 40 && !Player.UnderTurret(true) && (Game.Time - OverKill > 0.3) && dashPosition.CountEnemiesInRange(700) < 3)
             {
-                if (t.IsValidTarget()
-                 && Player.Mana > QMANA + EMANA + WMANA
-                 && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(Player.Position)
-                 && Q.IsReady()
-                 && Q.GetDamage(t) + E.GetDamage(t) > t.Health
-                 && !Orbwalking.InAutoAttackRange(t)
-                 && Q.WillHit(Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition)
-                     )
+                if ( t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(Player.Position) && !Orbwalking.InAutoAttackRange(t))
                 {
-                    E.Cast(Player.Position.Extend(Game.CursorPos, E.Range), true);
-                    Program.debug("E kill Q");
-                }
-                else if (t2.IsValidTarget()
-                 && t2.Position.Distance(Game.CursorPos) + 300 < t2.Position.Distance(Player.Position)
-                 && Player.Mana > EMANA + RMANA
-                 && Player.GetAutoAttackDamage(t2) + E.GetDamage(t2) > t2.Health
-                 && !Orbwalking.InAutoAttackRange(t2))
-                {
-                    var position = Player.Position.Extend(Game.CursorPos, E.Range);
-                    if (W.IsReady())
-                        W.Cast(position, true);
-                    E.Cast(position, true);
-                    Program.debug("E kill aa");
-                    OverKill = Game.Time;
-                }
-                else if (t.IsValidTarget()
-                 && Player.Mana > QMANA + EMANA + WMANA
-                 && t.Position.Distance(Game.CursorPos) + 300 < t.Position.Distance(Player.Position)
-                 && W.IsReady()
-                 && W.GetDamage(t) + E.GetDamage(t) > t.Health
-                 && !Orbwalking.InAutoAttackRange(t)
-                 && Q.WillHit(Player.Position.Extend(Game.CursorPos, E.Range), Q.GetPrediction(t).UnitPosition)
-                     )
-                {
-                    E.Cast(Player.Position.Extend(Game.CursorPos, E.Range), true);
-                    Program.debug("E kill W");
+                    var dmgCombo = 0f;
+
+                    if (t.IsValidTarget(950))
+                    {
+                        dmgCombo = (float)Player.GetAutoAttackDamage(t) + E.GetDamage(t);
+                    }
+
+                    if (Q.IsReady() && Player.Mana > QMANA + EMANA && Q.WillHit(dashPosition, Q.GetPrediction(t).UnitPosition))
+                        dmgCombo = Q.GetDamage(t);
+
+                    if (W.IsReady() && Player.Mana > QMANA + EMANA + WMANA )
+                    {
+                        dmgCombo += W.GetDamage(t);
+                    }
+
+                    if (dmgCombo > t.Health)
+                    {
+                        E.Cast(dashPosition);
+                        OverKill = Game.Time;
+                        Program.debug("E ks combo");
+                    }
                 }
             }
         }
+
         private void LogicR()
         {
 
@@ -375,10 +353,10 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         R.CastIfWillHit(target, 2, true);
                     }
-                    
                 }
             }
         }
+
         private void castR(Obj_AI_Hero target)
         {
             if (Config.Item("hitchanceR", true).GetValue<bool>())
@@ -392,6 +370,15 @@ namespace OneKeyToWin_AIO_Sebby
             else
                 R.Cast(target, true);
         }
+
+        private bool DashCheck(Vector3 dash)
+        {
+            if ((!dash.UnderTurret(true) || Program.Combo))
+                return true;
+            else
+                return false;
+        }
+
         private double getRdmg(Obj_AI_Base target)
         {
             var rDmg = R.GetDamage(target);
@@ -518,6 +505,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
+
         private void KsJungle()
         {
             var mobs = MinionManager.GetMinions(Player.ServerPosition, float.MaxValue, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
@@ -601,6 +589,7 @@ namespace OneKeyToWin_AIO_Sebby
             var wts = Drawing.WorldToScreen(Hero.Position);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1], color, msg);
         }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("qRange", true).GetValue<bool>())
