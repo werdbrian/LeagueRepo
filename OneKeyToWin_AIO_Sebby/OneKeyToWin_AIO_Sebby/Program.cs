@@ -332,7 +332,18 @@ namespace OneKeyToWin_AIO_Sebby
 
         public static bool None { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None); } }
 
-        public static bool Combo { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo); } }
+        public static bool Combo { get {
+                if (Config.Item("onlyUtility", true).GetValue<bool>())
+                {
+                    if (Player.IsMoving)
+                        return true;
+                    else
+                        return false;
+                }
+                else
+                    return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo);
+
+            } }
 
         public static bool LaneClear { get { return (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear); } }
 
