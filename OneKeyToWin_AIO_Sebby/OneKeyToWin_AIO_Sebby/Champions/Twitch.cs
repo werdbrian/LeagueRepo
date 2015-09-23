@@ -29,7 +29,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             W.SetSkillshot(0.25f, 100f, 1410f, false, SkillshotType.SkillshotCircle);
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("notif", "Notification (timers)", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange", "E range", true).SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("rRange", "R range", true).SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
@@ -221,17 +220,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (passiveDmg(enemy) > enemy.Health)
                     drawText("IS DEAD", enemy, System.Drawing.Color.Yellow);
-            }
-
-            if (Config.Item("qRange", true).GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy", true).GetValue<bool>())
-                {
-                    if (Q.IsReady())
-                        Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-                }
-                else
-                    Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
             }
 
             if (Config.Item("eRange", true).GetValue<bool>())
