@@ -48,6 +48,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("eRange2", "E push position", true).SetValue(false));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("autoQ", "Auto Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("farmQ", "Q farm helper", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("QE", "try Q + E ", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q config").AddItem(new MenuItem("Qonly", "Q only after AA", true).SetValue(false));
@@ -103,7 +104,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var t = target as Obj_AI_Hero;
 
-            if (Q.IsReady() && t.IsValidTarget() && (GetWStacks(t) == 1 || Player.HasBuff("vayneinquisition")) && t.Position.Distance(dashPosition) < 600 && dashPosition.CountEnemiesInRange(800) < 3)
+            if (Q.IsReady() && Config.Item("autoQ", true).GetValue<bool>() && t.IsValidTarget() && (GetWStacks(t) == 1 || Player.HasBuff("vayneinquisition")) && t.Position.Distance(dashPosition) < 600 && dashPosition.CountEnemiesInRange(800) < 3)
             {
                 Q.Cast(dashPosition, true);
                 Program.debug("" + t.Name + GetWStacks(t));
@@ -171,7 +172,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     Q.Cast(dashPosition, true);
                 }
-                if (Program.Combo && DashCheck(dashPosition) && !Config.Item("Qonly", true).GetValue<bool>())
+                if (Program.Combo && Config.Item("autoQ", true).GetValue<bool>() && !Config.Item("Qonly", true).GetValue<bool>() && DashCheck(dashPosition) )
                 {
                     var t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
@@ -189,7 +190,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (target.IsValidTarget(270) && target.IsMelee)
                     {
-                        if (Q.IsReady() && DashCheck(dashPosition))
+                        if (Q.IsReady() && Config.Item("autoQ", true).GetValue<bool>() && DashCheck(dashPosition))
                             Q.Cast(dashPosition, true);
                         else if (E.IsReady() && Player.Health < Player.MaxHealth * 0.5)
                         {
