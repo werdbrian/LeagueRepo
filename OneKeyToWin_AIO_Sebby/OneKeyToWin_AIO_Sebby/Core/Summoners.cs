@@ -26,7 +26,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (flash != SpellSlot.Unknown)
             {
-                Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Flash").AddItem(new MenuItem("Flash", "Flash max range").SetValue(true));
+                //Config.SubMenu("Activator OKTW©").SubMenu("Summoners").SubMenu("Flash").AddItem(new MenuItem("Flash", "Flash max range").SetValue(true));
 
             }
             if (exhaust != SpellSlot.Unknown)
