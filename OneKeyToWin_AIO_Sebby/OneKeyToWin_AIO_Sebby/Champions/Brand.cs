@@ -161,8 +161,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                         totalDmg += BonusDmg(t2);
 
-                        if (totalDmg > t2.Health)
-                            R.CastOnUnit(t2);
+                        if (totalDmg > t2.Health && Player.GetAutoAttackDamage(t2) * 2 < t2.Health)
+                        {
+                            if( t2.CountAlliesInRange(500) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
+                                R.CastOnUnit(t2);
+                        }
 
                     }
                     else if (t2.Health < dmgR * 2 + BonusDmg(t2))
