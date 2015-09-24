@@ -57,7 +57,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Game_OnUpdate(EventArgs args)
         {
-            if (!Program.LagFree(0) || Player.IsRecalling())
+            if (!Program.LagFree(0) || Player.IsRecalling() || Player.IsDead)
                 return;
 
             if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)

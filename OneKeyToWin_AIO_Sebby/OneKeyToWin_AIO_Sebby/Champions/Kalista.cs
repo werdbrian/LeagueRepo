@@ -96,12 +96,13 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
                 }
-                else if (Player.Distance(args.End) <= 300f)
+                else 
                 {
-                    if (!OktwCommon.CanMove(Player) || Player.Distance(sender.Position) < 300f)
+                    var castArea = Player.Distance(args.End) * (args.End - Player.ServerPosition).Normalized() + Player.ServerPosition;
+                    if (castArea.Distance(Player.ServerPosition) < Player.BoundingRadius / 2)
+                    {
                         dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
-                    else if (Player.Distance(args.End) < 100f)
-                        dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
+                    }
                 }
 
                 if (Player.Health - dmg < (Player.CountEnemiesInRange(600) * Player.Level * 10 ) + (Player.Level * 10))
@@ -256,7 +257,6 @@ namespace OneKeyToWin_AIO_Sebby
                         cast = false;
                 }
 
-
                 var qDmg = Q.GetDamage(t) + Player.GetAutoAttackDamage(t);
                 var eDmg = GetEdmg(t);
 
@@ -322,8 +322,8 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
                 
-                if (GetRStacks(target) >= countE
-                    && (GetPassiveTime(target) < 0.5 || Player.ServerPosition.Distance(target.ServerPosition) > E.Range - 150 || Player.Health < Player.MaxHealth * 0.3)
+                if (GetRStacks(target) >= countE && (GetPassiveTime(target) < 0.5 || Player.ServerPosition.Distance(target.ServerPosition) > E.Range - 150 
+                    || Player.Health < Player.MaxHealth * 0.3)
                     && Player.Mana > RMANA + QMANA + EMANA + WMANA
                     && Player.CountEnemiesInRange(800) == 0)
                 {
