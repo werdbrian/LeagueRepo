@@ -194,7 +194,7 @@ namespace OneKeyToWin_AIO_Sebby
                 Q.Cast();
             else if (FishBoneActive && Program.Combo && Player.CountEnemiesInRange(2000) == 0)
                 Q.Cast();
-            else if (FishBoneActive && Program.Farm)
+            else if (FishBoneActive && (Program.Farm || Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit))
             {
                 Q.Cast();
             }
