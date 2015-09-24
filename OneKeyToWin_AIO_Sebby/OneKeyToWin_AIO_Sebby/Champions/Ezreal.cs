@@ -483,7 +483,7 @@ namespace OneKeyToWin_AIO_Sebby
             var minions = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
             foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion)))
             {
-                Program.CastSpell(Q, minion);
+                Q.Cast(minion);
                 FarmId = minion.NetworkId;
             }
             if (Config.Item("LC", true).GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear && !Orbwalking.CanAttack() && (Player.ManaPercentage() > Config.Item("Mana", true).GetValue<Slider>().Value || Player.UnderTurret(false)))
