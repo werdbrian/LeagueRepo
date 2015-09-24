@@ -148,9 +148,9 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Config.Item("FaceOfTheMountain").GetValue<bool>() && FaceOfTheMountain.IsReady() && Player.Distance(ally.ServerPosition) < FaceOfTheMountain.Range)
                 {
                     if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                        FaceOfTheMountain.Cast(ally);
+                        TryCast(() => FaceOfTheMountain.Cast(ally));
                     else if (ally.Health - dmg < ally.Level * 10)
-                        FaceOfTheMountain.Cast(ally);
+                        TryCast(() => FaceOfTheMountain.Cast(ally));
                 }
 
                 if (Config.Item("Seraph").GetValue<bool>())
@@ -159,11 +159,11 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         var value = Player.Level * 20;
                         if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
-                            Seraph.Cast();
+                            TryCast(() => Seraph.Cast());
                         else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                            Seraph.Cast();
+                            TryCast(() => Seraph.Cast());
                         else if (ally.Health - dmg < ally.Level * 10)
-                            Seraph.Cast();
+                            TryCast(() => Seraph.Cast());
                     }
                 }
                 
@@ -173,14 +173,28 @@ namespace OneKeyToWin_AIO_Sebby
                     {
                         var value = 95 + Player.Level * 20;
                         if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
-                            Zhonya.Cast();
+                        {
+                            TryCast(() => Zhonya.Cast());
+                        }
                         else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                            Zhonya.Cast();
+                        {
+                            TryCast(() => Zhonya.Cast());
+                        }
                         else if (ally.Health - dmg < ally.Level * 10)
-                            Zhonya.Cast();
+                        {
+                            TryCast(() => Zhonya.Cast()); 
+                        }
                     }
                 }
             }
+        }
+
+        private void TryCast(Utility.DelayAction.Callback cast)
+        {
+            Utility.DelayAction.Add(1, cast);
+            Utility.DelayAction.Add(100, cast);
+            Utility.DelayAction.Add(200, cast);
+            Utility.DelayAction.Add(300, cast);
         }
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -405,6 +419,7 @@ namespace OneKeyToWin_AIO_Sebby
                     if (Player.CountEnemiesInRange(1200) > 0 && Player.Mana < 200)
                         ManaPotion.Cast();
                 }
+
                 if (Player.HasBuff("RegenerationPotion") || Player.HasBuff("ItemMiniRegenPotion") || Player.HasBuff("ItemCrystalFlask"))
                     return;
 

@@ -143,16 +143,16 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     var value = 95 + Player.Level * 20;
                     if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
-                        Player.Spellbook.CastSpell(barrier, Player);
+                        TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
                     if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 15)
-                        Player.Spellbook.CastSpell(barrier, Player);
-                
+                        TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
+
                 }
 
                 if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() && dmg > 0)
                 {
                     if (ally.Health - dmg < ally.CountEnemiesInRange(650) * ally.Level * 40)
-                        Player.Spellbook.CastSpell(exhaust, sender);
+                        TryCast(() => Player.Spellbook.CastSpell(exhaust, sender));
                 }
 
                 if (CanUse(heal) && Config.Item("Heal").GetValue<bool>() && dmg > 0)
@@ -161,11 +161,20 @@ namespace OneKeyToWin_AIO_Sebby
                         return;
 
                     if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                        Player.Spellbook.CastSpell(heal, ally);
+                        TryCast(() => Player.Spellbook.CastSpell(heal, ally));
                     else if (ally.Health - dmg <  ally.Level * 10)
-                        Player.Spellbook.CastSpell(heal, ally);
+                        TryCast(() => Player.Spellbook.CastSpell(heal, ally));
+
                 }
             }
+        }
+
+        private void TryCast(Utility.DelayAction.Callback cast)
+        {
+            Utility.DelayAction.Add(1, cast);
+            Utility.DelayAction.Add(100, cast);
+            Utility.DelayAction.Add(200, cast);
+            Utility.DelayAction.Add(300, cast);
         }
 
         private bool CanUse(SpellSlot sum)
