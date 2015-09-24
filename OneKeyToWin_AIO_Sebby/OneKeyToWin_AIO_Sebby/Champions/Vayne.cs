@@ -104,7 +104,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             var t = target as Obj_AI_Hero;
 
-            if (Q.IsReady() && Config.Item("autoQ", true).GetValue<bool>() && t.IsValidTarget() && (GetWStacks(t) == 1 || Player.HasBuff("vayneinquisition")) && t.Position.Distance(dashPosition) < 600 && dashPosition.CountEnemiesInRange(800) < 3)
+            if (Q.IsReady() && (Program.Combo || Program.Farm) && Config.Item("autoQ", true).GetValue<bool>() && t.IsValidTarget() && (GetWStacks(t) == 1 || Player.HasBuff("vayneinquisition")) && t.Position.Distance(dashPosition) < 600 && dashPosition.CountEnemiesInRange(800) < 3)
             {
                 Q.Cast(dashPosition, true);
                 Program.debug("" + t.Name + GetWStacks(t));
