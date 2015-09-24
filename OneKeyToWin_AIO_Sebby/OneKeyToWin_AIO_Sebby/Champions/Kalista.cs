@@ -73,7 +73,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
                 {
-                    lastecast = Game.ClockTime;
+                    
                     Orbwalking.ResetAutoAttackTimer();
                 }
                 if (args.SData.Name == "kalistaw")
@@ -288,12 +288,15 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void CastE()
         {
-            if (Game.ClockTime - lastecast < 0.300)
+            if (Game.Time - lastecast < 0.300)
             {
                 return;
             }
-            
-            E.Cast();
+            else
+            { 
+                lastecast = Game.Time;
+                E.Cast();
+            }
         }
 
         void castQ(bool cast, Obj_AI_Base t)
