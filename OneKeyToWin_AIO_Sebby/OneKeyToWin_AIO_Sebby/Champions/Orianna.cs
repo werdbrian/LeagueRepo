@@ -48,11 +48,11 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("Wdmg", "E dmg % hp", true).SetValue(new Slider(10, 100, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Shield Config").AddItem(new MenuItem("AGC", "AntiGapcloserE", true).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q out range aa minion", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQout", "Farm Q out range aa minion", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(60, 100, 20)));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("clearQ", "LaneClear Q", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("clearW", "LaneClear W", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("clearE", "LaneClear E", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "LaneClear Q", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "LaneClear W", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmE", "LaneClear E", true).SetValue(false));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("rCount", "Auto R x enemies", true).SetValue(new Slider(3, 0, 5)));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("smartR", "Semi-manual cast R key", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
@@ -286,7 +286,7 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicFarm()
         {
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range, MinionTypes.All);
-            if (Program.Farm && Config.Item("farmQ", true).GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA + EMANA)
+            if (Program.Farm && Config.Item("farmQout", true).GetValue<bool>() && Player.Mana > RMANA + QMANA + WMANA + EMANA)
             {
                 foreach (var minion in allMinions.Where(minion => minion.IsValidTarget(Q.Range) && !Orbwalker.InAutoAttackRange(minion) && minion.Health < Q.GetDamage(minion) && minion.Health > minion.FlatPhysicalDamageMod))
                 {
@@ -318,7 +318,7 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (Qfarm.MinionsHit + QWfarm.MinionsHit == 0)
                     return;
-                if (Config.Item("clearQ", true).GetValue<bool>())
+                if (Config.Item("farmQ", true).GetValue<bool>())
                 {
                     if (Qfarm.MinionsHit > 2 && !W.IsReady() && Q.IsReady())
                     {
@@ -330,9 +330,9 @@ namespace OneKeyToWin_AIO_Sebby
 
                 foreach (var minion in allMinions)
                 {
-                    if (W.IsReady() && minion.Distance(BallPos) < W.Range && minion.Health < W.GetDamage(minion) && Config.Item("clearW", true).GetValue<bool>())
+                    if (W.IsReady() && minion.Distance(BallPos) < W.Range && minion.Health < W.GetDamage(minion) && Config.Item("farmW", true).GetValue<bool>())
                         W.Cast();
-                    if (!W.IsReady() && E.IsReady() && minion.Distance(BallPos) < E.Width && Config.Item("clearE", true).GetValue<bool>())
+                    if (!W.IsReady() && E.IsReady() && minion.Distance(BallPos) < E.Width && Config.Item("farmE", true).GetValue<bool>())
                         E.CastOnUnit(Player);
                 }
             }

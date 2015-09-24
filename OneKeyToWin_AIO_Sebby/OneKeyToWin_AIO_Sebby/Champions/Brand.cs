@@ -65,7 +65,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
-            Game.OnWndProc += Game_OnWndProc; ;
+            Game.OnWndProc += Game_OnWndProc;
         }
 
         private void Game_OnWndProc(WndEventArgs args)
@@ -74,13 +74,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (!Config.Item("spellFarm", true).GetValue<bool>())
                 {
-                    Config.Item("spellFarm", true).SetValue<bool>(true);
+                    
                     Config.Item("farmQ", true).SetValue<bool>(true);
                     Config.Item("farmW", true).SetValue<bool>(true);
                 }
                 else
                 {
-                    Config.Item("spellFarm", true).SetValue<bool>(false);
+                   
                     Config.Item("farmQ", true).SetValue<bool>(false);
                     Config.Item("farmW", true).SetValue<bool>(false);
                 }
