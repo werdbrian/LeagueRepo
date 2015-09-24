@@ -55,7 +55,7 @@ namespace OneKeyToWin_AIO_Sebby
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if stacks", true).SetValue(new Slider(10, 30, 0)));
-            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmE", "Auto E if minions", true).SetValue(new Slider(2, 10, 1)));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("farmEcount", "Auto E if minions", true).SetValue(new Slider(2, 10, 1)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("minionE", "Auto E big minion", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edmg", "E % dmg adjust", true).SetValue(new Slider(100, 150, 50)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edead", "Cast E before Kalista dead", true).SetValue(true));
@@ -73,20 +73,19 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (args.SData.Name == "KalistaExpungeWrapper")
                 {
-                    
+                    lastecast = Game.Time;
                     Orbwalking.ResetAutoAttackTimer();
                 }
                 if (args.SData.Name == "kalistaw")
                 {
                     wCount++;
                 }
-                Program.debug(args.SData.Name);
             }
+
             if (R.IsReady() && sender.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(sender.Position) < R.Range && Player.Distance(sender.Position) > Config.Item("rangeBalista", true).GetValue<Slider>().Value)
             {
                 grabTime = Game.Time;
             }
-
 
             if ( Config.Item("Edead", true).GetValue<bool>() && E.IsReady()  && sender.IsEnemy && sender.IsValidTarget(1500))
             {
@@ -306,9 +305,10 @@ namespace OneKeyToWin_AIO_Sebby
             else
                 Program.CastSpell(Q, t);
         }
+
         private void LogicE()
         {
-            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && target.IsEnemy && OktwCommon.ValidUlt(target)))
+            foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(E.Range) && OktwCommon.ValidUlt(target)))
             {
                 var Edmg = GetEdmg(target);
                 if (target.Health  < Edmg)
@@ -331,7 +331,7 @@ namespace OneKeyToWin_AIO_Sebby
                     return;
                 }
             }
-            if (Program.LaneClear && (count >= Config.Item("farmE", true).GetValue<Slider>().Value  || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
+            if (Program.LaneClear && (count >= Config.Item("farmEcount", true).GetValue<Slider>().Value  || ((Player.UnderTurret(false) && !Player.UnderTurret(true)) && count > 0 && Player.Mana > RMANA + QMANA + EMANA)))
             {
                 CastE();
                 return;
