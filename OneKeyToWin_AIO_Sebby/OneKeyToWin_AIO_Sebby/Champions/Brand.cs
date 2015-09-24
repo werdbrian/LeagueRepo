@@ -75,7 +75,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             else
                 Orbwalking.Attack = true;
 
-            if (Program.LagFree(1))
+            if (Program.LagFree(0))
             {
                 SetMana();
                 Jungle();
@@ -267,16 +267,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (mobs.Count > 0)
                 {
                     var mob = mobs[0];
-                    if (E.IsReady() && Config.Item("jungleE", true).GetValue<bool>())
-                    {
-                        E.Cast(mob.ServerPosition);
-                        return;
-                    }
                     if (W.IsReady() && Config.Item("jungleW", true).GetValue<bool>())
                     {
                         W.Cast(mob.ServerPosition);
                         return;
                     }
+                    
+                    if (E.IsReady() && Config.Item("jungleE", true).GetValue<bool>())
+                    {
+                        E.Cast(mob);
+                        return;
+                    }
+                    
                     if (Q.IsReady() && Config.Item("jungleQ", true).GetValue<bool>())
                     {
                         Q.Cast(mob.ServerPosition);
