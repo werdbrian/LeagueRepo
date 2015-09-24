@@ -492,7 +492,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     if (minion.Health < Q.GetDamage(minion) * 0.8 && minion.Health > minion.FlatPhysicalDamageMod)
                     {
-                        Program.CastSpell(Q, minion);
+                        Q.Cast(minion);
                     }
 
                 }
@@ -500,7 +500,7 @@ namespace OneKeyToWin_AIO_Sebby
                 {
                     foreach (var minion in minions.Where(minion => FarmId != minion.NetworkId && minion.Health > Q.GetDamage(minion) * 1.5 && Orbwalker.InAutoAttackRange(minion)))
                     {
-                        Program.CastSpell(Q, minion);
+                        Q.Cast(minion);
                     }
                 }
             }
