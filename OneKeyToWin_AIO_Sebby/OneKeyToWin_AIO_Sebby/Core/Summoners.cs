@@ -57,12 +57,6 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-
-            if (flash != SpellSlot.Unknown && Config.Item("Flash").GetValue<bool>() && sender.ActiveSpellSlot == flash && flash.IsReady() && args.Slot == flash)
-            {
-                args.Process = false;
-                Player.Spellbook.CastSpell(flash, ObjectManager.Player.Position.Extend(Game.CursorPos, 500), false);
-            }
            
         }
 

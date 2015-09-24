@@ -105,15 +105,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     }
                 }
 
-                if (Player.ChampionName == "Kalista" && W.IsReady() && Game.Time - need.LastVisableTime > 3 && Game.Time - need.LastVisableTime < 4 && !Program.Combo && Config.Item("autoW").GetValue<bool>() && ObjectManager.Player.Mana > 300f)
-                {
-                    if (need.PredictedPos.Distance(Player.Position) > 1500 && need.PredictedPos.Distance(Player.Position) < 4000)
-                    {
-                        W.Cast(ObjectManager.Player.Position.Extend(need.PredictedPos, 5500));
-                        return;
-                    }
-                }
-
                 if (Player.ChampionName == "Caitlyn" && W.IsReady() && Game.Time - need.LastVisableTime < 2 && Player.Mana > 200f && !Player.IsWindingUp && Config.Item("bushW").GetValue<bool>())
                 {
                     if (need.PredictedPos.Distance(Player.Position) < 800)
