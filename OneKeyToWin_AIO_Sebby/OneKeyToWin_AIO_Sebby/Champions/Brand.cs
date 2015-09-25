@@ -101,7 +101,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             
             if (t2.IsValidTarget() )
             {
-                if (t2.CountEnemiesInRange(R.Range) >= Config.Item("rCount", true).GetValue<Slider>().Value && Config.Item("rCount", true).GetValue<Slider>().Value > 0)
+                if (t2.CountEnemiesInRange(bounceRange) >= Config.Item("rCount", true).GetValue<Slider>().Value && Config.Item("rCount", true).GetValue<Slider>().Value > 0)
                     R.Cast(t2);
 
                 if (t2.CountAlliesInRange(550) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
