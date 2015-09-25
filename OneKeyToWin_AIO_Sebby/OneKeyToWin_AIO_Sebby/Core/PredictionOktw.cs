@@ -332,6 +332,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
+            //Set hit chance
+            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
+            {
+                result = WayPointAnalysis(result, input);
+                //Program.debug(input.Unit.BaseSkinName + result.Hitchance);
+            }
             //Check for collision
             if (checkCollision && input.Collision && result.Hitchance > HitChance.Impossible)
             {
@@ -341,12 +347,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 result.Hitchance = result.CollisionObjects.Count > 0 ? HitChance.Collision : result.Hitchance;
             }
 
-            //Set hit chance
-            if (result.Hitchance == HitChance.High || result.Hitchance == HitChance.VeryHigh)
-            {
-                result = WayPointAnalysis(result, input);
-                //Program.debug(input.Unit.BaseSkinName + result.Hitchance);
-            }
+            
             return result;
         }
 
