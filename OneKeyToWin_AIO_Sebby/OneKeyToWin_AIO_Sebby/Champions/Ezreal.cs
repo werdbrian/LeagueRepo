@@ -74,6 +74,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu(Player.ChampionName).SubMenu("R config").SubMenu("R Jungle stealer").AddItem(new MenuItem("Rally", "Ally stealer", true).SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("hitchanceR", "VeryHighHitChanceR", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R config").AddItem(new MenuItem("useR", "Semi-manual cast R key", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))); //32 == space
+
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Farm Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LC", "LaneClear", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(60, 100, 20)));
@@ -322,7 +323,6 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 foreach (var target in Program.Enemies.Where(target => target.IsValidTarget(R.Range) && OktwCommon.ValidUlt(target)))
                 {
-                    
                     float predictedHealth = target.Health + target.HPRegenRate * 2;
                     double Rdmg = R.GetDamage(target);
                     if (Rdmg > predictedHealth)
@@ -334,12 +334,7 @@ namespace OneKeyToWin_AIO_Sebby
                         castR(target);
                         Program.debug("R normal");
                     }
-                    else if (Rdmg > predictedHealth && target.HasBuff("Recall"))
-                    {
-                        R.Cast(target, true, true);
-                        Program.debug("R recall");
-                    }
-                    else if (!OktwCommon.CanMove(target) && Config.Item("Rcc", true).GetValue<bool>() &&
+                    if (!OktwCommon.CanMove(target) && Config.Item("Rcc", true).GetValue<bool>() &&
                         target.IsValidTarget(Q.Range + E.Range) && Rdmg + qDmg * 4 > predictedHealth)
                     {
                         R.CastIfWillHit(target, 2, true);
