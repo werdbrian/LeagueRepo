@@ -42,6 +42,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("countE", "Auto E if x stacks & out range AA", true).SetValue(new Slider(6, 6, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("5e", "Always E if 6 stacks", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("jungleE", "Jungle ks E", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Edead", "Cast E before Twitch die", true).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("Rks", "R KS out range AA", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("countR", "Auto R if x enemies (combo)", true).SetValue(new Slider(3, 5, 0)));
@@ -50,7 +51,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Drawing.OnDraw += Drawing_OnDraw;
             //AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             // Interrupter.OnPossibleToInterrupt += Interrupter_OnPossibleToInterrupt;
-            //Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
         }
 
         private void Game_OnUpdate(EventArgs args)
@@ -67,6 +68,34 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicW();
             if (Program.LagFree(4) && R.IsReady() && Program.Combo)
                 LogicR();
+        }
+
+        private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+
+            if (Config.Item("Edead", true).GetValue<bool>() && E.IsReady() && sender.IsEnemy && sender.IsValidTarget(1500))
+            {
+
+                double dmg = 0;
+
+                if (args.Target != null && args.Target.IsMe)
+                {
+                    dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
+                }
+                else
+                {
+                    var castArea = Player.Distance(args.End) * (args.End - Player.ServerPosition).Normalized() + Player.ServerPosition;
+                    if (castArea.Distance(Player.ServerPosition) < Player.BoundingRadius / 2)
+                    {
+                        dmg = dmg + sender.GetSpellDamage(Player, args.SData.Name);
+                    }
+                }
+
+                if (Player.Health - dmg < (Player.CountEnemiesInRange(600) * Player.Level * 10) + (Player.Level * 10))
+                {
+                    E.Cast();
+                }
+            }
         }
 
         private void LogicR()
