@@ -171,35 +171,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
-        private void LogicE()
-        {
-            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget())
-            {
-                var eDmg = E.GetDamage(t) + BonusDmg(t);
-                var wDmg = W.GetDamage(t);
-
-                if (eDmg > t.Health)
-                    E.CastOnUnit(t);
-                else if (wDmg + eDmg > t.Health && Player.Mana > WMANA + EMANA)
-                    E.CastOnUnit(t);
-                if (Program.Combo && Player.Mana > RMANA + EMANA)
-                    E.CastOnUnit(t);
-                else if (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
-                    E.CastOnUnit(t);
-            }
-            else if (Config.Item("minionE", true).GetValue<bool>())
-            {
-                if ((Program.Combo && Player.Mana > RMANA + EMANA) || (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA))
-                {
-                    foreach (var minion in MinionManager.GetMinions(E.Range).Where(minion => minion.IsValidTarget(E.Range) && minion.CountEnemiesInRange(300) > 0 && minion.HasBuff("brandablaze")))
-                    {
-                        E.CastOnUnit(minion);
-                    }
-                }
-            }
-        }
-
         private void LogicQ()
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
@@ -268,6 +239,35 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        private void LogicE()
+        {
+            var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+            if (t.IsValidTarget())
+            {
+                var eDmg = E.GetDamage(t) + BonusDmg(t);
+                var wDmg = W.GetDamage(t);
+
+                if (eDmg > t.Health)
+                    E.CastOnUnit(t);
+                else if (wDmg + eDmg > t.Health && Player.Mana > WMANA + EMANA)
+                    E.CastOnUnit(t);
+                if (Program.Combo && Player.Mana > RMANA + EMANA)
+                    E.CastOnUnit(t);
+                else if (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
+                    E.CastOnUnit(t);
+            }
+            else if (Config.Item("minionE", true).GetValue<bool>())
+            {
+                if ((Program.Combo && Player.Mana > RMANA + EMANA) || (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA))
+                {
+                    foreach (var minion in MinionManager.GetMinions(E.Range).Where(minion => minion.IsValidTarget(E.Range) && minion.CountEnemiesInRange(300) > 0 && minion.HasBuff("brandablaze")))
+                    {
+                        E.CastOnUnit(minion);
+                    }
+                }
+            }
+        }
+
         private void Jungle()
         {
             if (Program.LaneClear && Player.Mana > RMANA + WMANA + RMANA + WMANA)
@@ -282,15 +282,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         return;
                     }
                     
-                    if (E.IsReady() && Config.Item("jungleE", true).GetValue<bool>())
-                    {
-                        E.Cast(mob);
-                        return;
-                    }
-                    
                     if (Q.IsReady() && Config.Item("jungleQ", true).GetValue<bool>())
                     {
                         Q.Cast(mob.ServerPosition);
+                        return;
+                    }
+
+                    if (E.IsReady() && Config.Item("jungleE", true).GetValue<bool>() && mob.HasBuff("brandablaze"))
+                    {
+                        E.Cast(mob);
                         return;
                     }
                 }
