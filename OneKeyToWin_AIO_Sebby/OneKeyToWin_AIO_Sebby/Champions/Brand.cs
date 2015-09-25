@@ -38,6 +38,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("QAblazed", "Q only if ablazed", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harrasQ", "Harass Q", true).SetValue(true));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("gapQ", "Gapcloser E + Q", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("intQ", "Interrupt spells E + Q", true).SetValue(true));
+
+
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harrasW", "Harass W", true).SetValue(true));
 
@@ -60,8 +64,43 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion", true).SetValue(true));
 
+ 
+
+
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+        }
+
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (!Config.Item("gapQ", true).GetValue<bool>() || Player.Mana <  QMANA + EMANA)
+                return;
+
+            var t = gapcloser.Sender;
+
+            if ( t.IsValidTarget(E.Range) && (t.HasBuff("brandablaze") || E.IsReady()))
+            {
+
+                E.CastOnUnit(t);
+                if (Q.IsReady())
+                    Q.Cast(t);
+
+            }
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero t, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (!Config.Item("intQ", true).GetValue<bool>() || Player.Mana < QMANA + EMANA)
+                return;
+
+            if (t.IsValidTarget(E.Range) && (t.HasBuff("brandablaze") || E.IsReady()))
+            { 
+                E.CastOnUnit(t);
+                if (Q.IsReady())
+                    Q.Cast(t);
+            }
         }
 
         private void Game_OnGameUpdate(EventArgs args)
