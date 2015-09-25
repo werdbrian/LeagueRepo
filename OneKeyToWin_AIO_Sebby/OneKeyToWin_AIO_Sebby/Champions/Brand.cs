@@ -43,6 +43,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasE", "Harras E", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("minionE", "use E on ablazed minion", true).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R", true).SetValue(true));
            
@@ -99,7 +100,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             
             if (t2.IsValidTarget() )
             {
-                if (t2.CountAlliesInRange(500) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
+                if (t2.CountAlliesInRange(550) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
                 {
                     var prepos = R.GetPrediction(t2).CastPosition;
                     var dmgR = R.GetDamage(t2);
@@ -170,60 +171,67 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
-        private int CountMinionsInRange(float range , Vector3 pos)
-        {
-            var minions = MinionManager.GetMinions(pos, range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-            int count = 0;
-            foreach (var minion in minions)
-            {
-                count++;
-            }
-            return count;
-        }
         private void LogicE()
         {
-            if (Program.Combo && Player.Mana > RMANA + EMANA)
-            {
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && E.GetDamage(enemy) + Q.GetDamage(enemy) > enemy.Health))
-                {
-                    E.CastOnUnit(enemy);
-                    return;
-                }
-            }
-
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
+                var eDmg = E.GetDamage(t) + BonusDmg(t);
+                var wDmg = W.GetDamage(t);
+
+                if (eDmg > t.Health)
+                    E.CastOnUnit(t);
+                else if (wDmg + eDmg > t.Health && Player.Mana > WMANA + EMANA)
+                    E.CastOnUnit(t);
                 if (Program.Combo && Player.Mana > RMANA + EMANA)
                     E.CastOnUnit(t);
-                if (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
+                else if (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
                     E.CastOnUnit(t);
+            }
+            else if (Config.Item("minionE", true).GetValue<bool>())
+            {
+                if ((Program.Combo && Player.Mana > RMANA + EMANA) || (Program.Farm && Config.Item("harrasE", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA))
+                {
+                    foreach (var minion in MinionManager.GetMinions(E.Range).Where(minion => minion.IsValidTarget(E.Range) && minion.CountEnemiesInRange(300) > 0 && minion.HasBuff("brandablaze")))
+                    {
+                        E.CastOnUnit(minion);
+                    }
+                }
             }
         }
 
         private void LogicQ()
         {
-            if (Program.Combo && Player.Mana > RMANA + QMANA)
-            {
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Q.GetDamage(enemy) + W.GetDamage(enemy) + E.GetDamage(enemy) > enemy.Health))
-                {
-                    Program.CastSpell(Q, enemy);
-                }
-            }
-            var t = Orbwalker.GetTarget() as Obj_AI_Hero;
-            if (!t.IsValidTarget())
-                t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                if (!t.HasBuff("brandablaze") && Config.Item("QAblazed", true).GetValue<bool>())
-                    return;
+                var qDmg = Q.GetDamage(t) + BonusDmg(t);
+                var wDmg = W.GetDamage(t);
 
-                if (Program.Combo && Player.Mana > RMANA + QMANA)
+                if (qDmg > t.Health)
                     Program.CastSpell(Q, t);
-                if (Program.Farm && Config.Item("harrasQ", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
+
+                if (!t.HasBuff("brandablaze") && Config.Item("QAblazed", true).GetValue<bool>())
+                {
+                    var otherEnemy = t;
+
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("brandablaze")))
+                        otherEnemy = enemy;
+
+                    if (otherEnemy == t)
+                        return;
+                }
+
+                if(Program.Combo && Player.Mana > RMANA + QMANA )
                     Program.CastSpell(Q, t);
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
-                    Q.Cast(enemy);
+                else if (Program.Farm && Config.Item("harrasQ", true).GetValue<bool>() && Player.Mana > RMANA + EMANA + WMANA + EMANA)
+                    Program.CastSpell(Q, t);
+
+                if (Player.Mana > RMANA + QMANA)
+                {
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
+                        Q.Cast(enemy);
+                }
             }
         }
 
@@ -232,19 +240,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                var eDmg = E.GetDamage(t);
-                var wDmg = W.GetDamage(t);
+                var qDmg = Q.GetDamage(t);
+                var wDmg = W.GetDamage(t) + BonusDmg(t);
                 if (wDmg > t.Health)
                 {
                     Program.CastSpell(W, t);
                 }
-                else if (wDmg + eDmg > t.Health && Player.Mana > WMANA + QMANA)
+                else if (wDmg + qDmg > t.Health && Player.Mana > QMANA + EMANA)
                     Program.CastSpell(W, t);
                 else if (Program.Combo && Player.Mana > RMANA + WMANA)
                     Program.CastSpell(W, t);
                 else if (Program.Farm && Config.Item("harrasW", true).GetValue<bool>() && Config.Item("harras" + t.ChampionName).GetValue<bool>() && !Player.UnderTurret(true) && (Player.Mana > Player.MaxMana * 0.8 || W.Level > Q.Level) && Player.Mana > RMANA + WMANA + EMANA + QMANA + WMANA && OktwCommon.CanHarras())
                     Program.CastSpell(W, t);
-                else if ((Program.Combo || Program.Farm))
+
+                if (Player.Mana > RMANA + WMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && !OktwCommon.CanMove(enemy)))
                         W.Cast(enemy, true);
@@ -288,9 +297,15 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
-        static bool IsAblazed(Obj_AI_Base unit)
+        private int CountMinionsInRange(float range, Vector3 pos)
         {
-            return unit.HasBuff("brandablaze");
+            var minions = MinionManager.GetMinions(pos, range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+            int count = 0;
+            foreach (var minion in minions)
+            {
+                count++;
+            }
+            return count;
         }
 
         private float BonusDmg(Obj_AI_Hero target)
