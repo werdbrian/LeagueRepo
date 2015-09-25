@@ -93,89 +93,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 LogicR();
         }
 
-        private void LogicR()
-        {
-            var bounceRange = 500;
-            var t2 = TargetSelector.GetTarget(R.Range + bounceRange, TargetSelector.DamageType.Magical);
-
-            
-            if (t2.IsValidTarget() )
-            {
-                if (t2.CountEnemiesInRange(bounceRange) >= Config.Item("rCount", true).GetValue<Slider>().Value && Config.Item("rCount", true).GetValue<Slider>().Value > 0)
-                    R.Cast(t2);
-
-                if (t2.CountAlliesInRange(550) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
-                {
-                    var prepos = R.GetPrediction(t2).CastPosition;
-                    var dmgR = R.GetDamage(t2);
-
-                    if (t2.Health < dmgR * 3)
-                    {
-                        var totalDmg = dmgR;
-                        var minionCount = CountMinionsInRange(bounceRange, prepos);
-
-                        if (t2.IsValidTarget(R.Range))
-                        {
-                            if (prepos.CountEnemiesInRange(bounceRange) > 1)
-                            {
-                                if (minionCount > 2)
-                                    totalDmg = dmgR * 2;
-                                else
-                                    totalDmg = dmgR * 3;
-                            }
-                            else if (minionCount > 0)
-                            {
-                                totalDmg = dmgR * 2;
-                            }
-
-                            if (W.IsReady())
-                            {
-                                totalDmg += W.GetDamage(t2);
-                            }
-
-                            if (E.IsReady())
-                            {
-                                totalDmg += E.GetDamage(t2);
-                            }
-
-                            if (Q.IsReady())
-                            {
-                                totalDmg += Q.GetDamage(t2);
-                            }
-
-                            totalDmg += BonusDmg(t2);
-                            totalDmg += OktwCommon.GetEchoLudenDamage(t2);
-
-                            if (totalDmg > t2.Health && Player.GetAutoAttackDamage(t2) * 2 < t2.Health)
-                            {
-
-                                R.CastOnUnit(t2);
-                            }
-
-                        }
-                        else if (t2.Health < dmgR * 2 + BonusDmg(t2))
-                        {
-                            if (Player.CountEnemiesInRange(R.Range) > 0)
-                            {
-                                foreach (var t in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && enemy.Distance(prepos) < bounceRange))
-                                {
-                                    R.CastOnUnit(t);
-                                }
-                            }
-                            else
-                            {
-                                var minions = MinionManager.GetMinions(Player.Position, R.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
-                                foreach (var minion in minions.Where(minion => minion.IsValidTarget(R.Range) && minion.Distance(prepos) < bounceRange))
-                                {
-                                    R.CastOnUnit(minion);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         private void LogicQ()
         {
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
@@ -268,6 +185,88 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     foreach (var minion in MinionManager.GetMinions(E.Range).Where(minion => minion.IsValidTarget(E.Range) && minion.CountEnemiesInRange(300) > 0 && minion.HasBuff("brandablaze")))
                     {
                         E.CastOnUnit(minion);
+                    }
+                }
+            }
+        }
+
+        private void LogicR()
+        {
+            var bounceRange = 500;
+            var t2 = TargetSelector.GetTarget(R.Range + bounceRange, TargetSelector.DamageType.Magical);
+
+            if (t2.IsValidTarget(R.Range) && t2.CountEnemiesInRange(bounceRange) >= Config.Item("rCount", true).GetValue<Slider>().Value && Config.Item("rCount", true).GetValue<Slider>().Value > 0)
+                R.Cast(t2);
+
+            if (t2.IsValidTarget())
+            {
+                if (t2.CountAlliesInRange(550) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
+                {
+                    var prepos = R.GetPrediction(t2).CastPosition;
+                    var dmgR = R.GetDamage(t2);
+
+                    if (t2.Health < dmgR * 3)
+                    {
+                        var totalDmg = dmgR;
+                        var minionCount = CountMinionsInRange(bounceRange, prepos);
+
+                        if (t2.IsValidTarget(R.Range))
+                        {
+                            if (prepos.CountEnemiesInRange(bounceRange) > 1)
+                            {
+                                if (minionCount > 2)
+                                    totalDmg = dmgR * 2;
+                                else
+                                    totalDmg = dmgR * 3;
+                            }
+                            else if (minionCount > 0)
+                            {
+                                totalDmg = dmgR * 2;
+                            }
+
+                            if (W.IsReady())
+                            {
+                                totalDmg += W.GetDamage(t2);
+                            }
+
+                            if (E.IsReady())
+                            {
+                                totalDmg += E.GetDamage(t2);
+                            }
+
+                            if (Q.IsReady())
+                            {
+                                totalDmg += Q.GetDamage(t2);
+                            }
+
+                            totalDmg += BonusDmg(t2);
+                            totalDmg += OktwCommon.GetEchoLudenDamage(t2);
+
+                            if (totalDmg > t2.Health && Player.GetAutoAttackDamage(t2) * 2 < t2.Health)
+                            {
+
+                                R.CastOnUnit(t2);
+                            }
+
+                        }
+                        else if (t2.Health < dmgR * 2 + BonusDmg(t2))
+                        {
+                            if (Player.CountEnemiesInRange(R.Range) > 0)
+                            {
+                                foreach (var t in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && enemy.Distance(prepos) < bounceRange))
+                                {
+                                    R.CastOnUnit(t);
+                                }
+                            }
+                            else
+                            {
+                                var minions = MinionManager.GetMinions(Player.Position, R.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                                foreach (var minion in minions.Where(minion => minion.IsValidTarget(R.Range) && minion.Distance(prepos) < bounceRange))
+                                {
+                                    R.CastOnUnit(minion);
+                                }
+                            }
+                        }
                     }
                 }
             }
