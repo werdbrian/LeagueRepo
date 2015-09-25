@@ -154,7 +154,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicR()
         {
             Obj_AI_Hero bestEnemy = null;
-            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && !OktwCommon.ValidUlt(enemy)))
+            foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(R.Range) && OktwCommon.ValidUlt(enemy)))
             {
                 if (bestEnemy == null)
                     bestEnemy = enemy;
