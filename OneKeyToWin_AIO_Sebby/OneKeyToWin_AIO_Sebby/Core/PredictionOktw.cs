@@ -384,13 +384,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
             double angleMove = 30 + (input.Radius / 15);
             float backToFront = moveArea * 1.5f;
             float pathMinLen = 500f + backToFront;
-
+            
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
-                pathMinLen = 550f;
+                pathMinLen = backToFront * (1f + input.Delay);
                 fixRange = moveArea * (0.2f + input.Delay);
                 backToFront = moveArea;
-                angleMove += 5;
+                angleMove += 5 + (input.Radius / 10);
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
@@ -402,7 +402,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 result.Hitchance = HitChance.VeryHigh;
             }
-
             else if (input.Type == SkillshotType.SkillshotLine)
             {
                 if (input.Unit.Path.Count() > 1)
@@ -411,13 +410,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
                     if (GetAngle(input.From, input.Unit) < angleMove)
                     {
-                        backToFront = moveArea / 2;
+                        backToFront = moveArea / 2 ;
                         result.Hitchance = HitChance.VeryHigh;
                     }
                     else
-                    {
                         result.Hitchance = HitChance.High;
-                    }
                 }
             }
 
@@ -440,10 +437,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (input.Type == SkillshotType.SkillshotLine && totalDelay < 0.8)
                     result.Hitchance = HitChance.VeryHigh;
-                else if (totalDelay < 0.5)
+                else if (totalDelay < 0.6)
                     result.Hitchance = HitChance.VeryHigh;
-                else if (totalDelay < 0.7)
-                    result.Hitchance = HitChance.High;
                 else
                     result.Hitchance = HitChance.Medium;
             }
@@ -452,7 +447,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
-                else if (distanceFromToUnit < input.Range - fixRange && GetAngle(input.From, input.Unit) < 10)
+                else if (distanceFromToUnit < input.Range - fixRange)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
@@ -559,19 +554,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var result = GetPositionOnPath(input, input.Unit.GetWaypoints(), speed);
 
             return result;
-        }
-
-        internal static List<Vector3> CirclePoint(float CircleLineSegmentN, float radius, Vector3 position)
-        {
-            List<Vector3> points = new List<Vector3>();
-            var bestPoint = ObjectManager.Player.Position;
-            for (var i = 1; i <= CircleLineSegmentN; i++)
-            {
-                var angle = i * 2 * Math.PI / CircleLineSegmentN;
-                var point = new Vector3(position.X + radius * (float)Math.Cos(angle), position.Y + radius * (float)Math.Sin(angle), position.Z);
-                points.Add(point);
-            }
-            return points;
         }
 
         internal static double GetAngle(Vector3 from, Obj_AI_Base target)
