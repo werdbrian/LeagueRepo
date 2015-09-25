@@ -390,11 +390,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (Config.Item("noti", true).GetValue<bool>() && R.IsReady())
             {
-                var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(1000, TargetSelector.DamageType.Physical);
 
                 if (t.IsValidTarget())
                 {
-                    var rDamage = R.GetDamage(t);
+                    var rDamage = R.GetDamage(t) * 2;
                     if (rDamage * 3 > t.Health)
                     {
                         Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "3 x Ult can kill: " + t.ChampionName + " have: " + t.Health + "hp");
