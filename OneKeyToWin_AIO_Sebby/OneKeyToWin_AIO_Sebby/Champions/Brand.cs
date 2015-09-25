@@ -36,19 +36,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("QAblazed", "Q only if ablazed", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harrasQ", "Harras Q", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harrasQ", "Harass Q", true).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harrasW", "Harras W", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("harrasW", "Harass W", true).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("harrasE", "Harras E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("minionE", "use E on ablazed minion", true).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R", true).SetValue(true));
-           
+            Config.SubMenu(Player.ChampionName).SubMenu("R option").AddItem(new MenuItem("rCount", "Auto R if can hit x enemies", true).SetValue(new Slider(3, 0, 5)));
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
-                Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W", true).SetValue(true));
@@ -100,6 +101,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             
             if (t2.IsValidTarget() )
             {
+                if (t2.CountEnemiesInRange(R.Range) >= Config.Item("rCount", true).GetValue<Slider>().Value && Config.Item("rCount", true).GetValue<Slider>().Value > 0)
+                    R.Cast(t2);
+
                 if (t2.CountAlliesInRange(550) == 0 || Player.HealthPercent < 40 || t2.CountEnemiesInRange(bounceRange) > 1)
                 {
                     var prepos = R.GetPrediction(t2).CastPosition;
@@ -140,6 +144,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                             }
 
                             totalDmg += BonusDmg(t2);
+                            totalDmg += OktwCommon.GetEchoLudenDamage(t2);
 
                             if (totalDmg > t2.Health && Player.GetAutoAttackDamage(t2) * 2 < t2.Health)
                             {
@@ -176,7 +181,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                var qDmg = Q.GetDamage(t) + BonusDmg(t);
+                var qDmg = Q.GetDamage(t) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
                 var wDmg = W.GetDamage(t);
 
                 if (qDmg > t.Health)
@@ -212,7 +217,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (t.IsValidTarget())
             {
                 var qDmg = Q.GetDamage(t);
-                var wDmg = W.GetDamage(t) + BonusDmg(t);
+                var wDmg = W.GetDamage(t) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
                 if (wDmg > t.Health)
                 {
                     Program.CastSpell(W, t);
@@ -244,7 +249,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var t = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
             if (t.IsValidTarget())
             {
-                var eDmg = E.GetDamage(t) + BonusDmg(t);
+                var eDmg = E.GetDamage(t) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
                 var wDmg = W.GetDamage(t);
 
                 if (eDmg > t.Health)
