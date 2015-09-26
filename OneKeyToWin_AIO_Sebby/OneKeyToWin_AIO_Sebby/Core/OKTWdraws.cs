@@ -143,6 +143,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 foreach (var obj in OKTWward.HiddenObjList)
                 {
+                    if (obj.type == 0)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.White, 3, 20, true);
+                    }
                     if (obj.type == 1)
                     {
                         Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.Yellow, 3, 20,true);
@@ -170,6 +174,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 foreach (var obj in OKTWward.HiddenObjList)
                 {
+                    if (obj.type == 0)
+                    {
+                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.White, 5, 1);
+                        DrawFontTextMap(Tahoma13, "??? " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.White);
+                    }
                     if (obj.type == 1)
                     {
                         Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.Yellow, 5, 1);

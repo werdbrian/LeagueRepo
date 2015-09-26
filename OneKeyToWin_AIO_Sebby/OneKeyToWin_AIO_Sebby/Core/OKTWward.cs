@@ -77,7 +77,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
             foreach (var obj in HiddenObjList)
             {
                 if (obj.endTime < Game.Time)
+                {
                     HiddenObjList.Remove(obj);
+                    return;
+                }
             }
 
             if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
@@ -180,10 +183,24 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (!sender.IsEnemy)
+
+            if (!sender.IsEnemy || sender.IsAlly)
                 return;
-            
-            AddWard(sender.Name.ToLower(), sender.Position);
+
+            if ((sender is MissileClient))
+            {
+                var missile = (MissileClient)sender;
+
+                if (missile.SpellCaster.IsAlly) return;
+                if (missile.SData.Name == "itemplacementmissile" && !missile.SpellCaster.IsVisible)
+                {
+
+                    AddWard(missile.SData.Name.ToLower(), missile.StartPosition.Extend(missile.EndPosition, 500));
+                }
+            }
+
+            if (!HiddenObjList.Exists(x => x.pos == sender.Position))
+                AddWard(sender.Name.ToLower(), sender.Position);
 
             if (rengar &&  sender.Position.Distance(Player.Position) < 800)
             {
@@ -201,7 +218,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void GameObject_OnDelete(GameObject sender, EventArgs args)
         {
-            if (!sender.IsEnemy || (!(sender is Obj_AI_Base)))
+            if ((!(sender is Obj_AI_Base)))
                 return;
             Program.debug(sender.Name);
             foreach (var obj in HiddenObjList.Where(obj => obj.pos == sender.Position))
@@ -216,15 +233,15 @@ namespace OneKeyToWin_AIO_Sebby.Core
             switch (name)
             {
                 //OnCreateOBJ
-                //case "itemplacementmissile":
-                    //HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
-                   // break;
+                case "itemplacementmissile":
+                    HiddenObjList.Add(new HiddenObj() { type = 0, pos = posCast, endTime = Game.Time + 180 }); 
+                    break;
                 //PINKS
                 case "visionward":
                     HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue });
                     break;
                 case "trinkettotemlvl3B":
-                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue }); 
+                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = Game.Time + 180 }); 
                     break;
                 //SIGH WARD
                 case "itemhhostward":
