@@ -9,6 +9,17 @@ using SharpDX;
 
 namespace OneKeyToWin_AIO_Sebby.Core
 {
+
+    class HiddenObj
+    {
+        public int type; 
+        //1 - normal
+        //2 - pink
+        //3 - teemo trap
+        public float endTime { get; set; }
+        public Vector3 pos { get; set; }
+    }
+
     class OKTWward
     {
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
@@ -16,6 +27,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private bool rengar = false;
         Obj_AI_Hero Vayne = null;
         private static Spell Q, W, E, R;
+
+        public static List<HiddenObj> HiddenObjList = new List<HiddenObj>();
 
         private Items.Item
             VisionWard = new Items.Item(2043, 550f),
@@ -49,19 +62,26 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         Vayne = hero;
                 }
             }
-
+            
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
-            GameObject.OnCreate +=GameObject_OnCreate; 
+            GameObject.OnCreate +=GameObject_OnCreate;
+            GameObject.OnDelete += GameObject_OnDelete;
+
         }
 
         private void Game_OnUpdate(EventArgs args)
         {
             if (!Program.LagFree(0) || Player.IsRecalling() || Player.IsDead)
                 return;
+            foreach (var obj in HiddenObjList)
+            {
+                if (obj.endTime < Game.Time)
+                    HiddenObjList.Remove(obj);
+            }
 
             if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
-                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+            ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
 
             if(rengar && Player.HasBuff("rengarralertsound"))
                 CastVisionWards(Player.ServerPosition);
@@ -160,7 +180,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (rengar && sender.IsEnemy && sender.Position.Distance(Player.Position) < 800)
+            if (!sender.IsEnemy)
+                return;
+            var missile = (MissileClient)sender;
+            
+            AddWard(sender.Name.ToLower(), sender.Position);
+
+            if (rengar &&  sender.Position.Distance(Player.Position) < 800)
             {
                 switch (sender.Name)
                 {
@@ -174,36 +200,102 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
         }
 
+        private void GameObject_OnDelete(GameObject sender, EventArgs args)
+        {
+            if (!sender.IsEnemy || (!(sender is Obj_AI_Base)))
+                return;
+            Program.debug(sender.Name);
+            foreach (var obj in HiddenObjList.Where(obj => obj.pos == sender.Position))
+            {
+                HiddenObjList.Remove(obj);
+                return;
+            }
+        }
+
+        private void AddWard(string name , Vector3 posCast)
+        {
+            switch (name)
+            {
+                //OnCreateOBJ
+                //case "itemplacementmissile":
+                    //HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
+                   // break;
+                //PINKS
+                case "visionward":
+                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue });
+                    break;
+                case "trinkettotemlvl3B":
+                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue }); 
+                    break;
+                //SIGH WARD
+                case "itemhhostward":
+                    HiddenObjList.Add(new HiddenObj() {type = 1 , pos = posCast, endTime = Game.Time + 180}); 
+                    break;
+                case "wrigglelantern":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
+                    break;
+                case "sightward":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
+                    break;
+                case "itemferalflare":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                //TRINKET
+                case "trinkettotemlvl1":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 60 });
+                    break;
+                case "trinkettotemlvl2":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 120 });
+                    break;
+                case "trinkettotemlvl3":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                //others
+                case "teemorcast":
+                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
+                    break;
+                case "noxious trap":
+                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
+                    break;
+            }
+        }
+
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsEnemy && !sender.IsMinion && sender is Obj_AI_Hero && sender.Distance(Player.Position) < 800)
+            if (sender.IsEnemy && !sender.IsMinion && sender is Obj_AI_Hero )
             {
-                switch (args.SData.Name)
+                AddWard(args.SData.Name.ToLower(), args.End);
+                Program.debug("OPS " + args.SData.Name);
+
+                if (sender.Distance(Player.Position) < 800)
                 {
-                    case "akalismokebomb":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "deceive":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "khazixr":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "khazixrlong":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "talonshadowassault":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "monkeykingdecoy":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "RengarR":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
-                    case "TwitchHideInShadows":
-                        CastVisionWards(sender.ServerPosition);
-                        break;
+                    switch (args.SData.Name)
+                    {
+                        case "akalismokebomb":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "deceive":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "khazixr":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "khazixrlong":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "talonshadowassault":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "monkeykingdecoy":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "RengarR":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                        case "TwitchHideInShadows":
+                            CastVisionWards(sender.ServerPosition);
+                            break;
+                    }
                 }
             }
         }

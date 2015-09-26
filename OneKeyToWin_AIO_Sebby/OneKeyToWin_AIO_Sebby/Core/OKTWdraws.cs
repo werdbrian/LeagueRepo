@@ -38,6 +38,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("HpBar", "Dmg indicators BAR OKTW© style").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("ShowClicks", "Show enemy clicks").SetValue(true));
             Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("SS", "SS notification").SetValue(true));
+            Config.SubMenu("Utility, Draws OKTW©").AddItem(new MenuItem("showWards", "Show hidden objects , wards").SetValue(true));
+            
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("spellFarm", "OKTW SPELLS FARM (°)", true).SetValue(true));
             Config.Item("spellFarm", true).Permashow(true);
@@ -56,9 +58,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
             W = new Spell(SpellSlot.W);
             R = new Spell(SpellSlot.R);
 
+            
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += OnDraw;
+            Drawing.OnEndScene += Drawing_OnEndScene;
             Game.OnWndProc += Game_OnWndProc;
+            
         }
 
         private void Game_OnWndProc(WndEventArgs args)
@@ -132,11 +137,59 @@ namespace OneKeyToWin_AIO_Sebby.Core
             Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
         }
 
+        private void Drawing_OnEndScene(EventArgs args)
+        {
+            if (Config.Item("showWards").GetValue<bool>())
+            {
+                foreach (var obj in OKTWward.HiddenObjList)
+                {
+                    if (obj.type == 1)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.Yellow, 3, 20,true);
+                    }
+
+                    if (obj.type == 2)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.HotPink, 3, 20,true);
+                    }
+
+                    if (obj.type == 3)
+                    {
+                        Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.Orange, 3, 20,true);
+
+                    }
+                }
+            }   
+        }
+
         private void OnDraw(EventArgs args)
         {
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
-            
+            if (Config.Item("showWards").GetValue<bool>())
+            {
+                foreach (var obj in OKTWward.HiddenObjList)
+                {
+                    if (obj.type == 1)
+                    {
+                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.Yellow, 5, 1);
+                        DrawFontTextMap(Tahoma13, "Ward: " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Yellow);
+                    }
+
+                    if (obj.type == 2)
+                    {
+                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.HotPink, 5, 1);
+                        DrawFontTextMap(Tahoma13, "Vision Ward", obj.pos, SharpDX.Color.HotPink);
+                    }
+                    if (obj.type == 3)
+                    {
+                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.Orange, 5, 1);
+                        DrawFontTextMap(Tahoma13, "Teemo " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Orange);
+                    }
+
+                }
+            }
+
             if (Config.Item("spellFarm", true) != null && spellFarmTimer + 1 > Game.Time)
             {
                 if (Config.Item("spellFarm", true).GetValue<bool>())
