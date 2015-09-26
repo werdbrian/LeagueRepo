@@ -182,7 +182,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!sender.IsEnemy)
                 return;
-            var missile = (MissileClient)sender;
             
             AddWard(sender.Name.ToLower(), sender.Position);
 
