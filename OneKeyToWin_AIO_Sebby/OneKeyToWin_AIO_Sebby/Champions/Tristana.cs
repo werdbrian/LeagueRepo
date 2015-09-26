@@ -34,6 +34,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("harasQ", "Haras Q", true).SetValue(true));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("Eafter", "E after attack", true).SetValue(false));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("focusE", "Focus target with E", true).SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
                 Config.SubMenu(Player.ChampionName).SubMenu("E Config").SubMenu("Harras E").AddItem(new MenuItem("harras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -64,15 +65,33 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void afterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (Orbwalker.GetTarget() == null)
+            Obj_AI_Hero t;
+            if (target is Obj_AI_Hero)
+                t = (Obj_AI_Hero)target;
+            else
                 return;
-            var ORBtarget = Orbwalker.GetTarget();
-            if (ORBtarget.IsValid && ORBtarget is Obj_AI_Hero)
+
+            if (t.IsValid)
             {
                 if (Program.Combo)
                     Q.Cast();
                 else if (Program.Farm && Config.Item("harasQ", true).GetValue<bool>())
                     Q.Cast();
+
+                if (E.IsReady() && Config.Item("Eafter", true).GetValue<bool>())
+                {
+                    if (E.GetDamage(t) > t.Health)
+                        E.Cast(t);
+                    else if (E.GetDamage(t) + R.GetDamage(t) > t.Health && Player.Mana > RMANA + EMANA)
+                        E.Cast(t);
+                    else if (Program.Combo && Player.Mana > RMANA + EMANA + WMANA && Config.Item("useEon" + t.ChampionName).GetValue<bool>())
+                        E.Cast(t);
+                    else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + RMANA)
+                    {
+                        foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(E.Range) && Config.Item("harras" + enemy.ChampionName).GetValue<bool>()))
+                            E.Cast(t);
+                    }
+                }
             }
         }
 
@@ -109,7 +128,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         }
         private void LogicW()
         {
-            if (Config.Item("Wks", true).GetValue<bool>())
+            if (Config.Item("Wks", true).GetValue<bool>() && Player.Mana > RMANA + WMANA)
             {
                 foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range) && OktwCommon.ValidUlt(enemy) && enemy.CountEnemiesInRange(800) < 3 && enemy.Health > enemy.Level * 2))
                 {
@@ -120,7 +139,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Program.CastSpell(W, enemy);
                 }
             }
-
 
             if (Program.Combo && Config.Item("nktdE", true).GetValue<bool>())
             {
@@ -140,9 +158,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (E.GetDamage(t) > t.Health)
                     E.Cast(t);
-                else if (E.GetDamage(t) + R.GetDamage(t) > t.Health && Player.Mana > RMANA + EMANA)
+                if (E.GetDamage(t) + R.GetDamage(t) > t.Health && Player.Mana > RMANA + EMANA)
                     E.Cast(t);
-                else if (Program.Combo && Player.Mana > RMANA + EMANA && Config.Item("useEon" + t.ChampionName).GetValue<bool>())
+
+                if (Config.Item("Eafter", true).GetValue<bool>())
+                    return;
+
+                if (Program.Combo && Player.Mana > RMANA + EMANA + WMANA && Config.Item("useEon" + t.ChampionName).GetValue<bool>())
                     E.Cast(t);
                 else if (Program.Farm && Player.Mana > RMANA + EMANA + WMANA + RMANA)
                 {
@@ -151,6 +173,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 }
             } 
         }
+
         private void LogicR()
         {
             Obj_AI_Hero bestEnemy = null;
@@ -161,13 +184,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 else if (Player.Distance(enemy.Position) < Player.Distance(bestEnemy.Position))
                     bestEnemy = enemy;
 
-                if (R.GetDamage(enemy) + GetEDmg(enemy) > enemy.Health + enemy.Level && Config.Item("autoR", true).GetValue<bool>())
+                if (R.GetDamage(enemy) + GetEDmg(enemy) > enemy.Health + enemy.HPRegenRate && Config.Item("autoR", true).GetValue<bool>())
                 {
                     R.Cast(enemy);
                     Program.debug("R ks");
 
                 }
-                if (Config.Item("turrentR", true).GetValue<bool>())
+                if (Config.Item("turrentR", true).GetValue<bool>() && !Player.UnderTurret(false))
                 {
                     float pushDistance = 400 + (R.Level * 200);
                     var prepos = Prediction.GetPrediction(enemy, 0.25f);
@@ -178,7 +201,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         Program.debug("R turrent");
                     }
                 }
-                if (Player.Health < Player.MaxHealth * 0.4 && enemy.IsValidTarget(270) && enemy.IsMelee && Config.Item("GapCloser" + enemy.ChampionName).GetValue<bool>())
+                if (Player.Health < Player.MaxHealth * 0.3 && enemy.IsValidTarget(270) && enemy.IsMelee && Config.Item("GapCloser" + enemy.ChampionName).GetValue<bool>())
                 {
                     R.Cast(enemy);
                     Program.debug("R Meele");
@@ -234,7 +257,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 return 0;
             var dmg = E.GetDamage(target);
             var buffCount = OktwCommon.GetBuffCount(target, "tristanaecharge");
-            dmg = dmg + (dmg * 0.3f * buffCount);
+            dmg += (dmg * 0.3f * (buffCount - 1));
             return dmg - (target.HPRegenRate * 4);
         }
 
