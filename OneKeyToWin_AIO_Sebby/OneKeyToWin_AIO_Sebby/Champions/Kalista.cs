@@ -425,7 +425,7 @@ namespace OneKeyToWin_AIO_Sebby
             EMANA = E.Instance.ManaCost;
 
             if (!R.IsReady())
-                RMANA = EMANA - Player.PARRegenRate * E.Instance.Cooldown;
+                RMANA = QMANA - Player.PARRegenRate * Q.Instance.Cooldown;
             else
                 RMANA = R.Instance.ManaCost;
         }
