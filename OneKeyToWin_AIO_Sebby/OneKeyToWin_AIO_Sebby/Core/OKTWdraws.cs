@@ -160,7 +160,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (obj.type == 3)
                     {
                         Utility.DrawCircle(obj.pos, 100, System.Drawing.Color.Orange, 3, 20,true);
-
                     }
                 }
             }   
@@ -172,28 +171,29 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 return;
             if (Config.Item("showWards").GetValue<bool>())
             {
+                var circleSize = 60;
                 foreach (var obj in OKTWward.HiddenObjList)
                 {
                     if (obj.type == 0)
                     {
-                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.White, 5, 1);
-                        DrawFontTextMap(Tahoma13, "??? " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.White);
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.White, 5, 1);
+                        DrawFontTextMap(Tahoma13, "" + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.White);
                     }
                     if (obj.type == 1)
                     {
-                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.Yellow, 5, 1);
-                        DrawFontTextMap(Tahoma13, "Ward: " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Yellow);
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.Yellow, 5, 1);
+                        DrawFontTextMap(Tahoma13, "" + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Yellow);
                     }
 
                     if (obj.type == 2)
                     {
-                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.HotPink, 5, 1);
-                        DrawFontTextMap(Tahoma13, "Vision Ward", obj.pos, SharpDX.Color.HotPink);
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.HotPink, 5, 1);
+                        DrawFontTextMap(Tahoma13, "VW", obj.pos, SharpDX.Color.HotPink);
                     }
                     if (obj.type == 3)
                     {
-                        Utility.DrawCircle(obj.pos, 50, System.Drawing.Color.Orange, 5, 1);
-                        DrawFontTextMap(Tahoma13, "Teemo " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Orange);
+                        Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.Orange, 5, 1);
+                        DrawFontTextMap(Tahoma13, "T " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Orange);
                     }
 
                 }

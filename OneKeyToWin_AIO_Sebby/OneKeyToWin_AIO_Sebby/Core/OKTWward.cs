@@ -12,7 +12,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
     class HiddenObj
     {
-        public int type; 
+        public int type;
+        //0 - missile
         //1 - normal
         //2 - pink
         //3 - teemo trap
@@ -186,18 +187,19 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (!sender.IsEnemy || sender.IsAlly)
                 return;
-
+            if (sender.Position.Distance(Player.Position) < 1500)
+                Program.debug(sender.Name);
             if ((sender is MissileClient))
             {
                 var missile = (MissileClient)sender;
 
-                if (missile.SpellCaster.IsAlly) return;
                 if (missile.SData.Name == "itemplacementmissile" && !missile.SpellCaster.IsVisible)
                 {
-
-                    AddWard(missile.SData.Name.ToLower(), missile.StartPosition.Extend(missile.EndPosition, 500));
+                    if (!HiddenObjList.Exists(x => missile.StartPosition.Extend(missile.EndPosition, 500).Distance(x.pos) < 500))
+                        AddWard(missile.SData.Name.ToLower(), missile.StartPosition.Extend(missile.EndPosition, 500));
                 }
             }
+
 
             if (!HiddenObjList.Exists(x => x.pos == sender.Position))
                 AddWard(sender.Name.ToLower(), sender.Position);
@@ -234,7 +236,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 //OnCreateOBJ
                 case "itemplacementmissile":
-                    HiddenObjList.Add(new HiddenObj() { type = 0, pos = posCast, endTime = Game.Time + 180 }); 
+                    HiddenObjList.Add(new HiddenObj() { type = 0, pos = posCast, endTime = Game.Time + 180}); 
                     break;
                 //PINKS
                 case "visionward":
@@ -281,7 +283,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (sender.IsEnemy && !sender.IsMinion && sender is Obj_AI_Hero )
             {
                 AddWard(args.SData.Name.ToLower(), args.End);
-                Program.debug("OPS " + args.SData.Name);
+                //Program.debug("OPS " + args.SData.Name);
 
                 if (sender.Distance(Player.Position) < 800)
                 {
