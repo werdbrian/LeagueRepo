@@ -96,7 +96,6 @@
     <Compile Include="Core\OKTWward.cs" />
     <Compile Include="Core\OKTWtracker.cs" />
     <Compile Include="Core\PredictionOktw.cs" />
-    <Compile Include="Core\Summoners.cs" />
     <Compile Include="Champions\MissFortune.cs" />
     <Compile Include="Champions\Orianna.cs" />
     <Compile Include="Champions\Lucian.cs" />
