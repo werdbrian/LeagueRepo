@@ -75,6 +75,26 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if (!Program.LagFree(0) || Player.IsRecalling() || Player.IsDead)
                 return;
+
+            foreach (var sender in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.IsEnemy && Obj.MaxHealth<6 &&(Obj.Name == "SightWard" || Obj.Name == "VisionWard") ))
+            {
+                if (!HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+                {
+                    foreach (var obj in HiddenObjList)
+                    {
+                        if (obj.pos.Distance(sender.Position) < 400)
+                        {
+                            if (obj.type == 0)
+                            {
+                                HiddenObjList.Remove(obj);
+                                return;
+                            }
+                        }
+                    }
+                    AddWard(sender.Name.ToLower(), sender.Position);
+                }
+            }
+
             foreach (var obj in HiddenObjList)
             {
                 if (obj.endTime < Game.Time)
@@ -240,14 +260,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     HiddenObjList.Remove(obj);
                     return;
                 }
-                else if (obj.pos.Distance(sender.Position) < 400 && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+                else if (obj.pos.Distance(sender.Position) < 400)
                 {
-                    if (obj.type == 2 && sender.Name.ToLower() == "visionward")
+                    if ( obj.type == 2 && sender.Name.ToLower() == "visionward")
                     {
                         HiddenObjList.Remove(obj);
                         return;
                     }
-                    if (obj.type == 0)
+                    else if ((obj.type == 0 || obj.type ==1) && sender.Name.ToLower() == "sightward")
                     {
                         HiddenObjList.Remove(obj);
                         return;
@@ -256,54 +276,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
         }
 
-        private void AddWard(string name , Vector3 posCast)
-        {
-            switch (name)
-            {
-                //OnCreateOBJ
-                case "itemplacementmissile":
-                    HiddenObjList.Add(new HiddenObj() { type = 0, pos = posCast, endTime = Game.Time + 180}); 
-                    break;
-                //PINKS
-                case "visionward":
-                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue });
-                    break;
-                case "trinkettotemlvl3B":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
-                    break;
-                //SIGH WARD
-                case "itemhhostward":
-                    HiddenObjList.Add(new HiddenObj() {type = 1 , pos = posCast, endTime = Game.Time + 180}); 
-                    break;
-                case "wrigglelantern":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
-                    break;
-                case "sightward":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
-                    break;
-                case "itemferalflare":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
-                    break;
-                //TRINKET
-                case "trinkettotemlvl1":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 60 });
-                    break;
-                case "trinkettotemlvl2":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 120 });
-                    break;
-                case "trinkettotemlvl3":
-                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
-                    break;
-                //others
-                case "teemorcast":
-                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
-                    break;
-                case "noxious trap":
-                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
-                    break;
-            }
-        }
-
+       
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsEnemy && !sender.IsMinion && sender is Obj_AI_Hero )
@@ -341,6 +314,54 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             break;
                     }
                 }
+            }
+        }
+
+        private void AddWard(string name, Vector3 posCast)
+        {
+            switch (name)
+            {
+                //OnCreateOBJ
+                case "itemplacementmissile":
+                    HiddenObjList.Add(new HiddenObj() { type = 0, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                //PINKS
+                case "visionward":
+                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue });
+                    break;
+                case "trinkettotemlvl3B":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                //SIGH WARD
+                case "itemhhostward":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                case "wrigglelantern":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                case "sightward":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                case "itemferalflare":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                //TRINKET
+                case "trinkettotemlvl1":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 60 });
+                    break;
+                case "trinkettotemlvl2":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 120 });
+                    break;
+                case "trinkettotemlvl3":
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
+                    break;
+                //others
+                case "teemorcast":
+                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
+                    break;
+                case "noxious trap":
+                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
+                    break;
             }
         }
 
