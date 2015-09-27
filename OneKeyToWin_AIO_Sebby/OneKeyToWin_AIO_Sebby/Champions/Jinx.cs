@@ -202,9 +202,9 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void LogicW()
         {
-            if (Game.Time - QCastTime > 0.6 && Player.CountEnemiesInRange(400) == 0)
+            if (Game.Time - QCastTime > 0.6 && Player.CountEnemiesInRange(300) == 0)
             {
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && GetRealDistance(enemy) > bonusRange()))
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && !Orbwalking.InAutoAttackRange(enemy) && GetRealDistance(enemy) > bonusRange()))
                 {
                     var comboDmg = W.GetDamage(enemy);
                     if (R.IsReady() && Player.Mana > RMANA + WMANA)
@@ -220,7 +220,7 @@ namespace OneKeyToWin_AIO_Sebby
             }
 
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Physical);
-            if (t.IsValidTarget()  && Player.CountEnemiesInRange(bonusRange()) == 0)
+            if (t.IsValidTarget() && !Orbwalking.InAutoAttackRange(t) && t.Distance(Player.Position) > bonusRange() && Player.CountEnemiesInRange(GetRealPowPowRange(t)) == 0)
             {
                 if (Program.Combo && Player.Mana > RMANA + WMANA + 10 && GetRealDistance(t) > bonusRange() - 50)
                 {
