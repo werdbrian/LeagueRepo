@@ -187,8 +187,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (!sender.IsEnemy || sender.IsAlly)
                 return;
-            if (sender.Position.Distance(Player.Position) < 1500)
-                Program.debug(sender.Name);
+
             if ((sender is MissileClient))
             {
                 var missile = (MissileClient)sender;
@@ -223,10 +222,27 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if ((!(sender is Obj_AI_Base)))
                 return;
             Program.debug(sender.Name);
-            foreach (var obj in HiddenObjList.Where(obj => obj.pos == sender.Position))
+            foreach (var obj in HiddenObjList)
             {
-                HiddenObjList.Remove(obj);
-                return;
+                if(obj.pos == sender.Position)
+                {  
+                    HiddenObjList.Remove(obj);
+                    return;
+                }
+                if (obj.pos.Distance(sender.Position) < 400 && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+                {
+
+                    if (obj.type == 2 && sender.Name.ToLower() == "visionward")
+                    {
+                        HiddenObjList.Remove(obj);
+                        return;
+                    }
+                    if (obj.type == 0)
+                    {
+                        HiddenObjList.Remove(obj);
+                        return;
+                    }
+                }
             }
         }
 
@@ -243,7 +259,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = float.MaxValue });
                     break;
                 case "trinkettotemlvl3B":
-                    HiddenObjList.Add(new HiddenObj() { type = 2, pos = posCast, endTime = Game.Time + 180 }); 
+                    HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 }); 
                     break;
                 //SIGH WARD
                 case "itemhhostward":
