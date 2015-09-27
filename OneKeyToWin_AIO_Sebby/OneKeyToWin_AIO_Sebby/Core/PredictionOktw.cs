@@ -404,6 +404,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     {
                         backToFront = moveArea;
                         result.Hitchance = HitChance.VeryHigh;
+                        if (distanceFromToWaypoint > input.Unit.Distance(input.From))
+                            backToFront = moveArea/2;
                     }
                     else
                         result.Hitchance = HitChance.High;
