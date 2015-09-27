@@ -279,10 +279,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
        
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+
             if (sender.IsEnemy && !sender.IsMinion && sender is Obj_AI_Hero )
             {
                 AddWard(args.SData.Name.ToLower(), args.End);
-                //Program.debug("OPS " + args.SData.Name);
 
                 if (sender.Distance(Player.Position) < 800)
                 {
@@ -333,7 +333,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
                     break;
                 //SIGH WARD
-                case "itemhhostward":
+                case "itemghostward":
                     HiddenObjList.Add(new HiddenObj() { type = 1, pos = posCast, endTime = Game.Time + 180 });
                     break;
                 case "wrigglelantern":
