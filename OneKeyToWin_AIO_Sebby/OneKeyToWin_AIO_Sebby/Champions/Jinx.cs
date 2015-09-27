@@ -205,9 +205,9 @@ namespace OneKeyToWin_AIO_Sebby
         private void LogicW()
         {
             
-            if (Game.Time - QCastTime > 0.6 && Player.CountEnemiesInRange(300) == 0)
+            if (Game.Time - QCastTime > 0.4 && Player.CountEnemiesInRange(300) == 0)
             {
-                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && !Orbwalking.InAutoAttackRange(enemy) && enemy.Distance(Player.Position) > bonusRange() + 50))
+                foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(W.Range + 200) && !Orbwalking.InAutoAttackRange(enemy) && enemy.Distance(Player.Position) > bonusRange()))
                 {
                     var comboDmg = W.GetDamage(enemy);
                     if (R.IsReady() && Player.Mana > RMANA + WMANA)
