@@ -388,6 +388,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
                 pathMinLen = backToFront;
+                angleMove = 30 + (input.Radius / 10);
                 result.Hitchance = HitChance.VeryHigh;
             }
             else
@@ -414,7 +415,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                         backToFront = moveArea;
                         result.Hitchance = HitChance.VeryHigh;
                         if (distanceFromToWaypoint > input.Unit.Distance(input.From))
-                            backToFront = moveArea/2;
+                        {
+                            result.Hitchance = HitChance.VeryHigh;
+                            return result;
+                        }
+                            
                     }
                     else
                         result.Hitchance = HitChance.High;
@@ -438,6 +443,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
+                
                 if (input.Type == SkillshotType.SkillshotLine && totalDelay < 0.8)
                     result.Hitchance = HitChance.VeryHigh;
                 else if (totalDelay < 0.6)
