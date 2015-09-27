@@ -192,15 +192,28 @@ namespace OneKeyToWin_AIO_Sebby.Core
             {
                 var missile = (MissileClient)sender;
 
-                if (missile.SData.Name == "itemplacementmissile" && !missile.SpellCaster.IsVisible)
+                if ( !missile.SpellCaster.IsVisible)
                 {
-                    if (!HiddenObjList.Exists(x => missile.StartPosition.Extend(missile.EndPosition, 500).Distance(x.pos) < 500))
+                    if (missile.SData.Name == "itemplacementmissile" && !HiddenObjList.Exists(x => missile.StartPosition.Extend(missile.EndPosition, 500).Distance(x.pos) < 500))
                         AddWard(missile.SData.Name.ToLower(), missile.StartPosition.Extend(missile.EndPosition, 500));
                 }
             }
 
-            if (!HiddenObjList.Exists(x => x.pos == sender.Position) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
-                AddWard("sightward", sender.Position);
+            if (!HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+            {
+                foreach (var obj in HiddenObjList)
+                {
+                    if (obj.pos.Distance(sender.Position) < 400)
+                    {
+                        if (obj.type == 0)
+                        {
+                            HiddenObjList.Remove(obj);
+                            return;
+                        }
+                    }
+                }
+                AddWard(sender.Name.ToLower(), sender.Position);
+            }
 
             if (rengar &&  sender.Position.Distance(Player.Position) < 800)
             {
