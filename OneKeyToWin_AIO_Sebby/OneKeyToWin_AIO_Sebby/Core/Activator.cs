@@ -156,7 +156,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (!Solari.IsReady() && !FaceOfTheMountain.IsReady() && !Seraph.IsReady() && !Zhonya.IsReady() && !CanUse(barrier) && !CanUse(heal) && !CanUse(exhaust))
                 return;
             
-            if (!sender.IsValidTarget(1500))
+            if (sender.Distance(Player.Position) > 1600)
                 return;
 
             foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
@@ -178,13 +178,13 @@ namespace OneKeyToWin_AIO_Sebby
                 if(dmg == 0)
                     continue;
 
-                if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() && dmg > 0)
+                if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() )
                 {
                     if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 40)
                         TryCast(() => Player.Spellbook.CastSpell(exhaust, sender));
                 }
 
-                if (CanUse(heal) && Config.Item("Heal").GetValue<bool>() && dmg > 0)
+                if (CanUse(heal) && Config.Item("Heal").GetValue<bool>())
                 {
                     if (!Config.Item("AllyHeal").GetValue<bool>() && !ally.IsMe)
                         return;
@@ -262,7 +262,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void TryCast(Utility.DelayAction.Callback cast)
         {
-            Utility.DelayAction.Add(1, cast);
+            Utility.DelayAction.Add(0, cast);
             Utility.DelayAction.Add(100, cast);
             Utility.DelayAction.Add(200, cast);
             Utility.DelayAction.Add(300, cast);
@@ -301,7 +301,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             Cleansers();
             
-
             if (!Program.LagFree(0))
                 return;
 
@@ -442,7 +441,6 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Randuin.IsReady() && Player.CountEnemiesInRange(Randuin.Range) > 0)
                     Randuin.Cast();
             } 
-            
         }
 
         private void Offensive()
@@ -472,7 +470,6 @@ namespace OneKeyToWin_AIO_Sebby
                         Hextech.Cast(t);
                 }
             }
-
 
             if (Program.Combo && FrostQueen.IsReady() && Config.Item("FrostQueen").GetValue<bool>())
             {
@@ -575,6 +572,7 @@ namespace OneKeyToWin_AIO_Sebby
                 }
             }
         }
+
         private bool CanUse(SpellSlot sum)
         {
             if (sum != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(sum) == SpellState.Ready)
