@@ -199,9 +199,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-
-            if (!HiddenObjList.Exists(x => x.pos == sender.Position))
-                AddWard(sender.Name.ToLower(), sender.Position);
+            if (!HiddenObjList.Exists(x => x.pos == sender.Position) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+                AddWard("sightward", sender.Position);
 
             if (rengar &&  sender.Position.Distance(Player.Position) < 800)
             {
@@ -221,7 +220,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         {
             if ((!(sender is Obj_AI_Base)))
                 return;
-            Program.debug(sender.Name);
             foreach (var obj in HiddenObjList)
             {
                 if(obj.pos == sender.Position)
@@ -229,9 +227,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     HiddenObjList.Remove(obj);
                     return;
                 }
-                if (obj.pos.Distance(sender.Position) < 400 && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+                else if (obj.pos.Distance(sender.Position) < 400 && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
                 {
-
                     if (obj.type == 2 && sender.Name.ToLower() == "visionward")
                     {
                         HiddenObjList.Remove(obj);
