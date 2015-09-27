@@ -72,10 +72,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-
             if (Config.Item("Edead", true).GetValue<bool>() && E.IsReady() && sender.IsEnemy && sender.IsValidTarget(1500))
             {
-
                 double dmg = 0;
 
                 if (args.Target != null && args.Target.IsMe)
@@ -91,7 +89,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     }
                 }
 
-                if (Player.Health - dmg < (Player.CountEnemiesInRange(600) * Player.Level * 10) + (Player.Level * 10))
+                if (Player.Health - dmg < (Player.CountEnemiesInRange(600) * Player.Level * 10))
                 {
                     E.Cast();
                 }
@@ -144,6 +142,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 if (Player.Distance( waypoints.Last<Vector2>().To3D()) < 600)
                     count++;
             }
+
             if (count >= Config.Item("countQ", true).GetValue<Slider>().Value)
                 Q.Cast();
         }
@@ -196,6 +195,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     E.Cast();
             }
         }
+
         private void SetMana()
         {
             if ((Config.Item("manaDisable", true).GetValue<bool>() && Program.Combo) || Player.HealthPercent < 20)
@@ -228,11 +228,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
         }
+
         public static void drawText2(string msg, Vector3 Hero, System.Drawing.Color color)
         {
             var wts = Drawing.WorldToScreen(Hero);
             Drawing.DrawText(wts[0] - (msg.Length) * 5, wts[1] - 200, color, msg);
         }
+
         private void Drawing_OnDraw(EventArgs args)
         {
             if (Config.Item("notif", true).GetValue<bool>())
@@ -245,6 +247,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     drawText2("R ACTIVE:  " + String.Format("{0:0.0}", OktwCommon.GetPassiveTime(Player, "TwitchFullAutomatic")), Player.Position, System.Drawing.Color.OrangeRed);
 
             }
+
             foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(2000) && enemy.HasBuff("twitchdeadlyvenom")))
             {
                 if (passiveDmg(enemy) > enemy.Health)
