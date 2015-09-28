@@ -371,7 +371,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             var distanceFromToUnit = input.From.Distance(input.Unit.ServerPosition);
             var distanceFromToWaypoint = lastWaypiont.Distance(input.From);
 
-            float speedDelay = distanceFromToUnit / input.Speed;
+            float speedDelay = distanceFromToUnit / input.Speed; 
 
             if (Math.Abs(input.Speed - float.MaxValue) < float.Epsilon)
                 speedDelay = 0;
@@ -419,7 +419,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             result.Hitchance = HitChance.VeryHigh;
                             return result;
                         }
-                            
                     }
                     else
                         result.Hitchance = HitChance.High;
@@ -435,7 +434,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 else
                     result.Hitchance = HitChance.VeryHigh;
             }
-            else if (distanceFromToWaypoint <= input.Unit.Distance(input.From))
+            else if (distanceFromToWaypoint <= distanceFromToUnit)
             {
                 if (distanceFromToUnit > input.Range - fixRange)
                     result.Hitchance = HitChance.Medium;
@@ -449,14 +448,16 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 else if (totalDelay < 0.6)
                     result.Hitchance = HitChance.VeryHigh;
                 else
-                    result.Hitchance = HitChance.Medium;
+                    result.Hitchance = HitChance.High;
             }
 
             if (input.Type == SkillshotType.SkillshotCircle)
             {
-                if (totalDelay < 1.1 && UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
+                if (totalDelay < 1.1 && UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
-                else if (distanceFromToUnit < input.Range - fixRange)
+                else if (distanceFromToWaypoint <= distanceFromToUnit && distanceFromToUnit > input.Range - fixRange)
+                    result.Hitchance = HitChance.High;
+                else if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.07d)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
