@@ -64,7 +64,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (W.IsReady() && Range && args.Target is Obj_AI_Hero)
             {
-                W.Cast();
+                if(Program.Combo)
+                    W.Cast();
+                else if (args.Target.Position.Distance(Player.Position)< 500)
+                    W.Cast();
             }
         }
 
@@ -186,10 +189,24 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
+            if (Range)
+            {
+                if (Program.Combo && Range && !Q.IsReady() && !W.IsReady() && !E.IsReady())
+                    R.Cast();
+            }
+            else if (Program.Combo )
+            {
 
-            if (Program.Combo && !Q.IsReady() && !W.IsReady() && !E.IsReady())
-                R.Cast();
-
+                var t = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
+                if (!Q.IsReady() && !E.IsReady())
+                {
+                    R.Cast();
+                }   
+                else  if (!t.IsValidTarget())
+                {
+                    R.Cast();
+                }
+            }
         }
         private void Drawing_OnDraw(EventArgs args)
         {
