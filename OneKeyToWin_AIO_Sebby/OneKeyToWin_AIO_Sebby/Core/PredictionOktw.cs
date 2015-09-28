@@ -452,7 +452,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.VeryHigh;
                 else if (distanceFromToWaypoint <= distanceFromToUnit && distanceFromToUnit > input.Range - fixRange)
                     result.Hitchance = HitChance.High;
-                else if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.07d)
+                else if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
                     result.Hitchance = HitChance.VeryHigh;
             }
 
