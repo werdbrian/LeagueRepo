@@ -12,7 +12,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
     {
         private Menu Config = Program.Config;
         public static Orbwalking.Orbwalker Orbwalker = Program.Orbwalker;
-        private Spell Q, Q2, Qext, W, W2, E, E2, R;
+        private Spell Q, Q2, Qext, QextCol, W, W2, E, E2, R;
         private float QMANA = 0, WMANA = 0, EMANA = 0, QMANA2 = 0, WMANA2 = 0, EMANA2 = 0, RMANA = 0;
         private float Qcd, Wcd, Ecd, Q2cd, W2cd, E2cd;
         private float Qcdt, Wcdt, Ecdt, Q2cdt, W2cdt, E2cdt;
@@ -22,6 +22,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             Q = new Spell(SpellSlot.Q, 1050);
             Qext = new Spell(SpellSlot.Q, 1650);
+            QextCol = new Spell(SpellSlot.Q, 1650);
             Q2 = new Spell(SpellSlot.Q, 600);
             W = new Spell(SpellSlot.W);
             W2 = new Spell(SpellSlot.W, 350);
@@ -30,7 +31,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
-            Qext.SetSkillshot(0.25f, 100, 1600, true, SkillshotType.SkillshotLine);
+            Qext.SetSkillshot(0.25f, 80, 1600, false, SkillshotType.SkillshotLine);
+            QextCol.SetSkillshot(0.25f, 80, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
@@ -50,7 +52,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
            
             if (args.Slot == SpellSlot.Q )
             {
-                E.Cast(Player.ServerPosition .Extend(args.EndPosition, 100));
+                E.Cast(Player.ServerPosition .Extend(args.EndPosition, 150));
             }
 
         }
@@ -115,21 +117,21 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var qDmg = Qtype.GetDamage(t);
                 if (qDmg > t.Health)
-                    Program.CastSpell(Qtype, t);
+                    CastQ(t);
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
-                    Program.CastSpell(Qtype, t);
-                else if ( Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA && !Player.UnderTurret(true) && OktwCommon.CanHarras())
+                    CastQ(t);
+                else if (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Qtype.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
                     {
-                        Program.CastSpell(Qtype, enemy);
+                        CastQ(t);
                     }
                 }
 
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA + EMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Qtype.Range) && !OktwCommon.CanMove(enemy)))
-                        Qtype.Cast(enemy, true);
+                        CastQ(t);
                 }
             }
         }
@@ -163,7 +165,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             var t = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
 
-            if (t.IsValidTarget())
+            if (t.IsValidTarget() && !Player.HasBuff("jaycehyperchargevfx") && t.CountEnemiesInRange(900) <3)
             {
                 var qDmg = E2.GetDamage(t);
                 if (qDmg > t.Health)
@@ -191,23 +193,42 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Range)
             {
-                if (Program.Combo && Range && !Q.IsReady() && !W.IsReady() && !E.IsReady())
+                var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
+
+                if (Program.Combo && Range && Qcd > 1 && Wcd > 1 && !E.IsReady() && t.IsValidTarget() && t.CountEnemiesInRange(900) < 3)
                     R.Cast();
             }
             else if (Program.Combo )
             {
 
                 var t = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
-                if (!Q.IsReady() && !E.IsReady())
+                if (!Q.IsReady() && !E.IsReady() )
                 {
                     R.Cast();
                 }   
-                else  if (!t.IsValidTarget())
-                {
-                    R.Cast();
-                }
             }
         }
+
+        private void CastQ(Obj_AI_Base t)
+        {
+            if(!E.IsReady())
+                Program.CastSpell(Q, t);
+
+            var poutput = QextCol.GetPrediction(t);
+            bool cast = true;
+            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && t.Distance(poutput.CastPosition) > 150))
+            {
+                cast = false;
+                break;
+
+            }
+            if (cast)
+                Program.CastSpell(Qext, t);
+            else
+                Program.CastSpell(QextCol, t);
+
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
 
