@@ -52,7 +52,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
            
             if (args.Slot == SpellSlot.Q )
             {
-                E.Cast(Player.ServerPosition .Extend(args.EndPosition, 150));
+                E.Cast(Player.ServerPosition .Extend(args.EndPosition, 120));
             }
 
         }
