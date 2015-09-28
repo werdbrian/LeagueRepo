@@ -414,11 +414,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     {
                         backToFront = moveArea;
                         result.Hitchance = HitChance.VeryHigh;
-                        if (distanceFromToWaypoint > input.Unit.Distance(input.From))
-                        {
-                            result.Hitchance = HitChance.VeryHigh;
-                            return result;
-                        }
                     }
                     else
                         result.Hitchance = HitChance.High;
@@ -477,6 +472,11 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 {
                     result.Hitchance = HitChance.Medium;
                 }
+            }
+
+            if (distanceFromToWaypoint > distanceFromToUnit && GetAngle(input.From, input.Unit) < 5)
+            {
+                result.Hitchance = HitChance.VeryHigh;
             }
 
             if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 400 || input.Unit.MoveSpeed < 200f)
