@@ -191,7 +191,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (!IsCastingR)
                 R.Range = R.Range - Config.Item("MaxRangeR", true).GetValue<Slider>().Value;
             
-            var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget() )
             {
                 if (Config.Item("useR", true).GetValue<KeyBind>().Active && !IsCastingR)
