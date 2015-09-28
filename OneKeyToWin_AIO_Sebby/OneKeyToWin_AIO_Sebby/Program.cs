@@ -146,8 +146,8 @@ namespace OneKeyToWin_AIO_Sebby
                     case "Xerath":
                         new Champions.Xerath().LoadOKTW();
                         break;
-                    case "Syndra":
-                        new Champions.Syndra().LoadOKTW();
+                    case "Jayce":
+                        new Champions.Jayce().LoadOKTW();
                         break;
                     case "Kayle":
                         new Champions.Kayle().LoadOKTW();
@@ -240,21 +240,6 @@ namespace OneKeyToWin_AIO_Sebby
             //Game.OnWndProc +=Game_OnWndProc;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             Drawing.OnDraw += OnDraw;
-        }
-
-        private static void Game_OnWndProc(WndEventArgs args)
-        {
-            debug("" + args.Msg);
-            
-            if (args.Msg == 522)
-            {
-                debug("DUPA " + args.Msg);
-            }
-
-            if (args.Msg == 520)
-            {
-                debug("DUPA5 " + args.Msg);
-            }
         }
 
         private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
