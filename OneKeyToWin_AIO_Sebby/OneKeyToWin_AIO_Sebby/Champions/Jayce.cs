@@ -30,7 +30,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
-            Q.SetSkillshot(0.25f, 100, 1600, true, SkillshotType.SkillshotLine);
+            Qext.SetSkillshot(0.25f, 100, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
@@ -57,11 +57,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if(sender.IsMe && E.IsReady() && Range && args.SData.Name == "jayceshockblast")
-            {
-                E.Cast(args.Start.Extend(args.End, 200));
-                Program.debug(args.SData.Name);
-            }
+
         }
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -103,31 +99,34 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicQ()
         {
+            var Qtype = Q;
+            if (E.IsReady())
+                Qtype = Qext;
 
-            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var t = TargetSelector.GetTarget(Qtype.Range, TargetSelector.DamageType.Physical);
             if (Player.CountEnemiesInRange(900) > 0)
                 t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
 
 
             if (t.IsValidTarget())
             {
-                var qDmg = Q.GetDamage(t);
+                var qDmg = Qtype.GetDamage(t);
                 if (qDmg > t.Health)
-                    Program.CastSpell(Q, t);
+                    Program.CastSpell(Qtype, t);
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
-                    Program.CastSpell(Q, t);
+                    Program.CastSpell(Qtype, t);
                 else if ( Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Qtype.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
                     {
-                        Program.CastSpell(Q, enemy);
+                        Program.CastSpell(Qtype, enemy);
                     }
                 }
 
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA + EMANA)
                 {
-                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && !OktwCommon.CanMove(enemy)))
-                        Q.Cast(enemy, true);
+                    foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Qtype.Range) && !OktwCommon.CanMove(enemy)))
+                        Qtype.Cast(enemy, true);
                 }
             }
         }
@@ -139,7 +138,16 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicE()
         {
+            var t = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
 
+            if (t.IsValidTarget())
+            {
+                var qDmg = E2.GetDamage(t);
+                if (qDmg > t.Health)
+                    E2.Cast(t);
+                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    E2.Cast(t);
+            }
         }
 
         private void LogicW2()
@@ -150,19 +158,39 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicE2()
         {
-           
+            var t = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
+
+            if (t.IsValidTarget())
+            {
+                var qDmg = E2.GetDamage(t);
+                if (qDmg > t.Health)
+                    E2.Cast(t);
+                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    E2.Cast(t);
+            }
         }
 
         private void LogicQ2()
         {
-            
+            var t = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
+
+            if (t.IsValidTarget())
+            {
+                var qDmg = Q2.GetDamage(t);
+                if (qDmg > t.Health)
+                    Q2.Cast(t);
+                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    Q2.Cast(t);
+            }
         }
 
         private void LogicR()
         {
 
-        }
+            if (Program.Combo && !Q.IsReady() && !W.IsReady() && !E.IsReady())
+                R.Cast();
 
+        }
         private void Drawing_OnDraw(EventArgs args)
         {
 
