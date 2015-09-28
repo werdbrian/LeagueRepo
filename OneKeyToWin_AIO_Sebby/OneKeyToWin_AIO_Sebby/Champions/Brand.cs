@@ -18,8 +18,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 900);
-            W = new Spell(SpellSlot.W, 920);
+            Q = new Spell(SpellSlot.Q, 970);
+            W = new Spell(SpellSlot.W, 940);
             E = new Spell(SpellSlot.E, 625);
             R = new Spell(SpellSlot.R, 750);
 
@@ -62,10 +62,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("force", "Force passive use in combo on minion", true).SetValue(true));
-
- 
-
 
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
