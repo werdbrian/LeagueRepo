@@ -16,7 +16,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private Vector3 from;
         public void LoadOKTW()
         {
-            from = ObjectManager.Player.Position;
             Obj_AI_Base.OnDelete += Obj_AI_Base_OnDelete;
             Obj_AI_Base.OnCreate += Obj_AI_Base_OnCreate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
@@ -27,28 +26,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private void Game_OnGameUpdate(EventArgs args)
         {
             //foreach (var buff in ObjectManager.Player.Buffs)
-                //Program.debug(buff.Name);
+               //Program.debug(buff.Name);
         }
 
         private void Drawing_OnDraw(EventArgs args)
         {
             return;
-            var predInput2 = new Core.PredictionInput
-            {
-                Aoe = false,
-                Collision = false,
-                Speed = 1000,
-                Delay = 0.25f,
-                Range = 1000,
-                From = from,
-                Radius = 100,
-                Unit = ObjectManager.Player,
-                Type = SkillshotType.SkillshotLine
-            };
-            var poutput2 = Core.Prediction.GetPrediction(predInput2);
 
-            Utility.DrawCircle(from, 100, System.Drawing.Color.Aqua, 1, 1);
-            Utility.DrawCircle(poutput2.CastPosition, 100, System.Drawing.Color.Orange, 1, 1);
             if (obj != null &&  obj.IsValid)
             {
                 //Utility.DrawCircle(obj.Position, 100, System.Drawing.Color.Orange, 1, 1);
@@ -57,6 +41,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
+            return;
             if (sender.IsMe)
             {
                 //Program.debug("speed: " +args.SData.MissileSpeed);
@@ -68,6 +53,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Obj_AI_Base_OnCreate(GameObject sender, EventArgs args)
         {
+            return;
             if (sender.IsValid )
             {
                 //obj = sender;
@@ -79,6 +65,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void Obj_AI_Base_OnDelete(GameObject sender, EventArgs args)
         {
+            return;
             if (sender.IsValid)
             {
                 
