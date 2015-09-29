@@ -184,14 +184,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
             else
             {
-                if (Program.LagFree(1) && W2.IsReady() && Config.Item("autoWm", true).GetValue<bool>())
-                    LogicW2();
-
-                if (Program.LagFree(2) && E2.IsReady() && Config.Item("autoEm", true).GetValue<bool>())
+                if (Program.LagFree(1) && E2.IsReady() && Config.Item("autoEm", true).GetValue<bool>())
                     LogicE2();
 
-                if (Program.LagFree(3) && Q2.IsReady() && Config.Item("autoQm", true).GetValue<bool>())
+                if (Program.LagFree(2) && Q2.IsReady() && Config.Item("autoQm", true).GetValue<bool>())
                     LogicQ2();
+                if (Program.LagFree(3) && W2.IsReady() && Config.Item("autoWm", true).GetValue<bool>())
+                    LogicW2();
             }
 
             if (Program.LagFree(4))
