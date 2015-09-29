@@ -20,7 +20,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         public void LoadOKTW()
         {
-            Q = new Spell(SpellSlot.Q, 1050);
+            #region SET SKILLS
+            Q = new Spell(SpellSlot.Q, 1030);
             Qext = new Spell(SpellSlot.Q, 1650);
             QextCol = new Spell(SpellSlot.Q, 1650);
             Q2 = new Spell(SpellSlot.Q, 600);
@@ -31,15 +32,21 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
-            Qext.SetSkillshot(0.25f, 90, 1600, false, SkillshotType.SkillshotLine);
-            QextCol.SetSkillshot(0.25f, 90, 1600, true, SkillshotType.SkillshotLine);
+            Qext.SetSkillshot(0.25f, 100, 1600, false, SkillshotType.SkillshotLine);
+            QextCol.SetSkillshot(0.25f, 100, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
+            #endregion
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification", true).SetValue(false));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("noti", "Show notification & line", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
+
+
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
@@ -49,7 +56,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-           
             if (args.Slot == SpellSlot.Q )
             {
                 E.Cast(Player.ServerPosition .Extend(args.EndPosition, 120));
@@ -196,8 +202,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Range)
             {
                 var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
-
-                if (Program.Combo && Range && Qcd > 0.5 && Wcd > 0.5 && !E.IsReady() && t.IsValidTarget() && t.CountEnemiesInRange(900) < 3)
+                Program.debug("" + Wcd);
+                if (Program.Combo && Qcd > 0.5 && !W.IsReady() && t.IsValidTarget() && t.CountEnemiesInRange(900) < 3)
                 {
                     if (Q2cd < 0.5)
                         R.Cast();
@@ -231,12 +237,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             var poutput = QextCol.GetPrediction(t);
             bool cast = true;
-            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && t.Distance(poutput.CastPosition) > 150))
+
+            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && (t.Distance(poutput.CastPosition) > 100 || t.Distance(t.ServerPosition) > 100)))
             {
                 cast = false;
                 break;
-
             }
+
             if (cast)
                 Program.CastSpell(Qext, t);
             else
@@ -254,7 +261,75 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Drawing_OnDraw(EventArgs args)
         {
-           
+            if (Config.Item("qRange", true).GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
+                {
+                    if (Q.IsReady())
+                    {
+                        if (Range)
+                        {
+                            if (CanUseQE())
+                                Utility.DrawCircle(Player.Position, Qext.Range, System.Drawing.Color.Cyan, 1, 1);
+                            else
+                                Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                        }
+                        else
+                            Utility.DrawCircle(Player.Position, Q2.Range, System.Drawing.Color.Orange, 1, 1);
+                    }
+                }
+                else
+                {
+                    if (Range)
+                    {
+                        if (CanUseQE())
+                            Utility.DrawCircle(Player.Position, Qext.Range, System.Drawing.Color.Cyan, 1, 1);
+                        else
+                            Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                    }
+                    else
+                        Utility.DrawCircle(Player.Position, Q2.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+            }
+
+            if (Config.Item("noti", true).GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(1600, TargetSelector.DamageType.Physical);
+
+                if (t.IsValidTarget())
+                {
+                    var damageCombo = GetComboDMG(t);
+                    if (damageCombo > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Combo deal  " + damageCombo + " to " + t.ChampionName);
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+
+                }
+            }
+        }
+
+        private float GetComboDMG(Obj_AI_Base t)
+        {
+            float comboDMG = 0;
+
+            if (Qcd < 1 && Ecd < 1)
+                comboDMG = Q.GetDamage(t) * 1.4f;
+            else if (Qcd < 1)
+                comboDMG = Q.GetDamage(t);
+
+            if (Q2cd < 1)
+                comboDMG = Q.GetDamage(t, 1);
+
+            if (Wcd < 1)
+                comboDMG += (float)Player.GetAutoAttackDamage(t) * 3;
+
+            if (W2cd < 1)
+                comboDMG += W.GetDamage(t) * 2;
+
+            if (E2cd < 1)
+                comboDMG += E.GetDamage(t) * 3;
+            return comboDMG;
         }
 
         private bool CanUseQE()
