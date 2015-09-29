@@ -43,19 +43,32 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQ", "Auto Q range", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Q Config").AddItem(new MenuItem("autoQm", "Auto Q melee", true).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoW", "Auto W range", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("W Config").AddItem(new MenuItem("autoWm", "Auto W melee", true).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoE", "Auto E range (Q + E)", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("autoEm", "Auto E melee", true).SetValue(true));
+
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("gapE", "Gapcloser R + E", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("intE", "Interrupt spells R + Q + E", true).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoR", "Auto R range", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("R Config").AddItem(new MenuItem("autoRm", "Auto R melee", true).SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("harassMana", "Harass Mana", true).SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("harassMana", "Harass Mana", true).SetValue(new Slider(80, 100, 0)));
 
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("flee", "FLEE MODE", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))); //32 == space
 
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmE", "Lane clear E", true).SetValue(true));
-            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmQ", "Lane clear Q + E range", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmW", "Lane clear W range && mele", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(80, 100, 0)));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q", true).SetValue(true));
@@ -66,7 +79,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQm", "Jungle clear Q melee", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleWm", "Jungle clear W melee", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleEm", "Jungle clear E melee", true).SetValue(true));
-
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
@@ -133,7 +145,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.Q )
+            if (args.Slot == SpellSlot.Q && Config.Item("autoE", true).GetValue<bool>())
             {
                 E.Cast(Player.ServerPosition .Extend(args.EndPosition, 120));
             }
@@ -147,7 +159,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
-            if (W.IsReady() && Range && args.Target is Obj_AI_Hero)
+            if (W.IsReady() && Config.Item("autoW", true).GetValue<bool>() && Range && args.Target is Obj_AI_Hero)
             {
                 if(Program.Combo)
                     W.Cast();
@@ -158,35 +170,40 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void OnUpdate(EventArgs args)
         {
-            SetValue();
             if (Config.Item("flee", true).GetValue<KeyBind>().Active)
             {
                 FleeMode();
             }
-            Jungle();
+
             if (Range)
             {
-
-                if (Program.LagFree(1) && Q.IsReady())
+                if (Program.LagFree(1) && Q.IsReady() && Config.Item("autoQ", true).GetValue<bool>())
                     LogicQ();
 
-                if (Program.LagFree(2) && W.IsReady())
+                if (Program.LagFree(2) && W.IsReady() && Config.Item("autoW", true).GetValue<bool>())
                     LogicW();
             }
             else
             {
-                if (Program.LagFree(1) && E.IsReady())
+                if (Program.LagFree(1) && W2.IsReady() && Config.Item("autoWm", true).GetValue<bool>())
+                    LogicW2();
+
+                if (Program.LagFree(2) && E2.IsReady() && Config.Item("autoEm", true).GetValue<bool>())
                     LogicE2();
 
-                if (Program.LagFree(2) && Q.IsReady())
+                if (Program.LagFree(3) && Q2.IsReady() && Config.Item("autoQm", true).GetValue<bool>())
                     LogicQ2();
-
-                if (Program.LagFree(3) && W.IsReady())
-                    LogicW2();
             }
 
-            if (Program.LagFree(4) && R.IsReady())
-                LogicR();
+            if (Program.LagFree(4))
+            {
+                SetValue();
+                if(R.IsReady())
+                    LogicR();
+            }
+
+            Jungle();
+            LaneClearLogic();
         }
 
         private void FleeMode()
@@ -248,7 +265,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     CastQ(t);
                 else if (Program.Combo && Player.Mana > EMANA + QMANA)
                     CastQ(t);
-                else if (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA && !Player.UnderTurret(true) && OktwCommon.CanHarras())
+                else if (Program.Farm && Player.ManaPercent > Config.Item("harassMana", true).GetValue<Slider>().Value && OktwCommon.CanHarras())
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Qtype.Range) && Config.Item("haras" + enemy.ChampionName).GetValue<bool>()))
                     {
@@ -318,7 +335,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicR()
         {
-            if (Range)
+            if (Range && Config.Item("autoRm", true).GetValue<bool>())
             {
                 var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
                 if (Program.Combo && Qcd > 0.5 && !W.IsReady() && t.IsValidTarget() )
@@ -329,7 +346,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         R.Cast();
                 }
             }
-            else if (Program.Combo )
+            else if (Program.Combo && Config.Item("autoR", true).GetValue<bool>())
             {
 
                 var t = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
@@ -345,9 +362,45 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        private void LaneClearLogic()
+        {
+            if (!Program.LaneClear)
+                return;
+
+            if (Range && Q.IsReady() && E.IsReady() && Player.ManaPercent > Config.Item("Mana", true).GetValue<Slider>().Value && Config.Item("farmQ", true).GetValue<bool>() && Player.Mana > RMANA + WMANA)
+            {
+                var minionList = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All);
+                var farmPosition = QextCol.GetCircularFarmLocation(minionList, 150);
+
+                if (farmPosition.MinionsHit > Config.Item("LCminions", true).GetValue<Slider>().Value)
+                    Q.Cast(farmPosition.Position);
+            }
+
+            if (W.IsReady() && Player.ManaPercent > Config.Item("Mana", true).GetValue<Slider>().Value && Config.Item("farmW", true).GetValue<bool>())
+            {
+                if (Range)
+                {
+                    Program.debug("csa");
+                    var mobs = MinionManager.GetMinions(Player.ServerPosition, 550);
+                    if (mobs.Count >= Config.Item("LCminions", true).GetValue<Slider>().Value)
+                    {
+                        W.Cast();
+                    }
+                }
+                else
+                {
+                    var mobs = MinionManager.GetMinions(Player.ServerPosition, 300);
+                    if (mobs.Count >= Config.Item("LCminions", true).GetValue<Slider>().Value)
+                    {
+                        W.Cast();
+                    }
+                }
+            }
+        }
+
         private void Jungle()
         {
-            if (Program.LaneClear && Player.Mana > RMANA + WMANA + RMANA + WMANA)
+            if (Program.LaneClear && Player.Mana > RMANA + WMANA + WMANA)
             {
                 var mobs = MinionManager.GetMinions(Player.ServerPosition, 700, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
                 if (mobs.Count > 0)
@@ -360,12 +413,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                             Q.Cast(mob.ServerPosition);
                             return;
                         }
-                        if (W.IsReady() && Config.Item("jungleE", true).GetValue<bool>() && Orbwalking.InAutoAttackRange(mob))
+                        if (W.IsReady() && Config.Item("jungleE", true).GetValue<bool>())
                         {
-                            W.Cast();
+                            if( Orbwalking.InAutoAttackRange(mob))
+                                W.Cast();
                             return;
                         }
-                        if (Config.Item("jungleR", true).GetValue<bool>() && !Q.IsReady() && !W.IsReady())
+                        if (Config.Item("jungleR", true).GetValue<bool>())
                             R.Cast();
                     }
                     else
@@ -376,17 +430,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                             return;
                         }
 
-                        if (W2.IsReady() && Config.Item("jungleWm", true).GetValue<bool>() && mob.IsValidTarget(300))
+                        if (W2.IsReady() && Config.Item("jungleWm", true).GetValue<bool>() )
                         {
-                            W.Cast();
+                            if(mob.IsValidTarget(300))
+                                W.Cast();
                             return;
                         }
                         if (E2.IsReady() && Config.Item("jungleEm", true).GetValue<bool>() && mob.IsValidTarget(E2.Range))
                         {
-                            E2.Cast(mob);
+                            if( mob.IsValidTarget(E2.Range))
+                                E2.Cast(mob);
                             return;
                         }
-                        if (Config.Item("jungleR", true).GetValue<bool>() && !Q.IsReady() && !W.IsReady() && !E.IsReady())
+                        if (Config.Item("jungleR", true).GetValue<bool>())
                             R.Cast();
                     }
                 }
@@ -404,7 +460,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var poutput = QextCol.GetPrediction(t);
             bool cast = true;
 
-            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && (t.Distance(poutput.CastPosition) > 100 || t.Distance(t.ServerPosition) > 100)))
+            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && (t.Distance(poutput.CastPosition) > 90 || t.Distance(t.ServerPosition) > 90)))
             {
                 cast = false;
                 break;
@@ -442,7 +498,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private bool CanUseQE()
         {
-            if(E.IsReady() && Player.Mana > QMANA + EMANA)
+            if(E.IsReady() && Player.Mana > QMANA + EMANA && Config.Item("autoE", true).GetValue<bool>())
                 return true;
             else
                 return false;
