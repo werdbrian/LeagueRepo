@@ -31,8 +31,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
-            Qext.SetSkillshot(0.25f, 80, 1600, false, SkillshotType.SkillshotLine);
-            QextCol.SetSkillshot(0.25f, 80, 1600, true, SkillshotType.SkillshotLine);
+            Qext.SetSkillshot(0.25f, 90, 1600, false, SkillshotType.SkillshotLine);
+            QextCol.SetSkillshot(0.25f, 90, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
@@ -105,17 +105,20 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void LogicQ()
         {
             var Qtype = Q;
-            if (E.IsReady())
+            if (CanUseQE())
                 Qtype = Qext;
 
             var t = TargetSelector.GetTarget(Qtype.Range, TargetSelector.DamageType.Physical);
-            if (Player.CountEnemiesInRange(900) > 0)
-                t = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-
 
             if (t.IsValidTarget())
             {
                 var qDmg = Qtype.GetDamage(t);
+
+                if (CanUseQE())
+                {
+                    qDmg = qDmg * 1.4f;
+                }
+
                 if (qDmg > t.Health)
                     CastQ(t);
                 else if (Program.Combo && Player.Mana > RMANA + QMANA)
@@ -127,7 +130,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                         CastQ(t);
                     }
                 }
-
                 else if ((Program.Combo || Program.Farm) && Player.Mana > RMANA + QMANA + EMANA)
                 {
                     foreach (var enemy in Program.Enemies.Where(enemy => enemy.IsValidTarget(Qtype.Range) && !OktwCommon.CanMove(enemy)))
@@ -157,7 +159,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW2()
         {
-            if (Player.CountEnemiesInRange(500) > 0)
+            if (Player.CountEnemiesInRange(300) > 0)
                 W.Cast();
         }
 
@@ -195,14 +197,24 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
 
-                if (Program.Combo && Range && Qcd > 1 && Wcd > 1 && !E.IsReady() && t.IsValidTarget() && t.CountEnemiesInRange(900) < 3)
-                    R.Cast();
+                if (Program.Combo && Range && Qcd > 0.5 && Wcd > 0.5 && !E.IsReady() && t.IsValidTarget() && t.CountEnemiesInRange(900) < 3)
+                {
+                    if (Q2cd < 0.5)
+                        R.Cast();
+                    else if (Player.CountEnemiesInRange(300) > 0 && E2cd < 0.5)
+                        R.Cast();
+                }
             }
             else if (Program.Combo )
             {
 
-                var t = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
-                if (!Q.IsReady() && !E.IsReady() )
+                var t = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
+                if(t.IsValidTarget()&& t.IsValidTarget(Q2.Range + 200) && Q.GetDamage(t) * 1.4 > t.Health && CanUseQE())
+                {
+                    R.Cast();
+                }
+
+                if (!Q.IsReady() && !E.IsReady())
                 {
                     R.Cast();
                 }   
@@ -211,8 +223,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void CastQ(Obj_AI_Base t)
         {
-            if(!E.IsReady())
+            if (!CanUseQE())
+            {
                 Program.CastSpell(Q, t);
+                return; 
+            }
 
             var poutput = QextCol.GetPrediction(t);
             bool cast = true;
@@ -229,9 +244,25 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         }
 
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
         private void Drawing_OnDraw(EventArgs args)
         {
+           
+        }
 
+        private bool CanUseQE()
+        {
+            if(E.IsReady() && Player.Mana > QMANA + EMANA)
+                return true;
+            else
+                return false;
         }
 
         private float SetPlus(float valus)
