@@ -144,9 +144,13 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.Q && Config.Item("autoE", true).GetValue<bool>())
+            if (args.Slot == SpellSlot.Q)
             {
-                E.Cast(Player.ServerPosition .Extend(args.EndPosition, 120));
+                if(Range && Config.Item("autoE", true).GetValue<bool>())
+                    E.Cast(Player.ServerPosition .Extend(args.EndPosition, 120));
+
+                if (!Range && Player.Mana > 80)
+                    W.Cast();
             }
 
         }
