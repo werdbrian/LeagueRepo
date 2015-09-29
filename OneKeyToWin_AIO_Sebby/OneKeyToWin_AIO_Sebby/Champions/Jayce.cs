@@ -32,8 +32,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
-            Qext.SetSkillshot(0.25f, 100, 1600, false, SkillshotType.SkillshotLine);
-            QextCol.SetSkillshot(0.25f, 100, 1600, true, SkillshotType.SkillshotLine);
+            Qext.SetSkillshot(0.25f, 110, 1600, false, SkillshotType.SkillshotLine);
+            QextCol.SetSkillshot(0.25f, 110, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
@@ -47,9 +47,25 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("intE", "Interrupt spells R + Q + E", true).SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
-                Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+                Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("harassMana", "Harass Mana", true).SetValue(new Slider(80, 100, 30)));
+
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("flee", "FLEE MODE", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))); //32 == space
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("farmE", "Lane clear E", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("Mana", "LaneClear Mana", true).SetValue(new Slider(80, 100, 30)));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("LCminions", "LaneClear minimum minions", true).SetValue(new Slider(2, 10, 0)));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQ", "Jungle clear Q", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleW", "Jungle clear W", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleE", "Jungle clear E", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleR", "Jungle clear R", true).SetValue(true));
+
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleQm", "Jungle clear Q melee", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleWm", "Jungle clear W melee", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("Farm").AddItem(new MenuItem("jungleEm", "Jungle clear E melee", true).SetValue(true));
 
 
             Drawing.OnDraw += Drawing_OnDraw;
@@ -147,7 +163,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 FleeMode();
             }
-
+            Jungle();
             if (Range)
             {
 
@@ -196,10 +212,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                         foreach (var mob in mobs.Where(mob => mob.IsValidTarget(Q2.Range)))
                         {
-                            if (mob.Distance(Game.CursorPos) < best.Distance(Game.CursorPos))
+                            if (mob.Distance(Game.CursorPos) < best.Distance(Game.CursorPos) )
                                 best = mob;
                         }
-
+                        if(best.Distance(Game.CursorPos) + 200 < Player.Distance(Game.CursorPos))
                         Q2.Cast(best);
                     }
                     else if (R.IsReady())
@@ -208,6 +224,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 else if (R.IsReady())
                     R.Cast();
             }
+            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
         }
 
         private void LogicQ()
@@ -325,6 +342,54 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 {
                     R.Cast();
                 }   
+            }
+        }
+
+        private void Jungle()
+        {
+            if (Program.LaneClear && Player.Mana > RMANA + WMANA + RMANA + WMANA)
+            {
+                var mobs = MinionManager.GetMinions(Player.ServerPosition, 700, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+                if (mobs.Count > 0)
+                {
+                    var mob = mobs[0];
+                    if (Range)
+                    {
+                        if (Q.IsReady() && Config.Item("jungleQ", true).GetValue<bool>())
+                        {
+                            Q.Cast(mob.ServerPosition);
+                            return;
+                        }
+                        if (W.IsReady() && Config.Item("jungleE", true).GetValue<bool>() && Orbwalking.InAutoAttackRange(mob))
+                        {
+                            W.Cast();
+                            return;
+                        }
+                        if (Config.Item("jungleR", true).GetValue<bool>() && !Q.IsReady() && !W.IsReady())
+                            R.Cast();
+                    }
+                    else
+                    {
+                        if (Q2.IsReady() && Config.Item("jungleQm", true).GetValue<bool>() && mob.IsValidTarget(Q2.Range))
+                        {
+                            Q2.Cast(mob);
+                            return;
+                        }
+
+                        if (W2.IsReady() && Config.Item("jungleWm", true).GetValue<bool>() && mob.IsValidTarget(300))
+                        {
+                            W.Cast();
+                            return;
+                        }
+                        if (E2.IsReady() && Config.Item("jungleEm", true).GetValue<bool>() && mob.IsValidTarget(E2.Range))
+                        {
+                            E2.Cast(mob);
+                            return;
+                        }
+                        if (Config.Item("jungleR", true).GetValue<bool>() && !Q.IsReady() && !W.IsReady() && !E.IsReady())
+                            R.Cast();
+                    }
+                }
             }
         }
 
