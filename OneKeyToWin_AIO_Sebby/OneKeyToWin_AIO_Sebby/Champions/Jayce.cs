@@ -49,6 +49,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
+            Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("flee", "FLEE MODE", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))); //32 == space
+
+
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += OnUpdate;
             Orbwalking.BeforeAttack += BeforeAttack;
@@ -140,8 +143,12 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private void OnUpdate(EventArgs args)
         {
             SetValue();
+            if (Config.Item("flee", true).GetValue<KeyBind>().Active)
+            {
+                FleeMode();
+            }
 
-            if(Range)
+            if (Range)
             {
 
                 if (Program.LagFree(1) && Q.IsReady())
@@ -164,6 +171,43 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (Program.LagFree(4) && R.IsReady())
                 LogicR();
+        }
+
+        private void FleeMode()
+        {
+            if (Range)
+            {
+                if (E.IsReady())
+                    E.Cast(Player.Position.Extend(Game.CursorPos, 150));
+                else if (R.IsReady())
+                    R.Cast();
+            }
+            else
+            {
+                if (Q2.IsReady())
+                {
+                    var mobs = MinionManager.GetMinions(Player.ServerPosition, Q2.Range);
+                    
+
+                    if (mobs.Count > 0)
+                    {
+                        Obj_AI_Base best;
+                        best = mobs[0];
+
+                        foreach (var mob in mobs.Where(mob => mob.IsValidTarget(Q2.Range)))
+                        {
+                            if (mob.Distance(Game.CursorPos) < best.Distance(Game.CursorPos))
+                                best = mob;
+                        }
+
+                        Q2.Cast(best);
+                    }
+                    else if (R.IsReady())
+                        R.Cast();
+                }
+                else if (R.IsReady())
+                    R.Cast();
+            }
         }
 
         private void LogicQ()
@@ -224,6 +268,19 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             }
         }
 
+        private void LogicQ2()
+        {
+            var t = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
+
+            if (t.IsValidTarget())
+            {
+                if (Q2.GetDamage(t) > t.Health)
+                    Q2.Cast(t);
+                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                    Q2.Cast(t);
+            }
+        }
+
         private void LogicW2()
         {
             if (Player.CountEnemiesInRange(300) > 0 && Player.Mana > 80)
@@ -239,19 +296,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                     E2.Cast(t);
                 else if (Program.Combo && !Player.HasBuff("jaycehyperchargevfx"))
                     E2.Cast(t);
-            }
-        }
-
-        private void LogicQ2()
-        {
-            var t = TargetSelector.GetTarget(Q2.Range, TargetSelector.DamageType.Physical);
-
-            if (t.IsValidTarget())
-            {
-                if (Q2.GetDamage(t) > t.Health)
-                    Q2.Cast(t);
-                else if (Program.Combo && Player.Mana > RMANA + QMANA )
-                    Q2.Cast(t);
             }
         }
 
@@ -306,64 +350,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             else
                 Program.CastSpell(QextCol, t);
 
-        }
-
-        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
-        {
-            var wts1 = Drawing.WorldToScreen(pos1);
-            var wts2 = Drawing.WorldToScreen(pos2);
-
-            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
-        }
-
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            if (Config.Item("qRange", true).GetValue<bool>())
-            {
-                if (Config.Item("onlyRdy", true).GetValue<bool>())
-                {
-                    if (Q.IsReady())
-                    {
-                        if (Range)
-                        {
-                            if (CanUseQE())
-                                Utility.DrawCircle(Player.Position, Qext.Range, System.Drawing.Color.Cyan, 1, 1);
-                            else
-                                Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-                        }
-                        else
-                            Utility.DrawCircle(Player.Position, Q2.Range, System.Drawing.Color.Orange, 1, 1);
-                    }
-                }
-                else
-                {
-                    if (Range)
-                    {
-                        if (CanUseQE())
-                            Utility.DrawCircle(Player.Position, Qext.Range, System.Drawing.Color.Cyan, 1, 1);
-                        else
-                            Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
-                    }
-                    else
-                        Utility.DrawCircle(Player.Position, Q2.Range, System.Drawing.Color.Orange, 1, 1);
-                }
-            }
-
-            if (Config.Item("noti", true).GetValue<bool>())
-            {
-                var t = TargetSelector.GetTarget(1600, TargetSelector.DamageType.Physical);
-
-                if (t.IsValidTarget())
-                {
-                    var damageCombo = GetComboDMG(t);
-                    if (damageCombo > t.Health)
-                    {
-                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Combo deal  " + damageCombo + " to " + t.ChampionName);
-                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
-                    }
-
-                }
-            }
         }
 
         private float GetComboDMG(Obj_AI_Base t)
@@ -438,5 +424,62 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private bool Range { get { return Q.Instance.Name.Contains("jayceshockblast"); } }
 
+        public static void drawLine(Vector3 pos1, Vector3 pos2, int bold, System.Drawing.Color color)
+        {
+            var wts1 = Drawing.WorldToScreen(pos1);
+            var wts2 = Drawing.WorldToScreen(pos2);
+
+            Drawing.DrawLine(wts1[0], wts1[1], wts2[0], wts2[1], bold, color);
+        }
+
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            if (Config.Item("qRange", true).GetValue<bool>())
+            {
+                if (Config.Item("onlyRdy", true).GetValue<bool>())
+                {
+                    if (Q.IsReady())
+                    {
+                        if (Range)
+                        {
+                            if (CanUseQE())
+                                Utility.DrawCircle(Player.Position, Qext.Range, System.Drawing.Color.Cyan, 1, 1);
+                            else
+                                Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                        }
+                        else
+                            Utility.DrawCircle(Player.Position, Q2.Range, System.Drawing.Color.Orange, 1, 1);
+                    }
+                }
+                else
+                {
+                    if (Range)
+                    {
+                        if (CanUseQE())
+                            Utility.DrawCircle(Player.Position, Qext.Range, System.Drawing.Color.Cyan, 1, 1);
+                        else
+                            Utility.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Cyan, 1, 1);
+                    }
+                    else
+                        Utility.DrawCircle(Player.Position, Q2.Range, System.Drawing.Color.Orange, 1, 1);
+                }
+            }
+
+            if (Config.Item("noti", true).GetValue<bool>())
+            {
+                var t = TargetSelector.GetTarget(1600, TargetSelector.DamageType.Physical);
+
+                if (t.IsValidTarget())
+                {
+                    var damageCombo = GetComboDMG(t);
+                    if (damageCombo > t.Health)
+                    {
+                        Drawing.DrawText(Drawing.Width * 0.1f, Drawing.Height * 0.5f, System.Drawing.Color.Red, "Combo deal  " + damageCombo + " to " + t.ChampionName);
+                        drawLine(t.Position, Player.Position, 10, System.Drawing.Color.Yellow);
+                    }
+
+                }
+            }
+        }
     }
 }
