@@ -43,6 +43,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("onlyRdy", "Draw only ready spells", true).SetValue(true));
             Config.SubMenu(Player.ChampionName).SubMenu("Draw").AddItem(new MenuItem("qRange", "Q range", true).SetValue(false));
 
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("gapE", "Gapcloser R + E", true).SetValue(true));
+            Config.SubMenu(Player.ChampionName).SubMenu("E Config").AddItem(new MenuItem("intE", "Interrupt spells R + Q + E", true).SetValue(true));
 
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.Team != Player.Team))
                 Config.SubMenu(Player.ChampionName).SubMenu("Harras").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
@@ -52,6 +54,62 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             Orbwalking.BeforeAttack += BeforeAttack;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Spellbook.OnCastSpell += Spellbook_OnCastSpell;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+        }
+
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (!Config.Item("gapE", true).GetValue<bool>() || E2cd > 0.1)
+                return;
+
+            if(Range && !R.IsReady())
+                return;
+
+            var t = gapcloser.Sender;
+
+            if (t.IsValidTarget(400))
+            {
+                if (Range)
+                {
+                    R.Cast();
+                }
+                else
+                    E.Cast(t);
+            }
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero t, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (!Config.Item("intE", true).GetValue<bool>() || E2cd > 0.1)
+                return;
+
+            if (Range && !R.IsReady())
+                return;
+
+            if (t.IsValidTarget(300))
+            {
+                if (Range)
+                {
+                    R.Cast();
+                }
+                else 
+                    E.Cast(t);
+
+            }
+            else if (Q2cd < 0.2 && t.IsValidTarget(Q2.Range))
+            {
+                if (Range)
+                {
+                    R.Cast();
+                }
+                else
+                {
+                    Q.Cast(t);
+                    if(t.IsValidTarget(E2.Range))
+                        E.Cast(t);
+                }
+            }
         }
 
         private void Spellbook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
@@ -86,10 +144,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if(Range)
             {
 
-                if (Program.LagFree(2) && Q.IsReady() )
+                if (Program.LagFree(1) && Q.IsReady())
                     LogicQ();
 
-                if (Program.LagFree(3) && W.IsReady() )
+                if (Program.LagFree(2) && W.IsReady())
                     LogicW();
             }
             else
@@ -127,7 +185,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
                 if (qDmg > t.Health)
                     CastQ(t);
-                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && Player.Mana > EMANA + QMANA)
                     CastQ(t);
                 else if (Program.Farm && Player.Mana > RMANA + EMANA + QMANA + WMANA && !Player.UnderTurret(true) && OktwCommon.CanHarras())
                 {
@@ -168,20 +226,18 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW2()
         {
-            if (Player.CountEnemiesInRange(300) > 0)
+            if (Player.CountEnemiesInRange(300) > 0 && Player.Mana > 80)
                 W.Cast();
         }
 
         private void LogicE2()
         {
             var t = TargetSelector.GetTarget(E2.Range, TargetSelector.DamageType.Physical);
-
-            if (t.IsValidTarget() && !Player.HasBuff("jaycehyperchargevfx") && t.CountEnemiesInRange(900) <3)
+            if (t.IsValidTarget())
             {
-                var qDmg = E2.GetDamage(t);
-                if (qDmg > t.Health)
+                if (E2.GetDamage(t) > t.Health)
                     E2.Cast(t);
-                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && !Player.HasBuff("jaycehyperchargevfx"))
                     E2.Cast(t);
             }
         }
@@ -192,10 +248,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             if (t.IsValidTarget())
             {
-                var qDmg = Q2.GetDamage(t);
-                if (qDmg > t.Health)
+                if (Q2.GetDamage(t) > t.Health)
                     Q2.Cast(t);
-                else if (Program.Combo && Player.Mana > RMANA + QMANA)
+                else if (Program.Combo && Player.Mana > RMANA + QMANA )
                     Q2.Cast(t);
             }
         }
@@ -207,7 +262,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
                 if (Program.Combo && Qcd > 0.5 && !W.IsReady() && t.IsValidTarget() )
                 {
-                    if (Q2cd < 0.5 && t.CountEnemiesInRange(900) < 3)
+                    if (Q2cd < 0.5 && t.CountEnemiesInRange(800) < 3)
                         R.Cast();
                     else if (Player.CountEnemiesInRange(300) > 0 && E2cd < 0.5)
                         R.Cast();
