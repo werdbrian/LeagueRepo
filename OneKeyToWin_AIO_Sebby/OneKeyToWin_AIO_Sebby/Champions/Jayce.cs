@@ -146,7 +146,10 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void LogicW()
         {
-
+            if (Program.Combo && R.IsReady() && Range && Orbwalker.GetTarget().IsValidTarget() && Orbwalker.GetTarget() is Obj_AI_Hero)
+            {
+                W.Cast();
+            }
         }
 
         private void LogicE()
@@ -202,10 +205,9 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             if (Range)
             {
                 var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
-                Program.debug("" + Wcd);
-                if (Program.Combo && Qcd > 0.5 && !W.IsReady() && t.IsValidTarget() && t.CountEnemiesInRange(900) < 3)
+                if (Program.Combo && Qcd > 0.5 && !W.IsReady() && t.IsValidTarget() )
                 {
-                    if (Q2cd < 0.5)
+                    if (Q2cd < 0.5 && t.CountEnemiesInRange(900) < 3)
                         R.Cast();
                     else if (Player.CountEnemiesInRange(300) > 0 && E2cd < 0.5)
                         R.Cast();
@@ -215,7 +217,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
 
                 var t = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
-                if(t.IsValidTarget()&& t.IsValidTarget(Q2.Range + 200) && Q.GetDamage(t) * 1.4 > t.Health && CanUseQE())
+                if(t.IsValidTarget()&& !t.IsValidTarget(Q2.Range + 200) && Q.GetDamage(t) * 1.4 > t.Health && Qcd < 0.5 && Ecd < 0.5)
                 {
                     R.Cast();
                 }
