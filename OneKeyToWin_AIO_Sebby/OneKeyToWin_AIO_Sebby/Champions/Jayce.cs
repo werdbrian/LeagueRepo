@@ -33,7 +33,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
             Qext.SetSkillshot(0.25f, 110, 1600, false, SkillshotType.SkillshotLine);
-            QextCol.SetSkillshot(0.25f, 110, 1600, true, SkillshotType.SkillshotLine);
+            QextCol.SetSkillshot(0.25f, 120, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
@@ -62,7 +62,6 @@ namespace OneKeyToWin_AIO_Sebby.Champions
                 Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("haras" + enemy.ChampionName, enemy.ChampionName).SetValue(true));
 
             Config.SubMenu(Player.ChampionName).SubMenu("Harass").AddItem(new MenuItem("harassMana", "Harass Mana", true).SetValue(new Slider(80, 100, 0)));
-
 
             Config.SubMenu(Player.ChampionName).AddItem(new MenuItem("flee", "FLEE MODE", true).SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))); //32 == space
 
@@ -460,7 +459,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var poutput = QextCol.GetPrediction(t);
             bool cast = true;
 
-            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && (t.Distance(poutput.CastPosition) > 90 || t.Distance(t.ServerPosition) > 90)))
+            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && (t.Distance(poutput.CastPosition) > 50 || t.Distance(t.ServerPosition) > 50)))
             {
                 cast = false;
                 break;
