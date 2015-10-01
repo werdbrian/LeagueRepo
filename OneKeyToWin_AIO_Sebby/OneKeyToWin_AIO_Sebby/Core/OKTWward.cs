@@ -205,17 +205,23 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
 
-            if (!sender.IsEnemy || sender.IsAlly)
-                return;
+           //if (!sender.IsEnemy || sender.IsAlly)
+                //return;
+
+            if (sender.Position.Distance(Player.Position) < 600)
+                Program.debug(sender.Name);
 
             if ((sender is MissileClient))
             {
                 var missile = (MissileClient)sender;
-
+                
                 if ( !missile.SpellCaster.IsVisible)
                 {
                     if (missile.SData.Name == "itemplacementmissile" && !HiddenObjList.Exists(x => missile.StartPosition.Extend(missile.EndPosition, 500).Distance(x.pos) < 500))
                         AddWard(missile.SData.Name.ToLower(), missile.StartPosition.Extend(missile.EndPosition, 500));
+
+                    if ((missile.SData.Name == "BantamTrapShort" || missile.SData.Name == "BantamTrapBounceSpell") && !HiddenObjList.Exists(x => missile.EndPosition == x.pos ))
+                        AddWard("teemorcast", missile.EndPosition);
                 }
             }
 
@@ -255,19 +261,24 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 return;
             foreach (var obj in HiddenObjList)
             {
-                if(obj.pos == sender.Position)
-                {  
+                if (obj.pos == sender.Position)
+                {
+                    HiddenObjList.Remove(obj);
+                    return;
+                }
+                else if (obj.type == 3 && obj.pos.Distance(sender.Position) < 100)
+                {
                     HiddenObjList.Remove(obj);
                     return;
                 }
                 else if (obj.pos.Distance(sender.Position) < 400)
                 {
-                    if ( obj.type == 2 && sender.Name.ToLower() == "visionward")
+                    if (obj.type == 2 && sender.Name.ToLower() == "visionward")
                     {
                         HiddenObjList.Remove(obj);
                         return;
                     }
-                    else if ((obj.type == 0 || obj.type ==1) && sender.Name.ToLower() == "sightward")
+                    else if ((obj.type == 0 || obj.type == 1) && sender.Name.ToLower() == "sightward")
                     {
                         HiddenObjList.Remove(obj);
                         return;
