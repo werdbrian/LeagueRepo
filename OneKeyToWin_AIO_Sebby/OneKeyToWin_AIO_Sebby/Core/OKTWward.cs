@@ -208,9 +208,6 @@ namespace OneKeyToWin_AIO_Sebby.Core
            if (!sender.IsEnemy || sender.IsAlly)
                 return;
 
-            if (sender.Position.Distance(Player.Position) < 600)
-                Program.debug(sender.Name);
-
             if ((sender is MissileClient))
             {
                 var missile = (MissileClient)sender;
