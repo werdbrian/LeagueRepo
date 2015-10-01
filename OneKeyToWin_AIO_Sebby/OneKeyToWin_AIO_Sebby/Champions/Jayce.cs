@@ -472,7 +472,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var poutput = QextCol.GetPrediction(t);
             bool cast = true;
 
-            foreach (var minion in poutput.CollisionObjects.Where(minion => minion.IsEnemy && minion.Distance(poutput.CastPosition) > 170))
+            foreach (var minion in poutput.CollisionObjects.Where(minion => minion.IsEnemy && minion.Distance(poutput.CastPosition) > 150))
             {
                 cast = false;
                 break;
