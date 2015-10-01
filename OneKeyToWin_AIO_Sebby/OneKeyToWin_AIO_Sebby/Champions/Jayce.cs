@@ -158,7 +158,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             {
                 if (Range && E.IsReady() && Config.Item("autoE", true).GetValue<bool>())
                 {
-                    EcastPos = Player.ServerPosition.Extend(args.End, 150);
+                    EcastPos = Player.ServerPosition.Extend(args.End, 120 + Game.Ping);
                     Etick = Utils.TickCount;
                     E.Cast(EcastPos);
                 }
@@ -178,7 +178,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void OnUpdate(EventArgs args)
         {
-            if (Range && E.IsReady() && Utils.TickCount - Etick < 200)
+            if (Range && E.IsReady() && Utils.TickCount - Etick < 180 + Game.Ping)
             {
                 E.Cast(EcastPos);
             }
