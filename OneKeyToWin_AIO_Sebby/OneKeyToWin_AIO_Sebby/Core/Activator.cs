@@ -124,8 +124,6 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("CleanSpells", "ZedR FizzR MordekaiserR PoppyR VladimirR").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Stun", "Stun").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Snare", "Snare").SetValue(true));
-            Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Knockup", "Knockup").SetValue(true));
-            Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Knockback", "Knockback").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Charm", "Charm").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Fear", "Fear").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Suppression", "Suppression").SetValue(true));
@@ -404,15 +402,11 @@ namespace OneKeyToWin_AIO_Sebby
                 Clean();
             if (Player.HasBuffOfType(BuffType.Snare) && Config.Item("Snare").GetValue<bool>())
                 Clean();
-            if (Player.HasBuffOfType(BuffType.Knockup) && Config.Item("Knockup").GetValue<bool>())
-                Clean();
             if (Player.HasBuffOfType(BuffType.Charm) && Config.Item("Charm").GetValue<bool>())
                 Clean();
             if (Player.HasBuffOfType(BuffType.Fear) && Config.Item("Fear").GetValue<bool>())
                 Clean();
             if (Player.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
-                Clean();
-            if (Player.HasBuffOfType(BuffType.Knockback) && Config.Item("Knockback").GetValue<bool>())
                 Clean();
             if (Player.HasBuffOfType(BuffType.Taunt) && Config.Item("Taunt").GetValue<bool>())
                 Clean();
