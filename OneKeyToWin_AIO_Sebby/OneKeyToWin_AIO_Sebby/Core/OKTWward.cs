@@ -205,8 +205,8 @@ namespace OneKeyToWin_AIO_Sebby.Core
         private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
 
-           //if (!sender.IsEnemy || sender.IsAlly)
-                //return;
+           if (!sender.IsEnemy || sender.IsAlly)
+                return;
 
             if (sender.Position.Distance(Player.Position) < 600)
                 Program.debug(sender.Name);
