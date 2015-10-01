@@ -178,7 +178,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void OnUpdate(EventArgs args)
         {
-            if (Range && E.IsReady() && Utils.TickCount - Etick < 150)
+            if (Range && E.IsReady() && Utils.TickCount - Etick < 200)
             {
                 E.Cast(EcastPos);
             }
