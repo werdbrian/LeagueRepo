@@ -349,7 +349,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (Range && Config.Item("autoRm", true).GetValue<bool>())
             {
-                var t = TargetSelector.GetTarget(Q2.Range + 300, TargetSelector.DamageType.Physical);
+                var t = TargetSelector.GetTarget(Q2.Range + 200, TargetSelector.DamageType.Physical);
                 if (Program.Combo && Qcd > 0.5  && t.IsValidTarget() && ((!W.IsReady() && !t.IsMelee ) || (!W.IsReady() && !Player.HasBuff("jaycehyperchargevfx") && t.IsMelee)))
                 {
                     if (Q2cd < 0.5 && t.CountEnemiesInRange(800) < 3)
