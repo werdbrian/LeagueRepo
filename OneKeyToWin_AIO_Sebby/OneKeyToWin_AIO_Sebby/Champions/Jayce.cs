@@ -17,7 +17,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         private float Qcd, Wcd, Ecd, Q2cd, W2cd, E2cd;
         private float Qcdt, Wcdt, Ecdt, Q2cdt, W2cdt, E2cdt;
         public Obj_AI_Hero Player { get { return ObjectManager.Player; } }
-
+        private Vector3 EcastPos;
+        private int Etick = 0;
         public void LoadOKTW()
         {
             #region SET SKILLS
@@ -32,8 +33,8 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             R = new Spell(SpellSlot.R);
 
             Q.SetSkillshot(0.25f, 80, 1200, true, SkillshotType.SkillshotLine);
-            Qext.SetSkillshot(0.25f, 110, 1600, false, SkillshotType.SkillshotLine);
-            QextCol.SetSkillshot(0.25f, 120, 1600, true, SkillshotType.SkillshotLine);
+            Qext.SetSkillshot(0.25f, 100, 1600, false, SkillshotType.SkillshotLine);
+            QextCol.SetSkillshot(0.25f, 100, 1600, true, SkillshotType.SkillshotLine);
             Q2.SetTargetted(0.25f, float.MaxValue);
             E.SetSkillshot(0.1f, 120, float.MaxValue, false, SkillshotType.SkillshotCircle);
             E2.SetTargetted(0.25f, float.MaxValue);
@@ -146,18 +147,22 @@ namespace OneKeyToWin_AIO_Sebby.Champions
         {
             if (args.Slot == SpellSlot.Q)
             {
-                if(Range && Config.Item("autoE", true).GetValue<bool>())
-                    E.Cast(Player.ServerPosition .Extend(args.EndPosition, 120));
-
                 if (!Range && Player.Mana > 80)
                     W.Cast();
             }
-
         }
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-
+            if (sender.IsMe && args.SData.Name == "jayceshockblast" )
+            {
+                if (Range && E.IsReady() && Config.Item("autoE", true).GetValue<bool>())
+                {
+                    EcastPos = Player.ServerPosition.Extend(args.End, 150);
+                    Etick = Utils.TickCount;
+                    E.Cast(EcastPos);
+                }
+            }
         }
 
         private void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
@@ -173,6 +178,11 @@ namespace OneKeyToWin_AIO_Sebby.Champions
 
         private void OnUpdate(EventArgs args)
         {
+            if (Range && E.IsReady() && Utils.TickCount - Etick < 150)
+            {
+                E.Cast(EcastPos);
+            }
+
             if (Config.Item("flee", true).GetValue<KeyBind>().Active)
             {
                 FleeMode();
@@ -462,7 +472,7 @@ namespace OneKeyToWin_AIO_Sebby.Champions
             var poutput = QextCol.GetPrediction(t);
             bool cast = true;
 
-            foreach (var minion in poutput.CollisionObjects.Where(ColObj => ColObj.IsEnemy && ColObj.IsMinion && !ColObj.IsDead && (t.Distance(poutput.CastPosition) > 50 || t.Distance(t.ServerPosition) > 50)))
+            foreach (var minion in poutput.CollisionObjects.Where(minion => minion.IsEnemy && minion.Distance(poutput.CastPosition) > 170))
             {
                 cast = false;
                 break;
