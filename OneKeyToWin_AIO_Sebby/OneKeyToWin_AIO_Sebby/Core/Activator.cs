@@ -161,7 +161,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (sender.Distance(Player.Position) > 1600)
                 return;
 
-            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && Player.Distance(ally.ServerPosition) < 700))
+            foreach (var ally in Program.Allies.Where(ally => ally.IsValid && !ally.IsDead && ally.HealthPercent < 51 && Player.Distance(ally.ServerPosition) < 700))
             {
                 double dmg = 0;
                 if (args.Target != null && args.Target.NetworkId == ally.NetworkId)
@@ -219,7 +219,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (CanUse(barrier) && Config.Item("Barrier").GetValue<bool>() )
                 {
                     var value = 95 + Player.Level * 20;
-                    if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                    if (dmg > value && Player.HealthPercent < 50)
                         TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
                     if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 15)
                         TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
@@ -228,7 +228,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Seraph.IsReady() && Config.Item("Seraph").GetValue<bool>())
                 {
                     var value = Player.Level * 20;
-                    if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                    if (dmg > value && Player.HealthPercent < 50)
                         TryCast(() => Seraph.Cast());
                     else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
                         TryCast(() => Seraph.Cast());
@@ -239,7 +239,7 @@ namespace OneKeyToWin_AIO_Sebby
                 if (Zhonya.IsReady() && Config.Item("Zhonya").GetValue<bool>())
                 {
                     var value = 95 + Player.Level * 20;
-                    if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                    if (dmg > value && Player.HealthPercent < 50)
                     {
                         TryCast(() => Zhonya.Cast());
                     }
