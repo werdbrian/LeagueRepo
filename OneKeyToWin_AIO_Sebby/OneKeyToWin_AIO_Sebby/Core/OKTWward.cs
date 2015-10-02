@@ -76,7 +76,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (!Program.LagFree(0) || Player.IsRecalling() || Player.IsDead)
                 return;
 
-            foreach (var sender in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.IsEnemy && Obj.MaxHealth<6 &&(Obj.Name == "SightWard" || Obj.Name == "VisionWard") ))
+            foreach (var sender in ObjectManager.Get<Obj_AI_Base>().Where(Obj => Obj.IsEnemy && Obj.MaxHealth<6 && (Obj.Name == "SightWard" || Obj.Name == "VisionWard") ))
             {
                 if (!HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
                 {
@@ -204,10 +204,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-            if (!sender.IsEnemy || sender.IsAlly)
+            if (sender.Position.Distance(Player.Position) < 400)
+                Program.debug(sender.Name + sender.Type);
+
+            if (!sender.IsEnemy || sender.IsAlly )
                 return;
 
-            if ((sender is MissileClient))
+            if (sender.Type == GameObjectType.MissileClient && (sender is MissileClient))
             {
                 var missile = (MissileClient)sender;
                 
@@ -221,7 +224,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                 }
             }
 
-            if (!HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+            if (sender.Type == GameObjectType.obj_AI_Minion && !HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
             {
                 foreach (var obj in HiddenObjList)
                 {
@@ -253,8 +256,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void GameObject_OnDelete(GameObject sender, EventArgs args)
         {
-            if ((!(sender is Obj_AI_Base)))
+
+            if (!sender.IsEnemy || sender.IsAlly || sender.Type != GameObjectType.obj_AI_Minion)
                 return;
+
             foreach (var obj in HiddenObjList)
             {
                 if (obj.pos == sender.Position)
