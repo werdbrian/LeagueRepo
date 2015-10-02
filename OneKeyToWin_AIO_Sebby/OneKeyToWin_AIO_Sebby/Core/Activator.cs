@@ -120,6 +120,10 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Activator OKTW©").SubMenu("Defensives").AddItem(new MenuItem("Solari", "Solari").SetValue(true));
             // CLEANSERS 
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").AddItem(new MenuItem("Clean", "Quicksilver, Mikaels, Mercurial, Dervish").SetValue(true));
+
+            foreach (var ally in ObjectManager.Get<Obj_AI_Hero>().Where(ally => ally.IsAlly))
+                Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Mikaels allys").AddItem(new MenuItem("MikaelsAlly" + ally.ChampionName, ally.ChampionName).SetValue(true));
+
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").AddItem(new MenuItem("cleanHP", "Use only under % HP").SetValue(new Slider(80, 100, 0)));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("CleanSpells", "ZedR FizzR MordekaiserR PoppyR VladimirR").SetValue(true));
             Config.SubMenu("Activator OKTW©").SubMenu("Cleansers").SubMenu("Buff type").AddItem(new MenuItem("Stun", "Stun").SetValue(true));
@@ -191,7 +195,6 @@ namespace OneKeyToWin_AIO_Sebby
                         TryCast(() => Player.Spellbook.CastSpell(heal, ally));
                     else if (ally.Health - dmg < ally.Level * 10)
                         TryCast(() => Player.Spellbook.CastSpell(heal, ally));
-
                 }
 
                 if (Config.Item("Solari").GetValue<bool>() && Solari.IsReady() && Player.Distance(ally.ServerPosition) < Solari.Range)
@@ -222,37 +225,31 @@ namespace OneKeyToWin_AIO_Sebby
                         TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
                 }
 
-                if (Config.Item("Seraph").GetValue<bool>())
+                if (Seraph.IsReady() && Config.Item("Seraph").GetValue<bool>())
                 {
-                    if (Seraph.IsReady() )
-                    {
-                        var value = Player.Level * 20;
-                        if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
-                            TryCast(() => Seraph.Cast());
-                        else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                            TryCast(() => Seraph.Cast());
-                        else if (ally.Health - dmg < ally.Level * 10)
-                            TryCast(() => Seraph.Cast());
-                    }
+                    var value = Player.Level * 20;
+                    if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
+                        TryCast(() => Seraph.Cast());
+                    else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                        TryCast(() => Seraph.Cast());
+                    else if (ally.Health - dmg < ally.Level * 10)
+                        TryCast(() => Seraph.Cast());
                 }
                 
-                if (Config.Item("Zhonya").GetValue<bool>())
+                if (Zhonya.IsReady() && Config.Item("Zhonya").GetValue<bool>())
                 {
-                    if (Zhonya.IsReady())
+                    var value = 95 + Player.Level * 20;
+                    if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
                     {
-                        var value = 95 + Player.Level * 20;
-                        if (dmg > value && Player.Health < Player.MaxHealth * 0.5)
-                        {
-                            TryCast(() => Zhonya.Cast());
-                        }
-                        else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
-                        {
-                            TryCast(() => Zhonya.Cast());
-                        }
-                        else if (ally.Health - dmg < ally.Level * 10)
-                        {
-                            TryCast(() => Zhonya.Cast()); 
-                        }
+                        TryCast(() => Zhonya.Cast());
+                    }
+                    else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                    {
+                        TryCast(() => Zhonya.Cast());
+                    }
+                    else if (ally.Health - dmg < ally.Level * 10)
+                    {
+                        TryCast(() => Zhonya.Cast()); 
                     }
                 }
             }
@@ -398,6 +395,31 @@ namespace OneKeyToWin_AIO_Sebby
             if (Player.HasBuff("zedulttargetmark") || Player.HasBuff("FizzMarinerDoom") || Player.HasBuff("MordekaiserChildrenOfTheGrave") || Player.HasBuff("PoppyDiplomaticImmunity") || Player.HasBuff("VladimirHemoplague"))
                 Clean();
 
+            if (Mikaels.IsReady())
+            {
+                foreach (var ally in Program.Allies.Where(
+                    ally => ally.IsValid && !ally.IsDead && Config.Item("MikaelsAlly" + ally.ChampionName).GetValue<bool>() && Player.Distance(ally.Position) < Mikaels.Range 
+                    && ally.HealthPercent < (float)Config.Item("cleanHP").GetValue<Slider>().Value))
+                {
+                    if (ally.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Snare) && Config.Item("Snare").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Charm) && Config.Item("Charm").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Fear) && Config.Item("Fear").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Taunt) && Config.Item("Taunt").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Suppression) && Config.Item("Suppression").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                    if (ally.HasBuffOfType(BuffType.Blind) && Config.Item("Blind").GetValue<bool>())
+                        Mikaels.Cast(ally);
+                }
+            }
+
             if (Player.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
                 Clean();
             if (Player.HasBuffOfType(BuffType.Snare) && Config.Item("Snare").GetValue<bool>())
@@ -420,8 +442,6 @@ namespace OneKeyToWin_AIO_Sebby
         {
             if (Quicksilver.IsReady())
                 Quicksilver.Cast();
-            else if (Mikaels.IsReady())
-                Mikaels.Cast(Player);
             else if (Mercurial.IsReady())
                 Mercurial.Cast();
             else if (Dervish.IsReady())
