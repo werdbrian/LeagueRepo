@@ -49,7 +49,7 @@ namespace OneKeyToWin_AIO_Sebby
             Zhonya = new Items.Item(3157, 0),
             Seraph = new Items.Item(3040, 0),
             Solari = new Items.Item(3190, 600f),
-            Randuin = new Items.Item(3143, 500f);
+            Randuin = new Items.Item(3143, 400f);
         
         public void LoadOKTW()
         {
@@ -298,8 +298,8 @@ namespace OneKeyToWin_AIO_Sebby
         private void Game_OnGameUpdate(EventArgs args)
         {
             Cleansers();
-            
-            if (!Program.LagFree(0))
+
+            if (!Program.LagFree(0) || Player.IsRecalling() || Player.IsDead)
                 return;
 
             if (Config.Item("pots").GetValue<bool>())
