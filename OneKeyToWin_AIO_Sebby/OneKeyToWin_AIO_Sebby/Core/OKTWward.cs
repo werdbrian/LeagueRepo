@@ -90,7 +90,10 @@ namespace OneKeyToWin_AIO_Sebby.Core
                             }
                         }
                     }
-                    AddWard(sender.Name.ToLower(), sender.Position);
+                    if (sender.MaxHealth == 3)
+                        AddWard("sightward", sender.Position);
+                    if (sender.MaxHealth == 5)
+                        AddWard("visionward", sender.Position);
                 }
             }
 
