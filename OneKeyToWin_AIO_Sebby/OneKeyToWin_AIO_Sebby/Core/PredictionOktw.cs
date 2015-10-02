@@ -383,7 +383,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             float fixRange = moveArea * 0.6f;
             double angleMove = 30 + (input.Radius / 20);
             float backToFront = moveArea * 1.5f;
-            float pathMinLen = 500f + backToFront;
+            float pathMinLen = 600f + backToFront;
 
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
