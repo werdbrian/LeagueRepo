@@ -9,7 +9,6 @@ using SharpDX;
 
 namespace OneKeyToWin_AIO_Sebby.Core
 {
-
     class HiddenObj
     {
         public int type;
@@ -105,7 +104,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
 
             if (Config.Item("autoBuy").GetValue<bool>() && Player.InFountain() && !ScryingOrb.IsOwned() && Player.Level > 5)
-            ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
 
             if(rengar && Player.HasBuff("rengarralertsound"))
                 CastVisionWards(Player.ServerPosition);
@@ -216,12 +215,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (missile.SData.Name == "itemplacementmissile" && !HiddenObjList.Exists(x => missile.StartPosition.Extend(missile.EndPosition, 500).Distance(x.pos) < 500))
                         AddWard(missile.SData.Name.ToLower(), missile.StartPosition.Extend(missile.EndPosition, 500));
 
-                    if ((missile.SData.Name == "BantamTrapShort" || missile.SData.Name == "BantamTrapBounceSpell") && !HiddenObjList.Exists(x => missile.EndPosition == x.pos ))
+                    if ((missile.SData.Name == "BantamTrapShort" || missile.SData.Name == "BantamTrapBounceSpell") && !HiddenObjList.Exists(x => missile.EndPosition == x.pos))
                         AddWard("teemorcast", missile.EndPosition);
                 }
             }
 
-            if (sender.Type == GameObjectType.obj_AI_Minion && !HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward"))
+            if (sender.Type == GameObjectType.obj_AI_Minion && (sender.Name.ToLower() == "visionward" || sender.Name.ToLower() == "sightward") && !HiddenObjList.Exists(x => x.pos.Distance(sender.Position) < 100) )
             {
                 foreach (var obj in HiddenObjList)
                 {
