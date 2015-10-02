@@ -457,7 +457,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.Medium;
                 else if (input.Unit.Path.Count() > 0)
                 {
-                    if (distanceUnitToWaypoint < backToFront || input.Unit.Position == input.Unit.ServerPosition)
+                    if (distanceUnitToWaypoint < moveArea || input.Unit.Position == input.Unit.ServerPosition)
                         result.Hitchance = HitChance.Medium;
                 }
                 if (UnitTracker.GetLastVisableTime(input.Unit) < 0.05d)
