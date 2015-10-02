@@ -118,19 +118,25 @@ namespace OneKeyToWin_AIO_Sebby
 
         private void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
-            if (Config.Item("opsE", true).GetValue<bool>() && unit.IsEnemy && unit.IsValidTarget(E.Range) && ShouldUseE(args.SData.Name))
-            {
-                E.Cast(unit.ServerPosition, true);
-                debug("E ope");
-            }
+            if (unit.IsMinion)
+                return;
+
             if (unit.IsMe)
             {
                 if (args.SData.Name == "JinxWMissile")
                     WCastTime = Game.Time;
             }
-            if (E.IsReady() && unit.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(unit.Position) < E.Range)
+            if (E.IsReady())
             {
-                grabTime = Game.Time;
+                if (unit.IsEnemy && Config.Item("opsE", true).GetValue<bool>() &&  unit.IsValidTarget(E.Range) && ShouldUseE(args.SData.Name))
+                {
+                    E.Cast(unit.ServerPosition, true);
+                    debug("E ope");
+                }
+                if (unit.IsAlly && args.SData.Name == "RocketGrab" && Player.Distance(unit.Position) < E.Range)
+                {
+                    grabTime = Game.Time;
+                }
             }
 
         }
