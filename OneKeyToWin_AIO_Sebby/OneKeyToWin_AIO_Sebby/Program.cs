@@ -25,7 +25,7 @@ namespace OneKeyToWin_AIO_Sebby
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
 
-        private static float dodgeRange = 450;
+        private static float dodgeRange = 500;
         private static float dodgeTime = Game.Time;
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
@@ -67,7 +67,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
-            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("positioningAssistant", "Anti-Melle Positioning Assistant OKTW©", true).SetValue(true));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("positioningAssistant", "Anti-Melee Positioning Assistant OKTW©", true).SetValue(true));
             Config.Item("manaDisable", true).SetValue(false);
             Config.Item("comboDisableMode", true).SetValue(false);
             Config.Item("supportMode", true).SetValue(false);
@@ -256,7 +256,7 @@ namespace OneKeyToWin_AIO_Sebby
             {
                 if (Player.Distance(enemy.ServerPosition) < dodgeRange)
                 {
-                    var points = OktwCommon.CirclePoints(20, dodgeRange - 100, Player.Position);
+                    var points = OktwCommon.CirclePoints(20, dodgeRange - 200, Player.Position);
                     Vector3 bestPoint = Vector3.Zero;
                     foreach (var point in points)
                     {
@@ -471,7 +471,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
 
-            if (Game.Time - dodgeTime < 1 )
+            if (Game.Time - dodgeTime < 1 || Player.IsMelee)
             {
                 Render.Circle.DrawCircle(Player.Position, dodgeRange, System.Drawing.Color.DimGray, 1);
                 if((int)(Game.Time * 10) % 2 == 0)
