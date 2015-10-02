@@ -156,7 +156,6 @@ namespace OneKeyToWin_AIO_Sebby
         public static List<Vector3> CirclePoints(float CircleLineSegmentN, float radius, Vector3 position)
         {
             List<Vector3> points = new List<Vector3>();
-            var bestPoint = ObjectManager.Player.Position;
             for (var i = 1; i <= CircleLineSegmentN; i++)
             {
                 var angle = i * 2 * Math.PI / CircleLineSegmentN;
