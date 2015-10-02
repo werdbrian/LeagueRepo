@@ -24,6 +24,10 @@ namespace OneKeyToWin_AIO_Sebby
         public static List<Obj_AI_Hero> Enemies = new List<Obj_AI_Hero>() , Allies = new List<Obj_AI_Hero>();
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
+
+        private static float dodgeRange = 450;
+        private static float dodgeTime = Game.Time;
+
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
 
         private static void GameOnOnGameLoad(EventArgs args)
@@ -63,7 +67,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
-
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("positioningAssistant", "Anti-Melle Positioning Assistant OKTW©", true).SetValue(true));
             Config.Item("manaDisable", true).SetValue(false);
             Config.Item("comboDisableMode", true).SetValue(false);
             Config.Item("supportMode", true).SetValue(false);
@@ -242,6 +246,36 @@ namespace OneKeyToWin_AIO_Sebby
             Drawing.OnDraw += OnDraw;
         }
 
+        private static void PositionHelper()
+        {
+            if (!Config.Item("positioningAssistant", true).GetValue<bool>() || Player.ChampionName == "Draven" || Player.IsMelee)
+                return;
+
+            
+            foreach (var enemy in Enemies.Where(enemy => enemy.IsMelee && enemy.IsValidTarget(dodgeRange) && enemy.IsFacing(Player)))
+            {
+                if (Player.Distance(enemy.ServerPosition) < dodgeRange)
+                {
+                    var points = OktwCommon.CirclePoints(20, dodgeRange - 100, Player.Position);
+                    Vector3 bestPoint = Vector3.Zero;
+                    foreach (var point in points)
+                    {
+                        if (enemy.Distance(point) > dodgeRange && (bestPoint == Vector3.Zero || Game.CursorPos.Distance(point) < Game.CursorPos.Distance(bestPoint)))
+                        {
+                            bestPoint = point;
+                        }
+                    }
+                    if (enemy.Distance(bestPoint) > dodgeRange)
+                    {
+                        Orbwalker.SetOrbwalkingPoint(bestPoint);
+                        dodgeTime = Game.Time;
+                        return;
+                    }
+                }
+            }
+            Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+        }
+
         private static void Orbwalking_BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
         {
 
@@ -258,6 +292,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void OnUpdate(EventArgs args)
         {
+            PositionHelper();
             tickIndex++;
 
             if (tickIndex > 4)
@@ -435,7 +470,15 @@ namespace OneKeyToWin_AIO_Sebby
 
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
-            
+
+            if (Game.Time - dodgeTime < 1 )
+            {
+                Render.Circle.DrawCircle(Player.Position, dodgeRange, System.Drawing.Color.DimGray, 1);
+                if((int)(Game.Time * 10) % 2 == 0)
+                    drawText("Anti-Melle Positioning Assistant" , Player.Position, System.Drawing.Color.Gray);
+            }
+
+
             if (Config.Item("debugPred").GetValue<bool>() && Config.Item("PredictionMODE", true).GetValue<StringList>().SelectedIndex == 1 && Game.Time - DrawSpellTime < 0.5)
             {
                 if (DrawSpell.Type == SkillshotType.SkillshotLine)
