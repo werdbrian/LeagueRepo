@@ -25,7 +25,7 @@ namespace OneKeyToWin_AIO_Sebby
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
 
-        private static float dodgeRange = 500;
+        private static float dodgeRange = 400;
         private static float dodgeTime = Game.Time;
 
         static void Main(string[] args) { CustomEvents.Game.OnGameLoad += GameOnOnGameLoad;}
