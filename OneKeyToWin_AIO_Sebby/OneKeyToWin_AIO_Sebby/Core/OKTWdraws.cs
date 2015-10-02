@@ -193,7 +193,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     if (obj.type == 3)
                     {
                         Utility.DrawCircle(obj.pos, circleSize, System.Drawing.Color.Orange, 5, 1);
-                        DrawFontTextMap(Tahoma13, "T " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Orange);
+                        DrawFontTextMap(Tahoma13, "! " + (int)(obj.endTime - Game.Time), obj.pos, SharpDX.Color.Orange);
                     }
 
                 }

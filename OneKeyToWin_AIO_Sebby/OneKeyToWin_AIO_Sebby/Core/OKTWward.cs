@@ -204,8 +204,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
         private void GameObject_OnCreate(GameObject sender, EventArgs args)
         {
-
-           if (!sender.IsEnemy || sender.IsAlly)
+            if (!sender.IsEnemy || sender.IsAlly)
                 return;
 
             if ((sender is MissileClient))
@@ -368,6 +367,12 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     break;
                 case "noxious trap":
                     HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 300 });
+                    break;
+                case "JackInTheBox":
+                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 100 });
+                    break;
+                case "Jack In The Box":
+                    HiddenObjList.Add(new HiddenObj() { type = 3, pos = posCast, endTime = Game.Time + 100 });
                     break;
             }
         }
