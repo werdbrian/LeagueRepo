@@ -383,7 +383,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             float fixRange = moveArea * 0.6f;
             double angleMove = 30 + (input.Radius / 20);
             float backToFront = moveArea * 1.5f;
-            float pathMinLen = 600f + backToFront;
+            float pathMinLen = 700f + backToFront;
 
             if (UnitTracker.GetLastNewPathTime(input.Unit) < 0.1d)
             {
@@ -402,16 +402,13 @@ namespace OneKeyToWin_AIO_Sebby.Core
             }
             else if (input.Type == SkillshotType.SkillshotLine)
             {
-                if (input.Unit.Path.Count() > 1)
-                    result.Hitchance = HitChance.Medium;
-                else if (input.Unit.Path.Count() > 0)
+                if (input.Unit.Path.Count() > 0)
                 {
                     if (GetAngle(input.From, input.Unit) < angleMove)
                     {
-                        backToFront = moveArea / 2;
                         result.Hitchance = HitChance.VeryHigh;
                     }
-                    else
+                    else if (UnitTracker.GetLastNewPathTime(input.Unit) > 0.1d)
                         result.Hitchance = HitChance.High;
                 }
             }
@@ -433,9 +430,9 @@ namespace OneKeyToWin_AIO_Sebby.Core
 
             if (UnitTracker.GetLastAutoAttackTime(input.Unit) < 0.1d)
             {
-                if (input.Type == SkillshotType.SkillshotLine && totalDelay < 0.8)
+                if (input.Type == SkillshotType.SkillshotLine && totalDelay < 0.8 + (input.Radius * 0.001))
                     result.Hitchance = HitChance.VeryHigh;
-                else if (totalDelay < 0.6)
+                else if (input.Type == SkillshotType.SkillshotCircle && totalDelay < 0.6 + (input.Radius * 0.001))
                     result.Hitchance = HitChance.VeryHigh;
                 else
                     result.Hitchance = HitChance.Medium;
@@ -455,11 +452,14 @@ namespace OneKeyToWin_AIO_Sebby.Core
                     result.Hitchance = HitChance.Medium;
                 else if (input.Unit.Path.Count() == 0 && input.Unit.Position != input.Unit.ServerPosition)
                     result.Hitchance = HitChance.Medium;
-                else if (input.Unit.Path.Count() > 0)
+                else if (input.Unit.Path.Count() > 0 && distanceUnitToWaypoint < backToFront)
                 {
-                    if (distanceUnitToWaypoint < moveArea || input.Unit.Position == input.Unit.ServerPosition)
-                        result.Hitchance = HitChance.Medium;
+                    result.Hitchance = HitChance.Medium;
                 }
+                else if (input.Unit.Path.Count() > 1)
+                    result.Hitchance = HitChance.Medium;
+                else
+
                 if (UnitTracker.GetLastVisableTime(input.Unit) < 0.05d)
                 {
                     result.Hitchance = HitChance.Medium;
@@ -468,7 +468,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             if (distanceFromToWaypoint > input.Unit.Distance(input.From) && GetAngle(input.From, input.Unit) > angleMove)
                 result.Hitchance = HitChance.VeryHigh;
 
-            if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 400 || input.Unit.MoveSpeed < 200f)
+            if (input.Unit.Distance(input.From) < 300 || distanceFromToWaypoint < 300 || input.Unit.MoveSpeed < 200f)
                 result.Hitchance = HitChance.VeryHigh;
 
             return result;
