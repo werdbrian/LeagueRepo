@@ -67,7 +67,7 @@ namespace OneKeyToWin_AIO_Sebby
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("supportMode", "Support Mode", true).SetValue(false));
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("comboDisableMode", "Disable auto-attack in combo mode", true).SetValue(false));
             Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("manaDisable", "Disable mana manager in combo", true).SetValue(false));
-            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("positioningAssistant", "Anti-Melee Positioning Assistant OKTW©", true).SetValue(false));
+            Config.SubMenu("Extra settings OKTW©").AddItem(new MenuItem("positioningAssistant", "Anti-Melee Positioning Assistant OKTW©").SetValue(false));
             Config.Item("manaDisable", true).SetValue(false);
             Config.Item("comboDisableMode", true).SetValue(false);
             Config.Item("supportMode", true).SetValue(false);
@@ -248,7 +248,7 @@ namespace OneKeyToWin_AIO_Sebby
 
         private static void PositionHelper()
         {
-            if (!Config.Item("positioningAssistant", true).GetValue<bool>() || Player.ChampionName == "Draven" || Player.IsMelee)
+            if (!Config.Item("positioningAssistant").GetValue<bool>() || Player.ChampionName == "Draven" || Player.IsMelee)
                 return;
 
             
@@ -471,7 +471,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("disableDraws").GetValue<bool>())
                 return;
 
-            if (Config.Item("positioningAssistant", true).GetValue<bool>() && Game.Time - dodgeTime < 1 && !Player.IsMelee)
+            if (Config.Item("positioningAssistant").GetValue<bool>() && Game.Time - dodgeTime < 1 && !Player.IsMelee)
             {
                 Render.Circle.DrawCircle(Player.Position, dodgeRange, System.Drawing.Color.DimGray, 1);
                 if((int)(Game.Time * 10) % 2 == 0)
