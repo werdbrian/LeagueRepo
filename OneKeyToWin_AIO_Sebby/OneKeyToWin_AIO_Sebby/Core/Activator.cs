@@ -401,6 +401,8 @@ namespace OneKeyToWin_AIO_Sebby
                     ally => ally.IsValid && !ally.IsDead && Config.Item("MikaelsAlly" + ally.ChampionName).GetValue<bool>() && Player.Distance(ally.Position) < Mikaels.Range 
                     && ally.HealthPercent < (float)Config.Item("cleanHP").GetValue<Slider>().Value))
                 {
+                    if (ally.HasBuff("zedrdeathmark") || ally.HasBuff("FizzMarinerDoom") || ally.HasBuff("MordekaiserChildrenOfTheGrave") || ally.HasBuff("PoppyDiplomaticImmunity") || ally.HasBuff("VladimirHemoplague"))
+                        Mikaels.Cast(ally);
                     if (ally.HasBuffOfType(BuffType.Stun) && Config.Item("Stun").GetValue<bool>())
                         Mikaels.Cast(ally);
                     if (ally.HasBuffOfType(BuffType.Snare) && Config.Item("Snare").GetValue<bool>())
