@@ -381,7 +381,7 @@ namespace OneKeyToWin_AIO_Sebby.Core
             float totalDelay = speedDelay + input.Delay;
             float moveArea = input.Unit.MoveSpeed * totalDelay;
             float fixRange = moveArea * 0.6f;
-            double angleMove = 30 + (input.Radius / 10) - (input.Delay * 10);
+            double angleMove = 30 + (input.Radius / 10) - (input.Delay * 5);
             float backToFront = moveArea * 1.5f;
             float pathMinLen = 700f + backToFront;
 
