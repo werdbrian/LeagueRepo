@@ -177,9 +177,6 @@ namespace OneKeyToWin_AIO_Sebby
                         continue;
                 }
 
-                if(dmg == 0)
-                    continue;
-
                 if (CanUse(exhaust) && Config.Item("Exhaust").GetValue<bool>() )
                 {
                     if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 40)
