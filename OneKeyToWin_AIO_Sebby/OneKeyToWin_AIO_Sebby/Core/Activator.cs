@@ -363,7 +363,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Config.Item("Zhonya").GetValue<bool>() && Zhonya.IsReady())
             {
                 float time = 10;
-                if (Player.HasBuff("zedulttargetmark"))
+                if (Player.HasBuff("zedrdeathmark"))
                 {
                     time = OktwCommon.GetPassiveTime(Player, "zedulttargetmark");
                 }
@@ -392,7 +392,7 @@ namespace OneKeyToWin_AIO_Sebby
             if (Player.HealthPercent >= (float)Config.Item("cleanHP").GetValue<Slider>().Value || !Config.Item("Clean").GetValue<bool>())
                 return;
 
-            if (Player.HasBuff("zedulttargetmark") || Player.HasBuff("FizzMarinerDoom") || Player.HasBuff("MordekaiserChildrenOfTheGrave") || Player.HasBuff("PoppyDiplomaticImmunity") || Player.HasBuff("VladimirHemoplague"))
+            if (Player.HasBuff("zedrdeathmark") || Player.HasBuff("FizzMarinerDoom") || Player.HasBuff("MordekaiserChildrenOfTheGrave") || Player.HasBuff("PoppyDiplomaticImmunity") || Player.HasBuff("VladimirHemoplague"))
                 Clean();
 
             if (Mikaels.IsReady())
