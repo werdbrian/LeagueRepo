@@ -199,7 +199,10 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (Config.Item("Solari").GetValue<bool>() && Solari.IsReady() && Player.Distance(ally.ServerPosition) < Solari.Range)
                 {
-                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                    var value = 75 + (15 * Player.Level);
+                    if (dmg > value && Player.HealthPercent < 50)
+                        Solari.Cast();
+                    else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 15)
                         Solari.Cast();
                     else if (ally.Health - dmg < ally.Level * 10)
                         Solari.Cast();
@@ -207,7 +210,10 @@ namespace OneKeyToWin_AIO_Sebby
 
                 if (Config.Item("FaceOfTheMountain").GetValue<bool>() && FaceOfTheMountain.IsReady() && Player.Distance(ally.ServerPosition) < FaceOfTheMountain.Range)
                 {
-                    if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
+                    var value = 0.1 *  Player.MaxHealth ;
+                    if (dmg > value && Player.HealthPercent < 50)
+                        TryCast(() => FaceOfTheMountain.Cast(ally));
+                    else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 15)
                         TryCast(() => FaceOfTheMountain.Cast(ally));
                     else if (ally.Health - dmg < ally.Level * 10)
                         TryCast(() => FaceOfTheMountain.Cast(ally));
@@ -221,13 +227,13 @@ namespace OneKeyToWin_AIO_Sebby
                     var value = 95 + Player.Level * 20;
                     if (dmg > value && Player.HealthPercent < 50)
                         TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
-                    if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 15)
+                    else if (Player.Health - dmg < Player.CountEnemiesInRange(700) * Player.Level * 15)
                         TryCast(() => Player.Spellbook.CastSpell(barrier, Player));
                 }
 
                 if (Seraph.IsReady() && Config.Item("Seraph").GetValue<bool>())
                 {
-                    var value = Player.Level * 20;
+                    var value = Player.Mana * 0.2 + 150;
                     if (dmg > value && Player.HealthPercent < 50)
                         TryCast(() => Seraph.Cast());
                     else if (ally.Health - dmg < ally.CountEnemiesInRange(700) * ally.Level * 10)
